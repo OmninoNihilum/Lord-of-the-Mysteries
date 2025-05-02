@@ -173,6 +173,9 @@ public class AqueousLightDrown extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return 35;
+        if (target != null) {
+            return 35;
+        }
+        return 0;
     }
 }

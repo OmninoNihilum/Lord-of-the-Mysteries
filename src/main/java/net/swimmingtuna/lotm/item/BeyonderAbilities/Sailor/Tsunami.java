@@ -164,6 +164,9 @@ public class Tsunami extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return (int) (100 - (livingEntity.getHealth() * 2));
+        if (target != null) {
+            return (int) (100 - (livingEntity.getHealth() * 2));
+        }
+        return 0;
     }
 }

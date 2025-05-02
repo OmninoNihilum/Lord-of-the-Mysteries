@@ -517,6 +517,10 @@ public class ItemInit {
             () -> new TestItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ALLY_MAKER = ITEMS.register("ally_maker",
             () -> new AllyMaker(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> FORCED_UPDATE_ITEM = ITEMS.register("forced_update_item",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> FORCED_UPDATE_ITEM_2 = ITEMS.register("forced_update_item_2",
+            () -> new Item(new Item.Properties().stacksTo(1)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

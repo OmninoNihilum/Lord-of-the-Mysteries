@@ -7,8 +7,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -16,14 +14,12 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
 
 public class Awe extends SimpleAbilityItem {
 
@@ -50,6 +46,7 @@ public class Awe extends SimpleAbilityItem {
             double radius = (18.0 - sequence) * dir;
             float damage = (float) (17.0 * (Math.max(1, dir * 0.5)) - (sequence * 1.2));
             int duration = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.AWE.get());
+            System.out.println("damage is " + damage);
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
                     entity.addEffect((new MobEffectInstance(ModEffects.AWE.get(), duration, 1, false, false)));
@@ -68,6 +65,7 @@ public class Awe extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
@@ -78,8 +76,7 @@ public class Awe extends SimpleAbilityItem {
         int dreamIntoReality = BeyonderUtil.getDreamIntoReality(livingEntity);
         if (target != null && target.distanceTo(livingEntity) <= (18 - BeyonderUtil.getSequence(livingEntity)) * dreamIntoReality) {
             return (int) (100 - (target.distanceTo(livingEntity) * 2));
-        } else {
-            return 0;
         }
+        return 0;
     }
 }

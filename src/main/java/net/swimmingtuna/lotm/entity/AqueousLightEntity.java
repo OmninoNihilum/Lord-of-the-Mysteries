@@ -57,6 +57,11 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
         if (this.level().isClientSide() || !(result.getEntity() instanceof LivingEntity entity)) {
             return;
         }
+        if (this.getOwner() != null) {
+            if (entity == this.getOwner()) {
+                return;
+            }
+        }
         CompoundTag compoundTag = entity.getPersistentData();
         compoundTag.putInt("lightDrowning", 1);
         LivingEntity owner = (LivingEntity) this.getOwner();

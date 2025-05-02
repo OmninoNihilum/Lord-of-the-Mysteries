@@ -654,6 +654,12 @@ public class ModEvents {
     @SubscribeEvent
     public static void deathEvent(LivingDeathEvent event) {
         LivingEntity livingEntity = event.getEntity();
+        Entity entityAttacker = event.getSource().getEntity();
+        if (entityAttacker instanceof Projectile projectile && projectile.getOwner() != null) {
+            if (projectile.getOwner() instanceof Player) {
+                entityAttacker = projectile.getOwner();
+            }
+        }
         Level level = livingEntity.level();
         CompoundTag tag = livingEntity.getPersistentData();
         int sequence = BeyonderUtil.getSequence(livingEntity);
@@ -663,10 +669,10 @@ public class ModEvents {
                 BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
                 ProbabilityManipulationWipe.wipeProbablility(tag);
             }
-            if (BeyonderUtil.isBeyonder(livingEntity) && !event.isCanceled() && livingEntity instanceof Player) {
-                boolean dropCharacteristic = level.getLevelData().getGameRules().getBoolean(GameRuleInit.SHOULD_DROP_CHARACTERISTIC);
+            if (BeyonderUtil.isBeyonder(livingEntity) && !event.isCanceled() && livingEntity instanceof Player && (entityAttacker instanceof Player || (entityAttacker instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof Player))) {
                 boolean resetSequence = level.getLevelData().getGameRules().getBoolean(GameRuleInit.RESET_SEQUENCE);
                 boolean safetyNet = level.getLevelData().getGameRules().getBoolean(GameRuleInit.PATHWAY_SAFETY_NET);
+                boolean dropCharacteristic = level.getLevelData().getGameRules().getBoolean(GameRuleInit.SHOULD_DROP_CHARACTERISTIC);
                 boolean fateReincarnation = livingEntity.getPersistentData().getInt("monsterReincarnationCounter") >= 1;
                 if (dropCharacteristic) {
                     if (!safetyNet) {
@@ -718,6 +724,8 @@ public class ModEvents {
                 event.setCanceled(true);
                 livingEntity.setHealth(5.0f);
             }
+            tag.putDouble("corruption",0);
+            tag.putInt("age", 0);
             if (livingEntity instanceof Player player) {
                 byte[] keysClicked = new byte[5];
                 player.getPersistentData().putByteArray("keysClicked", keysClicked);

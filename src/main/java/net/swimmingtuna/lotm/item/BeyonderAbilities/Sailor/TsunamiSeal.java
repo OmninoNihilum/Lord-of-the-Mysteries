@@ -233,10 +233,12 @@ public class TsunamiSeal extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (BeyonderUtil.getSequence(target) > BeyonderUtil.getSequence(livingEntity) && target != null) {
-            return 70;
-        } else if (target != null) {
-            return 30;
+        if (target != null) {
+            if (BeyonderUtil.getSequence(target) > BeyonderUtil.getSequence(livingEntity)) {
+                return 70;
+            } else {
+                return 0;
+            }
         }
         return 0;
     }

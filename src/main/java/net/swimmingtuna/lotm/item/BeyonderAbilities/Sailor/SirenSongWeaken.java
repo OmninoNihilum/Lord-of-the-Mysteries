@@ -76,6 +76,9 @@ public class SirenSongWeaken extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return 30;
+        if (target != null) {
+            return 30;
+        }
+        return 0;
     }
 }

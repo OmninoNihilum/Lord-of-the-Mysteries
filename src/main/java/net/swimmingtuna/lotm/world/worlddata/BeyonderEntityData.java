@@ -20,6 +20,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
@@ -234,6 +235,10 @@ public class BeyonderEntityData extends SavedData {
             return;
         }
 
+        if (mob.level().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ONLY_USE_ABILITIES_ON_PLAYERS) && !(mob.getTarget() instanceof Player)) {
+            return;
+        }
+
         List<WeightedAbility> weightedAbilities = new ArrayList<>();
         int currentSpirituality = BeyonderUtil.getSpirituality(mob);
         for (Item item : availableAbilities) {
@@ -260,13 +265,11 @@ public class BeyonderEntityData extends SavedData {
                 totalPriority += ability.weight;
             }
 
-            // Debug log message
             Level level = mob.level();
             if (level instanceof ServerLevel) {
                 String entityName = mob.getName().getString();
                 String abilityName = selectedAbility.getDescription().getString();
                 int abilityPriority = 0;
-
                 for (WeightedAbility ability : weightedAbilities) {
                     if (ability.abilityItem == selectedAbility) {
                         abilityPriority = ability.weight;
@@ -276,7 +279,6 @@ public class BeyonderEntityData extends SavedData {
                 LOTM.LOGGER.info("{} chose ability {} with a {}/{} probability",
                         entityName, abilityName, abilityPriority, totalPriority);
             }
-
             mob.setItemInHand(InteractionHand.MAIN_HAND, selectedAbility.getDefaultInstance());
             useAvailableAbilityAsMob(mob);
         }

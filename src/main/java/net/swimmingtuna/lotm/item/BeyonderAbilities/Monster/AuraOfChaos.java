@@ -176,9 +176,9 @@ public class AuraOfChaos extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (livingEntity.getPersistentData().getBoolean("monsterAuraOfChaos") && BeyonderUtil.getSpirituality(livingEntity) < 800) {
+        if (livingEntity.getPersistentData().getBoolean("monsterAuraOfChaos") && BeyonderUtil.getSpirituality(livingEntity) < 800 && target != null) {
             return 100;
-        } else if (!livingEntity.getPersistentData().getBoolean("monsterAuraOfChaos") && BeyonderUtil.getSpirituality(livingEntity) > 1500) {
+        } else if (!livingEntity.getPersistentData().getBoolean("monsterAuraOfChaos") && BeyonderUtil.getSpirituality(livingEntity) > 1500 && target != null) {
             return 90;
         }
         return 0;

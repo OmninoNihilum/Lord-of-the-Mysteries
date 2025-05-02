@@ -167,7 +167,7 @@ public class BeyonderEntityCommand {
                 // If not a player, print to console
                 Map<EntityType<?>, String> mappings = data.getAllEntityMappings();
                 if (mappings.isEmpty()) {
-                    source.sendSuccess(() -> Component.literal("No entity-Beyonder mappings found.")
+                    source.sendSuccess(() -> Component.literal("No Beyonder Entities Found.")
                             .withStyle(ChatFormatting.YELLOW), false);
                     return 0;
                 }
