@@ -9,15 +9,22 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.UpdateEntityLocationS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -55,6 +62,23 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
         this.entityData.define(HAS_PLAYED_ANIMATION, false);
         this.entityData.define(YAW, 0.0f);
         this.entityData.define(PITCH, 0.0f);
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
+        return pDistance < 400000;
+    }
+
+    @Override
+    public @NotNull AABB getBoundingBoxForCulling() {
+        return new AABB(
+                this.getX() - 300,
+                this.getY() - 300,
+                this.getZ() - 300,
+                this.getX() + 300,
+                this.getY() + 300,
+                this.getZ() + 300
+        );
     }
 
     @Override
@@ -112,8 +136,12 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
         super.tick();
         if (!level().isClientSide()) {
             float scale = BeyonderUtil.getScale(this);
+            Vec3 currentPos = this.position();
             if (this.tickCount >= 20) {
                 this.discard();
+            }
+            for (ServerPlayer player : level().getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(100))) {
+                LOTMNetworkHandler.sendToPlayer(new UpdateEntityLocationS2C(currentPos.x(), currentPos.y(), currentPos.z(), this.getDeltaMovement().x(), this.getDeltaMovement().y(), this.getDeltaMovement().z(), this.getId()), player);
             }
             AABB aabb;
             if (this.tickCount == 14 && this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
@@ -171,6 +199,16 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                             livingEntity.getPersistentData().putInt("inTwilight", Math.max(tag.getInt("inTwilight"), 25));
                         }
                     }
+                }
+            }
+        }
+        if (this.level() instanceof ServerLevel serverLevel) {
+            int chunkRadius = 5;
+            ChunkPos centerChunk = new ChunkPos(this.blockPosition());
+            for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
+                for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
+                    ChunkPos chunkPos = new ChunkPos(centerChunk.x + dx, centerChunk.z + dz);
+                    serverLevel.getChunkSource().addRegionTicket(TicketType.PLAYER, chunkPos, 3, chunkPos);
                 }
             }
         }

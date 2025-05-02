@@ -27,10 +27,10 @@ public class MentalDamageSource extends DamageSource {
 
     public float calculateDamage(float baseAmount) {
         if (attacker == null || target == null) return baseAmount;
-        int attackerMental = getMentalStrength(attacker);
-        int targetMental =getMentalStrength(target);
+        float attackerMental = getMentalStrength(attacker);
+        float targetMental =getMentalStrength(target);
         if (targetMental <= 0) targetMental = 1;
-        float multiplier = Math.min(2.0f, ((float)attackerMental) / targetMental);
+        float multiplier = Math.min(2.0f, (attackerMental) / targetMental);
         return baseAmount * multiplier;
     }
 }

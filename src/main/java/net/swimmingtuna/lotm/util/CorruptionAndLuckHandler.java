@@ -29,6 +29,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.swimmingtuna.lotm.entity.*;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
@@ -63,6 +64,28 @@ public class CorruptionAndLuckHandler {
             boolean isMonsterNoException = BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.MONSTER.get());
             boolean isMonsterException = BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.MONSTER.get());
             double corruption = tag.getDouble("corruption");
+            double maxCorruption = 100;
+            if (sequence == 9) {
+                maxCorruption = 110;
+            } else if (sequence == 8) {
+                maxCorruption = 140;
+            } else if (sequence == 7) {
+                maxCorruption = 200;
+            } else if (sequence == 6) {
+                maxCorruption = 250;
+            } else if (sequence == 5) {
+                maxCorruption = 330;
+            } else if (sequence == 4) {
+                maxCorruption = 450;
+            } else if (sequence == 3) {
+                maxCorruption = 550;
+            } else if (sequence == 2) {
+                maxCorruption = 750;
+            } else if (sequence == 1) {
+                maxCorruption = 1000;
+            } else if (sequence == 0) {
+                maxCorruption = 1500;
+            }
             double lotmLuckValue = tag.getDouble("luck");
             double lotmMisfortuneValue = tag.getDouble("misfortune");
             if (corruption >= 1 && livingEntity.tickCount % 200 == 0) {
@@ -80,9 +103,9 @@ public class CorruptionAndLuckHandler {
             }
             if (corruption >= 1) {
                 if (livingEntity instanceof Player player && player.tickCount % 20 == 0) {
-                    player.displayClientMessage(Component.literal("You're corrupted with a value of " + corruption + " / 100").withStyle(BeyonderUtil.corruptionStyle(livingEntity)), true);
+                    player.displayClientMessage(Component.literal("You're corrupted with a value of " + corruption + " / " + maxCorruption).withStyle(BeyonderUtil.corruptionStyle(livingEntity)), true);
                 }
-                spawnCorruptionParticles(livingEntity, corruption);
+                spawnCorruptionParticles(livingEntity, corruption, sequence);
             }
             if (livingEntity.tickCount % 20 == 0) {
                 if (corruption >= 60 && Math.random() <= 0.05) {
@@ -704,7 +727,7 @@ public class CorruptionAndLuckHandler {
                         }
                     }
                 }
-            } else if (livingEntity instanceof Mob mob) {
+            } else if (livingEntity instanceof Mob mob && serverLevel.getLevelData().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ACTIVATE_CALAMITIES)) {
                 if (isMonsterNoException) {
                     if (sequence <= 6 && tag.getBoolean("monsterCalamityAttraction") && livingEntity.tickCount % 100 == 0) {
                         int calamityMeteor = tag.getInt("calamityMeteor");
@@ -1620,24 +1643,46 @@ public class CorruptionAndLuckHandler {
         }
     }
 
-    public static void spawnCorruptionParticles(LivingEntity entity, double corruption) {
+    public static void spawnCorruptionParticles(LivingEntity entity, double corruption, int sequence) {
         Level level = entity.level();
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
+        }
+        double maxCorruption = 100;
+        if (sequence == 9) {
+            maxCorruption = 110;
+        } else if (sequence == 8) {
+            maxCorruption = 140;
+        } else if (sequence == 7) {
+            maxCorruption = 200;
+        } else if (sequence == 6) {
+            maxCorruption = 250;
+        } else if (sequence == 5) {
+            maxCorruption = 330;
+        } else if (sequence == 4) {
+            maxCorruption = 450;
+        } else if (sequence == 3) {
+            maxCorruption = 550;
+        } else if (sequence == 2) {
+            maxCorruption = 750;
+        } else if (sequence == 1) {
+            maxCorruption = 1000;
+        } else if (sequence == 0) {
+            maxCorruption = 1500;
         }
         RandomSource random = level.getRandom();
         double x = entity.getX();
         double y = entity.getY() + 0.5;
         double z = entity.getZ();
         long gameTime = level.getGameTime();
-        if (corruption >= 1 && corruption < 30 && gameTime % 100 == 0) {
+        if (corruption >= 1 && corruption < 0.3 * maxCorruption && gameTime % 100 == 0) {
             for (int i = 0; i < 10; i++) {
                 double offsetX = random.nextDouble() - 0.5;
                 double offsetY = random.nextDouble() - 0.5;
                 double offsetZ = random.nextDouble() - 0.5;
                 serverLevel.sendParticles(ParticleTypes.ASH, x + offsetX, y + offsetY, z + offsetZ, 1, 0.0D, 0.0D, 0.0D, 0.0D);
             }
-        } else if (corruption >= 30 && corruption < 60 && gameTime % 100 == 0) {
+        } else if (corruption >= 0.3 * maxCorruption && corruption < 0.6 * maxCorruption && gameTime % 100 == 0) {
             DustParticleOptions orangeDust = new DustParticleOptions(new Vector3f(1.0F, 0.5F, 0.0F), 1.0F);
             for (int i = 0; i < 20; i++) {
                 double offsetX = random.nextDouble() - 0.5;
@@ -1645,14 +1690,14 @@ public class CorruptionAndLuckHandler {
                 double offsetZ = random.nextDouble() - 0.5;
                 serverLevel.sendParticles(orangeDust, x + offsetX, y + offsetY, z + offsetZ, 1, 0.0D, 0.0D, 0.0D, 0.0D);
             }
-        } else if (corruption >= 60 && corruption < 80 && gameTime % 60 == 0) {
+        } else if (corruption >= 0.6 * maxCorruption && corruption < 0.8 * maxCorruption && gameTime % 60 == 0) {
             for (int i = 0; i < 30; i++) {
                 double offsetX = random.nextDouble() - 0.5;
                 double offsetY = random.nextDouble() - 0.5;
                 double offsetZ = random.nextDouble() - 0.5;
                 serverLevel.sendParticles(ParticleTypes.PORTAL, x + offsetX, y + offsetY, z + offsetZ, 1, 0.0D, 0.0D, 0.0D, 0.0D);
             }
-        } else if (corruption >= 80 && gameTime % 20 == 0) {
+        } else if (corruption >= 0.8 * maxCorruption && gameTime % 20 == 0) {
             for (int i = 0; i < 20; i++) {
                 double offsetX = random.nextDouble() - 0.5;
                 double offsetY = random.nextDouble() - 0.5;

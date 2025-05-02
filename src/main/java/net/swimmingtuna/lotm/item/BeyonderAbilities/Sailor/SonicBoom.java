@@ -96,6 +96,9 @@ public class SonicBoom extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return 35;
+        if (target != null) {
+            return 40;
+        }
+        return 0;
     }
 }

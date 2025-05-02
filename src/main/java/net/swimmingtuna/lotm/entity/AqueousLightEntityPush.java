@@ -63,6 +63,11 @@ public class AqueousLightEntityPush extends AbstractHurtingProjectile {
         if (this.level().isClientSide() || !(result.getEntity() instanceof LivingEntity entity)) {
             return;
         }
+        if (this.getOwner() != null) {
+            if (entity == this.getOwner()) {
+                return;
+            }
+        }
         LivingEntity owner = (LivingEntity) this.getOwner();
         double x = entity.getX() - owner.getX();
         double y = entity.getY() - owner.getY();

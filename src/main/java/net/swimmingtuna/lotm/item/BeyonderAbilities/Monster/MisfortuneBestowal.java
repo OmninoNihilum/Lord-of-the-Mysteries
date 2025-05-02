@@ -96,7 +96,7 @@ public class MisfortuneBestowal extends SimpleAbilityItem {
         if (target != null) {
             return 60;
         }
-        return 35;
+        return 0;
     }
 
 }

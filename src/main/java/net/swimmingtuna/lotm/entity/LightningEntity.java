@@ -250,9 +250,13 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
         if (!this.level().isClientSide() && this.tickCount >= 2) {
             float detectionRadius = getDamage() * 0.25f;
-            AABB detectionBox = new AABB(lastPos.x - detectionRadius, lastPos.y - detectionRadius, lastPos.z - detectionRadius, lastPos.x + detectionRadius, lastPos.y + detectionRadius, lastPos.z + detectionRadius
-            );
-
+            double minX = Math.min(lastPos.x - detectionRadius, lastPos.x + detectionRadius);
+            double minY = Math.min(lastPos.y - detectionRadius, lastPos.y + detectionRadius);
+            double minZ = Math.min(lastPos.z - detectionRadius, lastPos.z + detectionRadius);
+            double maxX = Math.max(lastPos.x - detectionRadius, lastPos.x + detectionRadius);
+            double maxY = Math.max(lastPos.y - detectionRadius, lastPos.y + detectionRadius);
+            double maxZ = Math.max(lastPos.z - detectionRadius, lastPos.z + detectionRadius);
+            AABB detectionBox = new AABB(minX, minY, minZ, maxX, maxY, maxZ);;
             List<Entity> nearbyEntities = this.level().getEntities(this, detectionBox);
             boolean foundValidTarget = false;
             for (Entity entity : nearbyEntities) {

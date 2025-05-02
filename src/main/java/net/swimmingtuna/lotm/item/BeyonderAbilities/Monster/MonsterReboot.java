@@ -103,7 +103,7 @@ public class MonsterReboot extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return super.getPriority(livingEntity, target);
+        return 0;
     }
 
 }

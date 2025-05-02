@@ -107,6 +107,9 @@ public class SirenSongStrengthen extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return (int) (60 - livingEntity.getHealth());
+        if (target != null) {
+            return (int) (60 - livingEntity.getHealth());
+        }
+        return 0;
     }
 }

@@ -128,7 +128,10 @@ public class AcidicRain extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return 55;
+        if (target != null) {
+            return 55;
+        }
+        return 0;
     }
 
     @Override
