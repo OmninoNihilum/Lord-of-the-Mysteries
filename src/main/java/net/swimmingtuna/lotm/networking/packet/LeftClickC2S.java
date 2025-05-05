@@ -36,15 +36,7 @@ public class LeftClickC2S {
             ItemStack heldItem = player.getMainHandItem();
             byte[] keysClicked = player.getPersistentData().getByteArray("keysClicked");
 
-            if (!heldItem.isEmpty() && heldItem.getItem() instanceof BeyonderAbilityUser) {
-                for (int i = 0; i < keysClicked.length; i++) {
-                    if (keysClicked[i] == 0) {
-                        keysClicked[i] = 1;
-                        BeyonderAbilityUser.clicked(player, InteractionHand.MAIN_HAND);
-                        break;
-                    }
-                }
-            }
+
             if (player.getMainHandItem().getItem() instanceof LightningStorm) {
                 CompoundTag tag = player.getPersistentData();
                 double distance = tag.getDouble("sailorLightningStormDistance");

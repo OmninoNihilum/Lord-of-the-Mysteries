@@ -86,6 +86,15 @@ public class CorruptionAndLuckHandler {
             } else if (sequence == 0) {
                 maxCorruption = 1500;
             }
+            boolean shouldntActiveCalamity = false;
+            boolean calamityNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            if (calamityNearSpawn) {
+                BlockPos entityPos = livingEntity.getOnPos();
+                BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
+                if (entityPos.closerThan(worldSpawnPos, 300)) {
+                    shouldntActiveCalamity = true;
+                }
+            }
             double lotmLuckValue = tag.getDouble("luck");
             double lotmMisfortuneValue = tag.getDouble("misfortune");
             if (corruption >= 1 && livingEntity.tickCount % 200 == 0) {
@@ -459,7 +468,7 @@ public class CorruptionAndLuckHandler {
             int doubleDamage = tag.getInt("luckDoubleDamage");
             int ignoreDamage = tag.getInt("luckIgnoreDamage");
             Random random = new Random();
-            if (lotmMisfortuneValue >= 1) {
+            if (lotmMisfortuneValue >= 1 && !shouldntActiveCalamity) {
                 if (livingEntity.tickCount % 397 == 0 && random.nextInt(300) <= (lotmMisfortuneValue * misfortuneEnhancement) && meteor == 0) {
                     tag.putInt("luckMeteor", 40);
                     tag.putDouble("misfortune", lotmMisfortuneValue - 40);
@@ -581,7 +590,7 @@ public class CorruptionAndLuckHandler {
                     }
                 }
             }
-            if (livingEntity instanceof Player pPlayer) {
+            if (livingEntity instanceof Player pPlayer && !shouldntActiveCalamity) {
                 if (isMonsterNoException) {
                     if (sequence <= 6 && tag.getBoolean("monsterCalamityAttraction") && livingEntity.tickCount % 100 == 0) {
                         int calamityMeteor = tag.getInt("calamityMeteor");
@@ -727,7 +736,7 @@ public class CorruptionAndLuckHandler {
                         }
                     }
                 }
-            } else if (livingEntity instanceof Mob mob && serverLevel.getLevelData().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ACTIVATE_CALAMITIES)) {
+            } else if (!shouldntActiveCalamity && livingEntity instanceof Mob mob && serverLevel.getLevelData().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ACTIVATE_CALAMITIES)) {
                 if (isMonsterNoException) {
                     if (sequence <= 6 && tag.getBoolean("monsterCalamityAttraction") && livingEntity.tickCount % 100 == 0) {
                         int calamityMeteor = tag.getInt("calamityMeteor");

@@ -46,7 +46,6 @@ public class Awe extends SimpleAbilityItem {
             double radius = (18.0 - sequence) * dir;
             float damage = (float) (17.0 * (Math.max(1, dir * 0.5)) - (sequence * 1.2));
             int duration = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.AWE.get());
-            System.out.println("damage is " + damage);
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
                     entity.addEffect((new MobEffectInstance(ModEffects.AWE.get(), duration, 1, false, false)));

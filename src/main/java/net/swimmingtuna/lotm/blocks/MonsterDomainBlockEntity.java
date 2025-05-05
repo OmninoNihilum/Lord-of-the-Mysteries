@@ -105,11 +105,13 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                                 blockWasProcessed = true;
                             }
                         }
-                        if (targetBlock.getBlock() instanceof CropBlock cropBlock) {
+                        if (targetBlock.getBlock() instanceof CropBlock cropBlock && cropBlock != Blocks.TORCHFLOWER_CROP) {
                             IntegerProperty ageProperty = cropBlock.getAgeProperty();
                             int currentAge = targetBlock.getValue(ageProperty);
-                            if (currentAge < cropBlock.getMaxAge()) {
-                                level.setBlock(mutablePos, targetBlock.setValue(ageProperty, currentAge + multiplier), 3);
+                            int maxAge = cropBlock.getMaxAge();
+                            int newAge = Math.min(currentAge + multiplier, maxAge);
+                            if (newAge > currentAge) {
+                                level.setBlock(mutablePos, targetBlock.setValue(ageProperty, newAge), 3);
                             }
                             blockWasProcessed = true;
                         }
@@ -303,10 +305,11 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
             BeyonderHolder beyonderHolder = BeyonderHolderAttacher.getHolderUnwrap(owner);
             int maxRadius = 250 - (beyonderHolder.getSequence() * 45);
             multiplier = Math.max(1, (maxRadius / safeRadius) / 2);
-        } else multiplier = 1;
-        if (!BeyonderUtil.currentPathwayAndSequenceMatches(owner, BeyonderClassInit.MONSTER.get(), 4)) {
-            this.level.setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState(), 3);
+            if (!BeyonderUtil.currentPathwayAndSequenceMatches(owner, BeyonderClassInit.MONSTER.get(), 4)) {
+                this.level.setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState(), 3);
+            }
         }
+        else multiplier = 1;
         for (LivingEntity entity : livingEntities) {
             boolean isAlly = isAllyOfOwner(entity);
             if (entity instanceof Mob mob) {
@@ -547,7 +550,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                         }
 
                         // Process crop decay
-                        if (targetBlock.getBlock() instanceof CropBlock cropBlock) {
+                        if (targetBlock.getBlock() instanceof CropBlock cropBlock && cropBlock != Blocks.TORCHFLOWER_CROP) {
                             IntegerProperty ageProperty = cropBlock.getAgeProperty();
                             int currentAge = targetBlock.getValue(ageProperty);
                             if (currentAge > 0 && level.random.nextInt(100) <= (multiplier)) {

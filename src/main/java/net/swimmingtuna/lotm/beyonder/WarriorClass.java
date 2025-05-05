@@ -8,6 +8,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
@@ -422,7 +423,10 @@ public class WarriorClass implements BeyonderClass {
                 physicalReduction *= 0.5f;
                 supernaturalReduction *= 0.5f;
             }
-            float maxReduction = Math.max(0.3f, Math.min(0.7f, (10 - sequence) * 0.075f));
+            float maxReduction = Math.max(0.25f, Math.min(0.7f, (10 - sequence) * 0.075f));
+            if (livingEntity instanceof Mob) {
+                maxReduction = Math.max(0.2f, Math.min(0.5f, (10 - sequence) * 0.075f));
+            }
             if (isPhysical) {
                 float finalReduction = Math.min(physicalReduction, maxReduction);
                 event.setAmount(amount * (1.0f - finalReduction));

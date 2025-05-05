@@ -11,8 +11,8 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.SpiritVisionC2S;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
+import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.KeyBinding;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
@@ -23,13 +23,40 @@ public class KeyClientEvents {
 
         @SubscribeEvent
         public static void onKeyInput(InputEvent.Key event) {
-           if (KeyBinding.SPIRIT_VISION.consumeClick()) {
-               LOTMNetworkHandler.sendToServer(new SpiritVisionC2S());
-           }
+           //if (KeyBinding.SPIRIT_VISION.consumeClick()) {
+           //    LOTMNetworkHandler.sendToServer(new SpiritVisionC2S());
+           //}
            //if (KeyBinding.SPIRIT_WORLD_TRAVERSAL.consumeClick()) {
            //    System.out.println("Worked");
            //    LOTMNetworkHandler.sendToServer(new SpiritWorldTraversalC2S());
            //}
+            Player player = Minecraft.getInstance().player;
+            if (player == null) return;
+
+
+            // Check for left click
+            if (KeyBinding.ABILITY_KEY_X.consumeClick()) {
+                byte[] keysClicked = ClientAbilityCombinationData.getKeysClicked();
+                for (int i = 0; i < keysClicked.length; i++) {
+                    if (keysClicked[i] == 0) {
+                        ClientAbilityCombinationData.setKeyClicked(i, (byte) 1); // Left click
+                        ClientAbilityCombinationData.handleClick();
+                        break;
+                    }
+                }
+            }
+
+            // Handle right click
+            if (KeyBinding.ABILITY_KEY_O.consumeClick()) {
+                byte[] keysClicked = ClientAbilityCombinationData.getKeysClicked();
+                for (int i = 0; i < keysClicked.length; i++) {
+                    if (keysClicked[i] == 0) {
+                        ClientAbilityCombinationData.setKeyClicked(i, (byte) 2);
+                        ClientAbilityCombinationData.handleClick();
+                        break;
+                    }
+                }
+            }
         }
 
         @SubscribeEvent
@@ -74,8 +101,10 @@ public class KeyClientEvents {
     public static class ClientModBusEvents {
         @SubscribeEvent
         public static void onKeyRegister(RegisterKeyMappingsEvent event) {
-            event.register(KeyBinding.SPIRIT_VISION);
-            event.register(KeyBinding.SPIRIT_WORLD_TRAVERSAL);
+            //event.register(KeyBinding.SPIRIT_VISION);
+            //event.register(KeyBinding.SPIRIT_WORLD_TRAVERSAL);
+            event.register(KeyBinding.ABILITY_KEY_O);
+            event.register(KeyBinding.ABILITY_KEY_X);
         }
     }
 }

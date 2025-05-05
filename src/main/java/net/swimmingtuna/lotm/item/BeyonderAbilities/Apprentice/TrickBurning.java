@@ -27,10 +27,10 @@ import virtuoel.pehkui.api.ScaleTypes;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Burn extends SimpleAbilityItem {
+public class TrickBurning extends SimpleAbilityItem {
 
 
-    public Burn(Properties properties) {
+    public TrickBurning(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 0, 20);
     }
 
@@ -83,7 +83,7 @@ public class Burn extends SimpleAbilityItem {
     public static void smeltItem(LivingEvent.LivingTickEvent event) {
         LivingEntity player = event.getEntity();
         Level level = player.level();
-        if (!player.level().isClientSide() && player.isShiftKeyDown() && player.tickCount % 20 == 0 && !player.getOffhandItem().isEmpty() && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 8) && player.getMainHandItem().getItem() == ItemInit.TRICKBURN.get()) {
+        if (!player.level().isClientSide() && player.isShiftKeyDown() && player.tickCount % 20 == 0 && !player.getOffhandItem().isEmpty() && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 8) && player.getMainHandItem().getItem() == ItemInit.TRICKBURNING.get()) {
             int sequence = BeyonderUtil.getSequence(player);
             int smelt;
             ItemStack offHand = player.getOffhandItem();

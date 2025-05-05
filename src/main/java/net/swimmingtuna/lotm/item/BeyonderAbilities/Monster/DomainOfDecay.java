@@ -114,7 +114,7 @@ public class DomainOfDecay extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, put down a domain of decay, which will cause everything in the radius of it to encounter severe negative effects, the strength of them being stronger the smaller area. Examples include entities getting withered, ores turning to stone, crops dying, tools getting damaged, and more. Use near a domain in order to remove it"));
-        tooltipComponents.add(Component.literal("Left Click to increase radius"));
+        tooltipComponents.add(Component.literal("Shift to increase radius"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("400").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("30 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

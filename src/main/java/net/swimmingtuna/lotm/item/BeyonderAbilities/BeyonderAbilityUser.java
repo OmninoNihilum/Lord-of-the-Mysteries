@@ -2,137 +2,18 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.util.BeyonderUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class BeyonderAbilityUser extends SimpleAbilityItem {
-
-
     public BeyonderAbilityUser(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 9, 0, 0);
-    }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        if (!player.level().isClientSide()) {
-            ItemStack heldItem = player.getItemInHand(hand);
-            byte[] keysClicked = player.getPersistentData().getByteArray("keysClicked");
-            for (int i = 0; i < keysClicked.length; i++) {
-                if (keysClicked[i] == 0) {
-                    keysClicked[i] = 2;
-                    BeyonderAbilityUser.clicked(player, hand);
-                    return InteractionResultHolder.success(heldItem);
-                }
-            }
-        }
-        return super.use(level, player, hand);
-    }
-
-    public static void resetClicks(Player player) {
-        if (player.getPersistentData().getBoolean("shouldSendAbilityUserResetMessage")) {
-            player.getPersistentData().putByteArray("keysClicked", new byte[5]);
-            player.displayClientMessage(Component.empty(), true);
-            player.getPersistentData().putBoolean("shouldSendAbilityUserResetMessage", false);
-        }
-    }
-
-    @Override
-    public void inventoryTick(ItemStack pStack, Level pLevel, Entity livingEntity, int pSlotId, boolean pIsSelected) {
-        if (livingEntity instanceof Player player) {
-            if (player.tickCount % 4 == 0 && !livingEntity.level().isClientSide() && !(player.getMainHandItem().getItem() instanceof BeyonderAbilityUser)) {
-                resetClicks(player);
-            }
-            if (player.getMainHandItem().getItem() instanceof BeyonderAbilityUser && !player.getPersistentData().getBoolean("shouldSendAbilityUserResetMessage")) {
-                player.getPersistentData().putBoolean("shouldSendAbilityUserResetMessage", true);
-            }
-        }
-    }
-
-    public static void clicked(Player player, InteractionHand hand) {
-
-        if (player.level().isClientSide()) {
-            return;
-        }
-        byte[] keysClicked = player.getPersistentData().getByteArray("keysClicked");
-
-        StringBuilder stringBuilder = new StringBuilder(5);
-        for (byte b : keysClicked) {
-            char charToAdd = switch (b) {
-                case 1 -> 'L';
-                case 2 -> 'R';
-                default -> '_';
-            };
-            stringBuilder.append(charToAdd);
-        }
-        String actionBarString = StringUtils.join(stringBuilder.toString().toCharArray(), ' ');
-
-        Component actionBarComponent = Component.literal(actionBarString).withStyle(ChatFormatting.BOLD);
-        player.displayClientMessage(actionBarComponent, true);
-
-        if (keysClicked[4] == 0) {
-            return;
-        }
-
-        int abilityNumber = 0;
-        for (int i = 0; i < keysClicked.length; i++) {
-            abilityNumber |= (keysClicked[i] - 1) << (4 - i);
-        }
-        ++abilityNumber;
-        resetClicks(player);
-        BeyonderUtil.useAbilityByNumber(player, abilityNumber, hand);
-    }
-
-    @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity interactionTarget, InteractionHand hand) {
-        byte[] keysClicked = player.getPersistentData().getByteArray("keysClicked");
-        if (!player.level().isClientSide()) {
-            if (!player.getCooldowns().isOnCooldown(this)) {
-                player.getCooldowns().addCooldown(this, 4);
-                for (int i = 0; i < keysClicked.length; i++) {
-                    if (keysClicked[i] == 0) {
-                        keysClicked[i] = 2;
-                        BeyonderAbilityUser.clicked(player, hand);
-                        return InteractionResult.SUCCESS;
-                    }
-                }
-            } else {
-                return InteractionResult.FAIL;
-            }
-        }
-        return InteractionResult.PASS;
-    }
-
-    public static void clickEvent(AttackEntityEvent event) {
-        Player player = event.getEntity();
-        if (player.getMainHandItem().getItem() instanceof BeyonderAbilityUser) {
-            event.setCanceled(true); // Cancel default attack interaction
-
-            // Add byte 'L' to keysClicked array
-            byte[] keysClicked = player.getPersistentData().getByteArray("keysClicked");
-            for (int i = 0; i < keysClicked.length; i++) {
-                if (keysClicked[i] == 0) {
-                    keysClicked[i] = 1;
-                    player.getPersistentData().putByteArray("keysClicked", keysClicked);
-                    BeyonderAbilityUser.clicked(player, InteractionHand.MAIN_HAND);
-                    break;
-                }
-            }
-        }
     }
 
     @Override
