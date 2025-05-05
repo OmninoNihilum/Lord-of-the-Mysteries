@@ -324,28 +324,84 @@ public class ItemInit {
     //APPRENTICE
     public static final RegistryObject<Item> CREATEDOOR = ITEMS.register("createdoor",
             () -> new CreateDoor(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKBURN = ITEMS.register("trickburn",
-            () -> new Burn(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKBOUNCE = ITEMS.register("trickbounce",
-            () -> new BounceProjectiles(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKFREEZE = ITEMS.register("trickfreeze",
-            () -> new Freeze(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKBURNING = ITEMS.register("trickburning",
+            () -> new TrickBurning(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKFREEZING = ITEMS.register("trickfreezing",
+            () -> new TrickFreezing(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKTUMBLE = ITEMS.register("tricktumble",
-            () -> new Tumble(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKWINDPULL = ITEMS.register("trickwindpull",
-            () -> new WindPullArea(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKWINDPUSH = ITEMS.register("trickwindpush",
-            () -> new WindPushArea(new Item.Properties().stacksTo(1)));
+            () -> new TrickTumble(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKTELEKENISIS = ITEMS.register("tricktelekenisis",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKELECTRICSHOCK = ITEMS.register("trickelectricshock",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKESCAPETRICK = ITEMS.register("trickescapetrick",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKFLASH = ITEMS.register("trickflash",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKFOG = ITEMS.register("trickfog",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKLOUDNOISE = ITEMS.register("trickloudnoise",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKWIND = ITEMS.register("trickwind",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ASTROLOGER_SPIRIT_VISION = ITEMS.register("astrologer_spirit_vision",
+            () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> RECORDSCRIBE = ITEMS.register("recordscribe",
             () -> new ScribeRecord(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRAVELDOOR= ITEMS.register("traveldoor",
+    public static final RegistryObject<Item> TRAVELDOOR = ITEMS.register("traveldoor",
             () -> new TravelDoor(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRAVELDOORHOME= ITEMS.register("traveldoorhome",
+    public static final RegistryObject<Item> TRAVELDOORHOME = ITEMS.register("traveldoorhome",
             () -> new TravelDoorWaypoint(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> INVISIBLEHAND= ITEMS.register("invisiblehand",
+    public static final RegistryObject<Item> INVISIBLEHAND = ITEMS.register("invisiblehand",
             () -> new InvisibleHand(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> SCRIBEABILITIES= ITEMS.register("scribeabilities.json",
+    public static final RegistryObject<Item> BLINK = ITEMS.register("blink",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> BLINK_AFTERIMAGE = ITEMS.register("blinkafterimage",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SCRIBEABILITIES = ITEMS.register("scribeabilities",
             () -> new ScribeAbilities(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> BLINK_STATE = ITEMS.register("blinkstate",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> EXILE = ITEMS.register("exile",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOOR_MIRAGE = ITEMS.register("doormirage",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SPATIAL_CAGE = ITEMS.register("spatialcage",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SPATIAL_TEARING = ITEMS.register("spatialtearing",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SYMBOLIZATION = ITEMS.register("symbolization",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DIMENSIONAL_SIGHT = ITEMS.register("dimensionalsight",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> REPLICATE = ITEMS.register("replicate",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SEALING = ITEMS.register("sealing",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TELEPORTATION_AFTERIMAGE = ITEMS.register("teleportationafterimage",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SPACE_FRAGMENTATION = ITEMS.register("space_fragmentation",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> GRAVITY_MANIPULATION = ITEMS.register("gravitymanipulation",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SPATIAL_LOCK_ON = ITEMS.register("spatiallockon",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SPATIAL_SEAL = ITEMS.register("spatialseal",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOOR_SPATIAL_LOCK_ON = ITEMS.register("doorspatiallockon",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOOR_DIMENSION_CLOSING = ITEMS.register("door_dimensionclosing",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOOR_SEALED_SPACE = ITEMS.register("doorsealedspace",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOOR_LAYERING = ITEMS.register("doorlayering",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOOR_GAMMA_RAY_BURST = ITEMS.register("doorgammarayburst",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CONCEPTUALIZATION = ITEMS.register("conceptualization",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> REPLICATION = ITEMS.register("replication",
+            () -> new Item(new Item.Properties().stacksTo(1)));
 
     //INGREDIENTS
     public static final RegistryObject<Item> SPIRIT_EATER_STOMACH_POUCH = ITEMS.register("spirit_eater_stomach_pouch",
@@ -520,6 +576,8 @@ public class ItemInit {
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM = ITEMS.register("forced_update_item",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM_2 = ITEMS.register("forced_update_item_2",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> FORCED_UPDATE_ITEM_3 = ITEMS.register("forced_update_item_4",
             () -> new Item(new Item.Properties().stacksTo(1)));
 
     public static void register(IEventBus eventBus) {

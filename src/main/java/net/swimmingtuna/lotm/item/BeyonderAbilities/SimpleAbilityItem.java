@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -14,6 +15,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -72,10 +74,13 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
 
-    protected boolean checkAll(LivingEntity living) {
-        boolean itemCheckPassed = !(living instanceof Player);
-        if (living instanceof Player) {
-            itemCheckPassed = living.getItemInHand(InteractionHand.MAIN_HAND).is(this) || living.getItemInHand(InteractionHand.MAIN_HAND).is(ItemInit.BEYONDER_ABILITY_USER.get());
+    public boolean checkAll(LivingEntity living) {
+        boolean itemCheckPassed = true;
+        boolean isKeybindUse = !(living.getItemInHand(InteractionHand.MAIN_HAND).is(this) || living.getItemInHand(InteractionHand.OFF_HAND).is(this));
+        if (!isKeybindUse && living instanceof Player) {
+            itemCheckPassed = living.getItemInHand(InteractionHand.MAIN_HAND).is(this) ||
+                    living.getItemInHand(InteractionHand.MAIN_HAND).is(ItemInit.BEYONDER_ABILITY_USER.get()) ||
+                    living.getItemInHand(InteractionHand.OFF_HAND).is(this);
         }
 
         if (itemCheckPassed) {
@@ -176,7 +181,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
         }
     }
 
-    protected void addCooldown(LivingEntity player) {
+    public void addCooldown(LivingEntity player) {
         addCooldown(player, this, this.cooldown);
     }
 
@@ -263,7 +268,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
         BeyonderUtil.useSpirituality(livingEntity, spirituality);
     }
 
-    protected boolean useSpirituality(LivingEntity living) {
+    public boolean useSpirituality(LivingEntity living) {
         if (BeyonderUtil.getSpirituality(living) >= getRequiredSpirituality()) {
             useSpirituality(living, requiredSpirituality);
             return true;
@@ -287,8 +292,20 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
 
-    private boolean checkIfCanUseAbility(LivingEntity livingEntity) {
+    public static boolean checkIfCanUseAbility(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            boolean shouldntActiveCalamity = false;
+            boolean calamityNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            if (calamityNearSpawn) {
+                BlockPos entityPos = livingEntity.getOnPos();
+                BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
+                if (entityPos.closerThan(worldSpawnPos, 300)) {
+                    shouldntActiveCalamity = true;
+                }
+            }
+            if (shouldntActiveCalamity) {
+                return false;
+            }
             MisfortuneManipulation.livingUseAbilityMisfortuneManipulation(livingEntity);
             CompoundTag tag = livingEntity.getPersistentData();
             if (livingEntity.getMainHandItem().getItem() instanceof SimpleAbilityItem) {

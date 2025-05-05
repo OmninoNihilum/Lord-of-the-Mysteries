@@ -212,13 +212,22 @@ public class MonsterCalamityIncarnation extends SimpleAbilityItem {
         if (lightning >= 1) {
             tag.putInt("calamityIncarnationInLightning", lightning - 1);
             tag.putInt("monsterCalamityImmunity", 5);
-            int randomInt = (int) ((Math.random() * 50) - 25);
-            Vec3 startPos = new BlockPos((int) entity.getX() + randomInt, (int) entity.getY() + 50, (int) entity.getZ() + randomInt).getCenter();
+            double radius = 25;
+            double xOffset, yOffset, zOffset;
+            do {
+                xOffset = (Math.random() * 2 - 1) * radius;
+                yOffset = (Math.random() * 2 - 1) * radius;
+                zOffset = (Math.random() * 2 - 1) * radius;
+            } while (xOffset * xOffset + yOffset * yOffset + zOffset * zOffset > radius * radius); // ensure point is inside the sphere
+            Vec3 startPos = new BlockPos((int) (entity.getX() + xOffset), (int) (entity.getY() + 50 + yOffset), (int) (entity.getZ() + zOffset)).getCenter();
             LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), entity.level());
             lightningEntity.setSpeed(9.0f);
             lightningEntity.setMaxLength(60);
             lightningEntity.setDamage(7);
+            lightningEntity.setOwner(entity);
+            lightningEntity.setOwner(entity);
             lightningEntity.setNoUp(true);
+            lightningEntity.teleportTo(startPos.x(), startPos.y(), startPos.z());
             lightningEntity.setNewStartPos(startPos);
             lightningEntity.setDeltaMovement(0, -3, 0);
             if (entity instanceof Player player) {

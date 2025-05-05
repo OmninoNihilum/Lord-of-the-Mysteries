@@ -8,7 +8,6 @@ import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfDecay;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfProvidence;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MonsterDomainTeleporation;
 
 import java.util.function.Supplier;
 
@@ -32,21 +31,10 @@ public class MonsterDomainLeftClickC2S {
             if (player == null) return;
             ItemStack heldItem = player.getMainHandItem();
             int heldItemSlot = player.getInventory().selected;
-            int sequence = BeyonderHolderAttacher.getHolderUnwrap(player).getSequence();
-            if (sequence == 4) {
-                if (heldItem.getItem() instanceof DomainOfDecay) {
-                    player.getInventory().setItem(heldItemSlot, ItemInit.PROVIDENCEDOMAIN.get().getDefaultInstance());
-                } else if (heldItem.getItem() instanceof DomainOfProvidence) {
-                    player.getInventory().setItem(heldItemSlot, ItemInit.DECAYDOMAIN.get().getDefaultInstance());
-                }
-            } else if (sequence <= 3) {
-                if (heldItem.getItem() instanceof DomainOfDecay) {
-                    player.getInventory().setItem(heldItemSlot, ItemInit.PROVIDENCEDOMAIN.get().getDefaultInstance());
-                } else if (heldItem.getItem() instanceof DomainOfProvidence) {
-                    player.getInventory().setItem(heldItemSlot, ItemInit.MONSTERDOMAINTELEPORATION.get().getDefaultInstance());
-                } else if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
-                    player.getInventory().setItem(heldItemSlot, ItemInit.DECAYDOMAIN.get().getDefaultInstance());
-                }
+            if (heldItem.getItem() instanceof DomainOfDecay) {
+                player.getInventory().setItem(heldItemSlot, ItemInit.PROVIDENCEDOMAIN.get().getDefaultInstance());
+            } else if (heldItem.getItem() instanceof DomainOfProvidence) {
+                player.getInventory().setItem(heldItemSlot, ItemInit.DECAYDOMAIN.get().getDefaultInstance());
             }
         });
         return true;

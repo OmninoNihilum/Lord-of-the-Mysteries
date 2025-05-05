@@ -3,102 +3,32 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Tumble extends SimpleAbilityItem {
+public class TrickTumble extends SimpleAbilityItem {
 
 
-    public Tumble(Properties properties) {
+    public TrickTumble(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 50, 200);
     }
 
-    @Override
-    public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
-        }
-        tumble(player, interactionTarget.getOnPos());
-        addCooldown(player);
-        useSpirituality(player);
-        return InteractionResult.SUCCESS;
-    }
 
-    @Override
-    public InteractionResult useAbilityOnBlock(UseOnContext pContext) {
-        if (pContext.getPlayer() == null) {
-            Entity entity = pContext.getItemInHand().getEntityRepresentation();
-            if (entity instanceof LivingEntity user) {
-                BlockPos targetPos = pContext.getClickedPos();
-                if (!checkAll(user)) {
-                    return InteractionResult.FAIL;
-                }
-                tumble(user, targetPos);
-                return InteractionResult.SUCCESS;
-            }
-        } else {
-            Player player = pContext.getPlayer();
-            BlockPos targetPos = pContext.getClickedPos();
-
-            if (!checkAll(player)) {
-                return InteractionResult.FAIL;
-            }
-            tumble(player, targetPos);
-            addCooldown(player);
-            useSpirituality(player);
-            return InteractionResult.SUCCESS;
-        }
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
-        }
-        addCooldown(player);
-        useSpirituality(player);
-        tumble(player, player.getOnPos());
-        return InteractionResult.SUCCESS;
-    }
-
-    public static void tumble(LivingEntity livingEntity, BlockPos pos){
-        for (LivingEntity living : BeyonderUtil.checkEntitiesInLocation(livingEntity, BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), pos.getX(), pos.getY(), pos.getZ())) {
-            if (livingEntity.isShiftKeyDown()) {
-                if (living != livingEntity) {
-                    livingEntity.addEffect(new MobEffectInstance(ModEffects.TUMBLE.get(), 100, 2, true, true));
-                }
-            } else {
-                livingEntity.addEffect(new MobEffectInstance(ModEffects.TUMBLE.get(), 100, 2, true, true));
-            }
-        }
-    }
 
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 

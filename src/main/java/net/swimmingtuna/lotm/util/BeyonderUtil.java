@@ -176,16 +176,6 @@ public class BeyonderUtil {
                 projectile.setDeltaMovement((dx / length) * speed, (dy / length) * speed, (dz / length) * speed);
                 projectile.hurtMarked = true;
             }
-            //APPRENTICE BOUNCE SHOT ARROWS
-            if (BeyonderUtil.currentPathwayAndSequenceMatches(living, BeyonderClassInit.APPRENTICE.get(), 8) && living.getPersistentData().getBoolean("ApprenticeBounceProjectileMovement")) {
-                double dx = target.getX() - projectile.getX();
-                double dy = target.getY() - projectile.getY();
-                double dz = target.getZ() - projectile.getZ();
-                double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                double speed = 1.2;
-                projectile.setDeltaMovement((dx / length) * speed, (dy / length) * speed, (dz / length) * speed);
-                projectile.hurtMarked = true;
-            }
         }
 
 
@@ -545,12 +535,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.CREATEDOOR.get());
             }
             if (sequence <= 8) {
-                abilityNames.add(ItemInit.TRICKBURN.get());
-                abilityNames.add(ItemInit.TRICKBOUNCE.get());
-                abilityNames.add(ItemInit.TRICKFREEZE.get());
-                abilityNames.add(ItemInit.TRICKTUMBLE.get());
-                abilityNames.add(ItemInit.TRICKWINDPULL.get());
-                abilityNames.add(ItemInit.TRICKWINDPUSH.get());
+
             }
             if (sequence <= 6) {
                 abilityNames.add(ItemInit.RECORDSCRIBE.get());
@@ -619,6 +604,7 @@ public class BeyonderUtil {
         if (player.level().isClientSide()) {
             return;
         }
+
         if (player.hasEffect(ModEffects.STUN.get())) {
             player.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " +
                             (int) Objects.requireNonNull(player.getEffect(ModEffects.STUN.get())).getDuration() / 20 + " seconds.")
@@ -649,13 +635,28 @@ public class BeyonderUtil {
         String itemName = item.getDescription().getString();
         if (!(item instanceof Ability ability)) {
             player.sendSystemMessage(Component.literal("Registered ability ").append(itemName)
-                    .append(" for ability number " + abilityNumber + " is not an ability."));
+                    .append(" for ability number " + abilityNumber + " is not an ability.").withStyle(ChatFormatting.RED));
             return;
         }
 
         if (player.getCooldowns().isOnCooldown(item)) {
-            player.sendSystemMessage(Component.literal("Ability ").append(itemName).append(" is on cooldown!"));
+            player.sendSystemMessage(Component.literal("Ability ").append(itemName).append(" is on cooldown!").withStyle(ChatFormatting.RED));
             return;
+        }
+
+        // Create a dummy ItemStack for the ability to use in the ability methods
+        ItemStack abilityItemStack = new ItemStack(item);
+
+        // Check if we can use the ability - using our modified version that doesn't require holding the item
+        if (!checkIfCanUseAbility(player)) {
+            return;
+        }
+
+        // Additional check for SimpleAbilityItem - key difference is that we're not requiring the item to be in hand
+        if (ability instanceof SimpleAbilityItem simpleAbility) {
+            if (!simpleAbility.checkAll(player)) {
+                return;
+            }
         }
 
         double entityReach = ability.getEntityReach();
@@ -665,6 +666,7 @@ public class BeyonderUtil {
         boolean hasBlockInteraction = false;
         boolean hasGeneralAbility = false;
 
+        // Rest of the method remains the same...
         try {
             Method entityMethod = ability.getClass().getMethod("useAbilityOnEntity", ItemStack.class, LivingEntity.class, LivingEntity.class, InteractionHand.class);
             hasEntityInteraction = !entityMethod.getDeclaringClass().equals(Ability.class);
@@ -682,6 +684,7 @@ public class BeyonderUtil {
             hasGeneralAbility = !generalMethod.equals(Ability.class.getDeclaredMethod("useAbility", Level.class, LivingEntity.class, InteractionHand.class));
         } catch (NoSuchMethodException ignored) {
         }
+
         if (hasEntityInteraction) {
             Vec3 eyePosition = player.getEyePosition();
             Vec3 lookVector = player.getLookAngle();
@@ -692,7 +695,7 @@ public class BeyonderUtil {
 
             if (entityHit != null && entityHit.getEntity() instanceof LivingEntity livingEntity) {
                 if (player.level().isEmptyBlock(livingEntity.blockPosition().above())) {
-                    InteractionResult result = ability.useAbilityOnEntity(player.getItemInHand(hand), player, livingEntity, hand);
+                    InteractionResult result = ability.useAbilityOnEntity(abilityItemStack, player, livingEntity, hand);
                     if (result != InteractionResult.PASS) {
                         successfulUse = true;
                     }
@@ -717,14 +720,13 @@ public class BeyonderUtil {
                     }
                 }
                 if (bestTarget != null) {
-                    InteractionResult result = ability.useAbilityOnEntity(player.getItemInHand(hand), player, bestTarget, hand);
+                    InteractionResult result = ability.useAbilityOnEntity(abilityItemStack, player, bestTarget, hand);
                     if (result != InteractionResult.PASS) {
                         successfulUse = true;
                     }
                 }
             }
         }
-
 
         // Check for block interaction
         if (!successfulUse && hasBlockInteraction) {
@@ -741,7 +743,7 @@ public class BeyonderUtil {
             ));
 
             if (blockHit.getType() != HitResult.Type.MISS) {
-                UseOnContext context = new UseOnContext(player.level(), player, hand, player.getItemInHand(hand), blockHit);
+                UseOnContext context = new UseOnContext(player.level(), player, hand, abilityItemStack, blockHit);
                 InteractionResult result = ability.useAbilityOnBlock(context);
                 if (result != InteractionResult.PASS) {
                     successfulUse = true;
@@ -751,20 +753,105 @@ public class BeyonderUtil {
 
         if ((hasEntityInteraction || hasBlockInteraction) && !hasGeneralAbility) {
             if (successfulUse) {
+                // Use spirituality and add cooldown if it's a SimpleAbilityItem
+                if (ability instanceof SimpleAbilityItem simpleAbility) {
+                    simpleAbility.useSpirituality(player);
+                    simpleAbility.addCooldown(player);
+                }
 
                 player.displayClientMessage(Component.literal("Used: " + itemName).withStyle(getStyle(player)), true);
             } else {
                 player.displayClientMessage(Component.literal("Missed: " + itemName).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
             }
         } else if (!hasEntityInteraction && !hasBlockInteraction) {
-            ability.useAbility(player.level(), player, hand);
+            InteractionResult result = ability.useAbility(player.level(), player, hand);
+
+            // Use spirituality and add cooldown if it's a SimpleAbilityItem and ability was used
+            if (result != InteractionResult.PASS && ability instanceof SimpleAbilityItem simpleAbility) {
+                simpleAbility.useSpirituality(player);
+                simpleAbility.addCooldown(player);
+            }
+
             player.displayClientMessage(Component.literal("Used: " + itemName).withStyle(getStyle(player)), true);
         } else if (successfulUse) {
+            // Use spirituality and add cooldown if it's a SimpleAbilityItem
+            if (ability instanceof SimpleAbilityItem simpleAbility) {
+                simpleAbility.useSpirituality(player);
+                simpleAbility.addCooldown(player);
+            }
+
             player.displayClientMessage(Component.literal("Used: " + itemName).withStyle(getStyle(player)), true);
         } else {
-            ability.useAbility(player.level(), player, hand);
+            InteractionResult result = ability.useAbility(player.level(), player, hand);
+
+            // Use spirituality and add cooldown if it's a SimpleAbilityItem and ability was used
+            if (result != InteractionResult.PASS && ability instanceof SimpleAbilityItem simpleAbility) {
+                simpleAbility.useSpirituality(player);
+                simpleAbility.addCooldown(player);
+            }
+
             player.displayClientMessage(Component.literal("Used: " + itemName).withStyle(getStyle(player)), true);
         }
+    }
+
+    public static boolean checkAll(LivingEntity living, Item item) {
+        boolean itemCheckPassed = !(living instanceof Player);
+        if (item instanceof SimpleAbilityItem simpleAbilityItem) {
+            if (living instanceof Player) {
+                itemCheckPassed = living.getItemInHand(InteractionHand.MAIN_HAND).is(item) || living.getItemInHand(InteractionHand.MAIN_HAND).is(ItemInit.BEYONDER_ABILITY_USER.get());
+            }
+
+            if (itemCheckPassed) {
+                boolean checkAllResult = SimpleAbilityItem.checkAll(living, simpleAbilityItem.getRequiredPathway(), simpleAbilityItem.getRequiredSequence(), simpleAbilityItem.getRequiredSpirituality(), false);
+                if (!checkAllResult) {
+                    boolean sequenceAble = BeyonderUtil.sequenceAbleCopy(living);
+                    if (sequenceAble) {
+                        boolean abilityCopied = BeyonderUtil.checkAbilityIsCopied(living, simpleAbilityItem);
+                        if (abilityCopied) {
+                            BeyonderUtil.useCopiedAbility(living, simpleAbilityItem);
+                            return SimpleAbilityItem.checkSpirituality(living, simpleAbilityItem.getSpirituality(), true);
+                        }
+                    }
+                }
+                boolean finalCheck = SimpleAbilityItem.checkAll(living, simpleAbilityItem.getRequiredPathway(), simpleAbilityItem.getRequiredSequence(), simpleAbilityItem.getRequiredSpirituality(), true);
+                if (finalCheck) {
+                    BeyonderUtil.copyAbilities(living.level(), living, simpleAbilityItem);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkIfCanUseAbility(LivingEntity livingEntity) {
+        if (!livingEntity.level().isClientSide()) {
+            MisfortuneManipulation.livingUseAbilityMisfortuneManipulation(livingEntity);
+            CompoundTag tag = livingEntity.getPersistentData();
+
+            if (livingEntity.hasEffect(ModEffects.STUN.get())) {
+                if (livingEntity instanceof Player) {
+                    livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " +
+                                    (int) Objects.requireNonNull(livingEntity.getEffect(ModEffects.STUN.get())).getDuration() / 20 + " seconds.")
+                            .withStyle(ChatFormatting.RED));
+                }
+                return false;
+            } else if (tag.getInt("cantUseAbility") >= 1) {
+                tag.putInt("cantUseAbility", tag.getInt("cantUseAbility") - 1);
+                if (livingEntity instanceof Player) {
+                    livingEntity.sendSystemMessage(Component.literal("How unlucky! You messed up and couldn't use your ability!")
+                            .withStyle(ChatFormatting.RED));
+                }
+                return false;
+            } else if (tag.getInt("unableToUseAbility") >= 1) {
+                tag.putInt("unableToUseAbility", tag.getInt("unableToUseAbility") - 1);
+                if (livingEntity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("You are unable to use your ability")
+                            .withStyle(ChatFormatting.RED), true);
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean tryTargetedAbility(Player player, Ability ability, InteractionHand hand, String itemName) {
@@ -907,8 +994,6 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new GigantificationC2S());
             } else if (heldItem.getItem() instanceof SwordOfSilver) {
                 LOTMNetworkHandler.sendToServer(new SwordOfSilverC2S());
-            } else if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
-                LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
             } else if (heldItem.getItem() instanceof BeyonderAbilityUser) {
                 LOTMNetworkHandler.sendToServer(new LeftClickC2S()); //DIFFERENT FOR LEFT CLICK BLOCK
             } else if (heldItem.getItem() instanceof AqueousLightPush) {
@@ -1043,7 +1128,7 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new CalamityEnhancementLeftClickC2S());
             } else if (heldItem.getItem() instanceof DeathKnell) {
                 LOTMNetworkHandler.sendToServer(new DeathKnellLeftClickC2S());
-            } else if (heldItem.getItem() instanceof DomainOfProvidence || heldItem.getItem() instanceof DomainOfDecay || heldItem.getItem() instanceof MonsterDomainTeleporation) {
+            } else if (heldItem.getItem() instanceof DomainOfProvidence || heldItem.getItem() instanceof DomainOfDecay) {
                 LOTMNetworkHandler.sendToServer(new MonsterDomainLeftClickC2S());
             } else if (heldItem.getItem() instanceof InvisibleHand) {
                 LOTMNetworkHandler.sendToServer(new ToggleDistanceC2S());
@@ -1495,16 +1580,10 @@ public class BeyonderUtil {
 
         // APPRENTICE
         damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKBOUNCE.get(), applyAbilityStrengthened((300.0f - (sequence * 25)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.RECORDSCRIBE.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKBURN.get(), applyAbilityStrengthened((8.0f - sequence) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRAVELDOOR.get(), applyAbilityStrengthened(3.0f + abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRAVELDOORHOME.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((float) (50 - (sequence * 5)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.INVISIBLEHAND.get(), applyAbilityStrengthened((float) (50 - (sequence * 8)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKFREEZE.get(), applyAbilityStrengthened((float) (50 - (sequence * 6)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKWINDPULL.get(), applyAbilityStrengthened((float) (100 - (sequence * 10)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKWINDPUSH.get(), applyAbilityStrengthened((float) (100 - (sequence * 10)) / abilityWeakness, abilityStrengthened));
         return damageMap;
     }
 
@@ -2977,8 +3056,6 @@ public class BeyonderUtil {
                     }
                 }
             }
-            tag.putInt("apprenticeBounceHitArrows", 0);
-            tag.putBoolean("ApprenticeBounceProjectileMovement", false);
             tag.putInt("invisibleHandCounter", 0);
             tag.putDouble("invisibleHandDistance", 0);
             tag.putInt("travelBlinkDistance", 0);

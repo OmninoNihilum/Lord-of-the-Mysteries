@@ -113,12 +113,6 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(9, ItemInit.BEYONDER_ABILITY_USER.get());
         items.put(9, ItemInit.ALLY_MAKER.get());
         items.put(9, ItemInit.CREATEDOOR.get());
-        items.put(8, ItemInit.TRICKBURN.get());
-        items.put(8, ItemInit.TRICKBOUNCE.get());
-        items.put(8, ItemInit.TRICKFREEZE.get());
-        items.put(8, ItemInit.TRICKTUMBLE.get());
-        items.put(8, ItemInit.TRICKWINDPULL.get());
-        items.put(8, ItemInit.TRICKWINDPUSH.get());
         items.put(6, ItemInit.RECORDSCRIBE.get());
         items.put(6, ItemInit.SCRIBEABILITIES.get());
         items.put(5, ItemInit.TRAVELDOOR.get());
@@ -170,34 +164,6 @@ public class ApprenticeClass implements BeyonderClass {
                                     0.9F, 0.9F
                             );
                             event.setCanceled(true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @SuppressWarnings("removal")
-    public static void trickmasterBounceHitProjectiles(ProjectileImpactEvent event){
-        Projectile projectile = event.getProjectile();
-        if(!projectile.level().isClientSide){
-            if(event.getRayTraceResult().getType() == HitResult.Type.ENTITY){
-                if(event.getRayTraceResult() instanceof EntityHitResult entityHit){
-                    Entity entity = entityHit.getEntity();
-                    if(entity instanceof LivingEntity hitEntity) {
-                        if(hitEntity != projectile.getOwner()) {
-                            if( hitEntity.getPersistentData().getBoolean("apprenticeBounceHitArrows")) {
-                                float projectileBb = projectile.getBbHeight() + projectile.getBbWidth();
-                                float entityBb = (hitEntity.getBbHeight() + hitEntity.getBbWidth()) * BeyonderUtil.getDamage(hitEntity).get(ItemInit.TRICKBOUNCE.get());
-                                if(entityBb > projectileBb) {
-                                    Vec3 pMovement = projectile.getDeltaMovement();
-                                    if(event.isCancelable()) {
-                                        event.setCanceled(true);
-                                    }
-                                    projectile.setDeltaMovement(pMovement.x * -1, pMovement.y, pMovement.z * -1);
-                                    projectile.hurtMarked = true;
-                                }
-                            }
                         }
                     }
                 }

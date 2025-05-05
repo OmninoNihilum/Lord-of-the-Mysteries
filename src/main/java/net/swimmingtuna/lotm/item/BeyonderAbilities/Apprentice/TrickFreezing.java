@@ -33,8 +33,8 @@ import java.util.List;
 
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake.isOnSurface;
 
-public class Freeze extends SimpleAbilityItem {
-    public Freeze(Properties properties) {
+public class TrickFreezing extends SimpleAbilityItem {
+    public TrickFreezing(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 70, 300);
     }
 
@@ -61,14 +61,14 @@ public class Freeze extends SimpleAbilityItem {
     }
 
     public static void freezeEntity(LivingEntity livingEntity, LivingEntity target){
-        target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZE.get()), 2, false, false));
+        target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()), 2, false, false));
     }
 
     public static void freezeAura(LivingEntity livingEntity) {
-        int damage =(int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZE.get());
+        int damage =(int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get());
         for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(damage))) {
             if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
-                living.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZE.get()) / 3, 2, false, false));
+                living.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()) / 3, 2, false, false));
             }
         }
         Level level = livingEntity.level();

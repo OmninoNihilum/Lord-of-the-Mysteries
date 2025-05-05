@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -28,6 +27,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -42,6 +42,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.ApprenticeClass;
 import net.swimmingtuna.lotm.beyonder.MonsterClass;
@@ -57,8 +58,8 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.BounceProjectiles;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Burn;
+import net.swimmingtuna.lotm.item.AllyMaker;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickBurning;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.InvisibleHand;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
@@ -76,6 +77,7 @@ import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
 import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
 import net.swimmingtuna.lotm.util.SpiritWorldVisibilityTracker;
@@ -88,13 +90,10 @@ import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.swimmingtuna.lotm.beyonder.ApprenticeClass.apprenticeWindSlowFall;
-import static net.swimmingtuna.lotm.beyonder.ApprenticeClass.trickmasterBounceHitProjectiles;
-import static net.swimmingtuna.lotm.beyonder.WarriorClass.newWarriorDamageNegation;
+import static net.swimmingtuna.lotm.beyonder.ApprenticeClass.apprenticeWindSlowFall;import static net.swimmingtuna.lotm.beyonder.WarriorClass.newWarriorDamageNegation;
 import static net.swimmingtuna.lotm.beyonder.WarriorClass.twilightTick;
 import static net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity.domainDrops;
 import static net.swimmingtuna.lotm.entity.PlayerMobEntity.getDrop;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser.clickEvent;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ChaosWalkerDisableEnable.onChaosWalkerCombat;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfDecay.monsterDomainIntHandler;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfProvidence.domainDropsExperience;
@@ -172,8 +171,12 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onPlayerJoinWorld(PlayerEvent.PlayerLoggedInEvent event) {
-        BeyonderAbilityUser.resetClicks(event.getEntity());
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            ClientAbilityCombinationData.clientSideLoginHandling();
+        }
     }
+
+
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
@@ -222,15 +225,7 @@ public class ModEvents {
         if (heldItem.isEmpty() || !(heldItem.getItem() instanceof BeyonderAbilityUser)) {
             return;
         }
-        byte[] keysClicked = player.getPersistentData().getByteArray("keysClicked");
-        for (int i = 0; i < keysClicked.length; i++) {
-            if (keysClicked[i] == 0) {
-                keysClicked[i] = 1;
-                BeyonderAbilityUser.clicked(player, InteractionHand.MAIN_HAND);
-                return;
-            }
-        }
-        event.setCanceled(true);
+
     }
 
     @SubscribeEvent
@@ -395,8 +390,7 @@ public class ModEvents {
                 MercuryLiquefication.mercuryLiqueficationTick(event);
                 BeyonderUtil.ageHandlerTick(event);
                 InvisibleHand.invisibleHandTick(event);
-                Burn.smeltItem(event);
-                BounceProjectiles.decrementBounceArrows(livingEntity);
+                TrickBurning.smeltItem(event);
                 Gigantification.gigantificationScale(event);
                 EnableOrDisableProtection.warriorProtectionTick(event);
                 GuardianBoxEntity.decrementGuardianTimer(livingEntity);
@@ -453,7 +447,6 @@ public class ModEvents {
         CompoundTag tag = player.getPersistentData();
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
         if (player.level().isClientSide()) return;
-        clickEvent(event);
         SailorClass.sailorLightningPassive(event);
     }
 
@@ -461,7 +454,6 @@ public class ModEvents {
     public static void projectileImpactEvent(ProjectileImpactEvent event) {
         Entity projectile = event.getProjectile();
         if (!projectile.level().isClientSide()) {
-            trickmasterBounceHitProjectiles(event);
             SailorClass.sailorProjectileLightning(event);
         }
     }
@@ -474,6 +466,9 @@ public class ModEvents {
         if (attacker != null) {
             if (!attacker.level().isClientSide()) {
                 if (attacker instanceof LivingEntity livingEntity) {
+                    if (livingEntity.getMainHandItem().getItem() instanceof AllyMaker) {
+                        event.setCanceled(true);
+                    }
                     BeyonderClass pathway = BeyonderUtil.getPathway(livingEntity);
                     boolean x = attacked.getHealth() <= attacked.getMaxHealth() * 0.4f || attacked.hasEffect(MobEffects.WEAKNESS) || attacked.hasEffect(ModEffects.ABILITY_WEAKNESS.get()) || attacked.hasEffect(MobEffects.WITHER) || attacked.hasEffect(MobEffects.POISON);
                     if (pathway != null) {

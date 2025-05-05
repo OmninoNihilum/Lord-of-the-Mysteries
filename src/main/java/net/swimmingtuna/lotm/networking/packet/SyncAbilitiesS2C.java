@@ -36,9 +36,7 @@ public class SyncAbilitiesS2C {
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
-            // Clear existing abilities first
             ClientAbilitiesData.clearAbilities();
-            // Add each ability with its combination
             abilities.forEach(ClientAbilitiesData::setAbilities);
         });
         context.setPacketHandled(true);

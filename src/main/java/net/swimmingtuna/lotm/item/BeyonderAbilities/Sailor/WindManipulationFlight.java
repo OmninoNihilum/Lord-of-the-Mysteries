@@ -119,7 +119,7 @@ public class WindManipulationFlight extends SimpleAbilityItem {
         CompoundTag tag = livingEntity.getPersistentData();
         if (tag.getBoolean("sailorFlight1")) {
             if (livingEntity instanceof Player player && player.getAbilities().flying) {
-                BeyonderUtil.useSpirituality(player, 3);
+                BeyonderUtil.useSpirituality(player, 2);
             }
         }
         int flightCancel = tag.getInt("sailorFlightDamageCancel");
