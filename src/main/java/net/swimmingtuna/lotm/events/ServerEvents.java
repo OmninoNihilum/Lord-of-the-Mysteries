@@ -285,47 +285,52 @@ public class ServerEvents {
         }
         ItemStack heldItem = player.getMainHandItem();
         if (!heldItem.isEmpty() && heldItem.getItem() instanceof Prophecy) {
-            Matcher matcher = SpectatorClass.PROPHECY_PATTERN.matcher(message);
-            if (matcher.matches()) {
-                String targetPlayerName = matcher.group(1);
-                String eventDescription = matcher.group(2);
-                int timeValue = Integer.parseInt(matcher.group(3));
-                String timeUnit = matcher.group(4).toLowerCase();
-                int ticksPerSecond = 20;
-                int ticks;
-                if (timeUnit.startsWith("second")) {
-                    ticks = timeValue * ticksPerSecond;
-                } else {
-                    ticks = timeValue * 60 * ticksPerSecond;
-                }
-                String tagKey = null;
-                for (Map.Entry<String, String> entry : EVENT_TO_TAG.entrySet()) {
-                    if (eventDescription.equals(entry.getKey())) {
-                        tagKey = entry.getValue();
-                        break;
-                    }
-                }
-
-                if (tagKey != null) {
-                    Optional<ServerPlayer> targetPlayer = level.getServer().getPlayerList().getPlayers().stream().filter(p -> p.getName().getString().equals(targetPlayerName)).findFirst();
-                    if (targetPlayer.isPresent()) {
-                        CompoundTag tag = targetPlayer.get().getPersistentData();
-                        tag.putInt(tagKey, ticks);
-                        player.sendSystemMessage(Component.literal("Prophecy has been set for " + targetPlayerName).withStyle(ChatFormatting.GREEN));
+            if (BeyonderUtil.getSpirituality(player) >= 1500) {
+                Matcher matcher = SpectatorClass.PROPHECY_PATTERN.matcher(message);
+                if (matcher.matches()) {
+                    String targetPlayerName = matcher.group(1);
+                    String eventDescription = matcher.group(2);
+                    int timeValue = Integer.parseInt(matcher.group(3));
+                    String timeUnit = matcher.group(4).toLowerCase();
+                    int ticksPerSecond = 20;
+                    int ticks;
+                    if (timeUnit.startsWith("second")) {
+                        ticks = timeValue * ticksPerSecond;
                     } else {
-                        player.sendSystemMessage(Component.literal("Could not find player: " + targetPlayerName).withStyle(ChatFormatting.RED));
+                        ticks = timeValue * 60 * ticksPerSecond;
+                    }
+                    String tagKey = null;
+                    for (Map.Entry<String, String> entry : EVENT_TO_TAG.entrySet()) {
+                        if (eventDescription.equals(entry.getKey())) {
+                            tagKey = entry.getValue();
+                            break;
+                        }
+                    }
+
+                    if (tagKey != null) {
+                        Optional<ServerPlayer> targetPlayer = level.getServer().getPlayerList().getPlayers().stream().filter(p -> p.getName().getString().equals(targetPlayerName)).findFirst();
+                        if (targetPlayer.isPresent()) {
+                            CompoundTag tag = targetPlayer.get().getPersistentData();
+                            tag.putInt(tagKey, ticks);
+                            player.sendSystemMessage(Component.literal("Prophecy has been set for " + targetPlayerName).withStyle(ChatFormatting.GREEN));
+                            BeyonderUtil.useSpirituality(player, 1500);
+                        } else {
+                            player.sendSystemMessage(Component.literal("Could not find player: " + targetPlayerName).withStyle(ChatFormatting.RED));
+                        }
+                    } else {
+                        for (String description : EVENT_TO_TAG.keySet()) {
+                            player.sendSystemMessage(Component.literal("• " + description).withStyle(ChatFormatting.YELLOW));
+                        }
+                        player.sendSystemMessage(Component.literal("Unknown prophecy. Known prophecy types are above").withStyle(ChatFormatting.RED));
+
                     }
                 } else {
-                    for (String description : EVENT_TO_TAG.keySet()) {
-                        player.sendSystemMessage(Component.literal("• " + description).withStyle(ChatFormatting.YELLOW));
-                    }
-                    player.sendSystemMessage(Component.literal("Unknown prophecy. Known prophecy types are above").withStyle(ChatFormatting.RED));
-
+                    player.sendSystemMessage(Component.literal("Prophecy written incorrectly. Should be put in the format of (Player) will (event) in (number) (minutes/seconds).").withStyle(ChatFormatting.RED));
                 }
+                event.setCanceled(true);
             } else {
-                player.sendSystemMessage(Component.literal("Prophecy written incorrectly. Should be put in the format of (Player) will (event) in (number) (minutes/seconds).").withStyle(ChatFormatting.RED));
+                player.displayClientMessage(Component.literal("You require 1500 Spirituality").withStyle(ChatFormatting.RED), true);
             }
-            event.setCanceled(true);
         }
     }
 }

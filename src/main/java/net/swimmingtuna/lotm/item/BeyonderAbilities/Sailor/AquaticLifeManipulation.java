@@ -56,10 +56,18 @@ public class AquaticLifeManipulation extends SimpleAbilityItem {
                 return;
             }
             if (player instanceof Player) {
-                if (sequence >= 2) {
-                    player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer)).withStyle(BeyonderUtil.getStyle(player)));
+                if (BeyonderUtil.getPathway(nearestPlayer) != null) {
+                    if (sequence >= 2) {
+                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer).toString()).withStyle(BeyonderUtil.getStyle(player)));
+                    } else {
+                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer).toString() + ". Sequence is" + BeyonderUtil.getSequence(nearestPlayer)).withStyle(BeyonderUtil.getStyle(player)));
+                    }
                 } else {
-                    player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer) + ". Sequence is" + BeyonderUtil.getSequence(nearestPlayer)).withStyle(BeyonderUtil.getStyle(player)));
+                    if (sequence >= 2) {
+                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)));
+                    } else {
+                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)));
+                    }
                 }
             } else if (player instanceof Mob mob && !BeyonderUtil.areAllies(nearestPlayer, mob)) {
                 mob.setTarget(nearestPlayer);

@@ -173,7 +173,7 @@ public class GuardianBoxEntity extends Entity {
                             if (sequence >= ownerSequence + 2) {
                                 ScaleData pScaleData = ScaleTypes.BASE.getScaleData(projectile);
                                 if (this.tickCount >= 60) {
-                                    this.setDamage((int) (damage + (int) ((pScaleData.getScale() * 10) + projectile.getDeltaMovement().y() + projectile.getDeltaMovement().x() + projectile.getDeltaMovement().z())));
+                                    this.setDamage((int) (damage + (int) ((pScaleData.getScale() * 10) + (Math.abs(projectile.getDeltaMovement().y() + projectile.getDeltaMovement().x() + projectile.getDeltaMovement().z())))));
                                 }
                                 double x = projectile.getX() - this.getX();
                                 double y = projectile.getY() - this.getY();

@@ -1701,7 +1701,7 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_6_potion ingredients 2 awakened_bosses:herobrine_ingot faded_conquest_2:war_claymore born_in_chaos_v1:lifestealer_bone arphex:abyssal_shard legendary_monsters:lava_eaters_skin");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_5_potion ingredients 2 soulsweapons:essence_of_eventide soulsweapons:lord_soul_rose aquamirae:frozen_key cataclysm:witherite_ingot animatedmobsmod:ender_spectre");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_4_potion ingredients 2 macabre:gomoria_heart cataclysm:ignitium_ingot iceandfire:dragon_skull_lightning arphex:void_geode_shard sleepy_hollows:spectral_essence");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_3_potion ingredients 1 born_in_chaos_v1:lord_pumpkinheads_lamp iceandfire:dragon_skull_fire arphex:fire_opal");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_3_potion ingredients 1 born_in_chaos_v1:lord_pumpkinheads_hat_helmet iceandfire:dragon_skull_fire arphex:fire_opal");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_day_stalker soulsweapons:lord_soul_night_prowler minecraft:spyglass");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:emerald_block");
 
@@ -2561,7 +2561,9 @@ public class BeyonderUtil {
                 }
             }
             if (sequence <= 2 && sequence != -1 && livingEntity instanceof Player player) {
-                player.getFoodData().setFoodLevel(20);
+                if (player.getFoodData().getFoodLevel() <= 8) {
+                    player.getFoodData().setFoodLevel(9);
+                }
             }
         }
     }
@@ -3165,4 +3167,18 @@ public class BeyonderUtil {
     public static int getDreamIntoReality(LivingEntity living) {
         return Math.max(1, living.getPersistentData().getInt("dreamIntoReality"));
     }
+
+    public static List<LivingEntity> getNonAlliesNearby(LivingEntity living, float inflation) {
+        List<LivingEntity> nonAllies = new ArrayList<>();
+        for (LivingEntity livingEntity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(inflation))) {
+            if (livingEntity != living && !areAllies(living, livingEntity)) {
+                nonAllies.add(livingEntity);
+            }
+        }
+        return nonAllies;
+    }
+    public static boolean isEntityAlly(LivingEntity living, Entity possibleAlly) {
+        return (possibleAlly instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, living)) || (possibleAlly instanceof LivingEntity livingAlly && !BeyonderUtil.areAllies(livingAlly, living));
+    }
+
 }

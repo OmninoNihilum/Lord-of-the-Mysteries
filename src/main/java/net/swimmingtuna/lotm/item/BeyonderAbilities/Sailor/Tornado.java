@@ -39,7 +39,6 @@ public class Tornado extends SimpleAbilityItem {
     private static void tornado(LivingEntity pPlayer) {
         if (!pPlayer.level().isClientSide()) {
             summonTornado(pPlayer, BeyonderUtil.getSequence(pPlayer));
-            BeyonderUtil.useSpirituality(pPlayer, 500);
         }
     }
 

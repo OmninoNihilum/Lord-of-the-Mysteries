@@ -1,9 +1,11 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -134,6 +136,9 @@ public class WindManipulationFlight extends SimpleAbilityItem {
         if (flight >= 1) {
             tag.putInt("sailorFlight", flight + 1);
             if (flight <= 45 && flight % 15 == 0) {
+                if (livingEntity.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.EXPLOSION, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 0, 0,0,0,0);
+                }
                 livingEntity.setDeltaMovement(lookVector.x * 2, lookVector.y * 2, lookVector.z * 2);
                 livingEntity.hurtMarked = true;
             }

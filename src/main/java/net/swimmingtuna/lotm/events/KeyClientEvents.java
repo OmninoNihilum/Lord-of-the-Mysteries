@@ -8,18 +8,33 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
+import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.KeyBinding;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 
 public class KeyClientEvents {
     @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, value = Dist.CLIENT)
     public static class ClientForgeEvents {
+
+        @SubscribeEvent
+        public static void onMovementInputUpdate(MovementInputUpdateEvent event) {
+            Player player = Minecraft.getInstance().player;
+            if (player != null && player.hasEffect(ModEffects.TUMBLE.get())) {
+                event.getInput().forwardImpulse = 0;
+                event.getInput().leftImpulse = 0;
+                event.getInput().jumping = false;
+                event.getInput().shiftKeyDown = false;
+            }
+        }
+
 
         @SubscribeEvent
         public static void onKeyInput(InputEvent.Key event) {
@@ -78,7 +93,11 @@ public class KeyClientEvents {
         @SubscribeEvent
         public static void onFogDensityEvent(ViewportEvent.RenderFog event) {
             Player player = Minecraft.getInstance().player;
-            if (player.level().dimension().equals(DimensionInit.SPIRIT_WORLD_LEVEL_KEY)) {
+            if (ClientFogData.getFogTimer() >= 40) {
+                event.setFarPlaneDistance(100 - ClientFogData.getFogTimer() * 2);
+                event.setNearPlaneDistance(90 - ClientFogData.getFogTimer() * 2);
+                event.setCanceled(true);
+            } else if (player.level().dimension().equals(DimensionInit.SPIRIT_WORLD_LEVEL_KEY)) {
                 event.setFogShape(FogShape.SPHERE);
                 int currentSequence = ClientSequenceData.getCurrentSequence();
                 if (currentSequence == 0) {
@@ -95,6 +114,7 @@ public class KeyClientEvents {
                 }
                 event.setCanceled(true);
             }
+
         }
     }
     @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)

@@ -299,24 +299,29 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 entity.hurtMarked = true;
             }
             if (pickup) {
-                for (BlockPos blockPosition : BlockPos.betweenClosed((int) minX, (int) minY, (int) minZ, (int) maxX, (int) maxY, (int) maxZ)) {
+                int blockCheckLimit = 50;
+                int pickedUpBlocks = 0;
+                int maxPickupPerTick = 5;
+                for (int i = 0; i < blockCheckLimit && pickedUpBlocks < maxPickupPerTick; i++) {
+                    int randomX = random.nextInt(tornadoRadius * 2) - tornadoRadius;
+                    int randomY = random.nextInt(tornadoHeight);
+                    int randomZ = random.nextInt(tornadoRadius * 2) - tornadoRadius;
+                    BlockPos blockPosition = new BlockPos((int)this.getX() + randomX, (int)this.getY() + randomY, (int)this.getZ() + randomZ);
                     BlockState state = this.level().getBlockState(blockPosition);
-                    if (state.isAir() || state.is(BlockTags.TALL_FLOWERS) || random.nextInt(15000) != 1) {
+                    if (state.isAir() || state.is(BlockTags.TALL_FLOWERS) || state.getBlock() == Blocks.BEDROCK) {
                         continue;
                     }
-                    if (this.tickCount % 5 == 0) {
+                    if (random.nextInt(20) == 0 && this.tickCount % 5 == 0) {
                         FallingBlockEntity fallingBlock = FallingBlockEntity.fall(this.level(), blockPosition, state);
-                    fallingBlock.time = 1;
-                    double randomDirectionX = (random.nextDouble() - 0.5) * 2.0;
-                    double randomDirectionY = random.nextDouble() * 2.0;
-                    double randomDirectionZ = (random.nextDouble() - 0.5) * 2.0;
-                    fallingBlock.setDeltaMovement(randomDirectionX, randomDirectionY, randomDirectionZ);
-
-                    // Remove the block from the world and add the falling block entity
-                    this.level().setBlock(blockPosition, Blocks.AIR.defaultBlockState(), 3);
+                        fallingBlock.time = 1;
+                        double randomDirectionX = (random.nextDouble() - 0.5) * 2.0;
+                        double randomDirectionY = random.nextDouble() * 2.0;
+                        double randomDirectionZ = (random.nextDouble() - 0.5) * 2.0;
+                        fallingBlock.setDeltaMovement(randomDirectionX, randomDirectionY, randomDirectionZ);
+                        this.level().setBlock(blockPosition, Blocks.AIR.defaultBlockState(), 3);
                         this.level().addFreshEntity(fallingBlock);
+                        pickedUpBlocks++;
                     }
-
                 }
             }
 

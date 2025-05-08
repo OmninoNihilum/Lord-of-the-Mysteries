@@ -90,8 +90,8 @@ public class WhisperOfCorruptionEntity extends AbstractHurtingProjectile {
             if (this.tickCount % 15 == 0) {
                 for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(scale * 1.5))) {
                     if (this.getOwner() != null) {
-                        if (livingEntity != this.getOwner() && (this.getOwner() instanceof LivingEntity living && !BeyonderUtil.areAllies(living, livingEntity))) {
-                            livingEntity.getPersistentData().putDouble("corruption", livingEntity.getPersistentData().getDouble("corruption") + scale);
+                        if (livingEntity != this.getOwner() && (this.getOwner() instanceof LivingEntity owner && !BeyonderUtil.areAllies(owner, livingEntity))) {
+                            livingEntity.getPersistentData().putDouble("corruption", livingEntity.getPersistentData().getDouble("corruption") + (scale * 8));
                             int sequence = BeyonderUtil.getSequence(livingEntity);
                             this.tickCount+= (20 - (sequence * 2));
                         }

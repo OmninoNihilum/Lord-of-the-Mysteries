@@ -3,10 +3,8 @@ package net.swimmingtuna.lotm.item.OtherItems;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -17,12 +15,11 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
-import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 
 public class TestItem extends SimpleAbilityItem {
 
@@ -78,13 +75,8 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
-            for (PlayerMobEntity playerMobEntity : player.level().getEntitiesOfClass(PlayerMobEntity.class, player.getBoundingBox().inflate(20))) {
-                playerMobEntity.setPathway(BeyonderClassInit.SPECTATOR.get());
-                playerMobEntity.setSequence(7);
-                playerMobEntity.setMaxSpirituality(10000);
-                playerMobEntity.setSpiritualityRegen(50);
-            }
         }
+        ClientFogData.setFogTimer(50);
 
         return InteractionResult.SUCCESS;
     }

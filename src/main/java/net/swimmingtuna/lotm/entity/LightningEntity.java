@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -47,6 +48,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
     private Entity targetEntity;
     private Vec3 targetPos;
     private Vec3 lastPos; // New field for last position
+    private boolean shouldDiscard = false; // Flag to track if entity should be discarded
 
     public LightningEntity(EntityType<? extends LightningEntity> entityType, Level level) {
         super(entityType, level);
@@ -199,172 +201,398 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
     @Override
     public void tick() {
-        super.tick();
-
-        float speed = this.getSpeed();
-
-        if (startPos == null) {
-            startPos = this.position();
+        // Check if entity should be discarded from previous tick
+        if (this.shouldDiscard) {
+            super.tick();
+            this.discard();
+            return;
         }
 
-        if (this.positions.isEmpty()) {
-            this.positions.add(startPos);
-        }
+        try {
+            super.tick();
 
-        this.lastPos = this.positions.get(this.positions.size() - 1);
-        Vec3 targetVector = null;
+            float speed = this.getSpeed();
 
-        if (this.targetEntity != null) {
-            targetVector = this.targetEntity.position().subtract(lastPos).normalize();
-        } else if (this.targetPos != null) {
-            targetVector = this.targetPos.subtract(lastPos).normalize();
-        }
-
-        Vec3 newPos;
-        if (targetVector != null) {
-            newPos = lastPos.add(
-                    targetVector.x * speed + random.nextGaussian() * 0.1 * speed,
-                    targetVector.y * speed + random.nextGaussian() * 0.1 * speed,
-                    targetVector.z * speed + random.nextGaussian() * 0.1 * speed
-            );
-        } else {
-            Vec3 movement = this.getDeltaMovement().scale(speed);
-            if (this.getFallDown()) {
-                movement = movement.add(0, -0.5, 0);
+            if (startPos == null) {
+                startPos = this.position();
             }
-            newPos = lastPos.add(movement.add(new Vec3(
-                    random.nextGaussian() * 0.1 * speed,
-                    random.nextGaussian() * 0.1 * speed,
-                    random.nextGaussian() * 0.1 * speed
-            )));
-        }
-        if (targetPos != null) {
-            if (lastPos.distanceToSqr(targetPos) < 1) {
-                targetPos = null;
+
+            if (this.positions.isEmpty()) {
+                this.positions.add(startPos);
             }
-        }
 
-        if (this.positions.size() < this.getMaxLength()) {
-            this.positions.add(newPos);
-        }
+            this.lastPos = this.positions.get(this.positions.size() - 1);
+            Vec3 targetVector = null;
 
-        if (!this.level().isClientSide() && this.tickCount >= 2) {
-            float detectionRadius = getDamage() * 0.25f;
-            double minX = Math.min(lastPos.x - detectionRadius, lastPos.x + detectionRadius);
-            double minY = Math.min(lastPos.y - detectionRadius, lastPos.y + detectionRadius);
-            double minZ = Math.min(lastPos.z - detectionRadius, lastPos.z + detectionRadius);
-            double maxX = Math.max(lastPos.x - detectionRadius, lastPos.x + detectionRadius);
-            double maxY = Math.max(lastPos.y - detectionRadius, lastPos.y + detectionRadius);
-            double maxZ = Math.max(lastPos.z - detectionRadius, lastPos.z + detectionRadius);
-            AABB detectionBox = new AABB(minX, minY, minZ, maxX, maxY, maxZ);;
-            List<Entity> nearbyEntities = this.level().getEntities(this, detectionBox);
-            boolean foundValidTarget = false;
-            for (Entity entity : nearbyEntities) {
-                if (entity instanceof LivingEntity && entity != this.owner) {
-                    foundValidTarget = true;
-                    explodeLightningBlock(BlockPos.containing(lastPos), getDamage() * 0.25);
-                    this.discard();
-                    break;
+            if (this.targetEntity != null) {
+                targetVector = this.targetEntity.position().subtract(lastPos).normalize();
+            } else if (this.targetPos != null) {
+                targetVector = this.targetPos.subtract(lastPos).normalize();
+            }
+
+            Vec3 newPos;
+            if (targetVector != null) {
+                newPos = lastPos.add(
+                        targetVector.x * speed + random.nextGaussian() * 0.1 * speed,
+                        targetVector.y * speed + random.nextGaussian() * 0.1 * speed,
+                        targetVector.z * speed + random.nextGaussian() * 0.1 * speed
+                );
+            } else {
+                Vec3 movement = this.getDeltaMovement().scale(speed);
+                if (this.getFallDown()) {
+                    movement = movement.add(0, -0.5, 0);
+                }
+                newPos = lastPos.add(movement.add(new Vec3(
+                        random.nextGaussian() * 0.1 * speed,
+                        random.nextGaussian() * 0.1 * speed,
+                        random.nextGaussian() * 0.1 * speed
+                )));
+            }
+            if (targetPos != null) {
+                if (lastPos.distanceToSqr(targetPos) < 1) {
+                    targetPos = null;
                 }
             }
 
-            if (foundValidTarget) {
+            if (this.positions.size() < this.getMaxLength()) {
+                this.positions.add(newPos);
+            }
+
+            if (!this.level().isClientSide() && this.tickCount >= 2) {
+                float detectionRadius = getDamage() * 0.25f;
+
+                // Validate detection radius to prevent invalid bounding boxes
+                if (detectionRadius <= 0) {
+                    detectionRadius = 0.1f;  // Minimum safe radius
+                }
+
+                double minX = lastPos.x - detectionRadius;
+                double minY = lastPos.y - detectionRadius;
+                double minZ = lastPos.z - detectionRadius;
+                double maxX = lastPos.x + detectionRadius;
+                double maxY = lastPos.y + detectionRadius;
+                double maxZ = lastPos.z + detectionRadius;
+
+                // Extra check to ensure min/max values are correct
+                if (minX > maxX) {
+                    double temp = minX;
+                    minX = maxX;
+                    maxX = temp;
+                }
+                if (minY > maxY) {
+                    double temp = minY;
+                    minY = maxY;
+                    maxY = temp;
+                }
+                if (minZ > maxZ) {
+                    double temp = minZ;
+                    minZ = maxZ;
+                    maxZ = temp;
+                }
+
+                // Check for extreme values that might cause overflow
+                if (minX < -30000000 || maxX > 30000000 || minY < -30000000 || maxY > 30000000 ||
+                        minZ < -30000000 || maxZ > 30000000) {
+                    LOTM.LOGGER.warn("Lightning entity with extreme coordinates detected, discarding");
+                    this.shouldDiscard = true;
+                    return;
+                }
+
+                AABB detectionBox = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+
+                // Create a copy of the entities to avoid concurrent modification
+                List<Entity> nearbyEntities = new ArrayList<>(this.level().getEntitiesOfClass(Entity.class, detectionBox));
+                boolean foundValidTarget = false;
+
+                for (Entity entity : nearbyEntities) {
+                    if (entity instanceof LivingEntity && entity != this.owner) {
+                        foundValidTarget = true;
+                        try {
+                            explodeLightningBlock(BlockPos.containing(lastPos), getDamage() * 0.25);
+                        } catch (IllegalArgumentException e) {
+                            LOTM.LOGGER.error("Error in lightning explosion, discarding entity: " + e.getMessage());
+                        }
+                        this.shouldDiscard = true;  // Mark for discard instead of doing it immediately
+                        break;
+                    }
+                }
+
+                if (foundValidTarget) {
+                    return;
+                }
+            }
+
+            boolean hasExploded = false;
+            if (this.tickCount >= 2) {
+                for (int i = 0; i < this.positions.size() - 1 && !hasExploded; i++) {
+                    Vec3 pos1 = this.positions.get(i);
+                    Vec3 pos2 = this.positions.get(i + 1);
+                    double distance = pos1.distanceTo(pos2);
+                    Vec3 direction = pos2.subtract(pos1).normalize();
+                    for (double d = 0; d < distance && !hasExploded; d += 3.0) {
+                        Vec3 currentPos = pos1.add(direction.scale(d));
+
+                        // Check for extreme values
+                        if (Double.isNaN(currentPos.x) || Double.isNaN(currentPos.y) || Double.isNaN(currentPos.z) ||
+                                Double.isInfinite(currentPos.x) || Double.isInfinite(currentPos.y) || Double.isInfinite(currentPos.z) ||
+                                Math.abs(currentPos.x) > 30000000 || Math.abs(currentPos.y) > 30000000 || Math.abs(currentPos.z) > 30000000) {
+                            LOTM.LOGGER.warn("Lightning entity with invalid position detected, discarding");
+                            this.shouldDiscard = true;
+                            return;
+                        }
+
+                        AABB checkArea = createBoundingBox(currentPos);
+
+                        // Verify the bounding box is valid
+                        if (checkArea.minX > checkArea.maxX || checkArea.minY > checkArea.maxY || checkArea.minZ > checkArea.maxZ) {
+                            LOTM.LOGGER.warn("Lightning entity with invalid bounding box, discarding");
+                            this.shouldDiscard = true;
+                            return;
+                        }
+
+                        if (!this.level().isClientSide()) {
+                            try {
+                                for (BlockPos blockPos : BlockPos.betweenClosed(
+                                        new BlockPos((int) checkArea.minX, (int) checkArea.minY, (int) checkArea.minZ),
+                                        new BlockPos((int) checkArea.maxX, (int) checkArea.maxY, (int) checkArea.maxZ))) {
+                                    if (!this.level().getBlockState(blockPos).isAir() && !this.level().getBlockState(blockPos).getBlock().equals(Blocks.WATER)) {
+                                        Vec3 hitPos = currentPos;
+                                        try {
+                                            explodeLightningBlock(BlockPos.containing(hitPos), getDamage() * 0.25);
+                                        } catch (IllegalArgumentException e) {
+                                            LOTM.LOGGER.error("Error in lightning explosion, discarding entity: " + e.getMessage());
+                                        }
+                                        hasExploded = true;
+                                        this.shouldDiscard = true;  // Mark for discard instead of immediate discard
+                                        break;
+                                    }
+                                }
+                            } catch (IllegalArgumentException e) {
+                                LOTM.LOGGER.error("Error in block iteration, discarding entity: " + e.getMessage());
+                                this.shouldDiscard = true;
+                                return;
+                            }
+                        }
+                        double offsetX = random.nextGaussian() * 1;
+                        double offsetY = random.nextGaussian() * 1;
+                        double offsetZ = random.nextGaussian() * 1;
+                        if (level() instanceof ServerLevel serverLevel) {
+                            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, checkArea.minX + offsetX, checkArea.minY + offsetY, checkArea.minZ + offsetZ, 0, 0, 0, 0, 0);
+                            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, checkArea.minX + offsetX, checkArea.minY + offsetY, checkArea.minZ + offsetZ, 0, 0, 0, 0, 0);
+                        }
+                    }
+                    if (hasExploded) break;
+                }
+            }
+
+            this.setPos(startPos.x, startPos.y, startPos.z);
+
+            try {
+                this.setBoundingBox(createBoundingBox(newPos));
+            } catch (IllegalArgumentException e) {
+                LOTM.LOGGER.error("Error setting bounding box, discarding entity: " + e.getMessage());
+                this.shouldDiscard = true;
                 return;
             }
+
+            if (this.tickCount > this.getMaxLength()) {
+                this.shouldDiscard = true;  // Mark for discard instead of immediate discard
+                return;
+            }
+
+            boolean branchOut = getBranchOut();
+            boolean noUp = getNoUp();
+            boolean synchedMovement = getSynchedMovement();
+            if (!this.level().isClientSide()) {
+                if (synchedMovement) {
+                    if (this.tickCount >= 2) {
+                        this.setDeltaMovement(this.getPersistentData().getDouble("lightningBranchDMX"), this.getPersistentData().getDouble("lightningBranchDMY"), this.getPersistentData().getDouble("lightningBranchDMZ"));
+                    }
+                }
+                if (branchOut) {
+                    if (this.tickCount == getMaxLength()) {
+                        Vec3 pos = new Vec3(lastPos.x, lastPos.y, lastPos.z);
+                        try {
+                            this.explodeLightningBlock(BlockPos.containing(pos), getDamage() * 0.25);
+                        } catch (IllegalArgumentException e) {
+                            LOTM.LOGGER.error("Error in lightning explosion during branch out, discarding: " + e.getMessage());
+                        }
+                    }
+
+                    // Batch creation of lightning entities after iteration
+                    if (!this.shouldDiscard) {
+                        LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), this.level());
+                        lightningEntity.setSpeed(8.0f);
+                        lightningEntity.setDeltaMovement(this.getPersistentData().getDouble("sailorLightningDMX") + (Math.random() * 0.5) - 0.25, this.getPersistentData().getDouble("sailorLightningDMY") + (Math.random() * 0.5) - 0.25, this.getPersistentData().getDouble("sailorLightningDMZ") + (Math.random() * 0.5) - 0.25);
+                        lightningEntity.setMaxLength(100);
+                        lightningEntity.setDamage(6);
+                        lightningEntity.teleportTo(lastPos.x(), lastPos.y(), lastPos.z());
+                        lightningEntity.setSynchedMovement(true);
+                        lightningEntity.getPersistentData().putDouble("lightningBranchDMY", this.getPersistentData().getDouble("sailorLightningDMY") + (Math.random() * 0.8) - 0.4);
+                        lightningEntity.getPersistentData().putDouble("lightningBranchDMX", this.getPersistentData().getDouble("sailorLightningDMX") + (Math.random() * 0.8) - 0.4);
+                        lightningEntity.getPersistentData().putDouble("lightningBranchDMZ", this.getPersistentData().getDouble("sailorLightningDMZ") + (Math.random() * 0.8) - 0.4);
+                        this.level().addFreshEntity(lightningEntity);
+                    }
+
+                    if (this.tickCount == 1) {
+                        this.getPersistentData().putDouble("sailorLightningDMY", this.getDeltaMovement().y());
+                        this.getPersistentData().putDouble("sailorLightningDMX", this.getDeltaMovement().x());
+                        this.getPersistentData().putDouble("sailorLightningDMZ", this.getDeltaMovement().z());
+                    }
+                    this.setDeltaMovement(this.getPersistentData().getDouble("sailorLightningDMX"), this.getPersistentData().getDouble("sailorLightningDMY"), this.getPersistentData().getDouble("sailorLightningDMZ"));
+                }
+                if (noUp) {
+                    if (this.getDeltaMovement().y() >= -0.5f) {
+                        this.shouldDiscard = true;  // Mark for discard instead of immediate discard
+
+                        // Create lightning entity in the next tick to avoid concurrent modification
+                        LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), this.level());
+                        lightningEntity.setSpeed(5.0f);
+                        lightningEntity.setDeltaMovement((Math.random() * 0.6) - 0.3, -2, (Math.random() * 0.6) - 0.3);
+                        lightningEntity.setMaxLength(100);
+                        lightningEntity.teleportTo(lastPos.x(), lastPos.y(), lastPos.z());
+                        lightningEntity.setBranchOut(true);
+                        this.level().addFreshEntity(lightningEntity);
+                    }
+                }
+            }
+
+            if (!this.level().isClientSide() && owner != null) {
+                CompoundTag tag = owner.getPersistentData();
+                if (tag.getInt("sailorLightningTravel") >= 1 && lastPos != null) {
+                    owner.teleportTo(lastPos.x(), lastPos.y, lastPos.z);
+                    owner.getPersistentData().putInt("sailorLightningTravel", 10);
+                    Vec3 lookVec = owner.getLookAngle();
+                    this.setDeltaMovement(lookVec.x, lookVec.y, lookVec.z);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            // If we catch the specific exception from the crash report, log and discard
+            if (e.getMessage() != null && e.getMessage().contains("Start element") && e.getMessage().contains("is larger than end element")) {
+                LOTM.LOGGER.error("Caught bounding box error in lightning entity, discarding: " + e.getMessage());
+                this.discard();
+                return;
+            } else {
+                throw e;
+            }
+        } catch (Exception e) {
+            // Catch any other exceptions that might occur
+            LOTM.LOGGER.error("Unexpected error in lightning entity tick, discarding: " + e.getMessage());
+            this.discard();
+            return;
+        }
+    }
+
+    public void explodeLightningBlock(BlockPos hitPos, double radius) {
+        // Add safety checks for extreme values
+        if (hitPos == null ||
+                hitPos.getX() < -30000000 || hitPos.getX() > 30000000 ||
+                hitPos.getY() < -30000000 || hitPos.getY() > 30000000 ||
+                hitPos.getZ() < -30000000 || hitPos.getZ() > 30000000 ||
+                Double.isNaN(radius) || radius <= 0 || radius > 100) {
+
+            LOTM.LOGGER.warn("Lightning entity at invalid position or radius: " + hitPos + ", " + radius);
+            this.discard();
+            return;
         }
 
-        boolean hasExploded = false;
-        if (this.tickCount >= 2) {
-            for (int i = 0; i < this.positions.size() - 1 && !hasExploded; i++) {
-                Vec3 pos1 = this.positions.get(i);
-                Vec3 pos2 = this.positions.get(i + 1);
-                double distance = pos1.distanceTo(pos2);
-                Vec3 direction = pos2.subtract(pos1).normalize();
-                for (double d = 0; d < distance && !hasExploded; d += 3.0) {
-                    Vec3 currentPos = pos1.add(direction.scale(d));
-                    AABB checkArea = createBoundingBox(currentPos);
-                    if (!this.level().isClientSide()) {
-                        for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos((int) checkArea.minX, (int) checkArea.minY, (int) checkArea.minZ), new BlockPos((int) checkArea.maxX, (int) checkArea.maxY, (int) checkArea.maxZ))) {
-                            if (!this.level().getBlockState(blockPos).isAir() && !this.level().getBlockState(blockPos).getBlock().equals(Blocks.WATER)) {
-                                Vec3 hitPos = currentPos;
-                                explodeLightningBlock(BlockPos.containing(hitPos), getDamage() * 0.25);
-                                hasExploded = true;
-                                this.discard();
-                                break;
+        try {
+            // Calculate safe bounds for BlockPos.betweenClosed
+            BlockPos minPos = hitPos.offset((int) -radius, (int) -radius, (int) -radius);
+            BlockPos maxPos = hitPos.offset((int) radius, (int) radius, (int) radius);
+
+            // Safety check for block iteration
+            if (minPos.getX() > maxPos.getX() || minPos.getY() > maxPos.getY() || minPos.getZ() > maxPos.getZ()) {
+                LOTM.LOGGER.warn("Invalid block range in lightning explosion, discarding");
+                this.discard();
+                return;
+            }
+
+            for (BlockPos pos : BlockPos.betweenClosed(minPos, maxPos)) {
+                if (pos.distSqr(hitPos) <= radius * radius) {
+                    if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0) {
+                        this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                    }
+                }
+            }
+
+            // Create explosion AABB
+            double minX = hitPos.getX() - radius;
+            double minY = hitPos.getY() - radius;
+            double minZ = hitPos.getZ() - radius;
+            double maxX = hitPos.getX() + radius;
+            double maxY = hitPos.getY() + radius;
+            double maxZ = hitPos.getZ() + radius;
+
+            // Ensure min values are less than max values
+            if (minX > maxX) {
+                double temp = minX;
+                minX = maxX;
+                maxX = temp;
+            }
+            if (minY > maxY) {
+                double temp = minY;
+                minY = maxY;
+                maxY = temp;
+            }
+            if (minZ > maxZ) {
+                double temp = minZ;
+                minZ = maxZ;
+                maxZ = temp;
+            }
+
+            // Final validation before creating AABB
+            if (Double.isNaN(minX) || Double.isNaN(minY) || Double.isNaN(minZ) ||
+                    Double.isNaN(maxX) || Double.isNaN(maxY) || Double.isNaN(maxZ) ||
+                    Double.isInfinite(minX) || Double.isInfinite(minY) || Double.isInfinite(minZ) ||
+                    Double.isInfinite(maxX) || Double.isInfinite(maxY) || Double.isInfinite(maxZ)) {
+                LOTM.LOGGER.warn("Invalid coordinates for explosion AABB, discarding entity");
+                this.discard();
+                return;
+            }
+
+            AABB explosionArea = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+
+            // Create a copy of the entities list to avoid concurrent modification
+            List<Entity> entities = new ArrayList<>(this.level().getEntities(this, explosionArea));
+
+            for (Entity entity : entities) {
+                if (entity instanceof LivingEntity livingEntity) {
+                    if (this.getOwner() == null) {
+                        if (!BeyonderUtil.isBeyonderCapable(livingEntity)) {
+                            livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) ((Math.max((double) getDamage() / 5, getDamage() - (entity.distanceToSqr(hitPos.getCenter()))))) * 1.5f);
+                        } else {
+                            livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) (Math.max((double) getDamage() / 5, (getDamage() - (entity.distanceToSqr(hitPos.getCenter()))) * 2)));
+                        }
+                    } else {
+                        if (!BeyonderUtil.isBeyonderCapable(livingEntity)) {
+                            if (this.getOwner() != null) {
+                                livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()), (float) (Math.max((double) getDamage() / 3, getDamage() - (entity.distanceToSqr(hitPos.getCenter())))));
+                            } else {
+                                livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) (Math.max((double) getDamage() / 3, getDamage() - (entity.distanceToSqr(hitPos.getCenter())))));
+                            }
+                        } else {
+                            if (this.getOwner() != null) {
+                                livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()), (float) (Math.max((double) getDamage() / 3, (getDamage() - (entity.distanceToSqr(hitPos.getCenter())) * 2))));
+                            } else {
+                                livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) (Math.max((double) getDamage() / 3, getDamage() - (entity.distanceToSqr(hitPos.getCenter())) * 2)));
                             }
                         }
                     }
-                    double offsetX = random.nextGaussian() * 1;
-                    double offsetY = random.nextGaussian() * 1;
-                    double offsetZ = random.nextGaussian() * 1;
-                    if (level() instanceof ServerLevel serverLevel) {
-                        serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, checkArea.minX + offsetX, checkArea.minY + offsetY, checkArea.minZ + offsetZ, 0, 0, 0, 0, 0);
-                        serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, checkArea.minX + offsetX, checkArea.minY + offsetY, checkArea.minZ + offsetZ, 0, 0, 0, 0, 0);
-                    }
                 }
-                if (hasExploded) break;
             }
-        }
-
-        this.setPos(startPos.x, startPos.y, startPos.z);
-        this.setBoundingBox(createBoundingBox(newPos));
-
-        if (this.tickCount > this.getMaxLength()) {
+        } catch (IllegalArgumentException e) {
+            // Specific check for the error in the crash report
+            if (e.getMessage() != null && e.getMessage().contains("Start element") && e.getMessage().contains("is larger than end element")) {
+                LOTM.LOGGER.error("Caught specific error in explodeLightningBlock, discarding entity: " + e.getMessage());
+                this.discard();
+            } else {
+                LOTM.LOGGER.error("IllegalArgumentException in explodeLightningBlock, discarding entity: " + e.getMessage());
+                this.discard();
+            }
+        } catch (Exception e) {
+            LOTM.LOGGER.error("Unexpected error in explodeLightningBlock, discarding entity: " + e.getMessage());
             this.discard();
-        }
-        boolean branchOut = getBranchOut();
-        boolean noUp = getNoUp();
-        boolean synchedMovement = getSynchedMovement();
-        if (!this.level().isClientSide()) {
-            if (synchedMovement) {
-                if (this.tickCount >= 2) {
-                    this.setDeltaMovement(this.getPersistentData().getDouble("lightningBranchDMX"), this.getPersistentData().getDouble("lightningBranchDMY"), this.getPersistentData().getDouble("lightningBranchDMZ"));
-                }
-            }
-            if (branchOut) {
-                if (this.tickCount == getMaxLength()) {
-                    Vec3 pos = new Vec3(lastPos.x, lastPos.y, lastPos.z);
-                    this.explodeLightningBlock(BlockPos.containing(pos), getDamage() * 0.25);
-                }
-                LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), this.level());
-                lightningEntity.setSpeed(8.0f);
-                lightningEntity.setDeltaMovement(this.getPersistentData().getDouble("sailorLightningDMX") + (Math.random() * 0.5) - 0.25, this.getPersistentData().getDouble("sailorLightningDMY") + (Math.random() * 0.5) - 0.25, this.getPersistentData().getDouble("sailorLightningDMZ") + (Math.random() * 0.5) - 0.25);
-                lightningEntity.setMaxLength(100);
-                lightningEntity.setDamage(6);
-                lightningEntity.teleportTo(lastPos.x(), lastPos.y(), lastPos.z());
-                lightningEntity.setSynchedMovement(true);
-                lightningEntity.getPersistentData().putDouble("lightningBranchDMY", this.getPersistentData().getDouble("sailorLightningDMY") + (Math.random() * 0.8) - 0.4);
-                lightningEntity.getPersistentData().putDouble("lightningBranchDMX", this.getPersistentData().getDouble("sailorLightningDMX") + (Math.random() * 0.8) - 0.4);
-                lightningEntity.getPersistentData().putDouble("lightningBranchDMZ", this.getPersistentData().getDouble("sailorLightningDMZ") + (Math.random() * 0.8) - 0.4);
-                this.level().addFreshEntity(lightningEntity);
-                if (this.tickCount == 1) {
-                    this.getPersistentData().putDouble("sailorLightningDMY", this.getDeltaMovement().y());
-                    this.getPersistentData().putDouble("sailorLightningDMX", this.getDeltaMovement().x());
-                    this.getPersistentData().putDouble("sailorLightningDMZ", this.getDeltaMovement().z());
-                }
-                this.setDeltaMovement(this.getPersistentData().getDouble("sailorLightningDMX"), this.getPersistentData().getDouble("sailorLightningDMY"), this.getPersistentData().getDouble("sailorLightningDMZ"));
-            }
-            if (noUp) {
-                if (this.getDeltaMovement().y() >= -0.5f) {
-                    this.discard();
-                    LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), this.level());
-                    lightningEntity.setSpeed(5.0f);
-                    lightningEntity.setDeltaMovement((Math.random() * 0.6) - 0.3, -2, (Math.random() * 0.6) - 0.3);
-                    lightningEntity.setMaxLength(100);
-                    lightningEntity.teleportTo(lastPos.x(), lastPos.y(), lastPos.z());
-                    lightningEntity.setBranchOut(true);
-                    this.level().addFreshEntity(lightningEntity);
-                }
-            }
-        }
-        if (!this.level().isClientSide() && owner != null) {
-            CompoundTag tag = owner.getPersistentData();
-            if (tag.getInt("sailorLightningTravel") >= 1 && lastPos != null) {
-                owner.teleportTo(lastPos.x(), lastPos.y, lastPos.z);
-                owner.getPersistentData().putInt("sailorLightningTravel", 10);
-                Vec3 lookVec = owner.getLookAngle();
-                this.setDeltaMovement(lookVec.x, lookVec.y, lookVec.z);
-            }
         }
     }
 
@@ -395,7 +623,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
         if (!this.level().isClientSide()) {
             if (result.getEntity() instanceof LivingEntity entity) {
                 entity.hurt(BeyonderUtil.lightningSource(this), getDamage());
-                this.discard();
+                this.shouldDiscard = true;  // Mark for discard instead of immediate discard
             }
         }
         super.onHitEntity(result);
@@ -492,42 +720,5 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
     public int getDamage() {
         return this.entityData.get(DAMAGE);
-    }
-
-    public void explodeLightningBlock(BlockPos hitPos, double radius) {
-        for (BlockPos pos : BlockPos.betweenClosed(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius))) {
-            if (pos.distSqr(hitPos) <= radius * radius) {
-                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0) {
-                    this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                }
-            }
-        }
-        List<Entity> entities = this.level().getEntities(this, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
-        for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity) {
-                if (this.getOwner() == null) {
-                    if (!BeyonderUtil.isBeyonderCapable(livingEntity)) {
-                        livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) ((Math.max((double) getDamage() / 5, getDamage() - (entity.distanceToSqr(hitPos.getCenter()))))) * 1.5f);
-                    } else {
-                        livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) (Math.max((double) getDamage() / 5, (getDamage() - (entity.distanceToSqr(hitPos.getCenter()))) * 2)));
-                    }
-                } else {
-                    if (!BeyonderUtil.isBeyonderCapable(livingEntity)) {
-                        if (this.getOwner() != null) {
-                            livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()), (float) (Math.max((double) getDamage() / 3, getDamage() - (entity.distanceToSqr(hitPos.getCenter())))));
-                        } else {
-                            livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) (Math.max((double) getDamage() / 3, getDamage() - (entity.distanceToSqr(hitPos.getCenter())))));
-                        }
-                    } else {
-                        if (this.getOwner() != null) {
-                            livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()), (float) (Math.max((double) getDamage() / 3, (getDamage() - (entity.distanceToSqr(hitPos.getCenter())) * 2))));
-                        } else {
-                            livingEntity.hurt(livingEntity.damageSources().lightningBolt(), (float) (Math.max((double) getDamage() / 3, getDamage() - (entity.distanceToSqr(hitPos.getCenter())) * 2)));
-
-                        }
-                    }
-                }
-            }
-        }
     }
 }

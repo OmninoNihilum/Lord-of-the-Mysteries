@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -32,28 +34,61 @@ public class TrickWind extends SimpleAbilityItem {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 50, 200);
     }
 
-
-
-    public static void pull(LivingEntity player, Level level){
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get())))){
-            Vec3 playerPos = player.position();
-            Vec3 entityPos = entity.position();
-            Vec3 direction = playerPos.subtract(entityPos).normalize();
-            double distance = playerPos.distanceTo(entityPos);
-            double force = 0.5 * distance;
-            direction = new Vec3(direction.x, 0, direction.z).normalize();
-            entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(force)));
+    @Override
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+        if (!checkAll(player)) {
+            return InteractionResult.FAIL;
         }
+        useSpirituality(player);
+        addCooldown(player);
+        if (player.isShiftKeyDown()) {
+            pull(player);
+        } else {
+            push(player);
+        }
+        return InteractionResult.SUCCESS;
     }
 
 
-    public static void push(LivingEntity player, Level level){
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get())))){
-            Vec3 playerPos = player.position();
-            Vec3 entityPos = entity.position();
-            Vec3 direction = playerPos.subtract(entityPos).normalize();
-            entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-3)));
-            entity.hurtMarked = true;
+
+
+    public static void pull(LivingEntity player) {
+        if (!player.level().isClientSide()) {
+            Vec3 playerLookVector = player.getViewVector(1.0F);
+            double fovAngle = Math.toRadians(70.0);
+            for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
+                Vec3 playerPos = player.position();
+                Vec3 entityPos = entity.position();
+                Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
+                double dotProduct = playerLookVector.dot(toEntityVector);
+                double angle = Math.acos(dotProduct);
+                if (angle <= fovAngle) {
+                    Vec3 direction = playerPos.subtract(entityPos).normalize();
+                    double distance = playerPos.distanceTo(entityPos);
+                    double force = 0.5 * distance;
+                    direction = new Vec3(direction.x, 0, direction.z).normalize();
+                    entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(force)));
+                }
+            }
+        }
+    }
+
+    public static void push(LivingEntity player) {
+        if (!player.level().isClientSide()) {
+            Vec3 playerLookVector = player.getViewVector(1.0F);
+            double fovAngle = Math.toRadians(70.0);
+            for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
+                Vec3 playerPos = player.position();
+                Vec3 entityPos = entity.position();
+                Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
+                double dotProduct = playerLookVector.dot(toEntityVector);
+                double angle = Math.acos(dotProduct);
+                if (angle <= fovAngle) {
+                    Vec3 direction = playerPos.subtract(entityPos).normalize();
+                    entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-3)));
+                    entity.hurtMarked = true;
+                }
+            }
         }
     }
 
