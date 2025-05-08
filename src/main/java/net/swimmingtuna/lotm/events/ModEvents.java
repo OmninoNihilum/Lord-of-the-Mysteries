@@ -59,8 +59,10 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.AllyMaker;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickBurning;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.InvisibleHand;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickBurning;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickElectricShock;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickTelekenisis;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
@@ -78,6 +80,7 @@ import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
+import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
 import net.swimmingtuna.lotm.util.SpiritWorldVisibilityTracker;
@@ -90,7 +93,8 @@ import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.swimmingtuna.lotm.beyonder.ApprenticeClass.apprenticeWindSlowFall;import static net.swimmingtuna.lotm.beyonder.WarriorClass.newWarriorDamageNegation;
+import static net.swimmingtuna.lotm.beyonder.ApprenticeClass.apprenticeWindSlowFall;
+import static net.swimmingtuna.lotm.beyonder.WarriorClass.newWarriorDamageNegation;
 import static net.swimmingtuna.lotm.beyonder.WarriorClass.twilightTick;
 import static net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity.domainDrops;
 import static net.swimmingtuna.lotm.entity.PlayerMobEntity.getDrop;
@@ -177,7 +181,6 @@ public class ModEvents {
     }
 
 
-
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         BeyonderUtil.leftClickEmpty(event.getEntity());
@@ -235,6 +238,10 @@ public class ModEvents {
         CompoundTag playerPersistentData = player.getPersistentData();
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
         int sequence = holder.getSequence();
+        System.out.println("fog timer is " + ClientFogData.getFogTimer());
+        if (ClientFogData.getFogTimer() >= 1) {
+            ClientFogData.decrementFog();
+        }
     }
 
     @SubscribeEvent
@@ -336,6 +343,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                TrickTelekenisis.trickMasterTelekenisisPassive(event);
                 Prophecy.prophecyTick(event);
                 SpectatorClass.prophecyTickEvent(event);
                 battleHypnotismTickCheck(event);
@@ -448,6 +456,7 @@ public class ModEvents {
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
         if (player.level().isClientSide()) return;
         SailorClass.sailorLightningPassive(event);
+        TrickElectricShock.trickMasterShockPassive(event);
     }
 
     @SubscribeEvent
@@ -530,6 +539,10 @@ public class ModEvents {
             GuardianBoxEntity.guardianHurtEvent(event);
             newWarriorDamageNegation(event);
             MercuryLiquefication.mercuryArmorHurt(event);
+            Entity entitySourceOwner = source.getEntity();
+            if (entitySourceOwner instanceof Projectile projectile && projectile.getOwner() != null) {
+                entitySourceOwner = projectile.getOwner();
+            }
             boolean entityInSpiritWorld = tag.getBoolean("inSpiritWorld");
             if (entitySource != null) {
                 CompoundTag sourceTag = entitySource.getPersistentData();
@@ -537,8 +550,12 @@ public class ModEvents {
                 if (entityInSpiritWorld != sourceInSpiritWorld) {
                     event.setCanceled(true);
                 }
-
                 if (entity instanceof LivingEntity living) {
+                    if (entitySourceOwner instanceof LivingEntity livingEntity) {
+                        if (BeyonderUtil.areAllies(livingEntity, living)) {
+                            event.setAmount(event.getAmount() * 0.6f);
+                        }
+                    }
                     MonsterClass.monsterDodgeAttack(event);
                     int stoneImmunity = tag.getInt("luckStoneDamageImmunity");
                     int stoneDamage = tag.getInt("luckStoneDamage");
@@ -649,22 +666,33 @@ public class ModEvents {
     @SubscribeEvent
     public static void deathEvent(LivingDeathEvent event) {
         LivingEntity livingEntity = event.getEntity();
+        CompoundTag tag = livingEntity.getPersistentData();
         Entity entityAttacker = event.getSource().getEntity();
+        Level level = livingEntity.level();
         if (entityAttacker instanceof Projectile projectile && projectile.getOwner() != null) {
             if (projectile.getOwner() instanceof Player) {
                 entityAttacker = projectile.getOwner();
             }
         }
-        Level level = livingEntity.level();
-        CompoundTag tag = livingEntity.getPersistentData();
-        int sequence = BeyonderUtil.getSequence(livingEntity);
-        BeyonderClass pathway = BeyonderUtil.getPathway(livingEntity);
-        if (!livingEntity.level().isClientSide()) {
+        if (!level.isClientSide()) {
             if (livingEntity instanceof Player pPlayer) {
                 BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
                 ProbabilityManipulationWipe.wipeProbablility(tag);
             }
-            if (BeyonderUtil.isBeyonder(livingEntity) && !event.isCanceled() && livingEntity instanceof Player && (entityAttacker instanceof Player || (entityAttacker instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof Player))) {
+            boolean isValidPlayerAttack = false;
+            boolean areAllies = false;
+            if (entityAttacker instanceof Player || (entityAttacker instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof Player)) {
+                isValidPlayerAttack = true;
+                if (entityAttacker instanceof LivingEntity livingAttacker) {
+                    areAllies = BeyonderUtil.areAllies(livingAttacker, livingEntity);
+                } else if (entityAttacker instanceof Projectile projectile &&
+                        projectile.getOwner() instanceof LivingEntity livingOwner) {
+                    areAllies = BeyonderUtil.areAllies(livingOwner, livingEntity);
+                }
+            }
+            if (BeyonderUtil.isBeyonder(livingEntity) && !event.isCanceled() && entityAttacker != livingEntity && livingEntity instanceof Player && isValidPlayerAttack && !areAllies) {
+                int sequence = BeyonderUtil.getSequence(livingEntity);
+                BeyonderClass pathway = BeyonderUtil.getPathway(livingEntity);
                 boolean resetSequence = level.getLevelData().getGameRules().getBoolean(GameRuleInit.RESET_SEQUENCE);
                 boolean safetyNet = level.getLevelData().getGameRules().getBoolean(GameRuleInit.PATHWAY_SAFETY_NET);
                 boolean dropCharacteristic = level.getLevelData().getGameRules().getBoolean(GameRuleInit.SHOULD_DROP_CHARACTERISTIC);
@@ -694,7 +722,8 @@ public class ModEvents {
                             BeyonderCharacteristic.setData(stack, BeyonderClassInit.MONSTER.get(), 1, false, 1);
                         } else {
                             BeyonderCharacteristic.setData(stack, pathway, sequence, false, 1);
-                        }                        ItemEntity itemEntity = new ItemEntity(level, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), stack);
+                        }
+                        ItemEntity itemEntity = new ItemEntity(level, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), stack);
                         livingEntity.level().addFreshEntity(itemEntity);
                         if (!resetSequence) {
                             if (sequence == 9) {
@@ -719,7 +748,7 @@ public class ModEvents {
                 event.setCanceled(true);
                 livingEntity.setHealth(5.0f);
             }
-            tag.putDouble("corruption",0);
+            tag.putDouble("corruption", 0);
             tag.putInt("age", 0);
             if (livingEntity instanceof Player player) {
                 byte[] keysClicked = new byte[5];

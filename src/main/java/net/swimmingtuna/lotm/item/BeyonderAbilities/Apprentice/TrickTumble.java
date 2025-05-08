@@ -4,18 +4,27 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -26,6 +35,40 @@ public class TrickTumble extends SimpleAbilityItem {
 
     public TrickTumble(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 50, 200);
+    }
+
+
+    @Override
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+        if (!checkAll(player)) {
+            return InteractionResult.FAIL;
+        }
+        useSpirituality(player);
+        addCooldown(player);
+        tumble(player);
+        return InteractionResult.SUCCESS;
+    }
+
+    public static void tumble(LivingEntity living) {
+        if (!living.level().isClientSide()) {
+            for (LivingEntity livingEntity : BeyonderUtil.getNonAlliesNearby(living, 25)) {
+                Vec3 movement = livingEntity.getDeltaMovement();
+                if (BeyonderUtil.getSequence(living) >= 5) {
+                    if (livingEntity.onGround()) {
+                        BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                        livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
+                    }
+                } else {
+                    BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                    livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
+                }
+            }
+            BeyonderUtil.applyMobEffect(living, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+            BeyonderUtil.applyMobEffect(living, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+            living.setDeltaMovement (Math.min(3, living.getDeltaMovement().x * 1.5f), living.getDeltaMovement().y(), Math.min(3, living.getDeltaMovement().z() * 1.5f));
+        }
     }
 
 

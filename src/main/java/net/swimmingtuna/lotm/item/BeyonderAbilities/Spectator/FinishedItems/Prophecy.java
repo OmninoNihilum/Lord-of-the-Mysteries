@@ -47,7 +47,7 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake.isO
 public class Prophecy extends SimpleAbilityItem {
 
     public Prophecy(Properties properties) {
-        super(properties, BeyonderClassInit.SPECTATOR, 1, 750, 2400);
+        super(properties, BeyonderClassInit.SPECTATOR, 1, 1500, 2400);
     }
 
     @Override

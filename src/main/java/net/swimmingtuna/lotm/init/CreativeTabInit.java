@@ -168,6 +168,7 @@ public class CreativeTabInit {
                         event.accept(ItemInit.TRICKFLASH.get());
                         event.accept(ItemInit.TRICKFOG.get());
                         event.accept(ItemInit.TRICKLOUDNOISE.get());
+                        event.accept(ItemInit.TRICKBLACKCURTAIN.get());
                         event.accept(ItemInit.TRICKWIND.get());
                         event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION.get());
                         event.accept(ItemInit.RECORDSCRIBE.get());

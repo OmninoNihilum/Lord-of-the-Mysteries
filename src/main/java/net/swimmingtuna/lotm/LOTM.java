@@ -353,6 +353,7 @@ public class LOTM {
             event.accept(ItemInit.TRICKFLASH);
             event.accept(ItemInit.TRICKFOG);
             event.accept(ItemInit.TRICKLOUDNOISE);
+            event.accept(ItemInit.TRICKBLACKCURTAIN);
             event.accept(ItemInit.TRICKWIND);
             event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION);
             event.accept(ItemInit.RECORDSCRIBE);

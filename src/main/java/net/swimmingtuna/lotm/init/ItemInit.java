@@ -324,27 +324,36 @@ public class ItemInit {
     //APPRENTICE
     public static final RegistryObject<Item> CREATEDOOR = ITEMS.register("createdoor",
             () -> new CreateDoor(new Item.Properties().stacksTo(1)));
+
+
     public static final RegistryObject<Item> TRICKBURNING = ITEMS.register("trickburning",
             () -> new TrickBurning(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKFREEZING = ITEMS.register("trickfreezing",
             () -> new TrickFreezing(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKTUMBLE = ITEMS.register("tricktumble",
             () -> new TrickTumble(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKWIND = ITEMS.register("trickwind",
+            () -> new TrickWind(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKFOG = ITEMS.register("trickfog",
+            () -> new TrickFog(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRICKELECTRICSHOCK = ITEMS.register("trickelectricshock",
+            () -> new TrickElectricShock(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> TRICKTELEKENISIS = ITEMS.register("tricktelekenisis",
             () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKELECTRICSHOCK = ITEMS.register("trickelectricshock",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> TRICKESCAPETRICK = ITEMS.register("trickescapetrick",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKFLASH = ITEMS.register("trickflash",
             () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKFOG = ITEMS.register("trickfog",
-            () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKLOUDNOISE = ITEMS.register("trickloudnoise",
             () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> TRICKWIND = ITEMS.register("trickwind",
+    public static final RegistryObject<Item> TRICKBLACKCURTAIN = ITEMS.register("trickblackcurtain",
             () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> ASTROLOGER_SPIRIT_VISION = ITEMS.register("astrologer_spirit_vision",
+
+
+
+    public static final RegistryObject<Item> ASTROLOGER_SPIRIT_VISION = ITEMS.register("astrologerspiritvision",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> RECORDSCRIBE = ITEMS.register("recordscribe",
             () -> new ScribeRecord(new Item.Properties().stacksTo(1)));

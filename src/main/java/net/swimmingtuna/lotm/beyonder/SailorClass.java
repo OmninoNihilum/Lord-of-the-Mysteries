@@ -352,7 +352,14 @@ public class SailorClass implements BeyonderClass {
                 if (Math.random() * 100 < chanceOfDamage) {
                     LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, livingTarget.level());
                     lightningBolt.moveTo(livingTarget.getX(), livingTarget.getY(), livingTarget.getZ());
-                    lightningBolt.setDamage(3);
+                    lightningBolt.setDamage(Math.max(3,15 - (holder.getSequence() * 2)));
+                    if (BeyonderUtil.getSequence(livingEntity) <= 1) {
+                        float amount = 3;
+                        if (BeyonderUtil.getSequence(player) == 1) {
+                            amount = 2;
+                        }
+                        BeyonderUtil.applyMentalDamage(player, livingTarget, amount);
+                    }
                     livingTarget.level().addFreshEntity(lightningBolt);
                 }
             }

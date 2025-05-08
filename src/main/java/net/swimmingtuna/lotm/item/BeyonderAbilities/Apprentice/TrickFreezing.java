@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -18,6 +20,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -62,6 +65,21 @@ public class TrickFreezing extends SimpleAbilityItem {
 
     public static void freezeEntity(LivingEntity livingEntity, LivingEntity target){
         target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()), 2, false, false));
+        if (target.level() instanceof ServerLevel serverLevel) {
+            Vec3 sourcePos = livingEntity.position().add(0, livingEntity.getBbHeight() * 0.5, 0);
+            Vec3 targetPos = target.position().add(0, target.getBbHeight() * 0.5, 0);
+            double distance = sourcePos.distanceTo(targetPos);
+            Vec3 direction = targetPos.subtract(sourcePos).normalize();
+            int particleCount = (int) (distance * 5);
+            for (int i = 0; i < particleCount; i++) {
+                double progress = i / (double) particleCount;
+                Vec3 pos = sourcePos.add(direction.scale(distance * progress));
+                double offsetX = livingEntity.getRandom().nextGaussian() * 0.02;
+                double offsetY = livingEntity.getRandom().nextGaussian() * 0.02;
+                double offsetZ = livingEntity.getRandom().nextGaussian() * 0.02;
+                serverLevel.sendParticles(ParticleTypes.SNOWFLAKE, pos.x, pos.y, pos.z, 1, offsetX, offsetY, offsetZ, 0.01);
+            }
+        }
     }
 
     public static void freezeAura(LivingEntity livingEntity) {

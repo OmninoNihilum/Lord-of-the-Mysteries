@@ -230,6 +230,11 @@ public class LOTMNetworkHandler {
                 .encoder(SyncAbilitiesS2C::encode)
                 .consumerMainThread(SyncAbilitiesS2C::handle)
                 .add();
+        INSTANCE.messageBuilder(ClientFogDataS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientFogDataS2C::new)
+                .encoder(ClientFogDataS2C::toByte)
+                .consumerMainThread(ClientFogDataS2C::handle)
+                .add();
         INSTANCE.messageBuilder(ClearAbilitiesS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(ClearAbilitiesS2C::new)
                 .encoder(ClearAbilitiesS2C::toByte)
