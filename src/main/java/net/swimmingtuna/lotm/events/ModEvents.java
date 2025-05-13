@@ -80,6 +80,7 @@ import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
+import net.swimmingtuna.lotm.util.ClientData.ClientAbilityKeyResetData;
 import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
@@ -238,9 +239,18 @@ public class ModEvents {
         CompoundTag playerPersistentData = player.getPersistentData();
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
         int sequence = holder.getSequence();
-        System.out.println("fog timer is " + ClientFogData.getFogTimer());
-        if (ClientFogData.getFogTimer() >= 1) {
-            ClientFogData.decrementFog();
+        if (player.level().isClientSide()) {
+            if (ClientFogData.getFogTimer() >= 1) {
+                ClientFogData.decrementFog();
+            }
+            if (ClientAbilityKeyResetData.getAbilityResetTimer() >= 1) {
+                ClientAbilityKeyResetData.decrementAbilityResetTimer();
+                if (ClientAbilityKeyResetData.getAbilityResetTimer() == 1) {
+                    ClientAbilityCombinationData.resetKeysClicked();
+                    System.out.println("Client timer is " + ClientAbilityKeyResetData.getAbilityResetTimer());
+                    player.displayClientMessage(Component.literal("_ _ _ _ _").withStyle(ChatFormatting.BOLD), true);
+                }
+            }
         }
     }
 

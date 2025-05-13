@@ -69,7 +69,13 @@ public class AbilityRegisterCommand {
         dispatcher.register(Commands.literal("abilityput")
                 .then(Commands.literal("load")
                         .executes(AbilityRegisterCommand::loadBeyonderAbilities)));
-
+        dispatcher.register(Commands.literal("abilityput")
+                .then(Commands.literal("remove")
+                        .then(Commands.argument("item", ResourceArgument.resource(buildContext, Registries.ITEM))
+                                .executes(context -> removeAbility(
+                                        context,
+                                        ResourceArgument.getResource(context, "item", Registries.ITEM)
+                                )))));
     }
 
     private static int registerAbility(CommandSourceStack source, String combination, Holder.Reference<Item> itemReference) throws CommandSyntaxException {
@@ -106,6 +112,57 @@ public class AbilityRegisterCommand {
 
         return 1;
     }
+
+    private static int removeAbility(CommandContext<CommandSourceStack> context, Holder.Reference<Item> itemReference) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        Item item = itemReference.get();
+        ResourceLocation resourceLocation = itemReference.key().location();
+
+        if (!(item instanceof Ability)) {
+            throw NOT_ABILITY.create(resourceLocation);
+        }
+
+        CompoundTag tag = player.getPersistentData();
+        if (!tag.contains(REGISTERED_ABILITIES_KEY, Tag.TAG_COMPOUND)) {
+            context.getSource().sendFailure(Component.literal("No abilities registered.").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        CompoundTag registeredAbilities = tag.getCompound(REGISTERED_ABILITIES_KEY);
+        String itemResourceLocationStr = resourceLocation.toString();
+        boolean found = false;
+        for (String combinationNumber : registeredAbilities.getAllKeys()) {
+            String registeredAbilityLocation = registeredAbilities.getString(combinationNumber);
+            if (registeredAbilityLocation.equals(itemResourceLocationStr)) {
+                registeredAbilities.remove(combinationNumber);
+                String combination = findCombinationForNumber(Integer.parseInt(combinationNumber));
+                context.getSource().sendSuccess(() -> Component.literal("Removed ability: ")
+                        .append(Component.translatable(item.getDescriptionId()))
+                        .append(Component.literal(" (combination: " + combination + ")").withStyle(ChatFormatting.GREEN)), true);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            context.getSource().sendFailure(Component.literal("Ability not found in registered abilities: " + resourceLocation).withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        // Update the tag if there are still abilities, or remove it if empty
+        if (registeredAbilities.getAllKeys().isEmpty()) {
+            tag.remove(REGISTERED_ABILITIES_KEY);
+        } else {
+            tag.put(REGISTERED_ABILITIES_KEY, registeredAbilities);
+        }
+
+        // Sync the changes to the client
+        syncRegisteredAbilitiesToClient(player);
+
+        return 1;
+    }
+
+
 
     public static void syncRegisteredAbilitiesToClient(ServerPlayer player) {
         CompoundTag tag = player.getPersistentData();

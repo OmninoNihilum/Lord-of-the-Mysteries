@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -97,25 +98,17 @@ public class BeyonderCharacteristic extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand){
-        Random rand = new Random();
-        ItemStack stack = player.getItemInHand(hand);
-        CompoundTag tag = stack.getOrCreateTag();
-
-        if(!level.isClientSide()) {
-            int texture = rand.nextInt(1,3);
-            if(player.isShiftKeyDown()) {
-                setData(stack, BeyonderUtil.getPathway(player), BeyonderUtil.getSequence(player), false, texture);
-                player.getInventory().setChanged();
-                player.inventoryMenu.broadcastChanges();
-            } else {
-                player.displayClientMessage(Component.literal(tag.getString("pathway")), false);
-                player.displayClientMessage(Component.literal("" + tag.getInt("sequence")), false);
-                player.displayClientMessage(Component.literal("" + tag.getInt("texture")), false);
-            }
-        }
-        return InteractionResultHolder.success(stack);
+    public boolean isDamageable(ItemStack stack) {
+        return false;
     }
 
+    @Override
+    public boolean isFireResistant() {
+        return true;
+    }
 
+    @Override
+    public boolean canBeHurtBy(DamageSource pDamageSource) {
+        return false;
+    }
 }

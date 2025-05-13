@@ -137,12 +137,14 @@ public class BeyonderUtil {
 
     public static void projectileEvent(LivingEntity living) {
         //PROJECTILE EVENT
-        Projectile projectile = BeyonderUtil.getProjectiles(living);
-        if (projectile == null) return;
-
         if (living.level().isClientSide) {
             return;
         }
+        if (BeyonderUtil.getPathway(living) == null) {
+            return;
+        }
+        Projectile projectile = BeyonderUtil.getProjectiles(living);
+        if (projectile == null) return;
         //MATTER ACCELERATION ENTITIES
         if (projectile.getPersistentData().getInt("matterAccelerationEntities") >= 10) {
             double movementX = Math.abs(projectile.getDeltaMovement().x());
@@ -1685,7 +1687,7 @@ public class BeyonderUtil {
 
         // Sailor Potions
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_9_potion ingredients 2 cataclysm:kobolediator_skull mowziesmobs:sol_visage aquamirae:fin arphex:roach_nymph arphex:fly_appendage");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_8_potion ingredients 2 faded_conquest_2:summon_blocknight alexsmobs:warped_muscle iceandfire:sea_serpent_fang minecraft:prismarine_shard mutantmonsters:endersoul_hand");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_8_potion ingredients 2 faded_conquest_2:summon_blocknight macabre:fatty_maw iceandfire:sea_serpent_fang minecraft:prismarine_shard mutantmonsters:endersoul_hand");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_7_potion ingredients 2 eeeabsmobs:heart_of_pagan mowziesmobs:ice_crystal aquamirae:abyssal_amethyst arphex:abyssal_shard faded_conquest_2:keyof_pestilence");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_6_potion ingredients 2 cataclysm:monstrous_horn illageandspillage:spellbound_book arphex:oversized_stinger minecraft:white_banner bosses_of_mass_destruction:void_blossom");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_5_potion ingredients 2 aquamirae:frozen_key soulsweapons:essence_of_eventide soulsweapons:darkin_blade alexscaves:immortal_embryo arphex:void_geode_shard");

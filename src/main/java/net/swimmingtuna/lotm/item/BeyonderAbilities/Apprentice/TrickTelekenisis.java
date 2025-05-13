@@ -52,10 +52,10 @@ public class TrickTelekenisis extends SimpleAbilityItem {
     public static void enableDisableTelekenesis(LivingEntity player) {
         if (!player.level().isClientSide()) {
             CompoundTag tag = player.getPersistentData();
-            boolean electricShock = tag.getBoolean("trickmasterElectricShock");
-            tag.putBoolean("trickmasterElectricShock", !electricShock);
+            boolean telekenisis = tag.getBoolean("trickmasterTelekenisis");
+            tag.putBoolean("trickmasterTelekenisis", !telekenisis);
             if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("Telekenisis turned " + (electricShock ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
+                pPlayer.displayClientMessage(Component.literal("Telekenisis turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
             }
         }
     }
@@ -64,7 +64,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
     public static void trickMasterTelekenisisPassive(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         CompoundTag tag = livingEntity.getPersistentData();
-        if (!livingEntity.level().isClientSide() && tag.getBoolean("trickmasterElectricShock") && livingEntity.tickCount % 5 == 0) {
+        if (!livingEntity.level().isClientSide() && tag.getBoolean("trickmasterTelekenisis") && livingEntity.tickCount % 5 == 0) {
             if (BeyonderUtil.getSpirituality(livingEntity) >= 10) {
                 for (Entity entity : livingEntity.level().getEntitiesOfClass(Entity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTELEKENISIS.get())))) {
                     if ((entity instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity)) || (entity instanceof LivingEntity living && !BeyonderUtil.areAllies(livingEntity, living))) {

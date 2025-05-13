@@ -131,6 +131,7 @@ public class BeyonderRecipeData extends SavedData {
         return compoundTag;
     }
 
+
     public static BeyonderRecipeData load(CompoundTag compoundTag) {
         BeyonderRecipeData data = new BeyonderRecipeData();
         if (compoundTag.contains(RECIPES_KEY)) {

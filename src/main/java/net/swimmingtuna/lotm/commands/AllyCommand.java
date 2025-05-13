@@ -45,8 +45,7 @@ public class AllyCommand {
                 return 0;
             }
             allyData.addAlly(source.getUUID(), target.getUUID());
-            context.getSource().sendSuccess(() ->
-                    Component.literal("Added " + target.getScoreboardName() + " as an ally").withStyle(ChatFormatting.GREEN), true);
+            source.sendSystemMessage(Component.literal(("Added " + target.getScoreboardName() + " as an ally")).withStyle(ChatFormatting.GREEN), true);
             target.sendSystemMessage(Component.literal(source.getScoreboardName() + " has added you as an ally").withStyle(ChatFormatting.GREEN));
             return 1;
         } catch (Exception e) {
