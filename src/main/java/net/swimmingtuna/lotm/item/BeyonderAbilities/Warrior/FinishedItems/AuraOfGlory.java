@@ -110,7 +110,7 @@ public class AuraOfGlory extends SimpleAbilityItem {
                         projectile.discard();
                     }
                 }
-                if (BeyonderUtil.getSpirituality(livingEntity) <= 12) {
+                if (BeyonderUtil.getSpirituality(livingEntity) >= 12) {
                     BeyonderUtil.useSpirituality(livingEntity, 12);
                 } else {
                     livingEntity.sendSystemMessage(Component.literal("Your aura of glory was turned off due to lack of spirutality").withStyle(ChatFormatting.RED));

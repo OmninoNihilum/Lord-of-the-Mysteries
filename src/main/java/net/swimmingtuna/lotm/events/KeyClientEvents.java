@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
+import net.swimmingtuna.lotm.util.ClientData.ClientAbilityKeyResetData;
 import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.KeyBinding;
@@ -51,11 +52,19 @@ public class KeyClientEvents {
 
             // Check for left click
             if (KeyBinding.ABILITY_KEY_X.consumeClick()) {
+                ClientAbilityKeyResetData.setAbilityResetTimer(100);
                 byte[] keysClicked = ClientAbilityCombinationData.getKeysClicked();
                 for (int i = 0; i < keysClicked.length; i++) {
                     if (keysClicked[i] == 0) {
-                        ClientAbilityCombinationData.setKeyClicked(i, (byte) 1); // Left click
+                        ClientAbilityCombinationData.setKeyClicked(i, (byte) 1);
                         ClientAbilityCombinationData.handleClick();
+                        int filledPositions = 0;
+                        for (byte b : keysClicked) {
+                            if (b != 0) filledPositions++;
+                        }
+                        if (filledPositions >= 5) {
+                            ClientAbilityKeyResetData.setAbilityResetTimer(0);
+                        }
                         break;
                     }
                 }
@@ -63,11 +72,19 @@ public class KeyClientEvents {
 
             // Handle right click
             if (KeyBinding.ABILITY_KEY_O.consumeClick()) {
+                ClientAbilityKeyResetData.setAbilityResetTimer(100);
                 byte[] keysClicked = ClientAbilityCombinationData.getKeysClicked();
                 for (int i = 0; i < keysClicked.length; i++) {
                     if (keysClicked[i] == 0) {
                         ClientAbilityCombinationData.setKeyClicked(i, (byte) 2);
                         ClientAbilityCombinationData.handleClick();
+                        int filledPositions = 0;
+                        for (byte b : keysClicked) {
+                            if (b != 0) filledPositions++;
+                        }
+                        if (filledPositions >= 5) {
+                            ClientAbilityKeyResetData.setAbilityResetTimer(0);
+                        }
                         break;
                     }
                 }

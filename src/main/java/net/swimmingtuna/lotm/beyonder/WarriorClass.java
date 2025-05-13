@@ -425,7 +425,7 @@ public class WarriorClass implements BeyonderClass {
             }
             float maxReduction = Math.max(0.25f, Math.min(0.7f, (10 - sequence) * 0.075f));
             if (livingEntity instanceof Mob) {
-                maxReduction = Math.max(0.2f, Math.min(0.5f, (10 - sequence) * 0.075f));
+                maxReduction = Math.max(0.15f, Math.min(0.35f, (10 - sequence) * 0.075f));
             }
             if (isPhysical) {
                 float finalReduction = Math.min(physicalReduction, maxReduction);

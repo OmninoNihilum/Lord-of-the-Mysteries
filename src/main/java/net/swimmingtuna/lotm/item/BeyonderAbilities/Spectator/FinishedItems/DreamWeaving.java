@@ -14,7 +14,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -25,7 +24,6 @@ import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +73,7 @@ public class DreamWeaving extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use on a living entity, brings their nightmares into reality, giving them darkness temporarily and summoning a random array of mobs around the target"));
+        tooltipComponents.add(Component.literal("Upon use on a living entity, brings their nightmares into reality, giving them darkness temporarily and summoning a random array of mobs around the target which will despawn after 15 seconds"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("250").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("25 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -91,29 +89,26 @@ public class DreamWeaving extends SimpleAbilityItem {
                 BeyonderHolder.updateMaxHealthModifier(mob, 551);
                 mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
                 mob.setTarget(entity);
+                mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);
             }
         }
     }
 
     public static void dreamWeaving(LivingEntity entity) {
         //DREAM WEAVING
-        if (entity != null) {
-            AttributeInstance maxHp = entity.getAttribute(Attributes.MAX_HEALTH);
-            if (maxHp != null) {
-                if (entity instanceof Player || maxHp.getBaseValue() != 551) {
-                    return;
-                }
-                int deathTimer = entity.getPersistentData().getInt("DeathTimer");
-                entity.getPersistentData().putInt("DeathTimer", deathTimer + 1);
-                if (deathTimer >= 300) {
-                    if (entity.getPersistentData().contains("dreamWeavingUUID")) {
-                        UUID targetUUID = entity.getPersistentData().getUUID("dreamWeavingUUID");
-                        LivingEntity livingEntity = BeyonderUtil.getEntityFromUUID(entity.level(), targetUUID);
-                        if (livingEntity.isAlive() && entity instanceof Mob mob) {
-                            mob.setTarget(livingEntity);
-                        }
+        if (entity != null && entity.getPersistentData().getInt("dreamWeavingDeathTimer") >= 1) {
+            int deathTimer = entity.getPersistentData().getInt("dreamWeavingDeathTimer");
+            entity.getPersistentData().putInt("dreamWeavingDeathTimer", deathTimer - 1);
+            if (deathTimer >= 1) {
+                if (entity.getPersistentData().contains("dreamWeavingUUID")) {
+                    UUID targetUUID = entity.getPersistentData().getUUID("dreamWeavingUUID");
+                    LivingEntity livingEntity = BeyonderUtil.getEntityFromUUID(entity.level(), targetUUID);
+                    if (livingEntity.isAlive() && entity instanceof Mob mob) {
+                        mob.setTarget(livingEntity);
                     }
-                    entity.remove(Entity.RemovalReason.KILLED);
+                }
+                if (deathTimer == 1) {
+                    entity.remove(Entity.RemovalReason.DISCARDED);
                 }
             }
         }
