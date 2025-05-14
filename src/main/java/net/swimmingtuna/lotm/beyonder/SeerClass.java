@@ -29,6 +29,16 @@ public class SeerClass implements BeyonderClass {
     }
 
     @Override
+    public List<Integer> antiDivination() {
+        return List.of(20, 15, 13, 9, 5, 2, 1, 1, 1, 1);
+    }
+
+    @Override
+    public List<Integer> divination() {
+        return List.of(20, 15, 13, 9, 5, 2, 1, 1, 1, 1);
+    }
+
+    @Override
     public List<Integer> spiritualityLevels() {
         return List.of(10000, 5000, 3000, 1800, 1200, 700, 450, 300, 175, 125);
     }

@@ -52,4 +52,8 @@ public interface BeyonderClass {
         }
         return container;
     }
+
+    List<Integer> antiDivination();
+
+    List<Integer> divination();
 }

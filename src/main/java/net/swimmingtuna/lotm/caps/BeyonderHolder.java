@@ -40,6 +40,8 @@ public class BeyonderHolder extends PlayerCapability {
     private int currentSequence = -1;
     @Nullable private BeyonderClass currentClass = null;
     private int mentalStrength = 0;
+    private int divination = 0;
+    private int antiDivination = 0;
     private double spirituality = 100;
     private double maxSpirituality = 100;
     private double spiritualityRegen = 1;
@@ -68,6 +70,8 @@ public class BeyonderHolder extends PlayerCapability {
         this.spirituality = 100;
         this.maxSpirituality = 100;
         this.spiritualityRegen = 1;
+        this.divination = 0;
+        this.antiDivination = 0;
         @Nullable AttributeInstance healthAttribute = this.player.getAttribute(Attributes.MAX_HEALTH);
         if (healthAttribute != null) {
             if (healthAttribute.getModifier(HEALTH_MODIFIER_UUID) != null) {
@@ -91,6 +95,8 @@ public class BeyonderHolder extends PlayerCapability {
         this.maxSpirituality = this.currentClass.spiritualityLevels().get(this.currentSequence);
         this.spirituality = this.maxSpirituality;
         this.mentalStrength = this.currentClass.mentalStrength().get(this.currentSequence);
+        this.divination = this.currentClass.divination().get(this.currentSequence);
+        this.antiDivination = this.currentClass.antiDivination().get(this.currentSequence);
         this.spiritualityRegen = this.currentClass.spiritualityRegen().get(this.currentSequence);
         updateMaxHealthModifier(this.player, this.currentClass.maxHealth().get(sequence));
         this.player.setHealth(this.player.getMaxHealth());
@@ -116,6 +122,25 @@ public class BeyonderHolder extends PlayerCapability {
 
     public int getMentalStrength() {
         return this.mentalStrength;
+    }
+
+
+    public void setDivination(int divination) {
+        this.divination = divination;
+        updateTracking();
+    }
+
+    public int getDivination() {
+        return this.divination;
+    }
+
+    public void setAntiDivination(int antiDivination) {
+        this.antiDivination = antiDivination;
+        updateTracking();
+    }
+
+    public int getAntiDivination() {
+        return this.antiDivination;
     }
 
     public double getSpiritualityRegen() {
@@ -208,6 +233,8 @@ public class BeyonderHolder extends PlayerCapability {
         CompoundTag tag = new CompoundTag();
         tag.putInt("currentSequence", this.currentSequence);
         tag.putInt("mentalStrength", this.mentalStrength);
+        tag.putInt("divination", this.divination);
+        tag.putInt("antiDivination", this.antiDivination);
         tag.putString("currentClass", this.currentClass == null ? "" : BeyonderClassInit.getRegistry().getKey(this.currentClass).toString());
         tag.putDouble("spirituality", this.spirituality);
         tag.putDouble("maxSpirituality", this.maxSpirituality);
@@ -219,6 +246,8 @@ public class BeyonderHolder extends PlayerCapability {
     public void deserializeNBT(CompoundTag nbt, boolean readingFromDisk) {
         this.currentSequence = nbt.getInt("currentSequence");
         this.mentalStrength = nbt.getInt("mentalStrength");
+        this.divination = nbt.getInt("divination");
+        this.antiDivination = nbt.getInt("antiDivination");
         String className = nbt.getString("currentClass");
         if (!className.isEmpty()) {
             this.currentClass = BeyonderClassInit.getRegistry().getValue(new ResourceLocation(className));

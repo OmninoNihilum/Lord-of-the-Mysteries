@@ -1351,6 +1351,7 @@ public class BeyonderUtil {
         }
     }
 
+
     public static int getSequence(LivingEntity living) { //marked
         if (living != null) {
             if (living instanceof Player player) {
@@ -2114,6 +2115,30 @@ public class BeyonderUtil {
         return Math.max(1, mentalStrength * mobReducer);
     }
 
+    public static float getDivination(LivingEntity livingEntity) {
+        int mentalStrength = 1;
+        if (!livingEntity.level().isClientSide()) {
+            BeyonderClass pathway = getPathway(livingEntity);
+            if (pathway != null) {
+                int sequence = BeyonderUtil.getSequence(livingEntity);
+                mentalStrength = pathway.divination().get(sequence);
+            }
+        }
+        return mentalStrength;
+    }
+
+    public static float getAntiDivination(LivingEntity livingEntity) {
+        int mentalStrength = 1;
+        if (!livingEntity.level().isClientSide()) {
+            BeyonderClass pathway = getPathway(livingEntity);
+            if (pathway != null) {
+                int sequence = BeyonderUtil.getSequence(livingEntity);
+                mentalStrength = pathway.antiDivination().get(sequence);
+            }
+        }
+        return mentalStrength;
+    }
+
     public static boolean isPurifiable(LivingEntity livingEntity) {
         return livingEntity.getName().getString().toLowerCase().contains("skeleton") || livingEntity.getName().getString().toLowerCase().contains("demon") || livingEntity.getName().getString().toLowerCase().contains("ghost") || livingEntity.getName().getString().toLowerCase().contains("wraith") || livingEntity.getName().getString().toLowerCase().contains("zombie") || livingEntity.getName().getString().toLowerCase().contains("undead") || livingEntity.getPersistentData().getBoolean("isWraith");
 
@@ -2669,7 +2694,12 @@ public class BeyonderUtil {
         }
         LowSequenceDoorEntity lowDoor = new LowSequenceDoorEntity(canPassTrough, level, X, Y, Z, YAW, life);
         MidSequenceDoorEntity midDoor = new MidSequenceDoorEntity(level, X, Y, Z, YAW, life);
-
+        if (sequence > 7) {
+            lowDoor.setCanBringAllies(false);
+        }
+        else {
+            lowDoor.setCanBringAllies(true);
+        }
         if (sequence >= 8) {
             lowDoor.setPos(x, y, z);
             level.addFreshEntity(lowDoor);
