@@ -3,6 +3,7 @@ package net.swimmingtuna.lotm.item.OtherItems;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -75,8 +76,14 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
+            if (BeyonderUtil.currentPathwayMatchesNoException(player, BeyonderClassInit.SPECTATOR.get())) {
+                player.sendSystemMessage(Component.literal("Matches pathway"));
+            } else {
+                player.sendSystemMessage(Component.literal("Doesn't match pathway"));
+
+            }
+
         }
-        ClientFogData.setFogTimer(50);
 
         return InteractionResult.SUCCESS;
     }

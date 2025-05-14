@@ -14,6 +14,7 @@ import net.swimmingtuna.lotm.item.AllyMaker;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.SpiritVision;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
@@ -354,7 +355,8 @@ public class ItemInit {
 
 
     public static final RegistryObject<Item> ASTROLOGER_SPIRIT_VISION = ITEMS.register("astrologerspiritvision",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SpiritVision(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> RECORDSCRIBE = ITEMS.register("recordscribe",
             () -> new ScribeRecord(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRAVELDOOR = ITEMS.register("traveldoor",
@@ -582,6 +584,8 @@ public class ItemInit {
             () -> new TestItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ALLY_MAKER = ITEMS.register("ally_maker",
             () -> new AllyMaker(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ASTROLABE = ITEMS.register("astrolabe",
+            () -> new Astrolabe(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM = ITEMS.register("forced_update_item_5",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM_2 = ITEMS.register("forced_update_item_2",

@@ -6,6 +6,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -20,6 +21,7 @@ public class LowSequenceDoorEntity extends Entity implements GeoEntity {
 
     private static final EntityDataAccessor<Boolean> HAS_PLAYED_ANIMATION = SynchedEntityData.defineId(LowSequenceDoorEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_DYING = SynchedEntityData.defineId(LowSequenceDoorEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CAN_BRING_ALLIES = SynchedEntityData.defineId(LowSequenceDoorEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> LIFE = SynchedEntityData.defineId(LowSequenceDoorEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> YAW = SynchedEntityData.defineId(LowSequenceDoorEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> TELEPORT_X = SynchedEntityData.defineId(LowSequenceDoorEntity.class, EntityDataSerializers.FLOAT);
@@ -63,8 +65,14 @@ public class LowSequenceDoorEntity extends Entity implements GeoEntity {
                     double teleportX = this.entityData.get(TELEPORT_X);
                     double teleportY = this.entityData.get(TELEPORT_Y);
                     double teleportZ = this.entityData.get(TELEPORT_Z);
-                    if (entity == entityCanPassThrough) {
-                        entity.teleportTo(teleportX, teleportY, teleportZ);
+                    if (!entityData.get(CAN_BRING_ALLIES)) {
+                        if (entity == entityCanPassThrough) {
+                            entity.teleportTo(teleportX, teleportY, teleportZ);
+                        }
+                    } else {
+                        if (entityCanPassThrough instanceof LivingEntity owner && entity instanceof LivingEntity passenger && BeyonderUtil.areAllies(owner, passenger)) {
+                            entity.teleportTo(teleportX, teleportY, teleportZ);
+                        }
                     }
                 }
             }
@@ -80,6 +88,7 @@ public class LowSequenceDoorEntity extends Entity implements GeoEntity {
         this.entityData.define(YAW, 0.0F);
         this.entityData.define(LIFE, 120);
         this.entityData.define(HAS_PLAYED_ANIMATION, false);
+        this.entityData.define(CAN_BRING_ALLIES, false);
         this.entityData.define(IS_DYING, false);
         this.entityData.define(TELEPORT_X, 0.0F);
         this.entityData.define(TELEPORT_Y, 0.0F);
@@ -93,6 +102,9 @@ public class LowSequenceDoorEntity extends Entity implements GeoEntity {
         }
         if (tag.contains("hasPlayedAnimation")) {
             this.entityData.set(HAS_PLAYED_ANIMATION, tag.getBoolean("hasPlayedAnimation"));
+        }
+        if (tag.contains("canBringAllies")) {
+            this.entityData.set(CAN_BRING_ALLIES, tag.getBoolean("canBringAllies"));
         }
         if (tag.contains("entityCanPassThrough")) {
             this.entityData.set(LIFE, tag.getInt("life"));
@@ -115,11 +127,20 @@ public class LowSequenceDoorEntity extends Entity implements GeoEntity {
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putFloat("yaw", this.entityData.get(YAW));
         tag.putBoolean("hasPlayedAnimation", this.entityData.get(HAS_PLAYED_ANIMATION));
+        tag.putBoolean("canBringAllies", this.entityData.get(CAN_BRING_ALLIES));
         tag.putInt("life", this.entityData.get(LIFE));
         tag.putBoolean("isDying", this.entityData.get(IS_DYING));
         tag.putFloat("teleportX", this.entityData.get(TELEPORT_X));
         tag.putFloat("teleportY", this.entityData.get(TELEPORT_Y));
         tag.putFloat("teleportZ", this.entityData.get(TELEPORT_Z));
+    }
+
+    public boolean getCanBringAllies() {
+        return this.entityData.get(CAN_BRING_ALLIES);
+    }
+
+    public void setCanBringAllies(boolean canBringAllies) {
+        this.entityData.set(CAN_BRING_ALLIES, canBringAllies);
     }
 
     @Override

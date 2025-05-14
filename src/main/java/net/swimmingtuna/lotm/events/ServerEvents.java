@@ -26,6 +26,7 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.*;
+import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
 import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
@@ -48,6 +49,7 @@ public class ServerEvents {
         Level level = event.getPlayer().serverLevel();
         ServerPlayer player = event.getPlayer();
         Style style = BeyonderUtil.getStyle(player);
+        Astrolabe.astrolabeChatMessage(event);
         if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof EnvisionWeather) {
             if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
                 player.displayClientMessage(Component.literal("You are not of the Spectator pathway").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);

@@ -20,6 +20,7 @@ public class MidSequenceDoorEntity extends Entity implements GeoEntity {
 
     private static final EntityDataAccessor<Boolean> HAS_PLAYED_ANIMATION = SynchedEntityData.defineId(MidSequenceDoorEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_DYING = SynchedEntityData.defineId(MidSequenceDoorEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CAN_BRING_ALLIES = SynchedEntityData.defineId(MidSequenceDoorEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> LIFE = SynchedEntityData.defineId(MidSequenceDoorEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> YAW = SynchedEntityData.defineId(MidSequenceDoorEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> TELEPORT_X = SynchedEntityData.defineId(MidSequenceDoorEntity.class, EntityDataSerializers.FLOAT);
@@ -80,6 +81,7 @@ public class MidSequenceDoorEntity extends Entity implements GeoEntity {
         this.entityData.define(YAW, 0.0F);
         this.entityData.define(LIFE, 120);
         this.entityData.define(HAS_PLAYED_ANIMATION, false);
+        this.entityData.define(CAN_BRING_ALLIES, false);
         this.entityData.define(IS_DYING, false);
         this.entityData.define(TELEPORT_X, 0.0F);
         this.entityData.define(TELEPORT_Y, 0.0F);
@@ -93,6 +95,9 @@ public class MidSequenceDoorEntity extends Entity implements GeoEntity {
         }
         if (tag.contains("entityCanPassThrough")) {
             this.entityData.set(LIFE, tag.getInt("life"));
+        }
+        if (tag.contains("canBringAllies")) {
+            this.entityData.set(CAN_BRING_ALLIES, tag.getBoolean("canBringAllies"));
         }
         if (tag.contains("isDying")) {
             this.entityData.set(IS_DYING, tag.getBoolean("isDying"));
@@ -113,6 +118,7 @@ public class MidSequenceDoorEntity extends Entity implements GeoEntity {
         tag.putFloat("yaw", this.entityData.get(YAW));
         tag.putBoolean("hasPlayedAnimation", this.entityData.get(HAS_PLAYED_ANIMATION));
         tag.putInt("life", this.entityData.get(LIFE));
+        tag.putBoolean("canBringAllies", this.entityData.get(CAN_BRING_ALLIES));
         tag.putBoolean("isDying", this.entityData.get(IS_DYING));
         tag.putFloat("teleportX", this.entityData.get(TELEPORT_X));
         tag.putFloat("teleportY", this.entityData.get(TELEPORT_Y));
@@ -144,5 +150,14 @@ public class MidSequenceDoorEntity extends Entity implements GeoEntity {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return geoCache;
+    }
+
+
+    public boolean getCanBringAllies() {
+        return this.entityData.get(CAN_BRING_ALLIES);
+    }
+
+    public void setCanBringAllies(boolean canBringAllies) {
+        this.entityData.set(CAN_BRING_ALLIES, canBringAllies);
     }
 }

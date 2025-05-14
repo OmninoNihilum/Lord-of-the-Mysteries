@@ -53,6 +53,16 @@ public class WarriorClass implements BeyonderClass {
     }
 
     @Override
+    public List<Integer> antiDivination() {
+        return List.of(60, 45, 35, 30, 20, 2, 1, 1, 1, 1);
+    }
+
+    @Override
+    public List<Integer> divination() {
+        return List.of(20, 15, 13, 9, 5, 2, 1, 1, 1, 1);
+    }
+
+    @Override
     public List<Integer> spiritualityLevels() {
         return List.of(10000, 6000, 3500, 2800, 1500, 780, 475, 375, 200, 150);
     }
