@@ -2,6 +2,7 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Monster;
 
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -9,14 +10,21 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
+import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -63,22 +71,32 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
                     if (randomInt == 0) {
                         float explosionRadius = (float) (Math.max(3, misfortune / 8) + (enhancement * 3));
                         float damage = (float) ((2 * misfortune) + (enhancement * 10));
-                        entity.hurt(BeyonderUtil.explosionSource(player), damage);
-                        entity.level().explode(entity, entity.getX(), entity.getY(), entity.getZ(), explosionRadius, false, Level.ExplosionInteraction.TNT);
+                        explodeMeteorBlock(entity, entity.getOnPos(), explosionRadius, damage);
                         tag.putDouble("misfortune", 0);
-                    } else
-                    if (randomInt == 1) {
+                    } else if (randomInt == 1) {
                         float duration = (float) (100 + (misfortune * 5) * enhancement);
                         entity.addEffect(new MobEffectInstance(MobEffects.WITHER, (int) duration, 4, false, false));
                         entity.addEffect(new MobEffectInstance(ModEffects.NOREGENERATION.get(), (int) (duration * 0.75), 1, false, false));
-                        entity.hurt(BeyonderUtil.genericSource(player), (float) misfortune / 2);
+                        entity.hurt(BeyonderUtil.mentalSource(player.level(), player, entity), (float) misfortune / 2);
                     } else {
-                        int duration = (int) ((5) + (misfortune / 10) + (enhancement * 3));
+                        int duration = (int) ((5) + (misfortune / 2) + (enhancement * 3));
                         entity.getPersistentData().putInt("monsterImplosionLightning", duration);
                         tag.putDouble("misfortune", 0);
                     }
                 }
             }
+        }
+    }
+
+    public static void misfortuneImplosionLightning(LivingEvent.LivingTickEvent event) {
+        if (!event.getEntity().level().isClientSide() && event.getEntity().getPersistentData().getInt("monsterImplosionLightning") >= 1) {
+            CompoundTag tag = event.getEntity().getPersistentData();
+            LivingEntity livingEntity = event.getEntity();
+            tag.putInt("monsterImplosionLightning", tag.getInt("monsterImplosionLightning") - 1);
+            LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, livingEntity.level());
+            lightningBolt.setDamage(25);
+            lightningBolt.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            livingEntity.level().addFreshEntity(lightningBolt);
         }
     }
 
@@ -103,6 +121,25 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
             }
         }
     }
+
+    public static void explodeMeteorBlock(Entity entity, BlockPos hitPos, double radius, float damage) {
+        for (BlockPos pos : BlockPos.betweenClosed(
+                hitPos.offset((int) -radius, (int) -radius, (int) -radius),
+                hitPos.offset((int) radius, (int) radius, (int) radius))) {
+            if (pos.distSqr(hitPos) <= radius * radius) {
+                if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0) {
+                    entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                }
+            }
+        }
+        List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
+        for (Entity pEntity : entities) {
+            if (pEntity instanceof LivingEntity livingEntity) {
+                livingEntity.hurt(BeyonderUtil.genericSource(entity), damage); // problem w/ damage sources
+            }
+        }
+    }
+
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {

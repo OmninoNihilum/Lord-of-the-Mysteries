@@ -8,6 +8,8 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,8 +20,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -29,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
+import java.util.List;
 import java.util.Random;
 
 public class RoarEntity extends AbstractHurtingProjectile {
@@ -44,7 +49,7 @@ public class RoarEntity extends AbstractHurtingProjectile {
 
     @Override
     protected float getInertia() {
-        return this.isDangerous() ? 0.73F : super.getInertia();
+        return 1.0f;
     }
 
     @Override
@@ -109,7 +114,7 @@ public class RoarEntity extends AbstractHurtingProjectile {
     public void tick() {
         super.tick();
         ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
-        float radius = 3 * scaleData.getScale();
+        float radius = 1.5f * scaleData.getScale();
         if (!this.level().isClientSide()) {
             if (this.level() instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, this.getX(), this.getY(), this.getZ(), 0,0,0,0,0);
@@ -152,11 +157,13 @@ public class RoarEntity extends AbstractHurtingProjectile {
                     }
                 }
             }
-            float damage = 20.0F * scaleData.getScale();
-            float explosionRadius = 3 * scaleData.getScale();
+            float damage = 10.0F * scaleData.getScale();
+            float explosionRadius = 1.5f * scaleData.getScale();
             for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(explosionRadius))) {
                 if (entity != this.getOwner()) {
-                    entity.hurt(BeyonderUtil.explosionSource(this), damage);
+                    roarExplode(damage / 2, this.getOnPos(), BeyonderUtil.getScale(this));
+                    this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 10.0f, 1.5f);
+                    this.discard();
                 }
             }
 
@@ -166,4 +173,14 @@ public class RoarEntity extends AbstractHurtingProjectile {
         }
     }
 
+    public void roarExplode(double radius, BlockPos hitPos, float scale) {
+        List<Entity> entities = this.level().getEntities(this,
+                new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
+                        hitPos.offset((int) radius, (int) radius, (int) radius)));
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingEntity) {
+                livingEntity.hurt(BeyonderUtil.genericSource(this), 10 * scale); // Adjust damage as needed
+            }
+        }
+    }
 }

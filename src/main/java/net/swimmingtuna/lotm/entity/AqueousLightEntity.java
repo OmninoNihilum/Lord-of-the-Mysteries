@@ -71,7 +71,7 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
             return;
         }
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-        int damage = 20 - (holder.getSequence() * 2);
+        int damage = (int) (BeyonderUtil.getScale(entity) * 3);
         if (entity.level().isClientSide() || owner.level().isClientSide()) {
             return;
         }
@@ -123,7 +123,6 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
             aqueousLightEntity.setDeltaMovement(initialVelocity);
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(aqueousLightEntity);
             scaleData.setScale(scale);
-            System.out.println("scale is " + scale);
             Vec3 lightPosition = eyePosition.add(direction.scale(2.0));
             aqueousLightEntity.setPos(lightPosition);
             aqueousLightEntity.setOwner(player);

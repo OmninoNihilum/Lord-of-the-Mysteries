@@ -28,7 +28,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.PsychologicalInvisibility;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.MercuryLiqueficationC2S;
 import net.swimmingtuna.lotm.networking.packet.SendDustParticleS2C;

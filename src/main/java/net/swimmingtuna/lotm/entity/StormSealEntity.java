@@ -128,6 +128,7 @@ public class StormSealEntity extends AbstractHurtingProjectile {
                 BlockPos strikePos = new BlockPos((int) x, (int) this.getY(), (int) z);
                 LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.level());
                 if (lightningBolt != null) {
+                    lightningBolt.setDamage(25);
                     lightningBolt.moveTo(Vec3.atBottomCenterOf(strikePos));
                     lightningBolt.setVisualOnly(false);
                     lightningBolt.setCause(null);

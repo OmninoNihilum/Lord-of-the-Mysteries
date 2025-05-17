@@ -91,6 +91,7 @@ public class Earthquake extends SimpleAbilityItem {
                             stoneEntity.teleportTo(blockPos.getX(), blockPos.getY() + 3, blockPos.getZ());
                             stoneEntity.setDeltaMovement(0, (3 + (Math.random() * (6 - 3))), 0);
                             stoneEntity.setStoneYRot((int) (Math.random() * 18));
+                            stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.EARTHQUAKE.get()) / 2);
                             stoneEntity.setStoneXRot((int) (Math.random() * 18));
                             scaleData.setScale((float) (1 + (Math.random()) * 2.0f));
                             livingEntity.level().addFreshEntity(stoneEntity);

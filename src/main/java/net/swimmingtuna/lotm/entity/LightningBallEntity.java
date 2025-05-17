@@ -14,11 +14,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -139,15 +137,47 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
         if (x) {
             this.setXRot(this.getXRot() + getBallXRot());
             this.setYRot(this.getYRot() + getBallYRot());
+
             if (!this.level().isClientSide()) {
                 if (owner != null) {
+                    Vec3 eyePosition = owner.getEyePosition();
+                    HitResult hitResult = owner.pick(100.0D, 0.0F, false);
+                    Vec3 targetPos;
+
+                    if (hitResult.getType() != HitResult.Type.MISS) {
+                        targetPos = hitResult.getLocation();
+                    } else {
+                        Vec3 lookVector = owner.getLookAngle();
+                        targetPos = eyePosition.add(lookVector.scale(100.0D));
+                    }
                     if (this.tickCount <= 40) {
                         ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
                         this.teleportTo(owner.getX(), owner.getY() + scaleData.getScale() * 2, owner.getZ());
                     }
+
                     if (this.tickCount == 41) {
-                        this.setDeltaMovement(owner.getLookAngle().scale(3.0f));
+                        Vec3 currentPos = this.position();
+                        Vec3 direction = targetPos.subtract(currentPos).normalize();
+                        this.setDeltaMovement(direction.scale(3.0f));
                         this.hurtMarked = true;
+                    }
+                }
+            }
+        }
+        if (!this.level().isClientSide) {
+            if (this.tickCount >= 50 && !this.getPersistentData().getBoolean("isExploding")) {
+                float checkRadius = BeyonderUtil.getScale(this) / 2;
+                BlockPos entityPos = this.blockPosition();
+                for (BlockPos pos : BlockPos.betweenClosed(entityPos.offset((int) -checkRadius, (int) -checkRadius, (int) -checkRadius), entityPos.offset((int) checkRadius, (int) checkRadius, (int) checkRadius))) {
+                    if (pos.distSqr(entityPos) <= checkRadius * checkRadius) {
+                        if (!this.level().getBlockState(pos).isAir()) {
+                            ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
+                            float scale = scaleData.getScale();
+                            this.setDeltaMovement(this.getDeltaMovement().x * 0.5, this.getDeltaMovement().y * 0.5f, this.getDeltaMovement().z * 0.5f);
+                            this.getPersistentData().putInt("lightningRadiusCounter", (int) (scale * 2));
+                            this.getPersistentData().putBoolean("isExploding", true);
+                            break;
+                        }
                     }
                 }
             }
@@ -184,6 +214,7 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
 
                     LightningBolt lightning = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
                     lightning.teleportTo(this.getX(), this.getY(), this.getZ());
+                    lightning.setDamage(BeyonderUtil.getScale(this));
                     ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
                     if (scaleData.getScale() <= 50) {
                         scaleData.setScale(scaleData.getScale() + 0.3f);

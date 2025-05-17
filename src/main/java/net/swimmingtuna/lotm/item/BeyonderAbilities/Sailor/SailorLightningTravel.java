@@ -53,7 +53,7 @@ public class SailorLightningTravel extends SimpleAbilityItem {
     private static void lightningTravel(LivingEntity player, Level level) {
         if (!level.isClientSide()) {
             Vec3 lookVec = player.getLookAngle();
-            float speed = 8.0f;
+            float speed = 6.0f;
             LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), level);
             lightningEntity.setSpeed(speed);
             lightningEntity.setDeltaMovement(lookVec.x, lookVec.y, lookVec.z);

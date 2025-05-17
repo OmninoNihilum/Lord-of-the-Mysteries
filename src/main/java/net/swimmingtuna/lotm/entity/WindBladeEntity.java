@@ -1,6 +1,5 @@
 package net.swimmingtuna.lotm.entity;
 
-
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -13,6 +12,7 @@ import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -27,12 +27,17 @@ import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WindBladeEntity extends AbstractHurtingProjectile {
     private static final EntityDataAccessor<Boolean> DATA_DANGEROUS = SynchedEntityData.defineId(WindBladeEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_LIFE_COUNT = SynchedEntityData.defineId(WindBladeEntity.class, EntityDataSerializers.INT);
     private static final List<Block> EXCLUDED_BLOCKS = List.of(Blocks.BEDROCK, Blocks.OBSIDIAN);
+
+    // Track entities that have already been hit to avoid multiple hits
+    private final Set<Integer> hitEntities = new HashSet<>();
 
     public WindBladeEntity(EntityType<? extends WindBladeEntity> entityType, Level level) {
         super(entityType, level);
@@ -92,47 +97,64 @@ public class WindBladeEntity extends AbstractHurtingProjectile {
         return false;
     }
 
-    @Override
-    protected void onHitEntity(EntityHitResult result) {
-        if (!this.level().isClientSide() && result.getEntity() instanceof LivingEntity entity && this.getOwner() instanceof Player player) {
-            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-            if (!entity.level().isClientSide() && !player.level().isClientSide()) {
-                int currentLifeCount = this.entityData.get(DATA_LIFE_COUNT);
-                int decrease = (holder.getSequence() * 9) + 30;
-                currentLifeCount = currentLifeCount - decrease;
-                entity.hurt(BeyonderUtil.genericSource(this), (float) currentLifeCount / 20);
-                this.entityData.set(DATA_LIFE_COUNT, currentLifeCount - decrease);
-                if (currentLifeCount <= 0) {
-                    this.discard();
-                }
+    // Handle entity hit logic
+    private void handleEntityHit(LivingEntity entity) {
+        if (this.level().isClientSide() || !(this.getOwner() instanceof Player player)) {
+            return;
+        }
+
+        // Skip if the entity has already been hit by this wind blade
+        if (hitEntities.contains(entity.getId())) {
+            return;
+        }
+
+        BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+        int currentLifeCount = this.entityData.get(DATA_LIFE_COUNT);
+        int decrease = (holder.getSequence() * 9) + 30;
+        currentLifeCount = currentLifeCount - decrease;
+        entity.hurt(BeyonderUtil.genericSource(this), (float) currentLifeCount / 20);
+        this.entityData.set(DATA_LIFE_COUNT, currentLifeCount);
+
+        // Mark this entity as hit
+        hitEntities.add(entity.getId());
+
+        if (currentLifeCount <= 0) {
+            this.discard();
+        }
+    }
+
+    // Handle block hit logic
+    private void handleBlockHit(Block block) {
+        if (this.level().isClientSide) {
+            return;
+        }
+
+        if (!EXCLUDED_BLOCKS.contains(block)) {
+            int currentLifeCount = this.entityData.get(DATA_LIFE_COUNT);
+            int decrease = (BeyonderUtil.getSequence((LivingEntity) this.getOwner()) * 4) + 10;
+            currentLifeCount = currentLifeCount - decrease;
+            this.entityData.set(DATA_LIFE_COUNT, currentLifeCount);
+
+            if (currentLifeCount <= 0) {
+                this.discard();
             }
         }
+    }
+
+    // Keep these methods for compatibility but don't do anything in them
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        // Hit detection is now handled in tick()
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult result) {
+        // Hit detection is now handled in tick()
     }
 
     @Override
     public @NotNull ParticleOptions getTrailParticle() {
         return ParticleInit.NULL_PARTICLE.get();
-    }
-
-    @Override
-    protected void onHitBlock(BlockHitResult result) {
-        if (this.level().isClientSide) {
-            return;
-        }
-        if (!(this.getOwner() instanceof Player player)) {
-            this.discard();
-            return;
-        }
-        if (result != EXCLUDED_BLOCKS) {
-            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-            int currentLifeCount = this.entityData.get(DATA_LIFE_COUNT);
-            int decrease = (holder.getSequence() * 4) + 10;
-            currentLifeCount = currentLifeCount - decrease;
-            this.entityData.set(DATA_LIFE_COUNT, currentLifeCount - decrease);
-            if (currentLifeCount <= 0) {
-                this.discard();
-            }
-        }
     }
 
     @Override
@@ -166,16 +188,50 @@ public class WindBladeEntity extends AbstractHurtingProjectile {
         this.xRotO = this.getXRot();
     }
 
-
     @Override
     public void tick() {
         super.tick();
 
         this.xRotO = this.getXRot();
         this.yRotO = this.getYRot();
+
+        // Check for lifetime expiration
         if (this.tickCount % 20 == 0) {
             if (this.tickCount >= 240) {
                 this.discard();
+                return;
+            }
+        }
+
+        // Skip client-side processing
+        if (this.level().isClientSide()) {
+            return;
+        }
+        if (this.getOwner() == null) {
+            return;
+        }
+        float scale = BeyonderUtil.getScale(this);
+        AABB expandedBox = this.getBoundingBox().inflate(scale * 2);
+        List<LivingEntity> nearbyEntities = this.level().getEntitiesOfClass(LivingEntity.class, expandedBox, entity -> entity != this.getOwner() && entity.isAlive());
+        for (LivingEntity entity : nearbyEntities) {
+            handleEntityHit(entity);
+        }
+        int minX = Mth.floor(expandedBox.minX);
+        int minY = Mth.floor(expandedBox.minY);
+        int minZ = Mth.floor(expandedBox.minZ);
+        int maxX = Mth.ceil(expandedBox.maxX);
+        int maxY = Mth.ceil(expandedBox.maxY);
+        int maxZ = Mth.ceil(expandedBox.maxZ);
+        boolean hitBlock = false;
+        for (int x = minX; x <= maxX && !hitBlock; x++) {
+            for (int y = minY; y <= maxY && !hitBlock; y++) {
+                for (int z = minZ; z <= maxZ && !hitBlock; z++) {
+                    Block block = this.level().getBlockState(new net.minecraft.core.BlockPos(x, y, z)).getBlock();
+                    if (block != Blocks.AIR && block != Blocks.CAVE_AIR && block != Blocks.VOID_AIR) {
+                        handleBlockHit(block);
+                        hitBlock = true;
+                    }
+                }
             }
         }
     }

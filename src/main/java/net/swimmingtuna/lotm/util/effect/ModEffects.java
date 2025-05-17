@@ -36,7 +36,9 @@ public class ModEffects {
     public static final RegistryObject<MobEffect> NOREGENERATION = MOB_EFFECTS.register("noregeneration",
             () -> new NoRegenerationEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> ABILITY_WEAKNESS = MOB_EFFECTS.register("twilight",
-            () -> new NoRegenerationEffect(MobEffectCategory.HARMFUL, 3124687));
+            () -> new TwilightEffect(MobEffectCategory.HARMFUL, 3124687));
+    public static final RegistryObject<MobEffect> BENEFICIAL_EFFECTS_BLOCKER = MOB_EFFECTS.register("beneficialeffectsblocker",
+            () -> new NoBeneficialEffectsEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> ARMOR_WEAKNESS = MOB_EFFECTS.register("armor_weakness",
             ArmorWeaknessEffect::new);
     public static final RegistryObject<MobEffect> TUMBLE = MOB_EFFECTS.register("tumble",

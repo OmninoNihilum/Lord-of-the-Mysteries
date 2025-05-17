@@ -61,7 +61,7 @@ public class EntityInit {
                     .sized(2.0f,2.0f).clientTrackingRange(300).build("sword_of_twilight_entity"));
     public static final RegistryObject<EntityType<LightningBallEntity>> LIGHTNING_BALL =
             ENTITIES.register("lightningball", () -> EntityType.Builder.<LightningBallEntity>of(LightningBallEntity::new, MobCategory.MISC)
-                    .sized(2.0f,2.0f).clientTrackingRange(300).build("lightningball"));
+                    .sized(1.0f,1.0f).clientTrackingRange(300).build("lightningball"));
     public static final RegistryObject<EntityType<CircleEntity>> CIRCLE_ENTITY =
             ENTITIES.register("circle", () -> EntityType.Builder.<CircleEntity>of(CircleEntity::new, MobCategory.MISC)
                     .sized(1.0f,1.0f).build("circle"));

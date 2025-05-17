@@ -384,7 +384,7 @@ public class LOTM {
             event.accept(ItemInit.DOOR_GAMMA_RAY_BURST);
             event.accept(ItemInit.CONCEPTUALIZATION);
             event.accept(ItemInit.REPLICATION);
-
+            event.accept(ItemInit.ASTROLABE);
         }
         if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS) {
             event.accept(BlockInit.VISIONARY_BARRIER_BLOCK);

@@ -125,7 +125,11 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
-        if (!level.isClientSide()) {
+        boolean x = true;
+        if (context.getPlayer() != null && !checkIfCanUseAbility(context.getPlayer())) {
+            x = false;
+        }
+        if (!level.isClientSide() && x) {
             return useAbilityOnBlock(context);
         }
         return InteractionResult.PASS;
@@ -134,7 +138,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand usedHand) {
-        if (!livingEntity.level().isClientSide()) {
+        if (!livingEntity.level().isClientSide() && checkIfCanUseAbility(livingEntity)) {
             return interactLivingEntityLivingEntity(stack, livingEntity, interactionTarget, usedHand);
         }
         return InteractionResult.PASS;
@@ -294,16 +298,19 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
     public static boolean checkIfCanUseAbility(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
-            boolean shouldntActiveCalamity = false;
-            boolean calamityNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
-            if (calamityNearSpawn) {
+            boolean shouldntActiveCalamity = true;
+            boolean allowBeyonderAbilitiesNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            if (!allowBeyonderAbilitiesNearSpawn) {
                 BlockPos entityPos = livingEntity.getOnPos();
                 BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
                 if (entityPos.closerThan(worldSpawnPos, 300)) {
-                    shouldntActiveCalamity = true;
+                    shouldntActiveCalamity = false;
                 }
             }
-            if (shouldntActiveCalamity) {
+            if (!shouldntActiveCalamity) {
+                if (livingEntity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("You are unable to use abilities too close to spawn").withStyle(ChatFormatting.RED), true);
+                }
                 return false;
             }
             MisfortuneManipulation.livingUseAbilityMisfortuneManipulation(livingEntity);

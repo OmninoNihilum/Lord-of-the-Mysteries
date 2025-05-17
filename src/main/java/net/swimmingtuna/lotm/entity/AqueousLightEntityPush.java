@@ -85,7 +85,7 @@ public class AqueousLightEntityPush extends AbstractHurtingProjectile {
             this.discard();
             return;
         }
-        int damage = 15 - (holder.getSequence() * 2);
+        int damage = (int) (BeyonderUtil.getScale(this) * 2.5);
         entity.hurt(BeyonderUtil.genericSource(this), damage);
         if (holder.getSequence() > 7) {
             this.discard();

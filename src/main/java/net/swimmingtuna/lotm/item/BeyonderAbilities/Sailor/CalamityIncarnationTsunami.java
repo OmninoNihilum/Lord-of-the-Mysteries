@@ -73,9 +73,10 @@ public class CalamityIncarnationTsunami extends SimpleAbilityItem {
         Level level = livingEntity.level();
         tag.putInt("calamityIncarnationTsunami", calamityIncarnationTsunami - 1);
         BlockPos playerPos = livingEntity.blockPosition();
-        double radius = 23.0;
-        double minRemovalRadius = 25.0;
-        double maxRemovalRadius = 30.0;
+        float damage = BeyonderUtil.getDamage(livingEntity).get(ItemInit.CALAMITY_INCARNATION_TORNADO.get());
+        double radius = damage / 8;
+        double minRemovalRadius = damage / 7;
+        double maxRemovalRadius = damage / 6;
 
         // Create a sphere of water around the player
         for (int sphereX = (int) -radius; sphereX <= radius; sphereX++) {

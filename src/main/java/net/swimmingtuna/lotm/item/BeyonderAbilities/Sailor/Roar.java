@@ -46,12 +46,14 @@ public class Roar extends SimpleAbilityItem {
             RoarEntity roarEntity = new RoarEntity(EntityInit.ROAR_ENTITY.get(), player.level());
             roarEntity.teleportTo(player.getX(), player.getY(), player.getZ());
             Vec3 lookVec = player.getLookAngle();
-            float speed = BeyonderUtil.getDamage(player).get(ItemInit.ROAR.get());
+            roarEntity.setOwner(player);
+            float speed = BeyonderUtil.getDamage(player).get(ItemInit.ROAR.get()) / 1.5f;
             roarEntity.setDeltaMovement(lookVec.scale(speed).x, lookVec.scale(speed).y, lookVec.scale(speed).z);
             roarEntity.hurtMarked = true;
             player.level().addFreshEntity(roarEntity);
             Vec3 startPos = player.getEyePosition();
             Vec3 endPos = startPos.add(lookVec.scale(10));
+            BeyonderUtil.setScale(roarEntity, speed);
             BlockPos.betweenClosed(new BlockPos((int) Math.min(startPos.x, endPos.x) - 2, (int) Math.min(startPos.y, endPos.y) - 2, (int) Math.min(startPos.z, endPos.z) - 2), new BlockPos((int) Math.max(startPos.x, endPos.x) + 2, (int) Math.max(startPos.y, endPos.y) + 2, (int) Math.max(startPos.z, endPos.z) + 2)).
                     forEach(pos -> {
                         if (isInCone(startPos, lookVec, new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), 0.5) && startPos.distanceTo(new Vec3(pos.getX(), pos.getY(), pos.getZ())) <= 10) {

@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -42,7 +44,6 @@ public class FortuneAppropiation extends SimpleAbilityItem {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
                     CompoundTag tag = entity.getPersistentData();
                     CompoundTag livingTag = livingEntity.getPersistentData();
-
                     int pIgnoreDamage = tag.getInt("luckIgnoreDamage");
                     int pDiamonds = tag.getInt("luckDiamonds");
                     int pRegeneration = tag.getInt("luckRegeneration");
@@ -50,7 +51,6 @@ public class FortuneAppropiation extends SimpleAbilityItem {
                     int pHalveDamage = tag.getInt("luckHalveDamage");
                     int pIgnoreMobs = tag.getInt("luckIgnoreMobs");
                     int pLuckAttackerPoisoned = tag.getInt("luckAttackerPoisoned");
-
                     int ignoreDamage = tag.getInt("luckIgnoreDamage");
                     int diamonds = tag.getInt("luckDiamonds");
                     int regeneration = tag.getInt("luckRegeneration");
@@ -58,6 +58,11 @@ public class FortuneAppropiation extends SimpleAbilityItem {
                     int halveDamage = tag.getInt("luckHalveDamage");
                     int ignoreMobs = tag.getInt("luckIgnoreMobs");
                     int luckAttackerPoisoned = tag.getInt("luckAttackerPoisoned");
+                    double luck = tag.getDouble("luck");
+                    if (luck >= 1) {
+                        livingTag.putDouble("luck", livingTag.getDouble("luck") + luck);
+                        tag.putDouble("luck", 0);
+                    }
                     if (ignoreDamage >= 1) {
                         livingTag.putInt("luckIgnoreDamage", pIgnoreDamage + ignoreDamage);
                         tag.putInt("luckIgnoreDamage", 0);
@@ -86,6 +91,13 @@ public class FortuneAppropiation extends SimpleAbilityItem {
                         livingTag.putInt("luckAttackerPoisoned", pLuckAttackerPoisoned + luckAttackerPoisoned);
                         tag.putInt("luckAttackerPoisoned", 0);
                     }
+                    for (MobEffectInstance effectInstance : entity.getActiveEffects()) {
+                        MobEffect effect = effectInstance.getEffect();
+                        if (effect.isBeneficial()) {
+                            BeyonderUtil.applyMobEffect(livingEntity, effect, effectInstance.getDuration(), effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.isVisible());
+                            entity.removeEffect(effect);
+                        }
+                    }
                 }
             }
         }
@@ -93,7 +105,7 @@ public class FortuneAppropiation extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, takes all fortunate events from entities around you and gives them to yourself."));
+        tooltipComponents.add(Component.literal("Upon use, takes all fortunate events, luck, and beneficial effects from entities around you and gives them to yourself."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("20 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

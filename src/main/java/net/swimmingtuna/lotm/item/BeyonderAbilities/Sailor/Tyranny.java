@@ -45,7 +45,7 @@ public class Tyranny extends SimpleAbilityItem {
             for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius))) {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
                     int sequence = BeyonderUtil.getSequence(entity);
-                    int finalAmount = duration - 150 - (sequence * 15);
+                    int finalAmount = duration - (150 - (sequence * 15));
                     entity.addEffect(new MobEffectInstance(ModEffects.STUN.get(), finalAmount, 1, false, false));
                 }
             }

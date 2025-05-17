@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Position;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -15,6 +16,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -69,8 +71,10 @@ public class LavaEntity extends AbstractArrow {
         if (!this.level().isClientSide && !(result.getEntity() instanceof LavaEntity) && !(result.getEntity() instanceof StoneEntity)) {
             Vec3 hitPos = result.getLocation();
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
-            int scale = (int) scaleData.getScale();
             this.level().setBlock(BlockPos.containing(hitPos), Blocks.LAVA.defaultBlockState(), 3);
+            if (result.getEntity() instanceof LivingEntity living) {
+                living.hurt(living.damageSources().lava(), 5 * BeyonderUtil.getScale(this));
+            }
             this.discard();
         }
     }
@@ -80,8 +84,9 @@ public class LavaEntity extends AbstractArrow {
         if (!this.level().isClientSide) {
             Random random = new Random();
             if (random.nextInt(10) == 1) {
-            this.level().broadcastEntityEvent(this, (byte) 3);
-            this.level().setBlock(blockPosition(), Blocks.LAVA.defaultBlockState(), 3);}
+                this.level().broadcastEntityEvent(this, (byte) 3);
+                this.level().setBlock(blockPosition(), Blocks.LAVA.defaultBlockState(), 3);
+            }
             this.discard();
         }
     }
@@ -106,6 +111,10 @@ public class LavaEntity extends AbstractArrow {
         this.yRotO = this.getYRot();
         if (!this.level().isClientSide() && this.tickCount > 140) {
             this.discard();
+        }
+        for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this)))) {
+            this.level().setBlock(this.getOnPos(), Blocks.LAVA.defaultBlockState(), 3);
+            living.hurt(living.damageSources().lava(), 5 * BeyonderUtil.getScale(this));
         }
     }
 
