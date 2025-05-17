@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -109,6 +110,13 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                 Level level = player.level();
                 if (level instanceof ServerLevel serverLevel) {
                     enhancement = CalamityEnhancementData.getInstance(serverLevel).getCalamityEnhancement();
+                }
+                for (MobEffectInstance effectInstance : livingEntity.getActiveEffects()) {
+                    MobEffect effect = effectInstance.getEffect();
+                    if (!effect.isBeneficial()) {
+                        BeyonderUtil.applyMobEffect(interactionTarget, effect, effectInstance.getDuration(), effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.isVisible());
+                        livingEntity.removeEffect(effect);
+                    }
                 }
                 int paralysisDuration = 0;
                 int lotmLightningCount = 0;

@@ -1,0 +1,78 @@
+package net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
+import java.util.List;
+
+public class ConsciousnessStroll extends SimpleAbilityItem {
+
+    public ConsciousnessStroll (Properties properties) {
+        super(properties, BeyonderClassInit.SPECTATOR, 3, 300, 400);
+    }
+
+
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("Type a player's name in chat to teleport to their location in the form of your spirit body, not being able to be seen or hurt. Teleporting back after 3 secondse"));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("500").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("20 Seconds").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
+        tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
+        super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
+    }
+
+    public static void consciousnessStroll(LivingEntity livingEntity) {
+        //CONSCIOUSNESS STROLL
+        if (!(livingEntity instanceof ServerPlayer serverPlayer)) return;
+        CompoundTag tag = livingEntity.getPersistentData();
+        int strollCounter = tag.getInt("consciousnessStrollActivated");
+        int consciousnessStrollActivatedX = tag.getInt("consciousnessStrollActivatedX");
+        int consciousnessStrollActivatedY = tag.getInt("consciousnessStrollActivatedY");
+        int consciousnessStrollActivatedZ = tag.getInt("consciousnessStrollActivatedZ");
+        String originalDimension = tag.getString("consciousnessStrollDimension");
+        ResourceLocation dimLocation = ResourceLocation.tryParse(originalDimension);
+        ResourceKey<Level> targetDimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(originalDimension));
+
+        if (strollCounter >= 1) {
+            tag.putInt("consciousnessStrollActivated", strollCounter - 1);
+            serverPlayer.setGameMode(GameType.SPECTATOR);
+        }
+        ServerLevel targetLevel = serverPlayer.getServer().getLevel(targetDimension);
+        if (strollCounter == 1) {
+            if (targetLevel != null) {
+                livingEntity.changeDimension(targetLevel);
+            }
+            livingEntity.teleportTo(consciousnessStrollActivatedX, consciousnessStrollActivatedY, consciousnessStrollActivatedZ);
+            serverPlayer.setGameMode(GameType.SURVIVAL);
+        }
+    }
+
+    @Override
+    public @NotNull Rarity getRarity(ItemStack pStack) {
+        return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        return 0;
+    }
+}

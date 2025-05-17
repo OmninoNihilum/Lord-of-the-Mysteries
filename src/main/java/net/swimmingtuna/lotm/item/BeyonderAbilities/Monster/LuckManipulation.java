@@ -70,7 +70,7 @@ public class LuckManipulation extends SimpleAbilityItem {
             }
             if (luckManipulation == 3) { //wind moving projectiles
                 int x = tag.getInt("windMovingProjectilesCounter");
-                tag.putInt("windMovingProjectilesCounter", x + enhancement);
+                tag.putInt("windMovingProjectilesCounter", x + enhancement + 1);
                 tag.putDouble("luck", Math.max(0, luck - 8));
             }
             if (luckManipulation == 4) { //halve next damage
@@ -78,11 +78,11 @@ public class LuckManipulation extends SimpleAbilityItem {
                 tag.putDouble("luck", Math.max(0, luck - 10));
             }
             if (luckManipulation == 5) { //mobs distracted from you
-                tag.putInt("luckIgnoreMobs", tag.getInt("luckIgnoreMobs") + enhancement);
+                tag.putInt("luckIgnoreMobs", tag.getInt("luckIgnoreMobs") + enhancement + 1);
                 tag.putDouble("luck", Math.max(0, luck - 3));
             }
             if (luckManipulation == 6) { //players that hurt you recently will get poison
-                tag.putInt("luckAttackerPoisoned", tag.getInt("luckAttackerPoisoned") + enhancement);
+                tag.putInt("luckAttackerPoisoned", tag.getInt("luckAttackerPoisoned") + enhancement + 1);
                 tag.putDouble("luck", Math.max(0, luck - 12));
             }
             if (luckManipulation == 7) { //ignore next damage

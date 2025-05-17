@@ -89,18 +89,18 @@ public class EnableDisableRipple extends SimpleAbilityItem {
         return Rarity.create("MONSTER_ABILITY", ChatFormatting.GRAY);
     }
 
-    public static void rippleOfMisfortune(Player player) { //ADD CHECKS FOR NEARBY MONSTERS AT SEQ 6 AND 3
+    public static void rippleOfMisfortune(LivingEntity player) { //ADD CHECKS FOR NEARBY MONSTERS AT SEQ 6 AND 3
         if (!player.level().isClientSide() && player.getPersistentData().getBoolean("monsterRipple")) {
             Level level = player.level();
+            int sequence = BeyonderUtil.getSequence(player);
             int enhancement = 1;
             if (level instanceof ServerLevel serverLevel) {
                 enhancement = CalamityEnhancementData.getInstance(serverLevel).getCalamityEnhancement();
             }
-            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-            if (holder.getSpirituality() >= 150) {
-                holder.useSpirituality(150);
+            if (BeyonderUtil.getSpirituality(player) >= 120) {
+                BeyonderUtil.useSpirituality(player,120);
             }
-            if (holder.getSpirituality() <= 150) {
+            if (BeyonderUtil.getSpirituality(player) <= 120) {
                 player.getPersistentData().putBoolean("monsterRipple", false);
                 player.sendSystemMessage(Component.literal("Ripple of Misfortune turned off due to not enough spirituality").withStyle(ChatFormatting.RED));
             }
@@ -113,7 +113,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                     }
                     if (randomInt == 1) {
                         BlockPos hitPos = livingEntity.blockPosition();
-                        double radius = 10 - (holder.getSequence() * 2);
+                        double radius = 10 - (sequence * 2);
                         for (BlockPos pos : BlockPos.betweenClosed(
                                 hitPos.offset((int) -radius, (int) -radius, (int) -radius),
                                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
@@ -129,10 +129,10 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         for (Entity entity : entities) {
                             if (entity instanceof LivingEntity explosionHitEntity) {
                                 if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.MONSTER.get())) {
-                                    int sequence = BeyonderUtil.getSequence(explosionHitEntity);
-                                    if (sequence <= 5 && sequence > 3) {
+                                    int explosionSequence = BeyonderUtil.getSequence(explosionHitEntity);
+                                    if (explosionSequence <= 5 && explosionSequence > 3) {
                                         explosionHitEntity.hurt(BeyonderUtil.genericSource(player), 10 + (enhancement * 3));
-                                    } else if (sequence <= 3) {
+                                    } else if (explosionSequence <= 3) {
                                         return;
                                     }
                                 } else {
@@ -143,7 +143,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                     }
                     if (randomInt == 2) {
                         LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, player.level());
-                        lightningBolt.setDamage(30 - (holder.getSequence() * 5));
+                        lightningBolt.setDamage(30 - (sequence * 5));
                         lightningBolt.setPos(livingEntity.getOnPos().getCenter());
                         if (player instanceof ServerPlayer serverPlayer) {
                             lightningBolt.setCause(serverPlayer);
@@ -157,35 +157,35 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         tornadoEntity.setTornadoLifecount(100);
                         tornadoEntity.setOwner(player);
                         tornadoEntity.setTornadoPickup(true);
-                        tornadoEntity.setTornadoRadius(30 - (holder.getSequence() * 6) + (enhancement * 5));
-                        tornadoEntity.setTornadoHeight(50 - (holder.getSequence() * 8) + (enhancement * 8));
+                        tornadoEntity.setTornadoRadius(30 - (sequence * 6) + (enhancement * 5));
+                        tornadoEntity.setTornadoHeight(50 - (sequence * 8) + (enhancement * 8));
                         tornadoEntity.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
                         player.level().addFreshEntity(tornadoEntity);
                         for (LivingEntity otherEntities : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(60))) {
                             if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.MONSTER.get())) {
-                                int sequence = BeyonderUtil.getSequence(otherEntities);
-                                if (sequence <= 5 && sequence > 3) {
+                                int otherSequence = BeyonderUtil.getSequence(otherEntities);
+                                if (otherSequence <= 5 && otherSequence > 3) {
                                     otherEntities.getPersistentData().putInt("luckTornadoResistance", 6);
-                                } else if (sequence <= 3) {
+                                } else if (otherSequence <= 3) {
                                     otherEntities.getPersistentData().putInt("luckTornadoImmunity", 6);
                                 }
                             }
                         }
                     }
                     if (randomInt == 4) {
-                        for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(40 - (holder.getSequence() * 10) + (enhancement * 10)))) {
+                        for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(40 - (sequence * 10) + (enhancement * 10)))) {
                             if (entity != player) {
                                 if (BeyonderUtil.currentPathwayMatches(entity, BeyonderClassInit.MONSTER.get())) {
-                                    int sequence = BeyonderUtil.getSequence(entity);
-                                    if (sequence <= 5 && sequence > 3) {
-                                        entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 30 - (holder.getSequence() * 6), 1, false, false));
-                                        entity.setTicksFrozen(60 - (holder.getSequence() * 12));
-                                    } else if (sequence <= 3) {
+                                    int otherSequence = BeyonderUtil.getSequence(entity);
+                                    if (otherSequence <= 5 && otherSequence > 3) {
+                                        entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 30 - (sequence * 6), 1, false, false));
+                                        entity.setTicksFrozen(60 - (sequence * 12));
+                                    } else if (otherSequence <= 3) {
                                         return;
                                     }
                                 }
-                                entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60 - (holder.getSequence() * 12), 1, false, false));
-                                entity.setTicksFrozen(60 - (holder.getSequence() * 12));
+                                entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60 - (sequence * 12), 1, false, false));
+                                entity.setTicksFrozen(60 - (sequence * 12));
                             }
                         }
                     }
@@ -196,7 +196,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         stoneEntity.setStoneYRot((int) (Math.random() * 10) - 5);
                         stoneEntity.setDeltaMovement(0, -2, 0);
                         for (int i = 0; i < enhancement; i++) {
-                            if (holder.getSequence() >= 2) {
+                            if (sequence >= 2) {
                                 player.level().addFreshEntity(stoneEntity);
                                 player.level().addFreshEntity(stoneEntity);
                                 player.level().addFreshEntity(stoneEntity);
@@ -227,7 +227,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         }
                     }
                     if (randomInt == 7) {
-                        for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(25 - (holder.getSequence() * 5) + (enhancement * 5)))) {
+                        for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(25 - (sequence * 5) + (enhancement * 5)))) {
                             if (entity instanceof Player pPlayer) {
                                 BeyonderHolder holder1 = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
                                 if (holder1.currentClassMatches(BeyonderClassInit.MONSTER) || BeyonderUtil.sequenceAbleCopy(pPlayer)) {
@@ -245,7 +245,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         }
                     }
                     if (randomInt == 8) {
-                        for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(25 - (holder.getSequence() * 5) + (enhancement * 5)))) {
+                        for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(25 - (sequence * 5) + (enhancement * 5)))) {
                             CompoundTag tag = entity.getPersistentData();
                             if (entity instanceof Player pPlayer) {
                                 BeyonderHolder holder1 = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
@@ -281,13 +281,13 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         lightning.setNewStartPos(new Vec3(livingEntity.getX(), livingEntity.getY() + 80, livingEntity.getZ()));
                         lightning.setDeltaMovement(0, -3, 0);
                         lightning.setNoUp(true);
-                        if (holder.getSequence() == 3) {
+                        if (sequence == 3) {
                             player.level().addFreshEntity(lightning);
                             if (enhancement >= 2) {
                                 player.level().addFreshEntity(lightning);
                             }
                         }
-                        if (holder.getSequence() <= 2 && holder.getSequence() >= 1) {
+                        if (sequence <= 2 && sequence >= 1) {
                             player.level().addFreshEntity(lightning);
                             player.level().addFreshEntity(lightning);
                             player.level().addFreshEntity(lightning);
@@ -296,7 +296,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                                 player.level().addFreshEntity(lightning);
                             }
                         }
-                        if (holder.getSequence() == 0) {
+                        if (sequence == 0) {
                             player.level().addFreshEntity(lightning);
                             player.level().addFreshEntity(lightning);
                             player.level().addFreshEntity(lightning);
@@ -310,7 +310,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         }
                     }
                     if (randomInt == 10) {
-                        livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200 - (holder.getSequence() * 30) + (enhancement * 30), 1, false, false));
+                        livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200 - (sequence * 30) + (enhancement * 30), 1, false, false));
                     }
                     if (randomInt == 11) {
                         if (livingEntity instanceof Player pPlayer) {
@@ -348,18 +348,18 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         vex.setTarget(livingEntity);
                         vex.setPos(player.getX(), player.getY(), player.getZ());
                         vex.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 300, 2, false, false));
-                        vex.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 300, 4 - holder.getSequence(), false, false));
+                        vex.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 300, 4 -sequence, false, false));
                         vex.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false));
                         for (int i = 0; i < enhancement; i++) {
-                            if (holder.getSequence() == 3) {
+                            if (sequence == 3) {
                                 player.level().addFreshEntity(vex);
                             }
-                            if (holder.getSequence() <= 2 && holder.getSequence() >= 1) {
+                            if (sequence <= 2 && sequence >= 1) {
                                 player.level().addFreshEntity(vex);
                                 player.level().addFreshEntity(vex);
                                 player.level().addFreshEntity(vex);
                             }
-                            if (holder.getSequence() == 0) {
+                            if (sequence == 0) {
                                 player.level().addFreshEntity(vex);
                                 player.level().addFreshEntity(vex);
                                 player.level().addFreshEntity(vex);
@@ -371,10 +371,10 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                         if (livingEntity instanceof Player itemPlayer) {
                             for (Item item : getAbilities(itemPlayer)) {
                                 if (item instanceof SimpleAbilityItem simpleAbilityItem) {
-                                    int currentCooldown = (int) player.getCooldowns().getCooldownPercent(item, 0);
+                                    int currentCooldown = (int) itemPlayer.getCooldowns().getCooldownPercent(item, 0);
                                     int cooldownToSet = simpleAbilityItem.getCooldown() * (100 - currentCooldown) + (enhancement * 10);
                                     if (currentCooldown < cooldownToSet) {
-                                        player.getCooldowns().addCooldown(item, cooldownToSet);
+                                        itemPlayer.getCooldowns().addCooldown(item, cooldownToSet);
                                     }
                                 }
                             }

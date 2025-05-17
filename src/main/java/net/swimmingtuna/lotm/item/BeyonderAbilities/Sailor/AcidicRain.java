@@ -68,31 +68,33 @@ public class AcidicRain extends SimpleAbilityItem {
         double radius2 = radius1 / 5;
 
 
-        for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius1))) {
-            if (entity == livingEntity || BeyonderUtil.areAllies(livingEntity, entity)) {
-                continue;
-            }
-            if (entity.hasEffect(MobEffects.POISON)) {
-                int poisonAmp = entity.getEffect(MobEffects.POISON).getAmplifier();
-                if (poisonAmp == 0) {
+        if (livingEntity.tickCount % 10 == 0) {
+            for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius1))) {
+                if (entity == livingEntity || BeyonderUtil.areAllies(livingEntity, entity)) {
+                    continue;
+                }
+                entity.hurt(BeyonderUtil.genericSource(livingEntity), BeyonderUtil.getDamage(livingEntity).get(ItemInit.ACIDIC_RAIN.get()) / 4);
+                if (entity.hasEffect(MobEffects.POISON)) {
+                    int poisonAmp = entity.getEffect(MobEffects.POISON).getAmplifier();
+                    if (poisonAmp == 0) {
+                        entity.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 1, false, false));
+                    }
+                } else {
                     entity.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 1, false, false));
                 }
-            } else {
-                entity.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 1, false, false));
             }
-        }
-
-        for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius2))) {
-            if (entity == livingEntity) {
-                continue;
-            }
-            if (entity.hasEffect(MobEffects.POISON)) {
-                int poisonAmp = entity.getEffect(MobEffects.POISON).getAmplifier();
-                if (poisonAmp <= 2) {
+            for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius2))) {
+                if (entity == livingEntity) {
+                    continue;
+                }
+                if (entity.hasEffect(MobEffects.POISON)) {
+                    int poisonAmp = entity.getEffect(MobEffects.POISON).getAmplifier();
+                    if (poisonAmp <= 2) {
+                        entity.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 2, false, false));
+                    }
+                } else {
                     entity.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 2, false, false));
                 }
-            } else {
-                entity.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 2, false, false));
             }
         }
 

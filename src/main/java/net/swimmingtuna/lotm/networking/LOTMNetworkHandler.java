@@ -85,6 +85,11 @@ public class LOTMNetworkHandler {
                 .encoder(SyncAlliesPacket::encode)
                 .consumerMainThread(SyncAlliesPacket::handle)
                 .add();
+        INSTANCE.messageBuilder(LightningEntityPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(LightningEntityPacketS2C::new)
+                .encoder(LightningEntityPacketS2C::encode)
+                .consumerMainThread(LightningEntityPacketS2C::handle)
+                .add();
         INSTANCE.messageBuilder(SyncShouldntRenderInvisibilityPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(SyncShouldntRenderInvisibilityPacketS2C::new)
                 .encoder(SyncShouldntRenderInvisibilityPacketS2C::encode)

@@ -118,10 +118,9 @@ public class SirenSongHarm extends SimpleAbilityItem {
             tag.putInt("sirenSongHarm", sirenSongHarm - 1);
         }
 
-        if (sirenSongWeaken % 20 == 0 && sirenSongWeaken != 0) { //make it for 380,360,430 etc.
+        if (sirenSongWeaken % 20 == 0 && sirenSongWeaken != 0) {
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.SIREN_SONG_WEAKEN.get())))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
-
                     entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 21, 2, false, false));
                     entity.addEffect(new MobEffectInstance(ModEffects.ABILITY_WEAKNESS.get(), 21, 1, false, false));
                 }

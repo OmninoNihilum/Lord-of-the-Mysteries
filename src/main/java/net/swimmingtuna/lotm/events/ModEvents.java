@@ -67,7 +67,7 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.*;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
 import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderCharacteristic;
 import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
@@ -128,14 +128,14 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WaterSphere.wa
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WindManipulationFlight.windManipulationFlight;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WindManipulationFlight.windManipulationGuide;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WindManipulationSense.windManipulationSense;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.ConsciousnessStroll.consciousnessStroll;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.DreamIntoReality.dreamIntoReality;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.DreamWeaving.dreamWeaving;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.EnvisionBarrier.envisionBarrier;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.EnvisionKingdom.envisionKingdom;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.ManipulateMovement.manipulateMovement;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.MentalPlague.mentalPlague;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.Nightmare.nightmareTick;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.ConsciousnessStroll.consciousnessStroll;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamIntoReality.dreamIntoReality;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamWeaving.dreamWeaving;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionBarrier.envisionBarrier;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionKingdom.envisionKingdom;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.ManipulateMovement.manipulateMovement;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.MentalPlague.mentalPlague;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.Nightmare.nightmareTick;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.Gigantification.warriorGiant;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.WarriorDangerSense.warriorDangerSense;
 import static net.swimmingtuna.lotm.util.effect.BattleHypnotismEffect.battleHypnotismTickCheck;
@@ -157,6 +157,8 @@ public class ModEvents {
             );
         }
     }
+
+
 
 
     @SubscribeEvent
@@ -214,6 +216,9 @@ public class ModEvents {
             }
             if (event.getEffectInstance().getEffect() == ModEffects.NOREGENERATION.get()) {
                 entity.getPersistentData().putInt("noRegenerationEffectHealth", (int) entity.getHealth());
+            }
+            if (!event.getEntity().level().isClientSide() && event.getEntity().hasEffect(ModEffects.BENEFICIAL_EFFECTS_BLOCKER.get())) {
+                event.setCanceled(true);
             }
         }
 
@@ -353,6 +358,9 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                MisfortuneImplosion.misfortuneImplosionLightning(event);
+                VolcanicEruption.volcanicEruptionTick(event);
+                LightningRedirection.lightningRedirectionTick(event);
                 TrickTelekenisis.trickMasterTelekenisisPassive(event);
                 Prophecy.prophecyTick(event);
                 SpectatorClass.prophecyTickEvent(event);
@@ -561,7 +569,12 @@ public class ModEvents {
                     event.setCanceled(true);
                 }
                 if (entity instanceof LivingEntity living) {
-                    if (entitySourceOwner instanceof LivingEntity livingEntity) {
+                    if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.SAILOR.get(), 1) && (entitySource.getName().getString().contains("lightning") || entitySource.getName().getString().contains("thunder"))) {
+                        event.setCanceled(true);
+                        event.setAmount(0);
+                    }
+
+                        if (entitySourceOwner instanceof LivingEntity livingEntity) {
                         if (BeyonderUtil.areAllies(livingEntity, living)) {
                             event.setAmount(event.getAmount() * 0.6f);
                         }
@@ -860,6 +873,7 @@ public class ModEvents {
                         }
                     }
                 }
+                LightningRedirection.onLightningJoinWorld(event);
             }
             if (entity instanceof LivingEntity livingEntity) {
                 if (livingEntity instanceof PlayerMobEntity playerMobEntity) {

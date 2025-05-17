@@ -2,8 +2,11 @@ package net.swimmingtuna.lotm.item.OtherItems;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -14,12 +17,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 
 public class TestItem extends SimpleAbilityItem {
@@ -55,6 +59,7 @@ public class TestItem extends SimpleAbilityItem {
     public InteractionResult useAbilityOnBlock(UseOnContext pContext) {
         return InteractionResult.SUCCESS;
     }
+
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
@@ -76,12 +81,7 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
-            if (BeyonderUtil.currentPathwayMatchesNoException(player, BeyonderClassInit.SPECTATOR.get())) {
-                player.sendSystemMessage(Component.literal("Matches pathway"));
-            } else {
-                player.sendSystemMessage(Component.literal("Doesn't match pathway"));
-
-            }
+            player.sendSystemMessage(Component.literal("Dimension is " + player.level().dimension().toString()));
 
         }
 

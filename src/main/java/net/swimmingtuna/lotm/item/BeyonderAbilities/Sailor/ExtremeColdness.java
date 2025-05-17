@@ -151,7 +151,7 @@ public class ExtremeColdness extends SimpleAbilityItem {
                 if (affectedBySailorExtremeColdness >= 20) {
                     entity.addEffect(new MobEffectInstance(ModEffects.AWE.get(), 100, 1, false, false));
                     tag.putInt("affectedBySailorExtremeColdness", 0);
-                    entity.hurt(entity.damageSources().freeze(), 30);
+                    entity.hurt(entity.damageSources().freeze(), BeyonderUtil.getDamage(entity).get(ItemInit.EXTREME_COLDNESS.get()) / 4);
                 }
             }
         }

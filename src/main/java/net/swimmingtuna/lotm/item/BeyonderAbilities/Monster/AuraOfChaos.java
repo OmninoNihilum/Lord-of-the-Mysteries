@@ -85,8 +85,8 @@ public class AuraOfChaos extends SimpleAbilityItem {
             if (entity instanceof Player player) {
                 BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
                 if (player.tickCount % 20 == 0) {
-                    if (holder.getSpirituality() >= 150) {
-                        holder.useSpirituality(150);
+                    if (holder.getSpirituality() >= 120) {
+                        holder.useSpirituality(120);
                     } else {
                         tag.putBoolean("monsterAuraOfChaos", false);
                         player.sendSystemMessage(Component.literal("Aura of Chaos was turned off due to not enough spirituality").withStyle(ChatFormatting.RED));

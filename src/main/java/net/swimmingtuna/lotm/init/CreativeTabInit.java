@@ -19,6 +19,7 @@ public class CreativeTabInit {
                     .icon(() -> new ItemStack(ItemInit.ABILITYICONTAB.get()))
                     .displayItems((parameters, event) -> {
                         event.accept(ItemInit.BEYONDER_ABILITY_USER.get());
+                        event.accept(ItemInit.ASTROLABE.get());
                         event.accept(ItemInit.MIND_READING.get());
                         event.accept(ItemInit.AWE.get());
                         event.accept(ItemInit.FRENZY.get());
@@ -199,20 +200,11 @@ public class CreativeTabInit {
                         event.accept(ItemInit.DOOR_GAMMA_RAY_BURST.get());
                         event.accept(ItemInit.CONCEPTUALIZATION.get());
                         event.accept(ItemInit.REPLICATION.get());
-
-                    })
-                    .build());
-
-    public static final RegistryObject<CreativeModeTab> INGREDIENTS_TAB = CREATIVE_MODE_TABS.register("ingredients_tab",
-            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ItemInit.INGREDIENTSICONTAB.get()))
-                    .title(Component.translatable("creativetab.beyonderingredients_tab"))
-                    .icon(() -> new ItemStack(ItemInit.RED_CHESTNUT_FLOWER.get()))
-                    .displayItems((parameters, output) -> {
-                        output.accept(ItemInit.SPIRIT_EATER_STOMACH_POUCH.get());
-                        output.accept(ItemInit.DEEP_SEA_MARLINS_BLOOD.get());
-                        output.accept(ItemInit.HORNBEAM_ESSENTIALS_OIL.get());
-                        output.accept(ItemInit.STRING_GRASS_POWDER.get());
-                        output.accept(ItemInit.RED_CHESTNUT_FLOWER.get());
+                        event.accept(ItemInit.SPIRIT_EATER_STOMACH_POUCH.get());
+                        event.accept(ItemInit.DEEP_SEA_MARLINS_BLOOD.get());
+                        event.accept(ItemInit.HORNBEAM_ESSENTIALS_OIL.get());
+                        event.accept(ItemInit.STRING_GRASS_POWDER.get());
+                        event.accept(ItemInit.RED_CHESTNUT_FLOWER.get());
                     })
                     .build());
 

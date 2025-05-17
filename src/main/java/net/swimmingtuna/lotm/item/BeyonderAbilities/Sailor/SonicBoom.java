@@ -11,7 +11,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -54,22 +53,15 @@ public class SonicBoom extends SimpleAbilityItem {
         player.hurtMarked = true;
         player.setDeltaMovement(lookVec.x(), lookVec.y(), lookVec.z());
         serverLevel.playSound(null, player.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 30.0f, 5.0f);
-        ExplosionUtil.createNoKnockbackExplosion(player.level(), player,BeyonderUtil.getDamage(player).get(ItemInit.SONIC_BOOM.get()), false);
+        ExplosionUtil.createNoKnockbackExplosion(player.level(), player, BeyonderUtil.getDamage(player).get(ItemInit.SONIC_BOOM.get()), false);
         for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(30 - (sequence * 5)))) {
             if (entity == player) {
                 continue;
             }
             int duration = 100 - (sequence * 20);
-            int damage = (int) (BeyonderUtil.getDamage(player).get(ItemInit.SONIC_BOOM.get()) * 0.75);
-            if (!(entity instanceof Player)) {
-                entity.addEffect(new MobEffectInstance(ModEffects.AWE.get(), duration, 1, false, false));
-                entity.hurt(entity.damageSources().generic(), damage);
-            } else {
-                int duration2 = duration - (50 - (sequence * 5));
-                int damage2 = (int) (damage - (8 - (sequence * 0.5)));
-                entity.addEffect(new MobEffectInstance(ModEffects.AWE.get(), duration2, 1, false, false));
-                entity.hurt(entity.damageSources().generic(), damage2);
-            }
+            int damage = (int) (BeyonderUtil.getDamage(player).get(ItemInit.SONIC_BOOM.get()) * 1.25f);
+            entity.addEffect(new MobEffectInstance(ModEffects.AWE.get(), duration, 1, false, false));
+            entity.hurt(BeyonderUtil.lightningSource(player), damage);
         }
         RandomSource random = RandomSource.create();
         for (int i = 0; i < 100; i++) {
@@ -82,13 +74,14 @@ public class SonicBoom extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, compresses air and releases it in order to create a sonic boom, causing an explosion that propels you in the direction you're looking"));
+        tooltipComponents.add(Component.literal("Upon use, compresses air and releases it in order to create a sonic boom, causing an explosion that propels you in the direction you're looking. "));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("600").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("3 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SAILOR_ABILITY", ChatFormatting.BLUE);

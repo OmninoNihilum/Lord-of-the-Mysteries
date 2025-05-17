@@ -153,7 +153,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
             meteorEntity.teleportTo(meteorSpawnPos.getX(), meteorSpawnPos.getY(), meteorSpawnPos.getZ());
             meteorEntity.setOwner(player);
             meteorEntity.noPhysics = true;
-            int scalecheck = 10 - BeyonderUtil.getSequence(player) * 2;
+            int scalecheck = 12 - BeyonderUtil.getSequence(player) * 3;
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(meteorEntity);
             scaleData.setScale(scalecheck);
             scaleData.markForSync(true);

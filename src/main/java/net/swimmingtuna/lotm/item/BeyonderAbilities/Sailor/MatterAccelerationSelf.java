@@ -24,7 +24,7 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.EnvisionLocation;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -82,7 +82,8 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
 
             // Destroy blocks in a 5-block radius around the current position
             List<BlockPos> blockPositions = new ArrayList<>();
-            for (BlockPos offsetedPos : BlockPos.betweenClosed(pos.offset(-5, -5, -5), pos.offset(5, 5, 5))) {
+            float damage = BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get());
+            for (BlockPos offsetedPos : BlockPos.betweenClosed(pos.offset(-((int)damage / 2), -((int)damage / 2), -((int)damage / 2)), pos.offset(((int)damage / 2), ((int)damage / 2), ((int)damage / 2)))) {
                 if (visitedPositions.contains(offsetedPos)) continue;
                 visitedPositions.add(offsetedPos);
                 BlockState blockState = level.getBlockState(offsetedPos);
@@ -102,7 +103,7 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, boundingBox);
             for (LivingEntity entity : entities) {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
-                    entity.hurt(level.damageSources().lightningBolt(), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get())); // Adjust damage amount as needed
+                    entity.hurt(level.damageSources().lightningBolt(), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get()) * 1.5f); // Adjust damage amount as needed
                 }
             }
         }

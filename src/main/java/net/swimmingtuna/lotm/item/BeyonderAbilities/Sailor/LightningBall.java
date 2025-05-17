@@ -56,7 +56,7 @@ public class LightningBall extends SimpleAbilityItem {
             lightningBall.setSummoned(true);
             lightningBall.setBallXRot((float) ((Math.random() * 20) - 10));
             lightningBall.setBallYRot((float) ((Math.random() * 20) - 10));
-            lightningBall.setPos(player.getX(), player.getY() + 1.5, player.getZ());
+            lightningBall.teleportTo(player.getX(), player.getY() + 1.5, player.getZ());
             lightningBall.setOwner(player);
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(lightningBall);
             scaleData.setScale(BeyonderUtil.getDamage(player).get(ItemInit.LIGHTNING_BALL.get()));

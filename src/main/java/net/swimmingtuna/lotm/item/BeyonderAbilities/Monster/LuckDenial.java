@@ -17,11 +17,13 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -66,7 +68,7 @@ public class LuckDenial extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, doesnt allow a target to gain any luck for a long period of time. If your sequence is less than two, then it will also not allow their misfortune value to go below that amount."));
+        tooltipComponents.add(Component.literal("Upon use, doesnt allow a target to gain any luck or beneficial effects for a long period of time. If your sequence is less than two, then it will also not allow their misfortune value to go below that amount."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("175").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("5 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -80,6 +82,7 @@ public class LuckDenial extends SimpleAbilityItem {
             CompoundTag tag = interactionTarget.getPersistentData();
             double luck = tag.getDouble("luck");
             double misfortune = tag.getDouble("misfortune");
+            double beneficialEffectBlocker = BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()) / 5;
             if (BeyonderUtil.getSequence(player) <= 2) {
                 tag.putDouble("luckDenialTimer", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()));
                 tag.putDouble("luckDenialLuck", luck);
@@ -88,8 +91,10 @@ public class LuckDenial extends SimpleAbilityItem {
                 tag.putDouble("luckDenialTimer", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()));
                 tag.putDouble("luckDenialLuck", luck);
             }
+            BeyonderUtil.applyMobEffect(interactionTarget, ModEffects.BENEFICIAL_EFFECTS_BLOCKER.get(), (int) beneficialEffectBlocker, 1, true, true);
         }
     }
+
     public static void luckDenial(LivingEntity livingEntity) {
         CompoundTag tag = livingEntity.getPersistentData();
         double luck = tag.getDouble("luck");

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Random;
 
 public class MisfortuneBestowal extends SimpleAbilityItem {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
@@ -84,6 +85,47 @@ public class MisfortuneBestowal extends SimpleAbilityItem {
             int misfortuneAddValue = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MISFORTUNEBESTOWAL.get());
             pTag.putDouble("misfortune", Math.min(200, pMisfortune + misfortuneAddValue));
             tag.putDouble("misfortune", Math.min(0, misfortune - ((double) misfortuneAddValue / 2)));
+            float random = BeyonderUtil.getPositiveRandomInRange(900);
+            if (random <= 5) {
+                pTag.putInt("luckMeteor", 2);
+                player.sendSystemMessage(Component.literal("You randomly bestowed a Meteor on " + interactionTarget.getName().toString()));
+            } else if (random <= 70) {
+                pTag.putInt("luckLightningLOTM", 2);
+            } else if (random <= 100) {
+                pTag.putInt("cantUseAbility", pTag.getInt("cantUseAbility") + 1);
+            } else if (random <= 170) {
+                pTag.putInt("luckParalysis", 2);
+            } else if (random <= 240) {
+                pTag.putInt("luckUnequipArmor", 2);
+            } else if (random <= 260) {
+                pTag.putInt("luckWarden", 2);
+            } else if (random <=  300) {
+                pTag.putInt("luckLightningMC", 2);
+            }  else if (random <= 380) {
+                pTag.putInt("luckPoison", 2);
+            } else if (random <= 395) {
+                pTag.putInt("luckTornado", 2);
+            } else if (random <= 440) {
+                pTag.putInt("luckStone", 2);
+            } else if (random <= 500) {
+                pTag.putInt("luckDoubleDamage", pTag.getInt("luckDoubleDamage") + 1);
+            } else if (random <= 510) {
+                pTag.putInt("calamityLightningStorm", 2);
+            } else if (random <= 570) {
+                pTag.putInt("calamityGroundTremor", 2);
+            } else if (random <= 600) {
+                pTag.putInt("calamityGaze", 2);
+            } else if (random <= 650) {
+                pTag.putInt("calamityUndeadArmy", 2);
+            } else if (random <= 690) {
+                pTag.putInt("calamityBabyZombie", 2);
+            } else if (random <= 740) {
+                pTag.putInt("calamityBreeze", 2);
+            } else if (random <= 800) {
+                pTag.putInt("calamityWave", 2);
+            } else if (random <= 900) {
+                pTag.putInt("calamityExplosion", 2);
+            }
         }
     }
     @Override

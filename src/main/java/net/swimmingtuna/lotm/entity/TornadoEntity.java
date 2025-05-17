@@ -26,6 +26,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -126,8 +127,8 @@ public class TornadoEntity extends AbstractHurtingProjectile {
         if (!player.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(player);
             TornadoEntity tornado = new TornadoEntity(player.level(), player, 0, 0, 0);
-            tornado.setTornadoHeight(75 - (sequence * 10));
-            tornado.setTornadoRadius(25 - (sequence * 3));
+            tornado.setTornadoHeight((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CALAMITY_INCARNATION_TORNADO.get()) / 4);
+            tornado.setTornadoRadius((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CALAMITY_INCARNATION_TORNADO.get()) / 10);
             tornado.setTornadoLifecount(300);
             tornado.setTornadoPickup(true);
             player.level().addFreshEntity(tornado);

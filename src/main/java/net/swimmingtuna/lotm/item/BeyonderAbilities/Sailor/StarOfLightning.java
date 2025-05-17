@@ -69,14 +69,36 @@ public class StarOfLightning extends SimpleAbilityItem {
         if (sailorLightningStar == 1) {
             StarOfLightning.starOfLightningExplode(livingEntity, livingEntity.getOnPos(), 15);
             tag.putInt("sailorLightningStar", 0);
+            Level level = livingEntity.level();
+            float searchRadius = Math.min(300, BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()));
+            AABB searchArea = new AABB(livingEntity.getX() - searchRadius, livingEntity.getY() - searchRadius, livingEntity.getZ() - searchRadius, livingEntity.getX() + searchRadius, livingEntity.getY() + searchRadius, livingEntity.getZ() + searchRadius);
+            List<LivingEntity> potentialTargets = level.getEntitiesOfClass(LivingEntity.class, searchArea, target -> target != livingEntity && target.isAlive() && !BeyonderUtil.areAllies(livingEntity, target));
             for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()); i++) {
                 LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), livingEntity.level());
                 lightningEntity.setSpeed(50);
-                lightningEntity.setDamage(15);
-                double sailorStarX = (Math.random() * 2 - 1);
-                double sailorStarY = (Math.random() * 2 - 1);
-                double sailorStarZ = (Math.random() * 2 - 1);
-                lightningEntity.setDeltaMovement(sailorStarX, sailorStarY, sailorStarZ);
+                lightningEntity.setDamage((int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()) / 1.5f));
+
+                // Choose a random target if available
+                if (!potentialTargets.isEmpty()) {
+                    LivingEntity randomTarget = potentialTargets.get(level.random.nextInt(potentialTargets.size()));
+                    lightningEntity.setTargetEntity(randomTarget);
+                    double dirX = randomTarget.getX() - livingEntity.getX();
+                    double dirY = randomTarget.getY() - livingEntity.getY();
+                    double dirZ = randomTarget.getZ() - livingEntity.getZ();
+                    double length = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+                    if (length > 0) {
+                        dirX /= length;
+                        dirY /= length;
+                        dirZ /= length;
+                    }
+                    lightningEntity.setDeltaMovement(dirX, dirY, dirZ);
+                } else {
+                    double sailorStarX = (Math.random() * 2 - 1);
+                    double sailorStarY = (Math.random() * 2 - 1);
+                    double sailorStarZ = (Math.random() * 2 - 1);
+                    lightningEntity.setDeltaMovement(sailorStarX, sailorStarY, sailorStarZ);
+                }
+
                 lightningEntity.setMaxLength(10);
                 lightningEntity.setOwner(livingEntity);
                 lightningEntity.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());

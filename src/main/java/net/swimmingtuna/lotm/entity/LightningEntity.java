@@ -8,10 +8,13 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -21,6 +24,8 @@ import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.LightningEntityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +72,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
     @Override
     public boolean shouldRenderAtSqrDistance(double pDistance) {
-        return true;
+        return pDistance < 8000000; // 128 blocks squared
     }
 
     @Override
@@ -76,8 +81,15 @@ public class LightningEntity extends AbstractHurtingProjectile {
     }
 
     @Override
-    public AABB getBoundingBoxForCulling() {
-        return this.getBoundingBox().inflate(10.0D, 30.0D, 10.0D);
+    public @NotNull AABB getBoundingBoxForCulling() {
+        return new AABB(
+                this.getX() - 3000,
+                this.getY() - 3000,
+                this.getZ() - 3000,
+                this.getX() + 3000,
+                this.getY() + 3000,
+                this.getZ() + 3000
+        );
     }
 
 
@@ -210,7 +222,15 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
         try {
             super.tick();
-
+            MinecraftServer server = this.getServer();
+            if (server != null) {
+                List<ServerPlayer> players = server.getPlayerList().getPlayers();
+                for (Player player : players) {
+                    if (player.distanceTo(this) < 300 && player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new LightningEntityPacketS2C(this), serverPlayer);
+                    }
+                }
+            }
             float speed = this.getSpeed();
 
             if (startPos == null) {
@@ -666,8 +686,17 @@ public class LightningEntity extends AbstractHurtingProjectile {
         this.targetPos = targetPos;
     }
 
+    public Vec3 getTargetPos() {
+        return this.targetPos;
+    }
+
+
     public void setTargetEntity(Entity targetEntity) {
         this.targetEntity = targetEntity;
+    }
+
+    public Entity getTargetEntity() {
+        return this.targetEntity;
     }
 
     public void setOwner(LivingEntity entity) {

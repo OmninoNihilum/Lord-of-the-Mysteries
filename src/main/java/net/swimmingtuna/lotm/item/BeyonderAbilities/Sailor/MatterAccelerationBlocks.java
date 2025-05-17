@@ -72,6 +72,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         if (stoneEntity != null) {
                             stoneEntity.setDeltaMovement(lookDirection);
                             stoneEntity.setSent(true);
+                            stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(mob).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                             stoneEntity.setShouldntDamage(false);
                             stoneEntity.setTickCount(440);
                         }
@@ -87,6 +88,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         if (netherrackEntity != null) {
                             netherrackEntity.setDeltaMovement(lookDirection);
                             netherrackEntity.setSent(true);
+                            netherrackEntity.setDamage((int) (float) BeyonderUtil.getDamage(mob).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                             netherrackEntity.setShouldDamage(true);
                             netherrackEntity.setTickCount(440);
                         }
@@ -102,6 +104,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         if (endStoneEntity != null) {
                             endStoneEntity.setDeltaMovement(lookDirection);
                             endStoneEntity.setSent(true);
+                            endStoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(mob).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                             endStoneEntity.setShouldntDamage(false);
                             endStoneEntity.setTickCount(440);
                         }
@@ -140,7 +143,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         int randomYRot = (int) ((Math.random() * 10) - 5);
                         stoneEntity.setStoneYRot(randomYRot);
                         stoneEntity.setStoneXRot(randomXRot);
-                        stoneEntity.setDamage(80);
+                        stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         stoneEntity.setStoneStayAtX(randomStayX);
                         stoneEntity.setStoneStayAtY(randomStayY);
                         stoneEntity.setStoneStayAtZ(randomStayZ);
@@ -152,7 +155,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         player.level().addFreshEntity(stoneEntity);
                     }
                     if (level.dimension() == Level.NETHER) {
-                        NetherrackEntity stoneEntity = new NetherrackEntity(EntityInit.NETHERRACK_ENTITY.get(), player.level());
+                        NetherrackEntity netherrackEntity = new NetherrackEntity(EntityInit.NETHERRACK_ENTITY.get(), player.level());
                         float randomStayX;
                         do {
                             randomStayX = (float) ((Math.random() * 6) - 3);
@@ -161,22 +164,22 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         float randomStayZ = (float) ((Math.random() * 6) - 3);
                         int randomXRot = (int) ((Math.random() * 10) - 5);
                         int randomYRot = (int) ((Math.random() * 10) - 5);
-                        stoneEntity.setDamage(80);
-                        stoneEntity.setNetherrackStayAtX(randomStayX);
-                        stoneEntity.setNetherrackStayAtY(randomStayY);
-                        stoneEntity.setNetherrackStayAtZ(randomStayZ);
-                        stoneEntity.setOwner(player);
-                        stoneEntity.setRemoveAndHurt(true);
-                        stoneEntity.setSent(false);
-                        stoneEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
-                        stoneEntity.setShouldDamage(false);
-                        stoneEntity.setNetherrackXRot(randomXRot);
-                        stoneEntity.setNetherrackYRot(randomYRot);
+                        netherrackEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
+                        netherrackEntity.setNetherrackStayAtX(randomStayX);
+                        netherrackEntity.setNetherrackStayAtY(randomStayY);
+                        netherrackEntity.setNetherrackStayAtZ(randomStayZ);
+                        netherrackEntity.setOwner(player);
+                        netherrackEntity.setRemoveAndHurt(true);
+                        netherrackEntity.setSent(false);
+                        netherrackEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
+                        netherrackEntity.setShouldDamage(false);
+                        netherrackEntity.setNetherrackXRot(randomXRot);
+                        netherrackEntity.setNetherrackYRot(randomYRot);
 
-                        player.level().addFreshEntity(stoneEntity);
+                        player.level().addFreshEntity(netherrackEntity);
                     }
                     if (level.dimension() == Level.NETHER) {
-                        EndStoneEntity stoneEntity = new EndStoneEntity(EntityInit.ENDSTONE_ENTITY.get(), player.level());
+                        EndStoneEntity endstoneEntity = new EndStoneEntity(EntityInit.ENDSTONE_ENTITY.get(), player.level());
                         float randomStayX;
                         do {
                             randomStayX = (float) ((Math.random() * 6) - 3);
@@ -185,18 +188,18 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         float randomStayZ = (float) ((Math.random() * 6) - 3);
                         int randomXRot = (int) ((Math.random() * 10) - 5);
                         int randomYRot = (int) ((Math.random() * 10) - 5);
-                        stoneEntity.setDamage(80);
-                        stoneEntity.setEndstoneStayAtX(randomStayX);
-                        stoneEntity.setEndstoneStayAtY(randomStayY);
-                        stoneEntity.setEndstoneStayAtZ(randomStayZ);
-                        stoneEntity.setOwner(player);
-                        stoneEntity.setRemoveAndHurt(true);
-                        stoneEntity.setSent(false);
-                        stoneEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
-                        stoneEntity.setShouldntDamage(true);
-                        stoneEntity.setEndstoneXRot(randomXRot);
-                        stoneEntity.setEndstoneYRot(randomYRot);
-                        player.level().addFreshEntity(stoneEntity);
+                        endstoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
+                        endstoneEntity.setEndstoneStayAtX(randomStayX);
+                        endstoneEntity.setEndstoneStayAtY(randomStayY);
+                        endstoneEntity.setEndstoneStayAtZ(randomStayZ);
+                        endstoneEntity.setOwner(player);
+                        endstoneEntity.setRemoveAndHurt(true);
+                        endstoneEntity.setSent(false);
+                        endstoneEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
+                        endstoneEntity.setShouldntDamage(true);
+                        endstoneEntity.setEndstoneXRot(randomXRot);
+                        endstoneEntity.setEndstoneYRot(randomYRot);
+                        player.level().addFreshEntity(endstoneEntity);
                     }
                     if (level.dimension() != Level.OVERWORLD && level.dimension() != Level.NETHER && level.dimension() != Level.END) {
                         StoneEntity stoneEntity = new StoneEntity(EntityInit.STONE_ENTITY.get(), player.level());
@@ -212,6 +215,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         stoneEntity.setStoneStayAtY(randomStayY);
                         stoneEntity.setStoneStayAtZ(randomStayZ);
                         stoneEntity.setOwner(player);
+                        stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         stoneEntity.setRemoveAndHurt(true);
                         stoneEntity.setSent(false);
                         stoneEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);

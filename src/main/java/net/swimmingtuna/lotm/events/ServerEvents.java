@@ -4,6 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -25,9 +27,8 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.*;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
-import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.Map;
@@ -36,9 +37,9 @@ import java.util.regex.Matcher;
 
 import static net.swimmingtuna.lotm.beyonder.SpectatorClass.EVENT_TO_TAG;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor.coordsTravel;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.EnvisionLife.spawnMob;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.EnvisionLocation.isThreeIntegers;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.FinishedItems.EnvisionWeather.*;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLife.spawnMob;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation.isThreeIntegers;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionWeather.*;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ServerEvents {
@@ -154,28 +155,22 @@ public class ServerEvents {
                         player.displayClientMessage(Component.literal("You need 300 spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
                     } else {
                         player.getPersistentData().putInt("consciousnessStrollActivated", 60);
-                        PlayerMobEntity playerMobEntity = new PlayerMobEntity(EntityInit.PLAYER_MOB_ENTITY.get(), player.level());
-                        AttributeInstance playerMaxHealth = player.getAttribute(Attributes.MAX_HEALTH);
-                        AttributeInstance playerMobMaxHealth = playerMobEntity.getAttribute(Attributes.MAX_HEALTH);
-                        playerMobMaxHealth.setBaseValue(playerMaxHealth.getValue());
-                        playerMobEntity.setHealth(player.getHealth());
-                        playerMobEntity.teleportTo(player.getX(), player.getY(), player.getZ());
-                        playerMobEntity.setOwner(player);
-                        playerMobEntity.getPersistentData().putInt("CSlifetime", 60);
-                        playerMobEntity.setUsername(player.getName().getString());
-                        for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(50))) {
-                            if (mob.getTarget() == player) {
-                                mob.setTarget(playerMobEntity);
-                            }
-                        }
-                        player.level().addFreshEntity(playerMobEntity);
                         player.getCooldowns().addCooldown(ItemInit.CONSCIOUSNESS_STROLL.get(), 400);
                         player.getPersistentData().putInt("consciousnessStrollActivatedX", (int) player.getX());
                         player.getPersistentData().putInt("consciousnessStrollActivatedY", (int) player.getY());
                         player.getPersistentData().putInt("consciousnessStrollActivatedZ", (int) player.getZ());
+                        player.getPersistentData().putString("consciousnessStrollDimension", player.level().dimension().toString());
                         player.setGameMode(GameType.SPECTATOR);
                         BeyonderUtil.useSpirituality(player, 300);
-                        player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
+                        if (player.level().dimension() != onlinePlayer.level().dimension()) {
+                            ServerLevel targetDimension = onlinePlayer.getServer().getLevel(onlinePlayer.level().dimension());
+                            player.changeDimension(targetDimension);
+                            player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
+                        } else {
+                            // Same dimension, just teleport to coordinates
+                            player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
+                        }
+
                         event.setCanceled(true);
                     }
                 }
@@ -286,7 +281,7 @@ public class ServerEvents {
             event.setCanceled(true);
         }
         ItemStack heldItem = player.getMainHandItem();
-        if (!heldItem.isEmpty() && heldItem.getItem() instanceof Prophecy) {
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof Prophecy && !player.getCooldowns().isOnCooldown(ItemInit.PROPHECY.get())) {
             if (BeyonderUtil.getSpirituality(player) >= 1500) {
                 Matcher matcher = SpectatorClass.PROPHECY_PATTERN.matcher(message);
                 if (matcher.matches()) {
@@ -312,6 +307,7 @@ public class ServerEvents {
                     if (tagKey != null) {
                         Optional<ServerPlayer> targetPlayer = level.getServer().getPlayerList().getPlayers().stream().filter(p -> p.getName().getString().equals(targetPlayerName)).findFirst();
                         if (targetPlayer.isPresent()) {
+                            player.getCooldowns().addCooldown(ItemInit.PROPHECY.get(), 1200);
                             CompoundTag tag = targetPlayer.get().getPersistentData();
                             tag.putInt(tagKey, ticks);
                             player.sendSystemMessage(Component.literal("Prophecy has been set for " + targetPlayerName).withStyle(ChatFormatting.GREEN));

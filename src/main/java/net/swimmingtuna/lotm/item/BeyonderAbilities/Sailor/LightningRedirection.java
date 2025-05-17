@@ -4,11 +4,13 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -17,9 +19,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.LightningEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -56,65 +66,30 @@ public class LightningRedirection extends SimpleAbilityItem {
     }
 
     @Override
-    public InteractionResult useAbilityOnBlock(UseOnContext pContext) {
-        if (pContext.getPlayer() == null) {
-            Entity entity = pContext.getItemInHand().getEntityRepresentation();
-            if (entity instanceof LivingEntity user) {
-                if (!checkAll(user)) {
-                    return InteractionResult.FAIL;
-                }
-                lightningRedirection(user, pContext.getClickedPos());
-                return InteractionResult.SUCCESS;
-            }
-        } else {
-            Player player = pContext.getPlayer();
-            if (!checkAll(player)) {
-                return InteractionResult.FAIL;
-            }
-            lightningRedirection(player, pContext.getClickedPos());
-            addCooldown(player);
-            useSpirituality(player);
-            return InteractionResult.SUCCESS;
-        }
-        return InteractionResult.SUCCESS;
-    }
-    @Override
-    public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
         if (!checkAll(player)) {
             return InteractionResult.FAIL;
         }
         useSpirituality(player);
-        lightningRedirectionEntity(player, interactionTarget);
+        addCooldown(player);
+        enableDisableLightningRedirection(player);
         return InteractionResult.SUCCESS;
     }
 
-
-    private void lightningRedirection(LivingEntity player, BlockPos pos) {
-        if (!player.level().isClientSide()) {
-            Level level = player.level();
-            for (Entity entity : level.getEntitiesOfClass(Entity.class, player.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.LIGHTNING_REDIRECTION.get())))) {
-                if (entity instanceof LightningEntity lightning) {
-                    lightning.setTargetPos(pos.getCenter());
-                    lightning.setTargetEntity(null);
-                }
-            }
-        }
-    }
-    private void lightningRedirectionEntity(LivingEntity player,LivingEntity interactionTarget) {
-        if (!player.level().isClientSide()) {
-            Level level = player.level();
-            for (Entity entity : level.getEntitiesOfClass(Entity.class, player.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.LIGHTNING_REDIRECTION.get())))) {
-                if (entity instanceof LightningEntity lightning) {
-                    lightning.setTargetEntity(interactionTarget);
-                    lightning.setTargetPos(null);
-                }
+    public static void enableDisableLightningRedirection(LivingEntity livingEntity) {
+        if (!livingEntity.level().isClientSide()) {
+            CompoundTag tag = livingEntity.getPersistentData();
+            boolean lightningRedirection = tag.getBoolean("lightningRedirection");
+            tag.putBoolean("lightningRedirection", !lightningRedirection);
+            if (livingEntity instanceof Player pPlayer) {
+                pPlayer.displayClientMessage(Component.literal("Lightning Redirection Turned " + (lightningRedirection ? "Off" : "On")).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
             }
         }
     }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use on a block or entity, redirects all lightning bolts to move towards it."));
+        tooltipComponents.add(Component.literal("Upon use, enable or disable your lightning redireciton. If enabled, all lightning around you will automatically target whatever you're looking at"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("600").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("5 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -126,14 +101,104 @@ public class LightningRedirection extends SimpleAbilityItem {
         return Rarity.create("SAILOR_ABILITY", ChatFormatting.BLUE);
     }
 
-    @Override
-    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        int maxLightningCount = 0;
-        if (target != null) {
-            for (LightningEntity lightning : livingEntity.level().getEntitiesOfClass(LightningEntity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.LIGHTNING_REDIRECTION.get())))) {
-                maxLightningCount++;
+    public static void lightningRedirectionTick(LivingEvent.LivingTickEvent event) {
+        if (!event.getEntity().level().isClientSide()) {
+            LivingEntity living = event.getEntity();
+            CompoundTag tag = living.getPersistentData();
+            if (tag.getBoolean("lightningRedirection")) {
+                AABB searchBox = living.getBoundingBox().inflate((int) (float) BeyonderUtil.getDamage(living).get(ItemInit.LIGHTNING_REDIRECTION.get()));
+                List<LivingEntity> possibleTargets = living.level().getEntitiesOfClass(LivingEntity.class, searchBox, entity -> !entity.isSpectator() && entity.isPickable() && entity != living);
+                LivingEntity bestTarget = null;
+                double bestDotProduct = 0.99;
+                Vec3 eyePosition = living.getEyePosition();
+                Vec3 lookVector = living.getLookAngle();
+                for (LivingEntity target : possibleTargets) {
+                    Vec3 toEntity = target.getEyePosition().subtract(eyePosition).normalize();
+                    double dotProduct = toEntity.dot(lookVector);
+                    if (dotProduct > bestDotProduct) {
+                        BlockHitResult hitResult = living.level().clip(new ClipContext(eyePosition, target.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, living));
+                        if (hitResult.getType() == HitResult.Type.MISS && living.level().isEmptyBlock(target.blockPosition().above())) {
+                            bestTarget = target;
+                            bestDotProduct = dotProduct;
+                        }
+                    }
+                }
+                AABB aabb = new AABB(living.getX() - 75, living.getY() - 75, living.getZ() - 75, living.getX() + 75, living.getY() + 200, living.getZ() + 75);
+                for (LightningEntity lightning : living.level().getEntitiesOfClass(LightningEntity.class, aabb)) {
+                    if (bestTarget != null && lightning.getTargetEntity() != bestTarget && !BeyonderUtil.areAllies(bestTarget, living)) {
+                        lightning.setTargetEntity(bestTarget);
+                        if (lightning.getNoUp()) {
+                            lightning.setNoUp(false);
+                        }
+                    }
+                }
+                for (LightningBolt lightning : living.level().getEntitiesOfClass(LightningBolt.class, aabb)) {
+                    if (bestTarget != null && lightning.getOnPos() != bestTarget.getOnPos()) {
+                        lightning.teleportTo(bestTarget.getX(), bestTarget.getY(), bestTarget.getZ());
+                    }
+                }
             }
         }
-        return Math.min(100, maxLightningCount);
+    }
+
+    public static void onLightningJoinWorld(EntityJoinLevelEvent event) {
+        if (!event.getEntity().level().isClientSide() && (event.getEntity() instanceof LightningBolt || event.getEntity() instanceof LightningEntity)) {
+            Entity entity = event.getEntity();
+            AABB aabb = new AABB(entity.getX() - 75, entity.getY() - 200, entity.getZ() - 75, entity.getX() + 75, entity.getY() + 75, entity.getZ() + 75);
+            List<LivingEntity> nearbyEntities = entity.level().getEntitiesOfClass(LivingEntity.class, aabb);
+            LivingEntity livingEntity = null;
+            double closestDistance = Double.MAX_VALUE;
+            for (LivingEntity living : nearbyEntities) {
+                if (living.getPersistentData().contains("lightningRedirection") && living.getPersistentData().getBoolean("lightningRedirection")) {
+                    double distance = entity.distanceToSqr(living);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        livingEntity = living;
+                    }
+                }
+            }
+            if (livingEntity != null) {
+                final LivingEntity redirector = livingEntity;
+                CompoundTag tag = redirector.getPersistentData();
+                AABB searchBox = redirector.getBoundingBox().inflate((int) (float) BeyonderUtil.getDamage(redirector).get(ItemInit.LIGHTNING_REDIRECTION.get()));
+                List<LivingEntity> possibleTargets = redirector.level().getEntitiesOfClass(LivingEntity.class, searchBox, targetEntity -> !targetEntity.isSpectator() && targetEntity.isPickable() && targetEntity != redirector);
+                LivingEntity bestTarget = null;
+                double bestDotProduct = 0.99;
+                Vec3 eyePosition = redirector.getEyePosition();
+                Vec3 lookVector = redirector.getLookAngle();
+                for (LivingEntity target : possibleTargets) {
+                    Vec3 toEntity = target.getEyePosition().subtract(eyePosition).normalize();
+                    double dotProduct = toEntity.dot(lookVector);
+                    if (dotProduct > bestDotProduct) {
+                        BlockHitResult hitResult = redirector.level().clip(new ClipContext(eyePosition, target.getEyePosition(),
+                                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, redirector));
+                        if (hitResult.getType() == HitResult.Type.MISS && redirector.level().isEmptyBlock(target.blockPosition().above())) {
+                            bestTarget = target;
+                            bestDotProduct = dotProduct;
+                        }
+                    }
+                }
+                if (bestTarget != null && !BeyonderUtil.areAllies(bestTarget, redirector)) {
+                    if (entity instanceof LightningEntity lightningEntity) {
+                        lightningEntity.setTargetEntity(bestTarget);
+                        if (lightningEntity.getNoUp()) {
+                            lightningEntity.setNoUp(false);
+                        }
+                    } else if (entity instanceof LightningBolt lightningBolt) {
+                        lightningBolt.teleportTo(bestTarget.getX(), bestTarget.getY(), bestTarget.getZ());
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (!livingEntity.getPersistentData().getBoolean("lightningRedirection")) {
+            return 100;
+        }
+        else {
+            return 0;
+        }
     }
 }

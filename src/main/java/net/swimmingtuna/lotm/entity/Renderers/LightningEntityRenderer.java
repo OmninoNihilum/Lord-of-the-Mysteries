@@ -29,17 +29,47 @@ public class LightningEntityRenderer extends EntityRenderer<LightningEntity> {
         List<Vec3> positions = entity.getPositions();
         if (positions.size() < 2) return;
 
-        VertexConsumer mainBuilder = buffer.getBuffer(RenderType.leash());
-        poseStack.pushPose();
-        Vec3 entityPos = entity.position();
-        poseStack.translate(-entityPos.x, -entityPos.y, -entityPos.z);
-        Matrix4f matrix = poseStack.last().pose();
-        renderSmoothLine(mainBuilder, matrix, positions, LINE_WIDTH, packedLight, 1.0f, 246, 255, 155);
+        // Get current target information for rendering prediction
+        Vec3 lastPos = positions.get(positions.size() - 1);
+        Vec3 targetVector = null;
+
+        // Calculate the target direction based on entity's current state
+        if (entity.getTargetEntity() != null) {
+            targetVector = entity.getTargetEntity().position().subtract(lastPos).normalize();
+        } else if (entity.getTargetPos() != null) {
+            targetVector = entity.getTargetPos().subtract(lastPos).normalize();
+        } else if (entity.getDeltaMovement().lengthSqr() > 0.01) {
+            targetVector = entity.getDeltaMovement().normalize();
+        }
+
+        // Create a temporary extrapolated position if we have direction info
+        if (targetVector != null) {
+            Vec3 nextPredictedPos = lastPos.add(
+                    targetVector.scale(entity.getSpeed())
+            );
+
+            // Create a temporary list with the predicted position
+            List<Vec3> renderPositions = new java.util.ArrayList<>(positions);
+            renderPositions.add(nextPredictedPos);
+
+            VertexConsumer mainBuilder = buffer.getBuffer(RenderType.leash());
+            poseStack.pushPose();
+            Vec3 entityPos = entity.position();
+            poseStack.translate(-entityPos.x, -entityPos.y, -entityPos.z);
+            Matrix4f matrix = poseStack.last().pose();
+            renderSmoothLine(mainBuilder, matrix, renderPositions, LINE_WIDTH, packedLight, 1.0f, 246, 255, 155);
+        } else {
+            // Render normally if no targeting info
+            VertexConsumer mainBuilder = buffer.getBuffer(RenderType.leash());
+            poseStack.pushPose();
+            Vec3 entityPos = entity.position();
+            poseStack.translate(-entityPos.x, -entityPos.y, -entityPos.z);
+            Matrix4f matrix = poseStack.last().pose();
+            renderSmoothLine(mainBuilder, matrix, positions, LINE_WIDTH, packedLight, 1.0f, 246, 255, 155);
+        }
 
         poseStack.popPose();
     }
-
-
 
     private void renderSmoothLine(VertexConsumer builder, Matrix4f matrix, List<Vec3> positions, float width, int packedLight, float alpha, int r, int g, int b) {
         Vec3 cameraPos = this.entityRenderDispatcher.camera.getPosition();
