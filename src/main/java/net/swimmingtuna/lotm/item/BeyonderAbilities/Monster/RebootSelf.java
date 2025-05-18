@@ -28,7 +28,7 @@ import java.util.List;
 public class RebootSelf extends SimpleAbilityItem {
 
     public RebootSelf(Properties properties) {
-        super(properties, BeyonderClassInit.MONSTER, 1, 2000, 1200);
+        super(properties, BeyonderClassInit.MONSTER, 1, 2000, 900);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class RebootSelf extends SimpleAbilityItem {
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use if you're shifting, save your current state including health, spirituality, potion effects, luck, misfortune, sanity, and corruption. If not shifting, load your saved state"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2000").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Minute").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("45 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

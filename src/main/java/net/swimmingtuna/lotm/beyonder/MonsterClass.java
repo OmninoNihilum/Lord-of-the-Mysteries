@@ -80,7 +80,7 @@ public class MonsterClass implements BeyonderClass {
 
     @Override
     public List<Integer> spiritualityLevels() {
-        return List.of(10000, 5000, 3000, 1800, 1200, 700, 450, 300, 175, 125);
+        return List.of(29000, 11500, 6800, 3400, 2200, 1100, 600, 440, 240, 175);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class MonsterClass implements BeyonderClass {
 
     @Override
     public List<Integer> spiritualityRegen() {
-        return List.of(34, 22, 16, 12, 10, 8, 6, 5, 3, 2);
+            return List.of(50, 33, 25, 15, 12, 9, 7, 6, 4, 3);
     }
 
     @Override

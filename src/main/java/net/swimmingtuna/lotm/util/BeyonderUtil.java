@@ -1555,7 +1555,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.PROBABILITYWIPE.get(), applyAbilityStrengthened((200.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYFORTUNEINCREASE.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYMISFORTUNEINCREASE.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.PSYCHESTORM.get(), applyAbilityStrengthened((30.0f - (sequence * 3)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.PSYCHESTORM.get(), applyAbilityStrengthened((50.0f - (sequence * 3)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.REBOOTSELF.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPIRITVISION.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.WHISPEROFCORRUPTION.get(), applyAbilityStrengthened(((float) sequence) / abilityWeakness, abilityStrengthened));

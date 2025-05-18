@@ -63,7 +63,7 @@ public class SpectatorClass implements BeyonderClass {
 
     @Override
     public List<Integer> spiritualityLevels() {
-        return List.of(10000, 5000, 3000, 1800, 1200, 700, 450, 300, 175, 125);
+        return List.of(25000, 10000, 6000, 3000, 1800, 800, 500, 350, 175, 125);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SpectatorClass implements BeyonderClass {
 
     @Override
     public List<Integer> spiritualityRegen() {
-        return List.of(34, 22, 16, 12, 10, 8, 6, 5, 3, 2);
+        return List.of(45, 30, 20, 15, 12, 9, 6, 5, 3, 2);
     }
 
     @Override

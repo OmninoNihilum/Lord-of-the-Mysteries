@@ -64,7 +64,7 @@ public class WarriorClass implements BeyonderClass {
 
     @Override
     public List<Integer> spiritualityLevels() {
-        return List.of(10000, 6000, 3500, 2800, 1500, 780, 475, 375, 200, 150);
+        return List.of(30000, 12000, 7000, 3500, 2300, 900, 550, 400, 225, 150);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class WarriorClass implements BeyonderClass {
 
     @Override
     public List<Integer> spiritualityRegen() {
-        return List.of(34, 22, 16, 12, 10, 8, 6, 5, 3, 2);
+        return List.of(52, 34, 26, 17, 12, 8, 7, 6, 4, 3);
     }
 
     @Override
