@@ -116,7 +116,7 @@ public class WhisperOfCorruptionEntity extends AbstractHurtingProjectile {
             whisper.hurtMarked = true;
             whisper.hasImpulse = true;
             whisper.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-            scaleData.setScale(10 - (sequence * 2));
+            scaleData.setScale(12 - (sequence * 2));
             scaleData.markForSync(true);
             whisper.setLifetime(300 - (sequence * 50));
             livingEntity.level().addFreshEntity(whisper);

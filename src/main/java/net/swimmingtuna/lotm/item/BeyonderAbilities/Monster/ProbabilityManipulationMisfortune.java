@@ -33,7 +33,7 @@ public class ProbabilityManipulationMisfortune extends SimpleAbilityItem {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
     public ProbabilityManipulationMisfortune(Properties properties) {
-        super(properties, BeyonderClassInit.MONSTER, 0, 1000, 500, 777, 777);
+        super(properties, BeyonderClassInit.MONSTER, 0, 1000, 400, 777, 777);
     }
 
 

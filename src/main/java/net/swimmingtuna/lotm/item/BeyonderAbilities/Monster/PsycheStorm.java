@@ -97,17 +97,13 @@ public class PsycheStorm extends SimpleAbilityItem {
 
     private void psycheStorm(LivingEntity player, Level level, BlockPos targetPos) {
         if (!player.level().isClientSide()) {
-            int sequence = BeyonderUtil.getSequence(player);
-            double radius = (15.0 - sequence);
-            float damage = (float) (25.0 - (sequence * 2));
-            int corruptionAddition = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.PSYCHESTORM.get());
-            int duration = 200 - (sequence * 20);
+            float damage =  BeyonderUtil.getDamage(player).get(ItemInit.PSYCHESTORM.get());
+            double radius = damage * 0.66;
+            int duration = (int) (damage * 4);
             AABB boundingBox = new AABB(targetPos).inflate(radius);
             level.getEntitiesOfClass(LivingEntity.class, boundingBox, LivingEntity::isAlive).forEach(livingEntity -> {
                 if (livingEntity != player && !BeyonderUtil.areAllies(player, livingEntity)) {
-                    double corruption = livingEntity.getPersistentData().getDouble("corruption");
                     BeyonderUtil.applyMentalDamage(player, livingEntity, damage);
-                    livingEntity.getPersistentData().putDouble("corruption", corruption + corruptionAddition);
                     livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 1, false, false));
                 }
             });

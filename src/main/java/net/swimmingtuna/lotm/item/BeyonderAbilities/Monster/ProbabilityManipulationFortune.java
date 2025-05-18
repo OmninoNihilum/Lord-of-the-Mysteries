@@ -33,7 +33,7 @@ public class ProbabilityManipulationFortune extends SimpleAbilityItem {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
     public ProbabilityManipulationFortune(Properties properties) {
-        super(properties, BeyonderClassInit.MONSTER, 0, 1000, 500, 777, 777);
+        super(properties, BeyonderClassInit.MONSTER, 0, 1000, 400, 777, 777);
     }
 
 
@@ -60,7 +60,7 @@ public class ProbabilityManipulationFortune extends SimpleAbilityItem {
         tooltipComponents.add(Component.literal("Upon use on a target or typing a player's name in chat, gives them all fortunate events. If not used on a target, causes everything around you to gain them."));
         tooltipComponents.add(Component.literal("Left click for Probability Manipulation: Misfortune"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1000 if on a single target, 3500 otherwise").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("25 Seconds").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("20 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
