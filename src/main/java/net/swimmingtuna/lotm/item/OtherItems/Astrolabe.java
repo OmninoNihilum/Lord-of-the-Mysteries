@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,6 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -32,8 +32,11 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,29 +45,38 @@ public class Astrolabe extends Item {
 
 
     public Astrolabe(Properties pProperties) {
-        super(pProperties);
+        super(pProperties.durability(2000));
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
-        return super.use(pLevel, pPlayer, pUsedHand);
-    }
-
-
-    public static void astrolabe(LivingEntity player) {
-        if (!player.level().isClientSide()) {
-
+    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {
+        ItemStack stack = pPlayer.getItemInHand(pHand);
+        if (!pLevel.isClientSide()) {
+            int livingCount = 0;
+            for (LivingEntity living : BeyonderUtil.getNonAlliesNearby(pPlayer, 30)) {
+                livingCount++;
+                int maxDamageAmount = livingCount * 10;
+                int totalDamage = 10 - Math.min(10, BeyonderUtil.getSequence(living));
+                if (totalDamage > 0) {
+                    stack.hurtAndBreak(totalDamage, pPlayer, (player) -> {
+                        player.broadcastBreakEvent(pHand);
+                    });
+                }
+            }
+            return InteractionResultHolder.success(stack);
         }
+        return InteractionResultHolder.sidedSuccess(stack, pLevel.isClientSide());
     }
+
+
+    @Override
+    public boolean isBarVisible(ItemStack pStack) {
+        return pStack.isDamaged();
+    }
+
 
     private static Registry<Structure> getStructureRegistry(ServerLevel level) {
         return level.registryAccess().registryOrThrow(Registries.STRUCTURE);
-    }
-
-    private static boolean isValidStructure(ServerLevel level, ResourceLocation resourceLocation) {
-        Registry<Structure> registry = getStructureRegistry(level);
-        return registry.containsKey(resourceLocation) ||
-                registry.containsKey(ResourceKey.create(Registries.STRUCTURE, resourceLocation));
     }
 
     public static void astrolabeChatMessage(ServerChatEvent event) {
@@ -429,8 +441,6 @@ public class Astrolabe extends Item {
                 }
 
 
-
-
                 // Check for structures
                 if (player.level() instanceof ServerLevel serverLevel) {
                     Registry<Structure> structureRegistry = getStructureRegistry(serverLevel);
@@ -447,7 +457,7 @@ public class Astrolabe extends Item {
                             int nearestX = nearestStructurePos.getX();
                             int nearestZ = nearestStructurePos.getZ();
                             String structureName = structureResourceKey.location().getPath().replace('_', ' ');
-                            player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: "+ nearestZ).withStyle(ChatFormatting.GREEN)));
+                            player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
                         } else {
                             player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found within " + searchRadius + " blocks").withStyle(ChatFormatting.RED));
                         }
@@ -511,5 +521,14 @@ public class Astrolabe extends Item {
             }
             event.setCanceled(true);
         }
+    }
+
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("Use in order to gauge the danger around you, with the more damage this item takes, the higher the danger level.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GOLD));
+        tooltipComponents.add(Component.literal("Type in a biome, structure, entity name, or block to get it's location.").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
+        tooltipComponents.add(Component.literal("You can also type in a player's name followed by either (sequence, location, inventory, luck, misfortune, health, or pathway) to get that data").withStyle(ChatFormatting.LIGHT_PURPLE).withStyle(ChatFormatting.BOLD));
+        tooltipComponents.add(Component.literal("Be warned, if you try to divine information about a player who is many sequences above you, they might know.").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 }
