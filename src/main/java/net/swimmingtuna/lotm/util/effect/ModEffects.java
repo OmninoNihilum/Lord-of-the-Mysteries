@@ -21,8 +21,6 @@ public class ModEffects {
             () -> new FrenzyEffect(MobEffectCategory.HARMFUL,3124687));
     public static final RegistryObject<MobEffect> BATTLEHYPNOTISM = MOB_EFFECTS.register("battlehypnotism",
             () -> new BattleHypnotismEffect(MobEffectCategory.HARMFUL,3124687));
-    public static final RegistryObject<MobEffect> NIGHTMARE = MOB_EFFECTS.register("nightmare",
-            () -> new NightmareEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> MANIPULATION = MOB_EFFECTS.register("manipulation",
             () -> new ManipulationEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> MENTALPLAGUE = MOB_EFFECTS.register("mentalplague",
@@ -39,10 +37,14 @@ public class ModEffects {
             () -> new TwilightEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> BENEFICIAL_EFFECTS_BLOCKER = MOB_EFFECTS.register("beneficialeffectsblocker",
             () -> new NoBeneficialEffectsEffect(MobEffectCategory.HARMFUL, 3124687));
+    public static final RegistryObject<MobEffect> FLASH = MOB_EFFECTS.register("flash",
+            () -> new FlashEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> ARMOR_WEAKNESS = MOB_EFFECTS.register("armor_weakness",
             ArmorWeaknessEffect::new);
     public static final RegistryObject<MobEffect> TUMBLE = MOB_EFFECTS.register("tumble",
             () -> new TumbleEffect(MobEffectCategory.HARMFUL, 3124687));
+    public static final RegistryObject<MobEffect> DEAFNESS = MOB_EFFECTS.register("deafness",
+            () -> new DeafnessEffect(MobEffectCategory.HARMFUL, 3124687));
 
 
     public static void register(IEventBus eventBus) {

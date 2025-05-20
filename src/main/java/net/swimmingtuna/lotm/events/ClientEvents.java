@@ -17,6 +17,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.client.AbilityOverlay;
+import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
@@ -59,6 +60,7 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("flash_overlay", FlashOverlay.INSTANCE);
         event.registerAbove(VanillaGuiOverlay.EXPERIENCE_BAR.id(), "spirituality_overlay", SpiritualityBarOverlay.INSTANCE);
         //event.registerAbove(VanillaGuiOverlay.PLAYER_HEALTH.id(), "lotm_health_overlay", HealthBarOverlay.INSTANCE);
         event.registerAboveAll("ability_overlay", AbilityOverlay.INSTANCE);

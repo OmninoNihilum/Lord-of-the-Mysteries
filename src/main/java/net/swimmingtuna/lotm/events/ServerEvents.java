@@ -21,11 +21,9 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.SpectatorClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
-import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoorWaypoint;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
@@ -36,7 +34,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 import static net.swimmingtuna.lotm.beyonder.SpectatorClass.EVENT_TO_TAG;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor.coordsTravel;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoorWaypoint.coordsTravel;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLife.spawnMob;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation.isThreeIntegers;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionWeather.*;
@@ -234,7 +232,7 @@ public class ServerEvents {
             }
             event.setCanceled(true);
         }
-        if (!player.level().isClientSide && player.getMainHandItem().getItem() instanceof TravelDoor && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 5)) {
+        if (!player.level().isClientSide && player.getMainHandItem().getItem() instanceof TravelDoorWaypoint && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 5)) {
             if (!BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.APPRENTICE.get())) {
                 player.displayClientMessage(Component.literal("You are not of the Apprentice pathway").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 event.setCanceled(true);
@@ -245,13 +243,26 @@ public class ServerEvents {
                 event.setCanceled(true);
                 return;
             }
+            if (BeyonderUtil.getSequence(player) > 5) {
+                player.displayClientMessage(Component.literal("You need to be sequence 5 in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
+                event.setCanceled(true);
+                return;
+            }
             if (coordsTravel(message)) {
                 String[] coordinates = message.replace(",", " ").trim().split("\\s+");
+                //Add a string that checks for dimensions
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
 
-                player.teleportTo(x, y, z);
+                //MARKED
+                //Make a door that teleports to the dimensions + Dimension
+                if (BeyonderUtil.getSequence(player) <= 3) {
+                    player.teleportTo(x,y,z);
+                    //teleport to dimension
+                } else {
+                    player.teleportTo(x,y,z);
+                }
                 event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
                 BeyonderUtil.useSpirituality(player,300);
                 event.setCanceled(true);

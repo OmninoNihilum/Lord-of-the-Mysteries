@@ -75,9 +75,24 @@ public class TravelDoorWaypoint extends SimpleAbilityItem {
         }
     }
 
+    public static boolean coordsTravel(String message) {
+        message = message.replace(",", " ").trim();
+        message = message.replaceAll("\\s+", " ");
+        try {
+            String[] parts = message.split(" ");
+            if (parts.length != 3) return false;
+            for (String part : parts) {
+                Integer.parseInt(part);
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Right-click to teleport to selected waypoint"));
+        tooltipComponents.add(Component.literal("Right-click to teleport to selected waypoint. You can also type coordinates in chat to teleport to them. At sequence 3, you can also type in the name of a dimension"));
         tooltipComponents.add(Component.literal("Shift + Right-click to set waypoint at current position"));
         tooltipComponents.add(Component.literal("Left-click air to cycle between waypoints"));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

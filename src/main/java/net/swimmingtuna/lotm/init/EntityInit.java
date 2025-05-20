@@ -95,6 +95,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<MeteorNoLevelEntity>> METEOR_NO_LEVEL_ENTITY =
             ENTITIES.register("meteor_no_hurt", () -> EntityType.Builder.<MeteorNoLevelEntity>of(MeteorNoLevelEntity::new, MobCategory.MISC)
                     .sized(2.0f,2.0f).clientTrackingRange(300).build("meteor_no_hurt"));
+    public static final RegistryObject<EntityType<FlashEntity>> FLASH_ENTITY =
+            ENTITIES.register("flash", () -> EntityType.Builder.<FlashEntity>of(FlashEntity::new, MobCategory.MISC)
+                    .sized(0.5f,0.5f).clientTrackingRange(200).build(new ResourceLocation(LOTM.MOD_ID, "flash").toString()));
     public static final RegistryObject<EntityType<SilverLightEntity>> SILVER_LIGHT_ENTITY =
             ENTITIES.register("silver_beam_entity", () -> EntityType.Builder.<SilverLightEntity>of(SilverLightEntity::new, MobCategory.MISC)
                     .sized(2.5f,2.5f).clientTrackingRange(400).build(new ResourceLocation(LOTM.MOD_ID, "silver_beam_entity").toString()));

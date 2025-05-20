@@ -4,51 +4,65 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.init.SoundInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class TrickLoudNoise extends SimpleAbilityItem {
-
-
     public TrickLoudNoise(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 50, 200);
     }
 
-
-
-    private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
-
-    @SuppressWarnings("deprecation")
     @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
-        if (slot == EquipmentSlot.MAINHAND) {
-            return this.lazyAttributeMap.get();
+    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand){
+        if(!checkAll(livingEntity)){
+            return InteractionResult.FAIL;
         }
-        return super.getDefaultAttributeModifiers(slot);
+        bang(livingEntity);
+        addCooldown(livingEntity);
+        useSpirituality(livingEntity);
+        return InteractionResult.SUCCESS;
     }
 
-    private Multimap<Attribute, AttributeModifier> createAttributeMap() {
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> attributeBuilder = ImmutableMultimap.builder();
+    public static void bang(LivingEntity entity){
+        if(!entity.level().isClientSide) {
+            int damage = (int) (float) BeyonderUtil.getDamage(entity).get(ItemInit.TRICKFOG.get());
+            int duration = (int) damage * 20;
+            AABB area = entity.getBoundingBox().inflate(damage);
+            List<Entity> players = entity.level().getEntities(entity, area, e -> e instanceof Player && e != entity);
 
-        //reach should be___
-        attributeBuilder.putAll(super.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND));
-        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 12, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with entities
-        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 12, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with blocks, p much useless for this item
-        return attributeBuilder.build();
+            for (Entity list : players) {
+                if (list instanceof Player player && !BeyonderUtil.areAllies(entity, player)) {
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundInit.BANG.get(), SoundSource.PLAYERS, 1f, 1f);
+                    player.addEffect(new MobEffectInstance(ModEffects.DEAFNESS.get(), duration, 0, false, false, true));
+                }
+            }
+        }
     }
 
     @Override

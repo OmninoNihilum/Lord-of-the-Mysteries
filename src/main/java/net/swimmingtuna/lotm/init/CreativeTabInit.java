@@ -173,11 +173,10 @@ public class CreativeTabInit {
                         event.accept(ItemInit.TRICKWIND.get());
                         event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION.get());
                         event.accept(ItemInit.RECORDSCRIBE.get());
-                        event.accept(ItemInit.TRAVELDOOR.get());
                         event.accept(ItemInit.TRAVELDOORHOME.get());
                         event.accept(ItemInit.INVISIBLEHAND.get());
                         event.accept(ItemInit.BLINK.get());
-                        event.accept(ItemInit.BLINK_AFTERIMAGE.get());
+                        event.accept(ItemInit.BLINKAFTERIMAGE.get());
                         event.accept(ItemInit.SCRIBEABILITIES.get());
                         event.accept(ItemInit.BLINK_STATE.get());
                         event.accept(ItemInit.EXILE.get());
@@ -188,7 +187,6 @@ public class CreativeTabInit {
                         event.accept(ItemInit.DIMENSIONAL_SIGHT.get());
                         event.accept(ItemInit.REPLICATE.get());
                         event.accept(ItemInit.SEALING.get());
-                        event.accept(ItemInit.TELEPORTATION_AFTERIMAGE.get());
                         event.accept(ItemInit.SPACE_FRAGMENTATION.get());
                         event.accept(ItemInit.GRAVITY_MANIPULATION.get());
                         event.accept(ItemInit.SPATIAL_LOCK_ON.get());

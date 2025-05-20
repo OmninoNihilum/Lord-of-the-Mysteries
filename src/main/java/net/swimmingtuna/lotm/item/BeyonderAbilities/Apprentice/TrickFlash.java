@@ -4,51 +4,56 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.entity.FlashEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Vector;
 
 public class TrickFlash extends SimpleAbilityItem {
-
 
     public TrickFlash(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 50, 200);
     }
 
-
-
-    private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
-
-    @SuppressWarnings("deprecation")
     @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
-        if (slot == EquipmentSlot.MAINHAND) {
-            return this.lazyAttributeMap.get();
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+        if (!checkAll(player)) {
+            return InteractionResult.FAIL;
         }
-        return super.getDefaultAttributeModifiers(slot);
+        useSpirituality(player);
+        addCooldown(player);
+        flash(player);
+        return InteractionResult.SUCCESS;
     }
 
-    private Multimap<Attribute, AttributeModifier> createAttributeMap() {
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> attributeBuilder = ImmutableMultimap.builder();
-
-        //reach should be___
-        attributeBuilder.putAll(super.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND));
-        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 12, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with entities
-        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 12, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with blocks, p much useless for this item
-        return attributeBuilder.build();
+    public static void flash(LivingEntity livingEntity) {
+        if (!livingEntity.level().isClientSide()) {
+            FlashEntity flash = new FlashEntity(EntityInit.FLASH_ENTITY.get(), livingEntity.level());
+            Vec3 lookVec = livingEntity.getLookAngle();
+            flash.setDeltaMovement(lookVec.scale(1.5));
+            flash.hurtMarked = true;
+            flash.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            livingEntity.level().addFreshEntity(flash);
+        }
     }
 
     @Override
@@ -63,5 +68,10 @@ public class TrickFlash extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        return super.getPriority(livingEntity, target);
     }
 }

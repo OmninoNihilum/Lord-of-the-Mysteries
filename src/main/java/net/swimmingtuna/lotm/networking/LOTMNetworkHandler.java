@@ -50,11 +50,6 @@ public class LOTMNetworkHandler {
                 .encoder(ProphesizeLeftClickC2S::toByte)
                 .consumerMainThread(ProphesizeLeftClickC2S::handle)
                 .add();
-        INSTANCE.messageBuilder(TravelDoorC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(TravelDoorC2S::new)
-                .encoder(TravelDoorC2S::toByte)
-                .consumerMainThread(TravelDoorC2S::handle)
-                .add();
         INSTANCE.messageBuilder(MercuryLiqueficationC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(MercuryLiqueficationC2S::new)
                 .encoder(MercuryLiqueficationC2S::toByte)

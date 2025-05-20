@@ -28,6 +28,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
@@ -418,6 +419,38 @@ public class MonsterClass implements BeyonderClass {
             }
         }
     }
+
+    public static void monsterDodgeAttack(LivingAttackEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        DamageSource source = event.getSource();
+        Entity entitySource = source.getEntity();
+        if (!livingEntity.level().isClientSide() && BeyonderUtil.isBeyonderCapable(livingEntity)) {
+            if ((entitySource != null && entitySource != livingEntity) && !source.is(DamageTypes.CRAMMING) && !source.is(DamageTypes.STARVE) && !source.is(DamageTypes.FALL) && !source.is(DamageTypes.DROWN) && !source.is(DamageTypes.FELL_OUT_OF_WORLD) && !source.is(DamageTypes.ON_FIRE)) {
+                if (BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.MONSTER.get())) {
+                    int randomChance = (int) ((Math.random() * 20) - BeyonderUtil.getSequence(livingEntity));
+                    if (randomChance >= 13) {
+                        double amount = event.getAmount();
+                        double x = 0;
+                        double z = 0;
+                        Random random = new Random();
+                        if (random.nextInt(2) == 0) {
+                            x = Math.min(3, amount * -0.15);
+                            z = Math.min(3, amount * -0.15);
+                        } else {
+                            x = Math.min(3, amount * 0.15);
+                            z = Math.min(3, amount * 0.15);
+                        }
+                        livingEntity.setDeltaMovement(x, 0.5, z);
+                        livingEntity.hurtMarked = true;
+                        event.setCanceled(true);
+                        livingEntity.sendSystemMessage(Component.literal("A breeze of wind moved you out of the way of damage").withStyle(ChatFormatting.GREEN));
+                    }
+                }
+            }
+        }
+    }
+
+
 
     public static void dodgeProjectiles(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
