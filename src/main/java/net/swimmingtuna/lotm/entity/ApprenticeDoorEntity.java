@@ -1,9 +1,13 @@
 package net.swimmingtuna.lotm.entity;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,6 +48,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Float> X = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> Y = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> Z = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<String> DIMENSION_ID = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.STRING);
+
 
     private DoorMode doorMode;
     private DoorAnimationKind animationKind;
@@ -54,7 +60,6 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         super(pEntityType, pLevel);
     }
 
-    //Teleport only
     public ApprenticeDoorEntity(Level level, LivingEntity creator, int sequence, int life, float yaw, float x, float y, float z, Level dimensionDestination, DoorAnimationKind animationKind){
         this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
         this.entityData.set(DOOR_MODE, DoorMode.TELEPORT_ONLY);
@@ -68,6 +73,10 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.entityData.set(Z, z);
 
         this.dimensionDestination = dimensionDestination;
+        if (dimensionDestination != null) {
+            ResourceKey<Level> dimKey = ((ServerLevel)dimensionDestination).dimension();
+            this.entityData.set(DIMENSION_ID, dimKey.location().toString());
+        }
         this.creator = creator;
     }
 
@@ -166,27 +175,42 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         }
     }
 
-    private void teleport(LivingEntity entity){
-        if(getDoorMode() == DoorMode.TELEPORT_ONLY){
-            if(isFreeToUse()){
-                if(getSequence() > 7){
-                    if(entity !=  null && entity == getCreator()){
-                        if(getDimensionDestination() == entity.level()) {
-                            entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
-                        } else {
-                            BeyonderUtil.teleportEntityTroughDimensions(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
-                        }
+    private void teleport(LivingEntity entity) {
+        if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
+            if (isFreeToUse()) {
+                if (getSequence() > 7) {
+                    if (entity != null && entity == getCreator()) {
+                        teleportToDestination(entity);
                     }
-                }else{
-                    if(entity !=  null){
-                        if(getDimensionDestination() == entity.level()) {
-                            entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
-                        } else {
-                            BeyonderUtil.teleportEntityTroughDimensions(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
-                        }
+                } else {
+                    if (entity != null) {
+                        teleportToDestination(entity);
                     }
                 }
             }
+        }
+    }
+    private void teleportToDestination(LivingEntity entity) {
+        if (dimensionDestination == null && !this.entityData.get(DIMENSION_ID).isEmpty()) {
+            if (level().getServer() != null) {
+                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION,
+                        new ResourceLocation(this.entityData.get(DIMENSION_ID)));
+                ServerLevel targetLevel = level().getServer().getLevel(dimKey);
+                if (targetLevel != null) {
+                    dimensionDestination = targetLevel;
+                }
+            }
+        }
+        if (dimensionDestination == null) {
+            return;
+        }
+        float x = getTeleportX();
+        float y = getTeleportY();
+        float z = getTeleportZ();
+        if (dimensionDestination.equals(entity.level())) {
+            entity.teleportTo(x, y, z);
+        } else {
+            BeyonderUtil.teleportEntityTroughDimensions(entity, dimensionDestination, x, y, z);
         }
     }
 
@@ -218,6 +242,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.entityData.define(X, 0F);
         this.entityData.define(Y, 0F);
         this.entityData.define(Z, 0F);
+        this.entityData.define(DIMENSION_ID, "");
     }
 
     @Override
@@ -228,6 +253,17 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 this.entityData.set(DOOR_MODE, mode);
             } catch (IllegalArgumentException ignored) {
                 delete();
+            }
+        }
+        if(tag.contains("dimensionId")) {
+            this.entityData.set(DIMENSION_ID, tag.getString("dimensionId"));
+            if (level().getServer() != null) {
+                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION,
+                        new ResourceLocation(tag.getString("dimensionId")));
+                ServerLevel targetLevel = level().getServer().getLevel(dimKey);
+                if (targetLevel != null) {
+                    this.dimensionDestination = targetLevel;
+                }
             }
         }
         if (tag.contains("doorAnimationKind")) {
@@ -284,6 +320,10 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         tag.putFloat("x", this.entityData.get(X));
         tag.putFloat("y", this.entityData.get(Y));
         tag.putFloat("z", this.entityData.get(Z));
+        String dimId = this.entityData.get(DIMENSION_ID);
+        if (!dimId.isEmpty()) {
+            tag.putString("dimensionId", dimId);
+        }
     }
 
     @Override
