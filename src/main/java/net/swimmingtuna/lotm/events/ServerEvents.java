@@ -222,7 +222,6 @@ public class ServerEvents {
                 int z = (int)targetPlayer.getZ();
                 player.teleportTo(x, y, z);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
-                event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)), true);
             } else {
                 event.getPlayer().displayClientMessage(Component.literal("Invalid coordinates or player name: " + message).withStyle(BeyonderUtil.getStyle(player)), true);
             }
@@ -242,16 +241,27 @@ public class ServerEvents {
             }
 
             if (coordsTravel(message)) {
-                String[] coordinates = message.replace(",", " ").trim().split("\\s+");
+                String[] coordinates;
+                String dimensionId = null;
+
+                if (hasDimensionId(message)) {
+                    dimensionId = getDimensionId(message);
+                    String[] parts = message.replace(",", " ").trim().split("\\s+");
+                    coordinates = new String[3];
+                    System.arraycopy(parts, parts.length - 3, coordinates, 0, 3);
+                } else {
+                    coordinates = message.replace(",", " ").trim().split("\\s+");
+                }
+
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
-                String dimensionId = null;
 
-                if(hasDimensionId(message)) dimensionId = getDimensionId(message);
                 spawnDoor(player, x, y, z, dimensionId);
+                if (dimensionId != null) {
+                    player.sendSystemMessage(Component.literal("Dimension ID is " + dimensionId));
+                }
 
-                event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
                 BeyonderUtil.useSpirituality(player, 300);
                 event.setCanceled(true);
                 return;
@@ -279,7 +289,6 @@ public class ServerEvents {
             } else {
                 event.getPlayer().displayClientMessage(Component.literal("Invalid coordinates or player name: " + message).withStyle(BeyonderUtil.getStyle(player)), true);
             }
-
             event.setCanceled(true);
         }
 

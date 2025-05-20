@@ -91,7 +91,6 @@ import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.swimmingtuna.lotm.beyonder.ApprenticeClass.apprenticeWindSlowFall;
 import static net.swimmingtuna.lotm.beyonder.WarriorClass.newWarriorDamageNegation;
 import static net.swimmingtuna.lotm.beyonder.WarriorClass.twilightTick;
 import static net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity.domainDrops;
@@ -417,7 +416,6 @@ public class ModEvents {
                 GuardianBoxEntity.decrementGuardianTimer(livingEntity);
                 EyeOfDemonHunting.eyeTick(event);
                 EyeOfDemonHunting.demonHunterAntiConcealment(event);
-                apprenticeWindSlowFall(event);
                 livingNoMoveEffect(event);
                 PsychologicalInvisibility.psychologicalInvisibilityHurtTick(livingEntity);
                 //sendSpiritWorldPackets(entity);

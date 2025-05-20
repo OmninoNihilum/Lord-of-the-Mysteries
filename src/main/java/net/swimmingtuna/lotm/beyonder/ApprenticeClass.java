@@ -217,20 +217,4 @@ public class ApprenticeClass implements BeyonderClass {
             }
         }
     }
-
-    public static void apprenticeWindSlowFall(LivingEvent.LivingTickEvent event) {
-        //WIND MANIPULATION GLIDE
-        LivingEntity player = event.getEntity();
-        if (!player.level().isClientSide()) {
-            boolean x = player instanceof Player pPlayer && pPlayer.getAbilities().instabuild;
-            if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.APPRENTICE.get()) && BeyonderUtil.getSequence(player) <= 8 && player.isShiftKeyDown() && player.fallDistance >= 3 && !x) {
-                Vec3 movement = player.getDeltaMovement();
-                double deltaX = Math.cos(Math.toRadians(player.getYRot() + 90)) * 0.06;
-                double deltaZ = Math.sin(Math.toRadians(player.getYRot() + 90)) * 0.06;
-                player.setDeltaMovement(movement.x + deltaX, -0.05, movement.z + deltaZ);
-                player.fallDistance = 5;
-                player.hurtMarked = true;
-            }
-        }
-    }
 }

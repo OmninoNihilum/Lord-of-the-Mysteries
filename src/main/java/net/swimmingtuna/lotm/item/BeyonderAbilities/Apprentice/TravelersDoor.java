@@ -87,49 +87,144 @@ public class TravelersDoor extends SimpleAbilityItem {
         message = message.replaceAll("\\s+", " ");
         try {
             String[] parts = message.split(" ");
-            if (parts.length != 3) return false;
-            for (String part : parts) {
-                Integer.parseInt(part);
+
+            // If we have 3 parts, they must all be integers
+            if (parts.length == 3) {
+                for (String part : parts) {
+                    Integer.parseInt(part);
+                }
+                return true;
             }
-            return true;
+            // If we have 4+ parts, the last 3 parts must be integers
+            else if (parts.length >= 4) {
+                // Try to parse the last 3 elements as integers
+                for (int i = parts.length - 3; i < parts.length; i++) {
+                    Integer.parseInt(parts[i]);
+                }
+                return true;
+            }
+
+            return false;
         } catch (NumberFormatException e) {
             return false;
         }
     }
 
-    public static boolean hasDimensionId(String message){
+    public static boolean hasDimensionId(String message) {
         message = message.replace(",", " ");
         String[] parts = message.trim().split("\\s+");
-        return parts.length > 3;
+        if (parts.length > 3) {
+            try {
+                for (int i = parts.length - 3; i < parts.length; i++) {
+                    Integer.parseInt(parts[i]);
+                }
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
-    public static String getDimensionId(String message){
+    public static String getDimensionId(String message) {
         message = message.replace(",", " ");
         String[] parts = message.trim().split("\\s+");
-        if(parts.length > 3) return parts[3];
+        if (parts.length > 3) {
+            try {
+                // Make sure the last 3 parts are integers
+                for (int i = parts.length - 3; i < parts.length; i++) {
+                    Integer.parseInt(parts[i]);
+                }
+
+                // Extract dimension ID from the message
+                // If it's just one word before the coordinates
+                if (parts.length == 4) {
+                    String dim = parts[0].toLowerCase();
+                    // Ensure the dimension has the correct minecraft: namespace
+                    if (dim.equals("nether")) {
+                        return "minecraft:the_nether";
+                    } else if (dim.equals("end")) {
+                        return "minecraft:the_end";
+                    } else if (dim.equals("overworld")) {
+                        return "minecraft:overworld";
+                    } else {
+                        // For modded dimensions, assume they use their own namespace
+                        return dim;
+                    }
+                } else {
+                    // If the dimension name has multiple words (like "the end")
+                    StringBuilder dimensionId = new StringBuilder();
+                    for (int i = 0; i < parts.length - 3; i++) {
+                        if (i > 0) dimensionId.append("_");
+                        dimensionId.append(parts[i].toLowerCase());
+                    }
+
+                    String dim = dimensionId.toString();
+                    // Apply the correct namespace
+                    if (dim.equals("the_nether") || dim.equals("nether")) {
+                        return "minecraft:the_nether";
+                    } else if (dim.equals("the_end") || dim.equals("end")) {
+                        return "minecraft:the_end";
+                    } else if (dim.equals("overworld")) {
+                        return "minecraft:overworld";
+                    } else {
+                        // For modded dimensions, attempt to add minecraft: namespace
+                        return dim;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
         return null;
-    }
-
-    public static double[] getHorizontalLookCoordinates(Player player, double distance){
-        float yaw = player.getYRot();
-
-        double angleRadians = Math.toRadians(-yaw);
-
-        double x = player.getX() + distance * Math.sin(angleRadians);
-        double z = player.getZ() + distance * Math.cos(angleRadians);
-
-        return new double[] {x, z};
     }
 
     public static Level getTargetLevel(Player player, String dimensionId) {
         if (dimensionId == null) {
             return player.level();
         }
+
         MinecraftServer server = player.level().getServer();
         if (server == null) return player.level();
-        ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionId));
+
+        // Debug output to see what dimension ID we're trying to use
+        System.out.println("Attempting to find dimension: " + dimensionId);
+
+        // Handle common dimension names without requiring exact ResourceLocation format
+        ResourceKey<Level> dimKey;
+        try {
+            // Try to create a resource location directly
+            dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionId));
+            System.out.println("Created resource key: " + dimKey);
+        } catch (Exception e) {
+            // If that fails, try some fallbacks
+            System.out.println("Failed to create resource key, trying fallbacks");
+            if (dimensionId.toLowerCase().contains("nether")) {
+                dimKey = Level.NETHER;
+            } else if (dimensionId.toLowerCase().contains("end")) {
+                dimKey = Level.END;
+            } else {
+                // Default to overworld if we can't figure it out
+                dimKey = Level.OVERWORLD;
+            }
+        }
+
         ServerLevel level = server.getLevel(dimKey);
-        return level != null ? level : player.level();
+        if (level != null) {
+            System.out.println("Found dimension: " + level);
+            return level;
+        } else {
+            System.out.println("Dimension not found, defaulting to current level");
+            return player.level();
+        }
+    }
+
+    public static double[] getHorizontalLookCoordinates(Player player, double distance){
+        float yaw = player.getYRot();
+        double angleRadians = Math.toRadians(-yaw);
+        double x = player.getX() + distance * Math.sin(angleRadians);
+        double z = player.getZ() + distance * Math.cos(angleRadians);
+        return new double[] {x, z};
     }
 
     public static void spawnDoor(Player player, int x, int y, int z, String dimensionId){
@@ -141,6 +236,7 @@ public class TravelersDoor extends SimpleAbilityItem {
                 (int) Math.floor(getHorizontalLookCoordinates(player, 2)[1]))).isAir()){
             animationKind = ApprenticeDoorEntity.DoorAnimationKind.FADE_IN;
         }
+
         ApprenticeDoorEntity door = new ApprenticeDoorEntity(player.level(), player, BeyonderUtil.getSequence(player), 150, yaw, x, y, z, targetLevel, animationKind);
         door.teleportTo(getHorizontalLookCoordinates(player, 2)[0], player.getY(), getHorizontalLookCoordinates(player, 2)[1]);
 
