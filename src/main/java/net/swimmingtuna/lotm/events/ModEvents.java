@@ -59,10 +59,7 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.AllyMaker;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.InvisibleHand;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickBurning;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickElectricShock;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TrickTelekenisis;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
@@ -157,8 +154,6 @@ public class ModEvents {
             );
         }
     }
-
-
 
 
     @SubscribeEvent
@@ -491,7 +486,35 @@ public class ModEvents {
         LivingEntity attacked = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (attacker != null) {
-            if (!attacker.level().isClientSide()) {
+            if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
+                BlinkAfterimage.travelerBlinkPassive(event);
+                CompoundTag tag = attacked.getPersistentData();
+                if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(attacked, BeyonderClassInit.SAILOR.get(), 1) && (attacker.getName().getString().toLowerCase().contains("lightning") || attacker.getName().getString().toLowerCase().contains("thunder") || attacker.toString().toLowerCase().contains("lightning") || attacker.toString().toLowerCase().contains("thunder"))) {
+                    event.setCanceled(true);
+                }
+                CompoundTag sourceTag = attacker.getPersistentData();
+                boolean entityInSpiritWorld = tag.getBoolean("inSpiritWorld");
+                boolean sourceInSpiritWorld = sourceTag.getBoolean("inSpiritWorld");
+                if (entityInSpiritWorld != sourceInSpiritWorld) {
+                    event.setCanceled(true);
+                }
+
+                //SAILOR FLIGHT
+                if (tag.getInt("sailorFlightDamageCancel") != 0 && event.getSource().is(DamageTypes.FALL)) {
+                    event.setCanceled(true);
+                    tag.putInt("sailorFlightDamageCancel", 0);
+                }
+                int ignoreDamage = tag.getInt("luckIgnoreDamage");
+                if (ignoreDamage >= 1) {
+                    event.setCanceled(true);
+                    attacked.getPersistentData().putInt("luckIgnoreDamage", attacked.getPersistentData().getInt("luckIgnoreDamage") - 1);
+
+                }
+                if (tag.getInt("inStormSeal") >= 1) {
+                    event.setCanceled(true);
+                }
+
+                MonsterClass.monsterDodgeAttack(event);
                 if (attacker instanceof LivingEntity livingEntity) {
                     if (livingEntity.getMainHandItem().getItem() instanceof AllyMaker) {
                         event.setCanceled(true);
@@ -525,6 +548,32 @@ public class ModEvents {
                 if (attacker.getPersistentData().getInt("harmfulFalseProphecyAttack") >= 1) {
                     attacker.getPersistentData().putInt("luckDoubleDamage", attacker.getPersistentData().getInt("luckDoubleDamage") + 5);
                     attacker.getPersistentData().putInt("harmfulFalseProphecyAttack", 0);
+                }
+                int stoneImmunity = tag.getInt("luckStoneDamageImmunity");
+                int meteorImmunity = tag.getInt("calamityMeteorImmunity");
+                int mcLightningImmunity = tag.getInt("luckMCLightningImmunity");
+                int lotmLightningDamage = tag.getInt("luckLightningLOTMDamage");
+                int lotmLightningImmunity = tag.getInt("calamityLOTMLightningImmunity");
+                int lightningStormImmunity = tag.getInt("calamityLightningStormImmunity");
+                if (attacker instanceof StoneEntity) {
+                    if (stoneImmunity >= 1) {
+                        event.setCanceled(true);
+                    }
+                }
+                if (attacker instanceof MeteorEntity || attacker instanceof MeteorNoLevelEntity) {
+                    if (meteorImmunity >= 1) {
+                        event.setCanceled(true);
+                    }
+                }
+                if (event.getSource().is(DamageTypes.LIGHTNING_BOLT)) {
+                    if (mcLightningImmunity >= 1) {
+                        event.setCanceled(true);
+                    }
+                }
+                if (attacker instanceof LightningEntity) {
+                    if (lotmLightningImmunity >= 1 || lightningStormImmunity >= 1) {
+                        event.setCanceled(true);
+                    }
                 }
             }
         }
@@ -569,12 +618,12 @@ public class ModEvents {
                     event.setCanceled(true);
                 }
                 if (entity instanceof LivingEntity living) {
-                    if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.SAILOR.get(), 1) && (entitySource.getName().getString().contains("lightning") || entitySource.getName().getString().contains("thunder"))) {
+                    if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.SAILOR.get(), 1) && (entitySource.getName().getString().toLowerCase().contains("lightning") || entitySource.getName().getString().toLowerCase().contains("thunder") || entitySource.toString().toLowerCase().contains("lightning") || entitySource.toString().toLowerCase().contains("thunder"))) {
                         event.setCanceled(true);
                         event.setAmount(0);
                     }
 
-                        if (entitySourceOwner instanceof LivingEntity livingEntity) {
+                    if (entitySourceOwner instanceof LivingEntity livingEntity) {
                         if (BeyonderUtil.areAllies(livingEntity, living)) {
                             event.setAmount(event.getAmount() * 0.6f);
                         }
@@ -591,7 +640,6 @@ public class ModEvents {
                     int lightningBoltResistance = tag.getInt("calamityLightningBoltMonsterResistance");
                     int lotmLightningDamageCalamity = tag.getInt("calamityLightningStormResistance");
                     int tornadoResistance = tag.getInt("luckTornadoResistance");
-                    int tornadoImmunity = tag.getInt("luckTornadoImmunity");
                     int lotmLightningImmunity = tag.getInt("calamityLOTMLightningImmunity");
                     int lightningStormImmunity = tag.getInt("calamityLightningStormImmunity");
                     Level level = entity.level();
@@ -639,7 +687,6 @@ public class ModEvents {
                 //SAILOR FLIGHT
                 if (entity instanceof Player player) {
                     PsychologicalInvisibility.psychologicalInvisibilityHurt(event);
-                    BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
                     int flightCancel = tag.getInt("sailorFlightDamageCancel");
                     if (!player.level().isClientSide()) {
 

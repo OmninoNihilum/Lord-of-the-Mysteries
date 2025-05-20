@@ -102,6 +102,7 @@ public class SoundInit {
     public static final RegistryObject<SoundEvent> SIREN_SONG_STRENGTHEN_19 = registerSoundEvent("siren_song_strengthen_19");
     public static final RegistryObject<SoundEvent> SIREN_SONG_STRENGTHEN_20 = registerSoundEvent("siren_song_strengthen_20");
 
+    public static final RegistryObject<SoundEvent> BANG = registerSoundEvent("bang");
 
     private static RegistryObject<SoundEvent> registerSoundEvent(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(LOTM.MOD_ID, name)));

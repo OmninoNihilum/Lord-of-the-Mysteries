@@ -456,10 +456,17 @@ public class Astrolabe extends Item {
                         if (nearestStructurePos != null) {
                             int nearestX = nearestStructurePos.getX();
                             int nearestZ = nearestStructurePos.getZ();
+                            int playerX = (int) player.getX();
+                            int playerZ = (int) player.getZ();
+                            int distanceFromStructure = Math.abs(nearestX - playerX) + Math.abs(nearestZ - playerZ);
                             String structureName = structureResourceKey.location().getPath().replace('_', ' ');
-                            player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
+                            if (distanceFromStructure <= searchRadius) {
+                                player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
+                            } else {
+                                player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
+                            }
                         } else {
-                            player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found within " + searchRadius + " blocks").withStyle(ChatFormatting.RED));
+                            player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
                         }
                     } else if (isTag) {
                         foundResource = true;
@@ -476,7 +483,17 @@ public class Astrolabe extends Item {
                                     if (nearestPos != null) {
                                         foundAny = true;
                                         String structureName = key.location().getPath().replace('_', ' ');
-                                        player.sendSystemMessage(Component.literal("Found " + structureName + " from tag " + structureTagKey.location().getPath().replace('_', ' ') + " at: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal(nearestPos.getX() + ", " + nearestPos.getY() + ", " + nearestPos.getZ()).withStyle(ChatFormatting.GREEN)));
+
+                                        int nearestX = nearestPos.getX();
+                                        int nearestZ = nearestPos.getZ();
+                                        int playerX = (int) player.getX();
+                                        int playerZ = (int) player.getZ();
+                                        int distanceFromStructure = Math.abs(nearestX - playerX) + Math.abs(nearestZ - playerZ);
+                                        if (distanceFromStructure <= searchRadius) {
+                                            player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
+                                        } else {
+                                            player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
+                                        }
                                         break;
                                     }
                                 }
@@ -498,16 +515,23 @@ public class Astrolabe extends Item {
                                 BlockPos nearestStructurePos = serverLevel.findNearestMapStructure(TagKey.create(Registries.STRUCTURE, key.location()), playerPos, maxDistance * 2, false);
                                 if (nearestStructurePos != null) {
                                     int nearestX = nearestStructurePos.getX();
-                                    int nearestY = nearestStructurePos.getY();
                                     int nearestZ = nearestStructurePos.getZ();
                                     String structureName = key.location().getPath().replace('_', ' ');
-                                    player.sendSystemMessage(Component.literal("Found " + structureName + " at: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal(nearestX + ", " + nearestY + ", " + nearestZ).withStyle(ChatFormatting.GREEN)));
+                                    int playerX = (int) player.getX();
+                                    int playerZ = (int) player.getZ();
+                                    int distanceFromStructure = Math.abs(nearestX - playerX) + Math.abs(nearestZ - playerZ);
+                                    int searchRadius = maxDistance * 2;
+                                    if (distanceFromStructure <= searchRadius) {
+                                        player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
+                                    } else {
+                                        player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
+                                    }
                                     break;
                                 }
                             }
                         }
                         if (foundResource && !structureFound) {
-                            player.sendSystemMessage(Component.literal("Structure type found but no instances within range").withStyle(ChatFormatting.RED));
+                            player.sendSystemMessage(Component.literal("No strucutre in range").withStyle(ChatFormatting.RED));
                         }
                     }
                 }

@@ -67,7 +67,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
         if (!livingEntity.level().isClientSide() && tag.getBoolean("trickmasterTelekenisis") && livingEntity.tickCount % 5 == 0) {
             if (BeyonderUtil.getSpirituality(livingEntity) >= 10) {
                 for (Entity entity : livingEntity.level().getEntitiesOfClass(Entity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTELEKENISIS.get())))) {
-                    if ((entity instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity)) || (entity instanceof LivingEntity living && !BeyonderUtil.areAllies(livingEntity, living))) {
+                    if (entity != livingEntity && (entity instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity)) || (entity instanceof LivingEntity living && !BeyonderUtil.areAllies(livingEntity, living))) {
                         double x = entity.getX() - livingEntity.getX();
                         double y = entity.getY() - livingEntity.getY();
                         double z = entity.getZ() - livingEntity.getZ();

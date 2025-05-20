@@ -21,7 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Blink;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
@@ -119,7 +119,7 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
         int matterAccelerationDistance = livingEntity.getPersistentData().getInt("tyrantSelfAcceleration");
         int blinkDistance = livingEntity.getPersistentData().getInt("BlinkDistance");
         int luckGiftingAmount = livingEntity.getPersistentData().getInt("monsterLuckGifting");
-        int doorBlinkDistance = livingEntity.getPersistentData().getInt("travelBlinkDistance");
+        int doorBlinkDistance = livingEntity.getPersistentData().getInt("trickmasterBlinkDistance");
 
         if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof MatterAccelerationSelf && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.SAILOR.get())) {
             livingEntity.getPersistentData().putInt("tyrantSelfAcceleration", matterAccelerationDistance + 50);
@@ -158,8 +158,8 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
                 livingEntity.getPersistentData().putInt("monsterLuckGifting", 0);
             }
         }
-        if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof TravelDoor && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.APPRENTICE.get())) {
-            livingEntity.getPersistentData().putInt("travelBlinkDistance", doorBlinkDistance + 10);
+        if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof Blink && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 5)) {
+            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", doorBlinkDistance + 10);
             if (livingEntity instanceof Player player) {
                 player.displayClientMessage(Component.literal("Blink Distance is " + doorBlinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
             }

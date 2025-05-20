@@ -87,8 +87,9 @@ public class TrickElectricShock extends SimpleAbilityItem {
                         serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, targetX + offsetX, targetY + offsetY, targetZ + offsetZ, 0, 0.0, 0.0, 0.0, 0.0);
                     }
                     int amount = 20 - (sequence * 2);
+                    int amountToStun = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKELECTRICSHOCK.get());
                     BeyonderUtil.useSpirituality(livingEntity, amount);
-                    BeyonderUtil.applyMobEffect(livingTarget, ModEffects.AWE.get(), amount, 1, false, false);
+                    BeyonderUtil.applyMobEffect(livingTarget, ModEffects.AWE.get(), amountToStun, 1, false, false);
                 }
             }
         }

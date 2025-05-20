@@ -308,7 +308,7 @@
   "item.lotm.traveldoorhome": "Travel Door: Home",
   "item.lotm.invisiblehand": "Invisible Hand",
   "item.lotm.blink": "Blink",
-  "item.lotm.blink_afterimage": "Blink: Afterimage",
+  "item.lotm.blinkautomatic": "Blink: Afterimage",
   "item.lotm.scribeabilities": "Scribed Abilities",
   "item.lotm.blinkstate": "Blink: State",
   "item.lotm.exile": "Exile",
@@ -419,6 +419,10 @@
   "effects.lotm.mentalplague": "Mental Plague",
   "effects.lotm.awe": "Paralysis",
   "effects.lotm.tumble": "Tumble",
+  "effects.lotm.flash": "Flash",
+  "effects.lotm.deafness": "Deafened",
+
+
 
 
   "attribute.lotm.spirituality": "Spirituality",

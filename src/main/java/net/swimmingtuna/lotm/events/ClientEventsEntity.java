@@ -27,6 +27,7 @@ public class ClientEventsEntity {
         event.registerLayerDefinition(MeteorModel.METEOR_LOCATION, MeteorModel::createBodyLayer);
         event.registerLayerDefinition(BulletModel.BULLET_LOCATION, BulletModel::createBodyLayer);
         event.registerLayerDefinition(MeteorNoLevelModel.METEOR_LOCATION, MeteorNoLevelModel::createBodyLayer);
+        event.registerLayerDefinition(FlashEntityModel.FLASH_LOCATION, FlashEntityModel::createBodyLayer);
         event.registerLayerDefinition(DragonBreathModel.LAYER, DragonBreathModel::createBodyLayer);
         event.registerLayerDefinition(WindBladeModel.WIND_BLADE_LOCATION, WindBladeModel::createBodyLayer);
         event.registerLayerDefinition(WindCushionModel.WIND_CUSHION_LOCATION, WindCushionModel::createBodyLayer);
@@ -39,6 +40,7 @@ public class ClientEventsEntity {
     }
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(EntityInit.FLASH_ENTITY.get(), FlashEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.LOW_SEQUENCE_DOOR_ENTITY.get(), LowSequenceDoorRenderer::new);
         event.registerEntityRenderer(EntityInit.SWORD_OF_TWILIGHT_ENTITY.get(), SwordOfTwilightEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.MERCURY_CAGE_ENTITY.get(), MercuryCageRenderer::new);

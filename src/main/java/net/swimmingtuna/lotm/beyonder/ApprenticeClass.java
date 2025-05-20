@@ -10,25 +10,18 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
-import net.swimmingtuna.lotm.caps.BeyonderHolder;
-import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -120,14 +113,58 @@ public class ApprenticeClass implements BeyonderClass {
     @Override
     public Multimap<Integer, Item> getItems() {
         HashMultimap<Integer, Item> items = HashMultimap.create();
+
         items.put(9, ItemInit.BEYONDER_ABILITY_USER.get());
         items.put(9, ItemInit.ALLY_MAKER.get());
         items.put(9, ItemInit.CREATEDOOR.get());
+
+        items.put(8, ItemInit.TRICKBURNING.get());
+        items.put(8, ItemInit.TRICKFREEZING.get());
+        items.put(8, ItemInit.TRICKTUMBLE.get());
+        items.put(8, ItemInit.TRICKWIND.get());
+        items.put(8, ItemInit.TRICKFOG.get());
+        items.put(8, ItemInit.TRICKELECTRICSHOCK.get());
+        items.put(8, ItemInit.TRICKTELEKENISIS.get());
+        items.put(8, ItemInit.TRICKESCAPETRICK.get());
+        items.put(8, ItemInit.TRICKFLASH.get());
+        items.put(8, ItemInit.TRICKLOUDNOISE.get());
+        items.put(8, ItemInit.TRICKBLACKCURTAIN.get());
+
+        items.put(7, ItemInit.ASTROLOGER_SPIRIT_VISION.get());
+
         items.put(6, ItemInit.RECORDSCRIBE.get());
         items.put(6, ItemInit.SCRIBEABILITIES.get());
-        items.put(5, ItemInit.TRAVELDOOR.get());
+
         items.put(5, ItemInit.TRAVELDOORHOME.get());
         items.put(5, ItemInit.INVISIBLEHAND.get());
+        items.put(5, ItemInit.BLINK.get());
+        items.put(5, ItemInit.BLINKAFTERIMAGE.get());
+
+        items.put(4, ItemInit.BLINK_STATE.get());
+        items.put(4, ItemInit.EXILE.get());
+        items.put(4, ItemInit.DOOR_MIRAGE.get());
+
+        items.put(3, ItemInit.SPATIAL_CAGE.get());
+        items.put(3, ItemInit.SPATIAL_TEARING.get());
+
+        items.put(2, ItemInit.SYMBOLIZATION.get());
+        items.put(2, ItemInit.DIMENSIONAL_SIGHT.get());
+        items.put(2, ItemInit.REPLICATE.get());
+        items.put(2, ItemInit.SEALING.get());
+
+        items.put(1, ItemInit.SPACE_FRAGMENTATION.get());
+        items.put(1, ItemInit.GRAVITY_MANIPULATION.get());
+        items.put(1, ItemInit.SPATIAL_SEAL.get());
+        items.put(1, ItemInit.SPATIAL_LOCK_ON.get());
+
+        items.put(0, ItemInit.DOOR_SPATIAL_LOCK_ON.get());
+        items.put(0, ItemInit.DOOR_DIMENSION_CLOSING.get());
+        items.put(0, ItemInit.DOOR_SEALED_SPACE.get());
+        items.put(0, ItemInit.DOOR_LAYERING.get());
+        items.put(0, ItemInit.DOOR_GAMMA_RAY_BURST.get());
+        items.put(0, ItemInit.CONCEPTUALIZATION.get());
+        items.put(0, ItemInit.REPLICATION.get());
+
         return items;
     }
 

@@ -75,10 +75,7 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Ability;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.InvisibleHand;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.ScribeAbilities;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoor;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoorWaypoint;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
@@ -538,17 +535,61 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.CREATEDOOR.get());
             }
             if (sequence <= 8) {
-
+                abilityNames.add(ItemInit.TRICKBURNING.get());
+                abilityNames.add(ItemInit.TRICKFREEZING.get());
+                abilityNames.add(ItemInit.TRICKTUMBLE.get());
+                abilityNames.add(ItemInit.TRICKWIND.get());
+                abilityNames.add(ItemInit.TRICKFOG.get());
+                abilityNames.add(ItemInit.TRICKELECTRICSHOCK.get());
+                abilityNames.add(ItemInit.TRICKTELEKENISIS.get());
+                abilityNames.add(ItemInit.TRICKESCAPETRICK.get());
+                abilityNames.add(ItemInit.TRICKFLASH.get());
+                abilityNames.add(ItemInit.TRICKLOUDNOISE.get());
+                abilityNames.add(ItemInit.TRICKBLACKCURTAIN.get());
+            }
+            if (sequence <= 7) {
+                abilityNames.add(ItemInit.ASTROLOGER_SPIRIT_VISION.get());
             }
             if (sequence <= 6) {
                 abilityNames.add(ItemInit.RECORDSCRIBE.get());
+                abilityNames.add(ItemInit.SCRIBEABILITIES.get());
             }
             if (sequence <= 5) {
-                abilityNames.add(ItemInit.TRAVELDOOR.get());
                 abilityNames.add(ItemInit.TRAVELDOORHOME.get());
                 abilityNames.add(ItemInit.INVISIBLEHAND.get());
+                abilityNames.add(ItemInit.BLINK.get());
+                abilityNames.add(ItemInit.BLINKAFTERIMAGE.get());
             }
-
+            if (sequence <= 4) {
+                abilityNames.add(ItemInit.BLINK_STATE.get());
+                abilityNames.add(ItemInit.EXILE.get());
+                abilityNames.add(ItemInit.DOOR_MIRAGE.get());
+            }
+            if (sequence <= 3) {
+                abilityNames.add(ItemInit.SPATIAL_CAGE.get());
+                abilityNames.add(ItemInit.SPATIAL_TEARING.get());
+            }
+            if (sequence <= 2) {
+                abilityNames.add(ItemInit.SYMBOLIZATION.get());
+                abilityNames.add(ItemInit.DIMENSIONAL_SIGHT.get());
+                abilityNames.add(ItemInit.REPLICATE.get());
+                abilityNames.add(ItemInit.SEALING.get());
+            }
+            if (sequence <= 1) {
+                abilityNames.add(ItemInit.SPACE_FRAGMENTATION.get());
+                abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
+                abilityNames.add(ItemInit.SPATIAL_SEAL.get());
+                abilityNames.add(ItemInit.SPATIAL_LOCK_ON.get());
+            }
+            if (sequence <= 0) {
+                abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
+                abilityNames.add(ItemInit.DOOR_DIMENSION_CLOSING.get());
+                abilityNames.add(ItemInit.DOOR_SEALED_SPACE.get());
+                abilityNames.add(ItemInit.DOOR_LAYERING.get());
+                abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
+                abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
+                abilityNames.add(ItemInit.REPLICATION.get());
+            }
         }
         return abilityNames;
     }
@@ -992,8 +1033,6 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof DawnWeaponry) {
                 LOTMNetworkHandler.sendToServer(new DawnWeaponryLeftClickC2S());
-            } else if (heldItem.getItem() instanceof TravelDoor) {
-                LOTMNetworkHandler.sendToServer(new TravelDoorC2S());
             } else if (heldItem.getItem() instanceof SwordOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new SwordOfTwilightC2S());
             } else if (heldItem.getItem() instanceof Gigantification) {
@@ -1166,6 +1205,13 @@ public class BeyonderUtil {
             } else if (heldItem.getItem() instanceof AqueousLightPull) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_DROWN.get())));
                 heldItem.shrink(1);
+            }
+            if (heldItem.getItem() instanceof Blink) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.BLINKAFTERIMAGE.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof BlinkAfterimage) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.BLINK.get())));
+                heldItem.shrink(1);
             } else if (heldItem.getItem() instanceof AqueousLightDrown) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_PUSH.get())));
                 heldItem.shrink(1);
@@ -1284,8 +1330,10 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BEAMOFTWILIGHT.get())));
             } else if (heldItem.getItem() instanceof BeamOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AURAOFTWILIGHT.get())));
-            } else if (heldItem.getItem() instanceof TravelDoor) {
-                LOTMNetworkHandler.sendToServer(new TravelDoorC2S());
+            } else if (heldItem.getItem() instanceof Blink) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINKAFTERIMAGE.get())));
+            } else if (heldItem.getItem() instanceof BlinkAfterimage) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
             }
         }
     }
@@ -1585,11 +1633,22 @@ public class BeyonderUtil {
 
 
         // APPRENTICE
+
         damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
         damageMap.put(ItemInit.RECORDSCRIBE.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
-        damageMap.put(ItemInit.TRAVELDOOR.get(), applyAbilityStrengthened(3.0f + abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.BLINK.get(), applyAbilityStrengthened(800 - (sequence * 120) + abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRAVELDOORHOME.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
         damageMap.put(ItemInit.INVISIBLEHAND.get(), applyAbilityStrengthened((float) (50 - (sequence * 8)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.BLINKAFTERIMAGE.get(), applyAbilityStrengthened(1.0f + abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKESCAPETRICK.get(), applyAbilityStrengthened(10.0f - (sequence + abilityWeakness), abilityStrengthened));
+        damageMap.put(ItemInit.TRICKWIND.get(), applyAbilityStrengthened((100 - (sequence * 10.0f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKBURNING.get(), applyAbilityStrengthened((200.0f - sequence * 20) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKELECTRICSHOCK.get(), applyAbilityStrengthened((20.0f - sequence) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKFLASH.get(), applyAbilityStrengthened(1.0f + abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKFOG.get(), applyAbilityStrengthened((20.0f - sequence * 2) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKLOUDNOISE.get(), applyAbilityStrengthened((200.0f - (180.0f * (8.0f / sequence))) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKTELEKENISIS.get(), applyAbilityStrengthened((50.0f - (sequence * 6.0f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((80.0f - (sequence * 9.0f)) / abilityWeakness, abilityStrengthened));
         return damageMap;
     }
 
@@ -2119,15 +2178,28 @@ public class BeyonderUtil {
     }
 
     public static float getDivination(LivingEntity livingEntity) {
-        int mentalStrength = 1;
+        int divination = 1;
         if (!livingEntity.level().isClientSide()) {
             BeyonderClass pathway = getPathway(livingEntity);
             if (pathway != null) {
                 int sequence = BeyonderUtil.getSequence(livingEntity);
-                mentalStrength = pathway.divination().get(sequence);
+                divination = pathway.divination().get(sequence);
+                if (currentPathwayAndSequenceMatchesNoException(livingEntity, BeyonderClassInit.APPRENTICE.get(), 7) && isExposedToMoonlight(livingEntity)) {
+                    divination = Math.round(divination * 1.5f);
+                }
             }
         }
-        return mentalStrength;
+        return divination;
+    }
+
+    public static boolean isExposedToMoonlight(LivingEntity entity) {
+        Level level = entity.level();
+        if (!level.isDay()) {
+            BlockPos entityPos = entity.blockPosition();
+            return level.canSeeSky(entityPos);
+        }
+
+        return false;
     }
 
     public static float getAntiDivination(LivingEntity livingEntity) {
@@ -3215,6 +3287,7 @@ public class BeyonderUtil {
             tag.putInt("calamityLightningStormImmunity", 0);
             tag.putInt("abilityStrengthened", 0);
             tag.putBoolean("lightningRedirection", false);
+            tag.putBoolean("trickmasterTelekenisis", false);
         }
     }
 

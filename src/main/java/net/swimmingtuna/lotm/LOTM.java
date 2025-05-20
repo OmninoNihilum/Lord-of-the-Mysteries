@@ -357,11 +357,10 @@ public class LOTM {
             event.accept(ItemInit.TRICKWIND);
             event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION);
             event.accept(ItemInit.RECORDSCRIBE);
-            event.accept(ItemInit.TRAVELDOOR);
             event.accept(ItemInit.TRAVELDOORHOME);
             event.accept(ItemInit.INVISIBLEHAND);
             event.accept(ItemInit.BLINK);
-            event.accept(ItemInit.BLINK_AFTERIMAGE);
+            event.accept(ItemInit.BLINKAFTERIMAGE);
             event.accept(ItemInit.SCRIBEABILITIES);
             event.accept(ItemInit.BLINK_STATE);
             event.accept(ItemInit.EXILE);
@@ -372,7 +371,6 @@ public class LOTM {
             event.accept(ItemInit.DIMENSIONAL_SIGHT);
             event.accept(ItemInit.REPLICATE);
             event.accept(ItemInit.SEALING);
-            event.accept(ItemInit.TELEPORTATION_AFTERIMAGE);
             event.accept(ItemInit.SPACE_FRAGMENTATION);
             event.accept(ItemInit.GRAVITY_MANIPULATION);
             event.accept(ItemInit.SPATIAL_LOCK_ON);

@@ -81,7 +81,8 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
-            player.sendSystemMessage(Component.literal("Dimension is " + player.level().dimension().toString()));
+            int ignoreDamage = tag.getInt("luckIgnoreDamage");
+            player.sendSystemMessage(Component.literal("Ignore Damage is " + ignoreDamage));
 
         }
 
