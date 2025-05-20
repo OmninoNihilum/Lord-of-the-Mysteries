@@ -173,7 +173,7 @@ public class CreativeTabInit {
                         event.accept(ItemInit.TRICKWIND.get());
                         event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION.get());
                         event.accept(ItemInit.RECORDSCRIBE.get());
-                        event.accept(ItemInit.TRAVELDOORHOME.get());
+                        event.accept(ItemInit.TRAVELERSDOOR.get());
                         event.accept(ItemInit.INVISIBLEHAND.get());
                         event.accept(ItemInit.BLINK.get());
                         event.accept(ItemInit.BLINKAFTERIMAGE.get());

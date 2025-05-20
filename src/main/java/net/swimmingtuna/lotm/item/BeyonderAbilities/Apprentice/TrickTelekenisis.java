@@ -55,7 +55,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
             boolean telekenisis = tag.getBoolean("trickmasterTelekenisis");
             tag.putBoolean("trickmasterTelekenisis", !telekenisis);
             if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("Telekenisis turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
+                pPlayer.displayClientMessage(Component.literal("Telekenisis Turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
             }
         }
     }
@@ -72,8 +72,10 @@ public class TrickTelekenisis extends SimpleAbilityItem {
                         double y = entity.getY() - livingEntity.getY();
                         double z = entity.getZ() - livingEntity.getZ();
                         double magnitude = Math.sqrt(x * x + y * y + z * z);
-                        livingEntity.setDeltaMovement(x / magnitude * 4, y / magnitude * 4, z / magnitude * 4);
-                        livingEntity.hurtMarked = true;
+                        if (entity != livingEntity) {
+                            entity.setDeltaMovement(x / magnitude * 4, y / magnitude * 4, z / magnitude * 4);
+                        }
+                        entity.hurtMarked = true;
                         float amount;
                         if (entity instanceof LivingEntity living) {
                             amount = 10 - BeyonderUtil.getSequence(living);

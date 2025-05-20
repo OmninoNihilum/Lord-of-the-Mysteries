@@ -49,7 +49,7 @@ public class ClientEventsEntity {
         event.registerEntityRenderer(EntityInit.DIVINE_HAND_LEFT_ENTITY.get(), DivineHandLeftRenderer::new);
         event.registerEntityRenderer(EntityInit.SILVER_LIGHT_ENTITY.get(), SilverLightRenderer::new);
         event.registerEntityRenderer(EntityInit.GLOBE_OF_TWILIGHT_ENTITY.get(), GlobeOfTwilightRenderer::new);
-        event.registerEntityRenderer(EntityInit.MID_SEQUENCE_DOOR_ENTITY.get(), MidSequenceDoorRenderer::new);
+        event.registerEntityRenderer(EntityInit.APPRENTICE_DOOR_ENTITY.get(), ApprenticeDoorRenderer::new);
         event.registerEntityRenderer(EntityInit.MERCURY_ENTITY.get(), MercuryEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.DAWN_RAY_ENTITY.get(), DawnRayRenderer::new);
         event.registerEntityRenderer(EntityInit.TWILIGHT_LIGHT.get(), TwilightLightRenderer::new);
@@ -84,6 +84,7 @@ public class ClientEventsEntity {
         event.registerSpriteSet(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), PlayerTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.MOB_TRAIL_PARTICLE.get(), MobTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.NULL_PARTICLE.get(), NullParticle.Provider::new);
+        event.registerSpriteSet(ParticleInit.BLACK_CURTAIN.get(), BlackCurtainParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.VOID_BREAK_PARTICLE.get(), VoidBreakParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.METEOR_PARTICLE.get(), MeteorParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.TORNADO_PARTICLE.get(), NullParticle.Provider::new);

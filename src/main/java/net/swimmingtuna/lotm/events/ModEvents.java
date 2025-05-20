@@ -489,6 +489,7 @@ public class ModEvents {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
                 BlinkAfterimage.travelerBlinkPassive(event);
                 CompoundTag tag = attacked.getPersistentData();
+                TrickEscapeTrick.escapeTrickAttackEvent(event);
                 if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(attacked, BeyonderClassInit.SAILOR.get(), 1) && (attacker.getName().getString().toLowerCase().contains("lightning") || attacker.getName().getString().toLowerCase().contains("thunder") || attacker.toString().toLowerCase().contains("lightning") || attacker.toString().toLowerCase().contains("thunder"))) {
                     event.setCanceled(true);
                 }
@@ -618,6 +619,7 @@ public class ModEvents {
                     event.setCanceled(true);
                 }
                 if (entity instanceof LivingEntity living) {
+                    TrickEscapeTrick.escapeTrickHurtEvent(event);
                     if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.SAILOR.get(), 1) && (entitySource.getName().getString().toLowerCase().contains("lightning") || entitySource.getName().getString().toLowerCase().contains("thunder") || entitySource.toString().toLowerCase().contains("lightning") || entitySource.toString().toLowerCase().contains("thunder"))) {
                         event.setCanceled(true);
                         event.setAmount(0);

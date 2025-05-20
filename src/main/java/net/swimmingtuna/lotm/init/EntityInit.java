@@ -95,6 +95,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<MeteorNoLevelEntity>> METEOR_NO_LEVEL_ENTITY =
             ENTITIES.register("meteor_no_hurt", () -> EntityType.Builder.<MeteorNoLevelEntity>of(MeteorNoLevelEntity::new, MobCategory.MISC)
                     .sized(2.0f,2.0f).clientTrackingRange(300).build("meteor_no_hurt"));
+    public static final RegistryObject<EntityType<ApprenticeDoorEntity>> APPRENTICE_DOOR_ENTITY =
+            ENTITIES.register("apprentice_door_entity", () -> EntityType.Builder.<ApprenticeDoorEntity>of(ApprenticeDoorEntity::new, MobCategory.MISC)
+                    .sized(0.5f,2f).clientTrackingRange(100).build("apprentice_door_entity"));
     public static final RegistryObject<EntityType<FlashEntity>> FLASH_ENTITY =
             ENTITIES.register("flash", () -> EntityType.Builder.<FlashEntity>of(FlashEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(200).build(new ResourceLocation(LOTM.MOD_ID, "flash").toString()));
@@ -119,9 +122,6 @@ public class EntityInit {
     public static final RegistryObject<EntityType<MercuryPortalEntity>> MERCURY_PORTAL_ENTITY =
             ENTITIES.register("mercury_portal_entity", () -> EntityType.Builder.<MercuryPortalEntity>of(MercuryPortalEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(100).build("mercury_portal_entity"));
-    public static final RegistryObject<EntityType<MidSequenceDoorEntity>> MID_SEQUENCE_DOOR_ENTITY =
-            ENTITIES.register("mid_sequence_door_entity", () -> EntityType.Builder.<MidSequenceDoorEntity>of(MidSequenceDoorEntity::new, MobCategory.MISC)
-                    .sized(0.5f,2f).clientTrackingRange(100).build("mid_sequence_door_entity"));
     public static final RegistryObject<EntityType<WindCushionEntity>> WIND_CUSHION_ENTITY =
             ENTITIES.register("wind_cushion", () -> EntityType.Builder.<WindCushionEntity>of(WindCushionEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).build("wind_cushion"));

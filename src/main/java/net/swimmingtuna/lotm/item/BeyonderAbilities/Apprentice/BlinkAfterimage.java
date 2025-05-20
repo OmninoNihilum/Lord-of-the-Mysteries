@@ -72,8 +72,8 @@ public class BlinkAfterimage extends SimpleAbilityItem {
         if (!level.isClientSide() && !event.isCanceled()) {
             if (tag.getBoolean("travelerAfterimage")) {
                 float amount = 50 + (event.getAmount() * BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINKAFTERIMAGE.get()));
-                if (BeyonderUtil.getSpirituality(livingEntity) >= 50 + event.getAmount()) {
-                    BeyonderUtil.useSpirituality(livingEntity, (int) (50 + event.getAmount()));
+                if (BeyonderUtil.getSpirituality(livingEntity) >= amount) {
+                    BeyonderUtil.useSpirituality(livingEntity, (int) amount);
                     int teleportDistance = (int) Math.ceil(event.getAmount());
                     boolean teleported = tryTeleportToSafeLocation(livingEntity, level, teleportDistance);
                     event.setCanceled(true);
@@ -91,6 +91,8 @@ public class BlinkAfterimage extends SimpleAbilityItem {
             }
         }
     }
+
+
 
     private static boolean tryTeleportToSafeLocation(Entity entity, Level level, int distance) {
         distance = Math.max(1, distance);
