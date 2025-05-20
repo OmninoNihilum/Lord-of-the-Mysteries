@@ -350,7 +350,7 @@ public class ItemInit {
     public static final RegistryObject<Item> TRICKLOUDNOISE = ITEMS.register("trickloudnoise",
             () -> new TrickLoudNoise(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKBLACKCURTAIN = ITEMS.register("trickblackcurtain",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new TrickBlackCurtain(new Item.Properties().stacksTo(1)));
 
     //7
     public static final RegistryObject<Item> ASTROLOGER_SPIRIT_VISION = ITEMS.register("astrologerspiritvision",
@@ -362,8 +362,8 @@ public class ItemInit {
             () -> new ScribeAbilities(new Item.Properties().stacksTo(1)));
 
     //5
-    public static final RegistryObject<Item> TRAVELDOORHOME = ITEMS.register("traveldoorhome",
-            () -> new TravelDoorWaypoint(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRAVELERSDOOR = ITEMS.register("travelersdoor",
+            () -> new TravelersDoor(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> INVISIBLEHAND = ITEMS.register("invisiblehand",
             () -> new InvisibleHand(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> BLINK = ITEMS.register("blink",

@@ -35,6 +35,7 @@ import net.swimmingtuna.lotm.init.*;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.screen.PotionCauldronScreen;
 import net.swimmingtuna.lotm.spirituality.ModAttributes;
+import net.swimmingtuna.lotm.util.CustomEntityDataSerializers;
 import net.swimmingtuna.lotm.util.PlayerMobs.NameManager;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worldgen.biome.BiomeModifierRegistry;
@@ -87,6 +88,7 @@ public class LOTM {
         ParticleInit.register(modEventBus);
         SoundInit.register(modEventBus);
         MenuInit.register(modEventBus);
+        CustomEntityDataSerializers.register();
         GeckoLib.initialize();
 
         modEventBus.addListener(ClientEvents::onRegisterOverlays);
@@ -357,7 +359,7 @@ public class LOTM {
             event.accept(ItemInit.TRICKWIND);
             event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION);
             event.accept(ItemInit.RECORDSCRIBE);
-            event.accept(ItemInit.TRAVELDOORHOME);
+            event.accept(ItemInit.TRAVELERSDOOR);
             event.accept(ItemInit.INVISIBLEHAND);
             event.accept(ItemInit.BLINK);
             event.accept(ItemInit.BLINKAFTERIMAGE);

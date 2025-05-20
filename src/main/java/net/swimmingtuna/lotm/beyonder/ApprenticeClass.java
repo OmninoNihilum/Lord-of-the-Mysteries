@@ -135,7 +135,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(6, ItemInit.RECORDSCRIBE.get());
         items.put(6, ItemInit.SCRIBEABILITIES.get());
 
-        items.put(5, ItemInit.TRAVELDOORHOME.get());
+        items.put(5, ItemInit.TRAVELERSDOOR.get());
         items.put(5, ItemInit.INVISIBLEHAND.get());
         items.put(5, ItemInit.BLINK.get());
         items.put(5, ItemInit.BLINKAFTERIMAGE.get());

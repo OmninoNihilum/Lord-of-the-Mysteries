@@ -65,9 +65,6 @@ public class TrickTumble extends SimpleAbilityItem {
                     livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
                 }
             }
-            BeyonderUtil.applyMobEffect(living, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
-            BeyonderUtil.applyMobEffect(living, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
-            living.setDeltaMovement (Math.min(3, living.getDeltaMovement().x * 1.5f), living.getDeltaMovement().y(), Math.min(3, living.getDeltaMovement().z() * 1.5f));
         }
     }
 

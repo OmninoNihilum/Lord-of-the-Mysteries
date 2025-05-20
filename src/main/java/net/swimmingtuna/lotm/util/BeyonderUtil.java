@@ -7,7 +7,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
@@ -18,6 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -68,8 +68,6 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
-import net.swimmingtuna.lotm.entity.LowSequenceDoorEntity;
-import net.swimmingtuna.lotm.entity.MidSequenceDoorEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
@@ -555,7 +553,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.SCRIBEABILITIES.get());
             }
             if (sequence <= 5) {
-                abilityNames.add(ItemInit.TRAVELDOORHOME.get());
+                abilityNames.add(ItemInit.TRAVELERSDOOR.get());
                 abilityNames.add(ItemInit.INVISIBLEHAND.get());
                 abilityNames.add(ItemInit.BLINK.get());
                 abilityNames.add(ItemInit.BLINKAFTERIMAGE.get());
@@ -1045,13 +1043,32 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AQUEOUS_LIGHT_PULL.get())));
             } else if (heldItem.getItem() instanceof AqueousLightPull) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AQUEOUS_LIGHT_DROWN.get())));
-
             } else if (heldItem.getItem() instanceof AqueousLightDrown) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AQUEOUS_LIGHT_PUSH.get())));
-
             } else if (heldItem.getItem() instanceof Hurricane) {
                 LOTMNetworkHandler.sendToServer(new LeftClickC2S());
-
+            } else if (heldItem.getItem() instanceof TrickBurning) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKFREEZING.get())));
+            } else if (heldItem.getItem() instanceof TrickFreezing) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKTUMBLE.get())));
+            } else if (heldItem.getItem() instanceof TrickTumble) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKWIND.get())));
+            } else if (heldItem.getItem() instanceof TrickWind) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKFOG.get())));
+            } else if (heldItem.getItem() instanceof TrickFog) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKELECTRICSHOCK.get())));
+            } else if (heldItem.getItem() instanceof TrickElectricShock) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKTELEKENISIS.get())));
+            } else if (heldItem.getItem() instanceof TrickTelekenisis) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKESCAPETRICK.get())));
+            } else if (heldItem.getItem() instanceof TrickEscapeTrick) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKFLASH.get())));
+            } else if (heldItem.getItem() instanceof TrickFlash) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKLOUDNOISE.get())));
+            } else if (heldItem.getItem() instanceof TrickLoudNoise) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKBLACKCURTAIN.get())));
+            } else if (heldItem.getItem() instanceof TrickBlackCurtain) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKBURNING.get())));
             } else if (heldItem.getItem() instanceof LightningStorm) {
                 LOTMNetworkHandler.sendToServer(new LeftClickC2S());
 
@@ -1177,7 +1194,7 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new MonsterDomainLeftClickC2S());
             } else if (heldItem.getItem() instanceof InvisibleHand) {
                 LOTMNetworkHandler.sendToServer(new ToggleDistanceC2S());
-            } else if (heldItem.getItem() instanceof TravelDoorWaypoint) {
+            } else if (heldItem.getItem() instanceof TravelersDoor) {
                 LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
             } else if (heldItem.getItem() instanceof ScribeAbilities) {
                 LOTMNetworkHandler.sendToServer(new ScribeCopyAbilityC2S());
@@ -1204,6 +1221,40 @@ public class BeyonderUtil {
                 heldItem.shrink(1);
             } else if (heldItem.getItem() instanceof AqueousLightPull) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_DROWN.get())));
+                heldItem.shrink(1);
+            }
+            if (heldItem.getItem() instanceof TrickBurning) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFREEZING.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickFreezing) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKTUMBLE.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickTumble) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKWIND.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickWind) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFOG.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickFog) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKELECTRICSHOCK.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickElectricShock) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKTELEKENISIS.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickTelekenisis) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKESCAPETRICK.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickEscapeTrick) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFLASH.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickFlash) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKLOUDNOISE.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickLoudNoise) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKBLACKCURTAIN.get())));
+                heldItem.shrink(1);
+            } else if (heldItem.getItem() instanceof TrickBlackCurtain) {
+                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKBURNING.get())));
                 heldItem.shrink(1);
             }
             if (heldItem.getItem() instanceof Blink) {
@@ -1287,7 +1338,7 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new CalamityEnhancementLeftClickC2S());
             } else if (heldItem.getItem() instanceof DeathKnell) {
                 LOTMNetworkHandler.sendToServer(new DeathKnellLeftClickC2S());
-            } else if (heldItem.getItem() instanceof TravelDoorWaypoint) {
+            } else if (heldItem.getItem() instanceof TravelersDoor) {
                 LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
             } else if (heldItem.getItem() instanceof ProbabilityManipulationFortune) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYMISFORTUNE.get())));
@@ -1453,8 +1504,7 @@ public class BeyonderUtil {
                     return -1;
                 }
             }
-        }
-        else {
+        } else {
             return 10;
         }
     }
@@ -1637,7 +1687,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
         damageMap.put(ItemInit.RECORDSCRIBE.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
         damageMap.put(ItemInit.BLINK.get(), applyAbilityStrengthened(800 - (sequence * 120) + abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRAVELDOORHOME.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
+        damageMap.put(ItemInit.TRAVELERSDOOR.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
         damageMap.put(ItemInit.INVISIBLEHAND.get(), applyAbilityStrengthened((float) (50 - (sequence * 8)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.BLINKAFTERIMAGE.get(), applyAbilityStrengthened(1.0f + abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKESCAPETRICK.get(), applyAbilityStrengthened(10.0f - (sequence + abilityWeakness), abilityStrengthened));
@@ -1649,6 +1699,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKLOUDNOISE.get(), applyAbilityStrengthened((200.0f - (180.0f * (8.0f / sequence))) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTELEKENISIS.get(), applyAbilityStrengthened((50.0f - (sequence * 6.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((80.0f - (sequence * 9.0f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((60.0f - (sequence * 7.0f)) / abilityWeakness, abilityStrengthened));
         return damageMap;
     }
 
@@ -2744,47 +2795,32 @@ public class BeyonderUtil {
         return null;
     }
 
-    public static void spawnDoorTeleportationOnly(Level level, BlockPos pos, double X, double Y, double Z, Entity canPassTrough, Direction direction, int life, LivingEntity user) {
-        int sequence = getSequence(user);
-        double x = pos.getX();
-        double y = pos.getY();
-        double z = pos.getZ();
-        float YAW = 0F;
-        if (direction == Direction.NORTH) {
-            x = x + 0.5;
-            z = z + 0.25;
-            YAW = 0F;
-        } else if (direction == Direction.WEST) {
-            x = x + 0.25;
-            z = z + 0.5;
-            YAW = 90F;
-        } else if (direction == Direction.SOUTH) {
-            x = x + 0.5;
-            z = z + 0.75;
-            YAW = 180;
-        } else if (direction == Direction.EAST) {
-            x = x + 0.75;
-            z = z + 0.5;
-            YAW = 270F;
-        }
-        LowSequenceDoorEntity lowDoor = new LowSequenceDoorEntity(canPassTrough, level, X, Y, Z, YAW, life);
-        MidSequenceDoorEntity midDoor = new MidSequenceDoorEntity(level, X, Y, Z, YAW, life);
-        if (sequence > 7) {
-            lowDoor.setCanBringAllies(false);
-        }
-        else {
-            lowDoor.setCanBringAllies(true);
-        }
-        if (sequence >= 8) {
-            lowDoor.setPos(x, y, z);
-            level.addFreshEntity(lowDoor);
-        } else if (sequence >= 5) {
-            midDoor.setPos(x, y, z);
-            level.addFreshEntity(midDoor);
+
+    public static void teleportEntityTroughDimensions(Entity entity, Level destinationLevel, double x, double y, double z) {
+        if (entity == null || entity.level().isClientSide()) {
+            return;
         }
 
+        ServerLevel currentWorld = (ServerLevel) entity.level();
+        MinecraftServer server = currentWorld.getServer();
+        ServerLevel destinationWorld = server.getLevel(destinationLevel.dimension());
+
+        if (destinationWorld == null) {
+            return;
+        }
+
+        if (entity instanceof ServerPlayer player) {
+            player.teleportTo(destinationWorld, x, y, z, player.getYRot(), player.getXRot());
+        } else {
+            Entity newEntity = entity.getType().create(destinationWorld);
+            if (newEntity != null) {
+                newEntity.restoreFrom(entity);
+                newEntity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
+                entity.discard();
+                destinationWorld.addFreshEntity(newEntity);
+            }
+        }
     }
-
 
     public static LivingEntity getEntityFromUUID(Level level, UUID uuid) {
         if (level instanceof ServerLevel serverLevel) {
@@ -3186,7 +3222,7 @@ public class BeyonderUtil {
             tag.putInt("invisibleHandCounter", 0);
             tag.putDouble("invisibleHandDistance", 0);
             tag.putInt("travelBlinkDistance", 0);
-            TravelDoorWaypoint.clearAllWaypoints(livingEntity);
+            TravelersDoor.clearAllWaypoints(livingEntity);
             tag.putBoolean("monsterAuraOfChaos", false);
             tag.putBoolean("monsterChaosWalkerCombat", false);
             tag.putInt("monsterCyclePotionEffectsCount", 0);
@@ -3288,6 +3324,7 @@ public class BeyonderUtil {
             tag.putInt("abilityStrengthened", 0);
             tag.putBoolean("lightningRedirection", false);
             tag.putBoolean("trickmasterTelekenisis", false);
+            tag.putInt("escapeTrickCount", 0);
         }
     }
 
@@ -3304,6 +3341,7 @@ public class BeyonderUtil {
         }
         return nonAllies;
     }
+
     public static boolean isEntityAlly(LivingEntity living, Entity possibleAlly) {
         return (possibleAlly instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, living)) || (possibleAlly instanceof LivingEntity livingAlly && !BeyonderUtil.areAllies(livingAlly, living));
     }

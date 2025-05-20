@@ -6,14 +6,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -23,7 +19,7 @@ import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoorWaypoint;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
@@ -34,7 +30,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 import static net.swimmingtuna.lotm.beyonder.SpectatorClass.EVENT_TO_TAG;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelDoorWaypoint.coordsTravel;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor.*;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLife.spawnMob;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation.isThreeIntegers;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionWeather.*;
@@ -232,42 +228,35 @@ public class ServerEvents {
             }
             event.setCanceled(true);
         }
-        if (!player.level().isClientSide && player.getMainHandItem().getItem() instanceof TravelDoorWaypoint && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 5)) {
+        if (!player.level().isClientSide && player.getMainHandItem().getItem() instanceof TravelersDoor && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 5)) {
             if (!BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.APPRENTICE.get())) {
                 player.displayClientMessage(Component.literal("You are not of the Apprentice pathway").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 event.setCanceled(true);
                 return;
             }
+
             if (BeyonderUtil.getSpirituality(player) < 300) {
                 player.displayClientMessage(Component.literal("You need 300 spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 event.setCanceled(true);
                 return;
             }
-            if (BeyonderUtil.getSequence(player) > 5) {
-                player.displayClientMessage(Component.literal("You need to be sequence 5 in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
-                event.setCanceled(true);
-                return;
-            }
+
             if (coordsTravel(message)) {
                 String[] coordinates = message.replace(",", " ").trim().split("\\s+");
-                //Add a string that checks for dimensions
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
+                String dimensionId = null;
 
-                //MARKED
-                //Make a door that teleports to the dimensions + Dimension
-                if (BeyonderUtil.getSequence(player) <= 3) {
-                    player.teleportTo(x,y,z);
-                    //teleport to dimension
-                } else {
-                    player.teleportTo(x,y,z);
-                }
+                if(hasDimensionId(message)) dimensionId = getDimensionId(message);
+                spawnDoor(player, x, y, z, dimensionId);
+
                 event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
-                BeyonderUtil.useSpirituality(player,300);
+                BeyonderUtil.useSpirituality(player, 300);
                 event.setCanceled(true);
                 return;
             }
+
             Player targetPlayer = null;
             for (Player serverPlayer : level.players()) {
                 if (serverPlayer.getName().getString().toLowerCase().equals(message.toLowerCase())) {
@@ -275,22 +264,25 @@ public class ServerEvents {
                     break;
                 }
             }
+
             if (targetPlayer != null) {
                 if(BeyonderUtil.areAllies(targetPlayer, event.getPlayer())){
                     int x = (int)targetPlayer.getX();
                     int y = (int)targetPlayer.getY();
                     int z = (int)targetPlayer.getZ();
                     player.teleportTo(x, y, z);
-                    BeyonderUtil.useSpirituality(player,300);
+                    BeyonderUtil.useSpirituality(player, 300);
                     event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)), true);
-                }else{
+                } else {
                     event.getPlayer().displayClientMessage(Component.literal("Player is not your ally").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
             } else {
                 event.getPlayer().displayClientMessage(Component.literal("Invalid coordinates or player name: " + message).withStyle(BeyonderUtil.getStyle(player)), true);
             }
+
             event.setCanceled(true);
         }
+
         ItemStack heldItem = player.getMainHandItem();
         if (!heldItem.isEmpty() && heldItem.getItem() instanceof Prophecy && !player.getCooldowns().isOnCooldown(ItemInit.PROPHECY.get())) {
             if (BeyonderUtil.getSpirituality(player) >= 1500) {

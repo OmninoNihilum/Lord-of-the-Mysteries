@@ -85,7 +85,8 @@ public class TrickWind extends SimpleAbilityItem {
                 double angle = Math.acos(dotProduct);
                 if (angle <= fovAngle) {
                     Vec3 direction = playerPos.subtract(entityPos).normalize();
-                    entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-3)));
+                    int factor = 10 - BeyonderUtil.getSequence(player);
+                    entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-factor)));
                     entity.hurtMarked = true;
                 }
             }

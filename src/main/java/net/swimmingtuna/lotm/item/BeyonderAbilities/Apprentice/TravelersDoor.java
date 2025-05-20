@@ -1,8 +1,14 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -12,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -21,9 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TravelDoorWaypoint extends SimpleAbilityItem {
+public class TravelersDoor extends SimpleAbilityItem {
 
-    public TravelDoorWaypoint(Properties properties) {
+    public TravelersDoor(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 5, 300, 20);
     }
 
@@ -90,6 +97,57 @@ public class TravelDoorWaypoint extends SimpleAbilityItem {
         }
     }
 
+    public static boolean hasDimensionId(String message){
+        message = message.replace(",", " ");
+        String[] parts = message.trim().split("\\s+");
+        return parts.length > 3;
+    }
+
+    public static String getDimensionId(String message){
+        message = message.replace(",", " ");
+        String[] parts = message.trim().split("\\s+");
+        if(parts.length > 3) return parts[3];
+        return null;
+    }
+
+    public static double[] getHorizontalLookCoordinates(Player player, double distance){
+        float yaw = player.getYRot();
+
+        double angleRadians = Math.toRadians(-yaw);
+
+        double x = player.getX() + distance * Math.sin(angleRadians);
+        double z = player.getZ() + distance * Math.cos(angleRadians);
+
+        return new double[] {x, z};
+    }
+
+    public static Level getTargetLevel(Player player, String dimensionId) {
+        if (dimensionId == null) {
+            return player.level();
+        }
+        MinecraftServer server = player.level().getServer();
+        if (server == null) return player.level();
+        ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionId));
+        ServerLevel level = server.getLevel(dimKey);
+        return level != null ? level : player.level();
+    }
+
+    public static void spawnDoor(Player player, int x, int y, int z, String dimensionId){
+        Level targetLevel = getTargetLevel(player, dimensionId);
+        float yaw = -player.getYRot() + 180;
+        ApprenticeDoorEntity.DoorAnimationKind animationKind = ApprenticeDoorEntity.DoorAnimationKind.BELLOW;
+        if(player.level().getBlockState(new BlockPos((int) Math.floor(getHorizontalLookCoordinates(player, 2)[0]),
+                (int) Math.floor(player.getY() - 1),
+                (int) Math.floor(getHorizontalLookCoordinates(player, 2)[1]))).isAir()){
+            animationKind = ApprenticeDoorEntity.DoorAnimationKind.FADE_IN;
+        }
+        ApprenticeDoorEntity door = new ApprenticeDoorEntity(player.level(), player, BeyonderUtil.getSequence(player), 150, yaw, x, y, z, targetLevel, animationKind);
+        door.teleportTo(getHorizontalLookCoordinates(player, 2)[0], player.getY(), getHorizontalLookCoordinates(player, 2)[1]);
+
+        player.level().addFreshEntity(door);
+    }
+
+
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Right-click to teleport to selected waypoint. You can also type coordinates in chat to teleport to them. At sequence 3, you can also type in the name of a dimension"));
@@ -102,7 +160,7 @@ public class TravelDoorWaypoint extends SimpleAbilityItem {
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (entity instanceof Player player && !level.isClientSide && player.getMainHandItem().getItem() == ItemInit.TRAVELDOORHOME.get()) {
+        if (entity instanceof Player player && !level.isClientSide && player.getMainHandItem().getItem() == ItemInit.TRAVELERSDOOR.get()) {
             if (isSelected) {
                 CompoundTag tag = player.getPersistentData();
                 int currentWaypoint = tag.getInt("doorWaypoint");

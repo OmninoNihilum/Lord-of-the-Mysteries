@@ -11,6 +11,7 @@ import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,6 +24,7 @@ import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderTransformData;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,6 +87,15 @@ public class ClientEvents {
                 int newValue = entry.getValue() - 1;
                 ClientAbilityCooldownData.setAbilityCooldown(entry.getKey(), newValue);
             }
+        }
+    }
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void onPlaySound(PlaySoundEvent event){
+        Player player = Minecraft.getInstance().player;
+        if(player != null && player.hasEffect(ModEffects.DEAFNESS.get())){
+            event.setCanceled(true);
         }
     }
 

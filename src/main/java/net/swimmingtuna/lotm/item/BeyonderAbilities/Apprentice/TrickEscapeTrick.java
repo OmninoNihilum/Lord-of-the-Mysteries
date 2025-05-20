@@ -1,7 +1,5 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,26 +9,25 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.util.Lazy;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -74,44 +71,134 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
                 }
             } else {
                 if(entity instanceof Player player) {
-                    player.displayClientMessage(Component.literal("Cant prepare anymore Escape Tricks.").withStyle(BeyonderUtil.getStyle(player)), true);
+                    player.displayClientMessage(Component.literal("Can't prepare anymore Escape Tricks.").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
             }
         }
     }
 
-    public static boolean canTeleportSafeSpace(LivingEntity entity){
-        Random random = new Random();
-        int range = (int) (float) BeyonderUtil.getDamage(entity).get(ItemInit.TRICKESCAPETRICK.get()) * 10;
-        int maxAttempts = range * 2;
-        for (int i = 0; i < maxAttempts; i++) {
-            int xOffSet = random.nextInt((int) range * 2) - (int) range;
-            int yOffSet = random.nextInt((int) range * 2) - (int) range;
-            int zOffSet = random.nextInt((int) range * 2) - (int) range;
-            double distanceSq = xOffSet*xOffSet + yOffSet*yOffSet + zOffSet*zOffSet;
-            if (distanceSq <= range*range) {
-                BlockPos pos = entity.blockPosition().offset(xOffSet, yOffSet, zOffSet);
-                if (entity.level().isEmptyBlock(pos) && entity.level().isEmptyBlock(pos.above()) && !entity.level().containsAnyLiquid(new AABB(pos, pos.above())) && entity.level().getBlockState(pos.below()).isFaceSturdy(entity.level(), pos.below(), Direction.UP)){
-                    entity.teleportTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-                    entity.getPersistentData().putInt("escapeTrickCount", entity.getPersistentData().getInt("escapeTrickCount") - 1);
+    public static void escapeTrickAttackEvent(LivingAttackEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (!entity.level().isClientSide() && entity.getPersistentData().getInt("escapeTrickCount") >= 1 && BeyonderUtil.getSequence(entity) <= 4) {
+            int range = (int) (float) BeyonderUtil.getDamage(entity).get(ItemInit.TRICKESCAPETRICK.get()) * 10;
+            boolean teleported = tryTeleportToSafeLocation(entity, entity.level(), range);
+            if (teleported) {
+                entity.getPersistentData().putInt("escapeTrickCount", entity.getPersistentData().getInt("escapeTrickCount") - 1);
+                event.setCanceled(true);
+                if (entity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("Remaining Escape Tricks: ").withStyle(BeyonderUtil.getStyle(player)).append(Component.literal("" + player.getPersistentData().getInt("escapeTrickCount")).withStyle(ChatFormatting.WHITE)), true);
+                }
+            } else {
+                if (entity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("No safe spaces found").withStyle(BeyonderUtil.getStyle(player)), true);
+                }
+            }
+        }
+    }
+
+    private static boolean tryTeleportToSafeLocation(LivingEntity entity, Level level, int range) {
+        List<Vec3> directions = new ArrayList<>();
+        directions.add(new Vec3(1, 0, 0));   // East
+        directions.add(new Vec3(-1, 0, 0));  // West
+        directions.add(new Vec3(0, 0, 1));   // South
+        directions.add(new Vec3(0, 0, -1));  // North
+        directions.add(new Vec3(1, 0, 1));   // Southeast
+        directions.add(new Vec3(-1, 0, 1));  // Southwest
+        directions.add(new Vec3(1, 0, -1));  // Northeast
+        directions.add(new Vec3(-1, 0, -1)); // Northwest
+        directions.add(new Vec3(0, 1, 0));   // Up
+        directions.add(new Vec3(0, -1, 0));  // Down
+        directions.add(new Vec3(1, 1, 0));   // Up + East
+        directions.add(new Vec3(-1, 1, 0));  // Up + West
+        directions.add(new Vec3(0, 1, 1));   // Up + South
+        directions.add(new Vec3(0, 1, -1));  // Up + North
+        directions.add(new Vec3(1, -1, 0));  // Down + East
+        directions.add(new Vec3(-1, -1, 0)); // Down + West
+        directions.add(new Vec3(0, -1, 1));  // Down + South
+        directions.add(new Vec3(0, -1, -1)); // Down + North
+        Collections.shuffle(directions);
+        Vec3 currentPos = entity.position();
+        for (Vec3 dir : directions) {
+            for (int distance = range; distance > range / 2; distance -= 5) {
+                Vec3 normalizedDir = dir.normalize().scale(distance);
+                Vec3 targetVec = currentPos.add(normalizedDir);
+                BlockPos targetPos = new BlockPos((int) Math.floor(targetVec.x), (int) Math.floor(targetVec.y), (int) Math.floor(targetVec.z));
+
+                if (isSafeLocation(targetPos, level, entity)) {
                     if (entity.level() instanceof ServerLevel serverLevel) {
-                        for (int p = 0; p < 10 * BeyonderUtil.getScale(entity); i++) {
-                            float randomInt = BeyonderUtil.getRandomInRange(BeyonderUtil.getScale(entity) * 2);
-                            float randomOne = BeyonderUtil.getRandomInRange(1);
-                            serverLevel.sendParticles(ParticleTypes.SMOKE, entity.getX() + randomInt, entity.getY() + randomInt, entity.getZ() + randomInt, 0, randomOne, randomOne, randomOne, 0.5f);
+                        for (int p = 0; p < 10 * BeyonderUtil.getScale(entity); p++) {
+                            float randomInt = BeyonderUtil.getRandomInRange(BeyonderUtil.getScale(entity));
+                            serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX() + randomInt, entity.getY() + randomInt, entity.getZ() + randomInt, 0, 0, 0, 0, 0f);
                         }
+                        float randomInt = BeyonderUtil.getRandomInRange(BeyonderUtil.getScale(entity));
+                        serverLevel.sendParticles(ParticleTypes.FLASH, entity.getX() + randomInt, entity.getY() + randomInt, entity.getZ() + randomInt, 0, 0, 0, 0, 0f);
                     }
-                    if (entity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Remaining Escape Tricks: ").withStyle(BeyonderUtil.getStyle(player)).append(Component.literal("" + player.getPersistentData().getInt("escapeTrickCount")).withStyle(ChatFormatting.WHITE)), true);
-                    }
+                    entity.teleportTo(targetVec.x, targetVec.y, targetVec.z);
                     return true;
                 }
             }
         }
-        if (entity instanceof Player player) {
-            player.displayClientMessage(Component.literal("No safe spaces found").withStyle(BeyonderUtil.getStyle(player)), true);
+        Random random = new Random();
+        int maxAttempts = range * 3;
+
+        for (int i = 0; i < maxAttempts; i++) {
+            int xOffset = random.nextInt(range * 2) - range;
+            int yOffset = random.nextInt(range) - range/4;
+            int zOffset = random.nextInt(range * 2) - range;
+
+            double distanceSq = xOffset*xOffset + yOffset*yOffset + zOffset*zOffset;
+            if (distanceSq <= range*range) {
+                BlockPos pos = entity.blockPosition().offset(xOffset, yOffset, zOffset);
+                Vec3 targetVec = new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+
+                if (isSafeLocation(pos, level, entity)) {
+                    entity.teleportTo(targetVec.x, targetVec.y, targetVec.z);
+                    return true;
+                }
+            }
         }
+
         return false;
+    }
+
+    private static boolean isSafeLocation(BlockPos pos, Level level, LivingEntity entity) {
+        float scale = BeyonderUtil.getScale(entity);
+        int requiredSpace = Math.max(1, (int) Math.ceil(scale));
+        for (int x = -requiredSpace; x <= requiredSpace; x++) {
+            for (int y = 0; y <= requiredSpace * 2; y++) {
+                for (int z = -requiredSpace; z <= requiredSpace; z++) {
+                    BlockPos checkPos = pos.offset(x, y, z);
+                    if (!level.getBlockState(checkPos).isAir()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
+    }
+
+    public static void escapeTrickHurtEvent(LivingHurtEvent event) {
+        LivingEntity attacked = event.getEntity();
+        if(attacked.getPersistentData().getInt("escapeTrickCount") > 0) {
+            if (BeyonderUtil.currentPathwayMatches(attacked, BeyonderClassInit.APPRENTICE.get()) && BeyonderUtil.getSequence(attacked) > 4) {
+                int range = (int) (float) BeyonderUtil.getDamage(attacked).get(ItemInit.TRICKESCAPETRICK.get()) * 5;
+                boolean teleported = tryTeleportToSafeLocation(attacked, attacked.level(), range);
+
+                if (teleported) {
+                    attacked.getPersistentData().putInt("escapeTrickCount", attacked.getPersistentData().getInt("escapeTrickCount") - 1);
+                    if (BeyonderUtil.getSequence(attacked) > 4) {
+                        event.setAmount(event.getAmount() / 2);
+                    }
+                    if (attacked instanceof Player player) {
+                        player.displayClientMessage(Component.literal("Remaining Escape Tricks: ").withStyle(BeyonderUtil.getStyle(player)).append(Component.literal("" + player.getPersistentData().getInt("escapeTrickCount")).withStyle(ChatFormatting.WHITE)), true);
+                    }
+                } else {
+                    if (attacked instanceof Player player) {
+                        player.displayClientMessage(Component.literal("No safe spaces found").withStyle(BeyonderUtil.getStyle(player)), true);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -123,6 +210,7 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);

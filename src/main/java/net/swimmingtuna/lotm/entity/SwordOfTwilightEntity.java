@@ -66,18 +66,23 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
 
     @Override
     public boolean shouldRenderAtSqrDistance(double pDistance) {
-        return pDistance < 400000;
+        return pDistance < 8000000; // 128 blocks squared
+    }
+
+    @Override
+    public boolean shouldRender(double pX, double pY, double pZ) {
+        return true;
     }
 
     @Override
     public @NotNull AABB getBoundingBoxForCulling() {
         return new AABB(
-                this.getX() - 300,
-                this.getY() - 300,
-                this.getZ() - 300,
-                this.getX() + 300,
-                this.getY() + 300,
-                this.getZ() + 300
+                this.getX() - 3000,
+                this.getY() - 3000,
+                this.getZ() - 3000,
+                this.getX() + 3000,
+                this.getY() + 3000,
+                this.getZ() + 3000
         );
     }
 
@@ -140,7 +145,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
             if (this.tickCount >= 20) {
                 this.discard();
             }
-            for (ServerPlayer player : level().getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(100))) {
+            for (ServerPlayer player : level().getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(250))) {
                 LOTMNetworkHandler.sendToPlayer(new UpdateEntityLocationS2C(currentPos.x(), currentPos.y(), currentPos.z(), this.getDeltaMovement().x(), this.getDeltaMovement().y(), this.getDeltaMovement().z(), this.getId()), player);
             }
             AABB aabb;
