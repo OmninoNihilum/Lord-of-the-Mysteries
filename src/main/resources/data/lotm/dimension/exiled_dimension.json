@@ -2,10 +2,11 @@
   "type": "lotm:exiled_dimension_type",
   "generator": {
     "type": "minecraft:noise",
-    "seed": "0",
+    "seed": 0,
     "settings": "lotm:exiled_plains_noise",
     "biome_source": {
       "type": "minecraft:multi_noise",
+      "preset": "minecraft:overworld",
       "biomes": [
         {
           "biome": "lotm:calamity_peaks",
