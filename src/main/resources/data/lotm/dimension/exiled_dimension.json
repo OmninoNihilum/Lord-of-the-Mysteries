@@ -2,48 +2,16 @@
   "type": "lotm:exiled_dimension_type",
   "generator": {
     "type": "minecraft:noise",
-    "seed": "0",
-    "settings": "minecraft:overworld",
+    "seed": 0,
+    "settings": "lotm:exiled_plains_noise",
     "biome_source": {
-      "type": "minecraft:multi_noise",
+      "type": "minecraft:checkerboard",
       "biomes": [
-        {
-          "biome": "lotm:calamity_peaks",
-          "parameters": {
-            "temperature": -0.5,
-            "humidity": 0.5,
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "lotm:glacial_landscape",
-          "parameters": {
-            "temperature": -1.0,
-            "humidity": 1.0,
-            "continentalness": 0.3,
-            "erosion": -0.3,
-            "weirdness": 0.2,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "lotm:hellish_plains",
-          "parameters": {
-            "temperature": 1.0,
-            "humidity": -0.5,
-            "continentalness": -0.3,
-            "erosion": 0.3,
-            "weirdness": -0.2,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        }
-      ]
+        "lotm:calamity_peaks",
+        "lotm:glacial_landscape",
+        "lotm:hellish_plains"
+      ],
+      "scale": 2
     }
   }
 }
