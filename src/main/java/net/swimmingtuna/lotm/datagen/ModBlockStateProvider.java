@@ -42,8 +42,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
         slabBlock(((SlabBlock) BlockInit.LOTM_QUARTZ_SLAB.get()), blockTexture(Blocks.DARK_OAK_PLANKS), blockTexture(Blocks.DARK_OAK_PLANKS));
         slabBlock(((SlabBlock) BlockInit.LOTM_DARKOAK_SLAB.get()), blockTexture(Blocks.DARK_OAK_PLANKS), blockTexture(Blocks.DARK_OAK_PLANKS));
 
-        simpleBlockWithItem(BlockInit.POTION_CAULDRON.get(),
-                new ModelFile.UncheckedModelFile(modLoc("block/empty_potion_cauldron")));
     }
 
     private void blockWithItem(RegistryObject<Block> blockRegistryObject) {

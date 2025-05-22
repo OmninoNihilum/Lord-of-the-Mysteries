@@ -254,8 +254,7 @@ public class CreateDoor extends SimpleAbilityItem {
 
     public static void checkAmount(LivingEntity living) {
         if(living.isShiftKeyDown() && living instanceof Player player) {
-            //player.displayClientMessage(Component.literal("Amount of blocks that can be opened: ").withStyle(ChatFormatting.WHITE).append(Component.literal(String.valueOf(100 - (97 * BeyonderUtil.getSequence(living) / 9))).withStyle(ChatFormatting.BLUE)), true);
-            player.displayClientMessage(Component.literal("Angle: ").withStyle(ChatFormatting.WHITE).append(Component.literal(String.valueOf(player.getYRot())).withStyle(ChatFormatting.BLUE)), true);
+            player.displayClientMessage(Component.literal("Amount of blocks that can be passed through: ").withStyle(ChatFormatting.WHITE).append(Component.literal(String.valueOf(100 - (97 * BeyonderUtil.getSequence(living) / 9))).withStyle(ChatFormatting.BLUE)), true);
         }
     }
 

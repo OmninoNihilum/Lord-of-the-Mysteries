@@ -333,8 +333,6 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 if (this.tickCount % 60 == 0) {
                     float newTornadoX = (float) (Math.random() * 2 - 1); // Random value between -1 and 1
                     float newTornadoZ = (float) (Math.random() * 2 - 1); // Random value between -1 and 1
-
-                    // Set new random movement values
                     this.setTornadoMov(new Vector3f(newTornadoX, tornadoMov.y, newTornadoZ));
 
                 }
