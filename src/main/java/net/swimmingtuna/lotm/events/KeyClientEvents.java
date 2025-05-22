@@ -130,6 +130,8 @@ public class KeyClientEvents {
                     event.setNearPlaneDistance(4);
                 }
                 event.setCanceled(true);
+            } else if (player.level().dimension().equals(DimensionInit.EXILED_DIMENSION_LEVEL_KEY)) {
+
             }
 
         }

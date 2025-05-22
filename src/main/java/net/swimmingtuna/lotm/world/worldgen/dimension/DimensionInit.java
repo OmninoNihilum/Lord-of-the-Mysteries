@@ -20,15 +20,26 @@ import net.swimmingtuna.lotm.LOTM;
 import java.util.List;
 import java.util.OptionalLong;
 
+import static net.swimmingtuna.lotm.LOTM.MOD_ID;
+
 public class DimensionInit {
     public static final ResourceKey<LevelStem> SPIRIT_WORLD_KEY = ResourceKey.create(Registries.LEVEL_STEM,
-            new ResourceLocation(LOTM.MOD_ID, "spirit_world"));
+            new ResourceLocation(MOD_ID, "spirit_world"));
     public static final ResourceKey<Level> SPIRIT_WORLD_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
-            new ResourceLocation(LOTM.MOD_ID, "spirit_world"));
+            new ResourceLocation(MOD_ID, "spirit_world"));
     public static final ResourceKey<DimensionType> SPIRIT_WORLD_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
-            new ResourceLocation(LOTM.MOD_ID, "spirit_world_type"));
+            new ResourceLocation(MOD_ID, "spirit_world_type"));
 
-    public static void bootstrapType(BootstapContext<DimensionType> context) {
+    public static final ResourceKey<LevelStem> EXILED_DIMENSION_KEY = ResourceKey.create(Registries.LEVEL_STEM,
+            new ResourceLocation(LOTM.MOD_ID, "exiled_dimension"));
+    public static final ResourceKey<Level> EXILED_DIMENSION_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
+            new ResourceLocation(LOTM.MOD_ID, "exiled_dimension"));
+    public static final ResourceKey<DimensionType> EXILED_DIMENSION_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
+            new ResourceLocation(LOTM.MOD_ID, "exiled_dimension_type"));
+
+
+
+    public static void bootstrapTypeSpiritWorld(BootstapContext<DimensionType> context) {
         context.register(SPIRIT_WORLD_TYPE, new DimensionType(
                 OptionalLong.empty(), // Don't fix time
                 true,  // hasSkylight
@@ -51,11 +62,6 @@ public class DimensionInit {
         HolderGetter<Biome> biomeRegistry = context.lookup(Registries.BIOME);
         HolderGetter<DimensionType> dimTypes = context.lookup(Registries.DIMENSION_TYPE);
         HolderGetter<NoiseGeneratorSettings> noiseGenSettings = context.lookup(Registries.NOISE_SETTINGS);
-
-        NoiseBasedChunkGenerator wrappedChunkGenerator = new NoiseBasedChunkGenerator(
-                new FixedBiomeSource(biomeRegistry.getOrThrow(Biomes.PLAINS)),
-                noiseGenSettings.getOrThrow(NoiseGeneratorSettings.AMPLIFIED));
-
         NoiseBasedChunkGenerator noiseBasedChunkGenerator = new NoiseBasedChunkGenerator(
                 MultiNoiseBiomeSource.createFromList(
                         new Climate.ParameterList<>(List.of(Pair.of(
@@ -70,8 +76,31 @@ public class DimensionInit {
                         ))),
                 noiseGenSettings.getOrThrow(NoiseGeneratorSettings.AMPLIFIED));
 
-        LevelStem stem = new LevelStem(dimTypes.getOrThrow(DimensionInit.SPIRIT_WORLD_TYPE), noiseBasedChunkGenerator);
+        LevelStem stemSpirit = new LevelStem(dimTypes.getOrThrow(DimensionInit.SPIRIT_WORLD_TYPE), noiseBasedChunkGenerator);
+        LevelStem stemExiled = new LevelStem(dimTypes.getOrThrow(DimensionInit.EXILED_DIMENSION_TYPE), noiseBasedChunkGenerator);
 
-        context.register(SPIRIT_WORLD_KEY, stem);
+        context.register(SPIRIT_WORLD_KEY, stemSpirit);
+        context.register(EXILED_DIMENSION_KEY, stemExiled);
     }
+
+    public static void bootstrapTypeExiledDimension(BootstapContext<DimensionType> context) {
+        context.register(EXILED_DIMENSION_TYPE, new DimensionType(
+                OptionalLong.empty(), // Don't fix time
+                true,  // hasSkylight
+                false, // hasCeiling
+                false, // ultraWarm
+                true,  // natural
+                1.0,   // coordinateScale
+                false,  // bedWorks
+                false,  // respawnAnchorWorks
+                -200,   // minY
+                384,   // height
+                384,   // logicalHeight
+                BlockTags.INFINIBURN_OVERWORLD,
+                BuiltinDimensionTypes.OVERWORLD_EFFECTS,
+                0.0f,  // ambientLight
+                new DimensionType.MonsterSettings(true, true, ConstantInt.of(0), 7)));
+    }
+
+
 }

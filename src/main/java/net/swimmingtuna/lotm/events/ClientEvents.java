@@ -1,19 +1,21 @@
 package net.swimmingtuna.lotm.events;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
@@ -74,19 +76,6 @@ public class ClientEvents {
         Player player = event.getRenderer().getMinecraft().player;
         if (player != null && player.getMainHandItem().getItem() instanceof DeathKnell && player.isShiftKeyDown()) {
             event.setFOV(event.getFOV() * (1 - 0.5f));
-        }
-    }
-
-
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public static void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            Map<String, Integer> currentCooldowns = new HashMap<>(ClientAbilityCooldownData.getCooldowns());
-            for (Map.Entry<String, Integer> entry : currentCooldowns.entrySet()) {
-                int newValue = entry.getValue() - 1;
-                ClientAbilityCooldownData.setAbilityCooldown(entry.getKey(), newValue);
-            }
         }
     }
 

@@ -239,12 +239,19 @@ public class ServerEvents {
                 event.setCanceled(true);
                 return;
             }
-
             if (coordsTravel(message)) {
                 String[] coordinates;
                 String dimensionId = null;
 
                 if (hasDimensionId(message)) {
+                    // Check if player can teleport across dimensions (sequence < 3)
+                    int sequence = BeyonderUtil.getSequence(player);
+                    if (sequence >= 3) {
+                        player.displayClientMessage(Component.literal("Your current sequence doesn't allow cross-dimensional teleportation").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
+                        event.setCanceled(true);
+                        return;
+                    }
+
                     dimensionId = getDimensionId(message);
                     String[] parts = message.replace(",", " ").trim().split("\\s+");
                     coordinates = new String[3];
@@ -258,9 +265,6 @@ public class ServerEvents {
                 int z = Integer.parseInt(coordinates[2]);
 
                 spawnDoor(player, x, y, z, dimensionId);
-                if (dimensionId != null) {
-                    player.sendSystemMessage(Component.literal("Dimension ID is " + dimensionId));
-                }
 
                 BeyonderUtil.useSpirituality(player, 300);
                 event.setCanceled(true);
@@ -274,9 +278,14 @@ public class ServerEvents {
                     break;
                 }
             }
-
             if (targetPlayer != null) {
                 if(BeyonderUtil.areAllies(targetPlayer, event.getPlayer())){
+                    if (targetPlayer.level() != player.level() && BeyonderUtil.getSequence(player) >= 3) {
+                        player.displayClientMessage(Component.literal("Your current sequence doesn't allow cross-dimensional teleportation").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
+                        event.setCanceled(true);
+                        return;
+                    }
+
                     int x = (int)targetPlayer.getX();
                     int y = (int)targetPlayer.getY();
                     int z = (int)targetPlayer.getZ();
