@@ -59,6 +59,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -1203,15 +1204,13 @@ public class BeyonderUtil {
     }
 
     public static void leftClickBlock(Player pPlayer) {
-        Style style = BeyonderUtil.getStyle(pPlayer);
         ItemStack heldItem = pPlayer.getMainHandItem();
         int activeSlot = pPlayer.getInventory().selected;
         if (ClientLeftclickCooldownData.getCooldown() > 0) {
             return;
         }
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            LOTMNetworkHandler.sendToServer(new RequestCooldownSetC2S());
-        }
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> BeyonderUtil::requestCooldown);
+
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
                 LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
@@ -1387,6 +1386,10 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
             }
         }
+    }
+
+    public static void requestCooldown() {
+        LOTMNetworkHandler.sendToServer(new RequestCooldownSetC2S());
     }
 
     public static void spawnParticlesInSphere(ServerLevel level, double x, double y, double z, int maxRadius, int maxParticles, float xSpeed, float ySpeed, float zSpeed, ParticleOptions particle) {
@@ -3323,6 +3326,7 @@ public class BeyonderUtil {
             tag.putBoolean("lightningRedirection", false);
             tag.putBoolean("trickmasterTelekenisis", false);
             tag.putInt("escapeTrickCount", 0);
+            tag.putBoolean("shouldntRenderSecretsSorcererHand", false);
         }
     }
 

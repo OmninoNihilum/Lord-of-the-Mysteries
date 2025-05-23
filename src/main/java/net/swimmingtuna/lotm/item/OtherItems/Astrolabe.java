@@ -52,10 +52,7 @@ public class Astrolabe extends Item {
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {
         ItemStack stack = pPlayer.getItemInHand(pHand);
         if (!pLevel.isClientSide()) {
-            int livingCount = 0;
             for (LivingEntity living : BeyonderUtil.getNonAlliesNearby(pPlayer, 30)) {
-                livingCount++;
-                int maxDamageAmount = livingCount * 10;
                 int totalDamage = 10 - Math.min(10, BeyonderUtil.getSequence(living));
                 if (totalDamage > 0) {
                     stack.hurtAndBreak(totalDamage, pPlayer, (player) -> {
@@ -263,6 +260,7 @@ public class Astrolabe extends Item {
                         int nearestY = nearestBlockpos.getY();
                         int nearestZ = nearestBlockpos.getZ();
                         player.sendSystemMessage(Component.literal(targetBlock.getName().getString() + " is at: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal(nearestX + ", " + nearestY + ", " + nearestZ).withStyle(ChatFormatting.GREEN)));
+                        BeyonderUtil.useSpirituality(player, maxDistance * 3);
                     } else {
                         player.sendSystemMessage(Component.literal("No " + targetBlock.getName() + " found"));
                     }
@@ -289,6 +287,7 @@ public class Astrolabe extends Item {
                         int nearestX = (int) nearestEntity.getX();
                         int nearestY = (int) nearestEntity.getY();
                         int nearestZ = (int) nearestEntity.getZ();
+                        BeyonderUtil.useSpirituality(player, maxDistance * 4);
                         player.sendSystemMessage(Component.literal(entityType.getDescription().getString() + " is at: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal(nearestX + ", " + nearestY + ", " + nearestZ).withStyle(ChatFormatting.GREEN)));
                     } else {
                         player.sendSystemMessage(Component.literal("No " + entityType.getDescription().getString() + " found within range").withStyle(ChatFormatting.RED));
@@ -389,6 +388,7 @@ public class Astrolabe extends Item {
                                     }
                                     player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s luck and misfortune is " + targetPlayer.getPersistentData().getDouble("luck") + " luck and " + targetPlayer.getPersistentData().getDouble("misfortune") + " misfortune"));
                                 }
+                                BeyonderUtil.useSpirituality(player, maxDistance * 5);
                             } else {
                                 player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + " is too far away or has anti-divination too high for you"));
                             }
@@ -434,6 +434,7 @@ public class Astrolabe extends Item {
 
                     if (closest != null) {
                         String biomeName = Component.translatable("biome." + targetBiomeKey.location().getNamespace() + "." + targetBiomeKey.location().getPath()).getString();
+                        BeyonderUtil.useSpirituality(player, maxDistance * 4);
                         player.sendSystemMessage(Component.literal("Nearest " + biomeName + " found at: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(closest.toShortString()).withStyle(ChatFormatting.GREEN));
                     } else {
                         player.sendSystemMessage(Component.literal("Biome found but no nearby instance within 500 blocks.").withStyle(ChatFormatting.RED));
@@ -461,6 +462,7 @@ public class Astrolabe extends Item {
                             int distanceFromStructure = Math.abs(nearestX - playerX) + Math.abs(nearestZ - playerZ);
                             String structureName = structureResourceKey.location().getPath().replace('_', ' ');
                             if (distanceFromStructure <= searchRadius) {
+                                BeyonderUtil.useSpirituality(player, maxDistance * 4);
                                 player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
                             } else {
                                 player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
@@ -490,6 +492,7 @@ public class Astrolabe extends Item {
                                         int playerZ = (int) player.getZ();
                                         int distanceFromStructure = Math.abs(nearestX - playerX) + Math.abs(nearestZ - playerZ);
                                         if (distanceFromStructure <= searchRadius) {
+                                            BeyonderUtil.useSpirituality(player, maxDistance * 4);
                                             player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
                                         } else {
                                             player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
@@ -522,6 +525,7 @@ public class Astrolabe extends Item {
                                     int distanceFromStructure = Math.abs(nearestX - playerX) + Math.abs(nearestZ - playerZ);
                                     int searchRadius = maxDistance * 2;
                                     if (distanceFromStructure <= searchRadius) {
+                                        BeyonderUtil.useSpirituality(player, maxDistance * 4);
                                         player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
                                     } else {
                                         player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
@@ -538,7 +542,7 @@ public class Astrolabe extends Item {
                 if (!foundResource) {
                     player.sendSystemMessage(Component.literal("No divination target found with " + message).withStyle(ChatFormatting.RED));
                 } else {
-                    tag.putInt("astrolabeAttempts", attempts + 1);
+                    BeyonderUtil.useSpirituality(player, maxDistance * 2);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

@@ -18,15 +18,19 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ApprenticeClass implements BeyonderClass {
     @Override
@@ -173,10 +177,11 @@ public class ApprenticeClass implements BeyonderClass {
         return ChatFormatting.BLUE;
     }
 
-    public void scribeRecordedAbilitiesMenu(ServerPlayer player, ItemStack... item){
+    public void scribeRecordedAbilitiesMenu(ServerPlayer player, ItemStack... item) {
         SimpleContainer menu = new SimpleContainer(45);
 
     }
+
     public SimpleContainer getRegisteredAbilityItemsContainer(int sequenceLevel) {
         SimpleContainer container = new SimpleContainer(45);
         for (int i = 9; i >= sequenceLevel; i--) {
@@ -188,22 +193,22 @@ public class ApprenticeClass implements BeyonderClass {
         return container;
     }
 
-    public static void doorRightClick(PlayerInteractEvent.RightClickBlock event){
+    public static void doorRightClick(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
         BlockPos pos = event.getPos();
         Level level = event.getLevel();
         BlockState state = level.getBlockState(pos);
-        if(!level.isClientSide){
-            if (event.getHand() != event.getEntity().getUsedItemHand()){
+        if (!level.isClientSide) {
+            if (event.getHand() != event.getEntity().getUsedItemHand()) {
                 return;
             }
-            if(BeyonderUtil.currentPathwayMatchesNoException(player, BeyonderClassInit.APPRENTICE.get())) {
+            if (BeyonderUtil.currentPathwayMatchesNoException(player, BeyonderClassInit.APPRENTICE.get())) {
                 if (state.getBlock() instanceof DoorBlock) {
                     if (state.getBlock().getStateDefinition().getProperty("open") instanceof BooleanProperty open) {
                         boolean isCurrentlyOpen = state.getValue(open);
                         BlockState newState = state.setValue(open, !isCurrentlyOpen);
                         player.swing(InteractionHand.MAIN_HAND, true);
-                        if(!player.isShiftKeyDown()){
+                        if (!player.isShiftKeyDown()) {
                             level.setBlock(pos, newState, 3);
                             level.playSound(null, pos,
                                     isCurrentlyOpen ? SoundEvents.IRON_DOOR_CLOSE : SoundEvents.IRON_DOOR_OPEN,
@@ -213,6 +218,29 @@ public class ApprenticeClass implements BeyonderClass {
                             event.setCanceled(true);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    public static final Map<UUID, Boolean> lastSentHandStates = new HashMap<>();
+
+    public static void apprenticeHideHand(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 40 == 0) {
+            CompoundTag tag = livingEntity.getPersistentData();
+            boolean currentState = tag.getBoolean("shouldntRenderSecretsSorcererHand");
+            if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(livingEntity, BeyonderClassInit.APPRENTICE.get(), 4)) {
+                tag.putBoolean("shouldntRenderSecretsSorcererHand", true);
+            } else if (currentState) {
+                tag.putBoolean("shouldntRenderSecretsSorcererHand", false);
+            }
+            if (livingEntity.tickCount % 120 == 0) {
+                UUID playerId = livingEntity.getUUID();
+                Boolean lastState = lastSentHandStates.get(playerId);
+                if (lastState == null || lastState != currentState) {
+                    LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderHandPacketS2C(currentState, playerId));
+                    lastSentHandStates.put(playerId, currentState);
                 }
             }
         }
