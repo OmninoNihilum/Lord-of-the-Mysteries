@@ -218,7 +218,6 @@ public class ModEvents {
                 event.setCanceled(true);
             }
         }
-
     }
 
 
@@ -355,6 +354,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                ApprenticeClass.apprenticeHideHand(event);
                 MisfortuneImplosion.misfortuneImplosionLightning(event);
                 VolcanicEruption.volcanicEruptionTick(event);
                 LightningRedirection.lightningRedirectionTick(event);

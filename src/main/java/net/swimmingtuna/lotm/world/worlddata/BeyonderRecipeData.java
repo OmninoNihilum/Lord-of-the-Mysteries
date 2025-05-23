@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BeyonderRecipeData extends SavedData {
+    private static final String DATA_NAME = "beyonder_recipe_data";
     private static final String RECIPES_KEY = "BeyonderRecipes";
     private final Map<ItemStack, RecipeIngredients> beyonderRecipes = new HashMap<>();
 
@@ -37,39 +38,63 @@ public class BeyonderRecipeData extends SavedData {
         }
     }
 
-    private BeyonderRecipeData() {}
+    private BeyonderRecipeData() {
+        super();
+    }
+
+    private BeyonderRecipeData(CompoundTag tag) {
+        super();
+        load(tag);
+    }
 
     public static BeyonderRecipeData getInstance(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                BeyonderRecipeData::load,
-                BeyonderRecipeData::create,
-                RECIPES_KEY
+                BeyonderRecipeData::new,
+                BeyonderRecipeData::new,
+                DATA_NAME
         );
     }
 
     public boolean setRecipe(ItemStack potion, List<ItemStack> mainIngredients, List<ItemStack> supplementaryIngredients) {
-        boolean recipeExists = beyonderRecipes.keySet().stream().anyMatch(existingPotion -> ItemStack.isSameItemSameTags(existingPotion, potion));
-        if (recipeExists) {
+        // Check if recipe already exists
+        ItemStack existingKey = findExistingRecipe(potion);
+        if (existingKey != null) {
             return false;
         }
-        beyonderRecipes.put(potion, new RecipeIngredients(mainIngredients, supplementaryIngredients));
+
+        // Create defensive copies to avoid external modification
+        List<ItemStack> mainCopy = new ArrayList<>();
+        for (ItemStack item : mainIngredients) {
+            mainCopy.add(item.copy());
+        }
+
+        List<ItemStack> suppCopy = new ArrayList<>();
+        for (ItemStack item : supplementaryIngredients) {
+            suppCopy.add(item.copy());
+        }
+
+        beyonderRecipes.put(potion.copy(), new RecipeIngredients(mainCopy, suppCopy));
         setDirty();
         return true;
     }
 
     public boolean removeRecipe(ItemStack potion) {
-        RecipeIngredients removedRecipe = null;
-        for (ItemStack existingPotion : beyonderRecipes.keySet()) {
-            if (ItemStack.isSameItemSameTags(existingPotion, potion)) {
-                removedRecipe = beyonderRecipes.remove(existingPotion);
-                break;
-            }
-        }
-        if (removedRecipe != null) {
+        ItemStack existingKey = findExistingRecipe(potion);
+        if (existingKey != null) {
+            beyonderRecipes.remove(existingKey);
             setDirty();
             return true;
         }
         return false;
+    }
+
+    private ItemStack findExistingRecipe(ItemStack potion) {
+        for (ItemStack existingPotion : beyonderRecipes.keySet()) {
+            if (ItemStack.isSameItemSameTags(existingPotion, potion)) {
+                return existingPotion;
+            }
+        }
+        return null;
     }
 
     public void clearRecipes() {
@@ -89,14 +114,27 @@ public class BeyonderRecipeData extends SavedData {
         for (Map.Entry<ItemStack, RecipeIngredients> entry : beyonderRecipes.entrySet()) {
             StringBuilder recipeMessage = new StringBuilder("Potion: ").append(entry.getKey().getHoverName().getString()).append(" - Main Ingredients: ");
 
-            for (ItemStack ingredient : entry.getValue().getMainIngredients()) {
-                recipeMessage.append(ingredient.getHoverName().getString()).append(", ");
+            List<ItemStack> mainIngredients = entry.getValue().getMainIngredients();
+            if (!mainIngredients.isEmpty()) {
+                for (int i = 0; i < mainIngredients.size(); i++) {
+                    recipeMessage.append(mainIngredients.get(i).getHoverName().getString());
+                    if (i < mainIngredients.size() - 1) {
+                        recipeMessage.append(", ");
+                    }
+                }
             }
 
             recipeMessage.append(" - Supplementary Ingredients: ");
-            for (ItemStack ingredient : entry.getValue().getSupplementaryIngredients()) {
-                recipeMessage.append(ingredient.getHoverName().getString()).append(", ");
+            List<ItemStack> suppIngredients = entry.getValue().getSupplementaryIngredients();
+            if (!suppIngredients.isEmpty()) {
+                for (int i = 0; i < suppIngredients.size(); i++) {
+                    recipeMessage.append(suppIngredients.get(i).getHoverName().getString());
+                    if (i < suppIngredients.size() - 1) {
+                        recipeMessage.append(", ");
+                    }
+                }
             }
+
             player.sendSystemMessage(Component.literal(recipeMessage.toString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD));
         }
     }
@@ -104,11 +142,16 @@ public class BeyonderRecipeData extends SavedData {
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
         ListTag recipeList = new ListTag();
+
         for (Map.Entry<ItemStack, RecipeIngredients> entry : beyonderRecipes.entrySet()) {
             CompoundTag recipeTag = new CompoundTag();
+
+            // Save potion
             CompoundTag potionTag = new CompoundTag();
             entry.getKey().save(potionTag);
             recipeTag.put("beyonderPotion", potionTag);
+
+            // Save main ingredients
             ListTag mainIngredientsTag = new ListTag();
             for (ItemStack ingredient : entry.getValue().getMainIngredients()) {
                 CompoundTag ingredientTag = new CompoundTag();
@@ -116,6 +159,8 @@ public class BeyonderRecipeData extends SavedData {
                 mainIngredientsTag.add(ingredientTag);
             }
             recipeTag.put("mainIngredients", mainIngredientsTag);
+
+            // Save supplementary ingredients
             ListTag supplementaryIngredientsTag = new ListTag();
             for (ItemStack ingredient : entry.getValue().getSupplementaryIngredients()) {
                 CompoundTag ingredientTag = new CompoundTag();
@@ -131,28 +176,51 @@ public class BeyonderRecipeData extends SavedData {
         return compoundTag;
     }
 
+    private void load(CompoundTag compoundTag) {
+        beyonderRecipes.clear();
 
-    public static BeyonderRecipeData load(CompoundTag compoundTag) {
-        BeyonderRecipeData data = new BeyonderRecipeData();
-        if (compoundTag.contains(RECIPES_KEY)) {
+        if (compoundTag.contains(RECIPES_KEY, Tag.TAG_LIST)) {
             ListTag recipeList = compoundTag.getList(RECIPES_KEY, Tag.TAG_COMPOUND);
+
             for (int i = 0; i < recipeList.size(); i++) {
                 CompoundTag recipeTag = recipeList.getCompound(i);
+
+                // Load potion
+                if (!recipeTag.contains("beyonderPotion", Tag.TAG_COMPOUND)) {
+                    continue; // Skip malformed entries
+                }
                 ItemStack potion = ItemStack.of(recipeTag.getCompound("beyonderPotion"));
+
+                // Load main ingredients
                 List<ItemStack> mainIngredients = new ArrayList<>();
-                ListTag mainIngredientsTag = recipeTag.getList("mainIngredients", Tag.TAG_COMPOUND);
-                for (int j = 0; j < mainIngredientsTag.size(); j++) {
-                    mainIngredients.add(ItemStack.of(mainIngredientsTag.getCompound(j)));
+                if (recipeTag.contains("mainIngredients", Tag.TAG_LIST)) {
+                    ListTag mainIngredientsTag = recipeTag.getList("mainIngredients", Tag.TAG_COMPOUND);
+                    for (int j = 0; j < mainIngredientsTag.size(); j++) {
+                        ItemStack ingredient = ItemStack.of(mainIngredientsTag.getCompound(j));
+                        if (!ingredient.isEmpty()) {
+                            mainIngredients.add(ingredient);
+                        }
+                    }
                 }
+
+                // Load supplementary ingredients
                 List<ItemStack> supplementaryIngredients = new ArrayList<>();
-                ListTag supplementaryIngredientsTag = recipeTag.getList("supplementaryIngredients", Tag.TAG_COMPOUND);
-                for (int j = 0; j < supplementaryIngredientsTag.size(); j++) {
-                    supplementaryIngredients.add(ItemStack.of(supplementaryIngredientsTag.getCompound(j)));
+                if (recipeTag.contains("supplementaryIngredients", Tag.TAG_LIST)) {
+                    ListTag supplementaryIngredientsTag = recipeTag.getList("supplementaryIngredients", Tag.TAG_COMPOUND);
+                    for (int j = 0; j < supplementaryIngredientsTag.size(); j++) {
+                        ItemStack ingredient = ItemStack.of(supplementaryIngredientsTag.getCompound(j));
+                        if (!ingredient.isEmpty()) {
+                            supplementaryIngredients.add(ingredient);
+                        }
+                    }
                 }
-                data.beyonderRecipes.put(potion, new RecipeIngredients(mainIngredients, supplementaryIngredients));
+
+                // Only add recipe if potion and at least one main ingredient exist
+                if (!potion.isEmpty() && !mainIngredients.isEmpty()) {
+                    beyonderRecipes.put(potion, new RecipeIngredients(mainIngredients, supplementaryIngredients));
+                }
             }
         }
-        return data;
     }
 
     public static BeyonderRecipeData create() {

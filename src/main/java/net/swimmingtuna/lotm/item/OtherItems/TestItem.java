@@ -2,11 +2,8 @@ package net.swimmingtuna.lotm.item.OtherItems;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -15,15 +12,16 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
+import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderHandData;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 
 public class TestItem extends SimpleAbilityItem {
@@ -63,7 +61,10 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
-            BeyonderUtil.useAvailableAbilityAsMob(interactionTarget);
+            LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderHandPacketS2C(!ClientShouldntRenderHandData.getShouldntRender(interactionTarget.getUUID()), interactionTarget.getUUID()));
+            player.sendSystemMessage(Component.literal(interactionTarget.getName().getString() + "now has a value of " + ClientShouldntRenderHandData.getShouldntRender(interactionTarget.getUUID())));
+            ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
+            interactionTarget.setItemInHand(InteractionHand.MAIN_HAND, diamondSword);
         }
         return InteractionResult.SUCCESS;
     }

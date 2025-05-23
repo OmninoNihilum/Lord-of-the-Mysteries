@@ -151,7 +151,7 @@
               "type": "minecraft:condition",
               "if_true": {
                 "type": "minecraft:biome",
-                "biome_is": ["lotm:hellish_plains"]
+                "biome_is": ["lotm:hellish_cliffs"]
               },
               "then_run": {
                 "type": "minecraft:sequence",
