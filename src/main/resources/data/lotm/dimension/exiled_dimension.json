@@ -12,7 +12,7 @@
           "biome": "lotm:calamity_peaks",
           "parameters": {
             "temperature": -0.5,
-            "humidity": 0.5,
+            "humidity": 0.0,
             "continentalness": 0.0,
             "erosion": 0.0,
             "weirdness": 0.0,
@@ -23,11 +23,11 @@
         {
           "biome": "lotm:glacial_landscape",
           "parameters": {
-            "temperature": -1.0,
-            "humidity": 1.0,
-            "continentalness": 0.3,
-            "erosion": -0.3,
-            "weirdness": 0.2,
+            "temperature": 0.0,
+            "humidity": 0.0,
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
             "depth": 0.0,
             "offset": 0.0
           }
@@ -35,11 +35,11 @@
         {
           "biome": "lotm:hellish_plains",
           "parameters": {
-            "temperature": 1.0,
-            "humidity": -0.5,
-            "continentalness": -0.3,
-            "erosion": 0.3,
-            "weirdness": -0.2,
+            "temperature": 0.5,
+            "humidity": 0.0,
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
             "depth": 0.0,
             "offset": 0.0
           }
