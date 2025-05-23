@@ -3348,4 +3348,10 @@ public class BeyonderUtil {
         return (possibleAlly instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, living)) || (possibleAlly instanceof LivingEntity livingAlly && !BeyonderUtil.areAllies(livingAlly, living));
     }
 
+    public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
+        if (living.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0,0,0,0,0);
+        }
+    }
+
 }
