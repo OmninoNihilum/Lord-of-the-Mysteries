@@ -252,12 +252,10 @@ public class EyeOfDemonHunting extends SimpleAbilityItem {
                     double x = living.getX();
                     double y = living.getY();
                     double z = living.getZ();
-                    if (BeyonderUtil.getPathway(living) != BeyonderClassInit.WARRIOR.get() && BeyonderUtil.getSequence(living) > 4) {
-                        if (living instanceof Player || living instanceof PlayerMobEntity) {
-                            LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
-                        } else if (living instanceof Monster) {
-                            LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.MOB_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
-                        }
+                    if (living instanceof Player || living instanceof PlayerMobEntity) {
+                        LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
+                    } else if (living instanceof Monster) {
+                        LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.MOB_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
                     }
                 }
             }

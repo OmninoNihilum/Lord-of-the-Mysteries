@@ -7,7 +7,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,11 +22,14 @@ import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.UUID;
+
 public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
 
     public enum DoorMode{
-        TELEPORT_ONLY
+        TELEPORT_ONLY,
+        DOOR_MIRAGE
     }
 
     public enum DoorAnimationKind{
@@ -48,18 +51,15 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Float> X = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> Y = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> Z = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<String> DIMENSION_ID = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> DESTINATION = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.STRING);
 
-
-    private DoorMode doorMode;
-    private DoorAnimationKind animationKind;
-    private Level dimensionDestination;
-    private LivingEntity creator;
+    private UUID creator;
 
     public ApprenticeDoorEntity(EntityType<?> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
+    //Teleport only
     public ApprenticeDoorEntity(Level level, LivingEntity creator, int sequence, int life, float yaw, float x, float y, float z, Level dimensionDestination, DoorAnimationKind animationKind){
         this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
         this.entityData.set(DOOR_MODE, DoorMode.TELEPORT_ONLY);
@@ -71,13 +71,26 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.entityData.set(X, x);
         this.entityData.set(Y, y);
         this.entityData.set(Z, z);
+        this.entityData.set(DESTINATION, dimensionDestination.dimension().location().toString());
 
-        this.dimensionDestination = dimensionDestination;
-        if (dimensionDestination != null) {
-            ResourceKey<Level> dimKey = ((ServerLevel)dimensionDestination).dimension();
-            this.entityData.set(DIMENSION_ID, dimKey.location().toString());
-        }
-        this.creator = creator;
+        this.creator = creator.getUUID();
+    }
+
+    //Door mirage
+    public ApprenticeDoorEntity(Level level, LivingEntity target, int sequence, float yaw, float x, float y, float z){
+        this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
+        this.entityData.set(DOOR_MODE, DoorMode.DOOR_MIRAGE);
+        this.entityData.set(DOOR_ANIMATION_KIND, DoorAnimationKind.FADE_IN);
+        this.entityData.set(SEQUENCE, sequence);
+        this.entityData.set(LIFE, 30);
+        this.entityData.set(FULL_LIFE, 30);
+        this.entityData.set(YAW, yaw);
+        this.entityData.set(X, x);
+        this.entityData.set(Y, y);
+        this.entityData.set(Z, z);
+        this.entityData.set(DESTINATION, level.dimension().location().toString());
+
+        this.creator = target.getUUID();
     }
 
     @Override
@@ -95,6 +108,17 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         teleport(living);
                     }
                 }
+            }
+        }
+
+        if(getDoorMode() == DoorMode.DOOR_MIRAGE){
+            if(!this.level().isClientSide){
+                handleLife();
+                LivingEntity target = getCreator();
+                target.getPersistentData().putDouble("xDoorMirageStuck", this.getX());
+                target.getPersistentData().putDouble("yDoorMirageStuck", this.getY());
+                target.getPersistentData().putDouble("zDoorMirageStuck", this.getZ());
+                teleport(target);
             }
         }
     }
@@ -120,7 +144,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     }
 
     public LivingEntity getCreator(){
-        return this.creator;
+        return BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
     }
 
     public int getSequence(){
@@ -140,7 +164,10 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     }
 
     public Level getDimensionDestination(){
-        return this.dimensionDestination;
+        ResourceLocation location = new ResourceLocation(this.entityData.get(DESTINATION));
+        ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, location);
+        MinecraftServer server = this.getServer();
+        return server.getLevel(dimensionKey);
     }
 
     public float getYaw() {
@@ -173,44 +200,49 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 delete();
             }
         }
+
+        if (life > 15){
+            this.entityData.set(HAS_PLAYED_ANIMATION, false);
+            this.entityData.set(FREE_TO_USE, false);
+        }else{
+            this.entityData.set(HAS_PLAYED_ANIMATION, true);
+            this.entityData.set(IS_DYING, true);
+            this.entityData.set(FREE_TO_USE, true);
+        }
+        if(life > 0) this.entityData.set(LIFE, life - 1);
+        else delete();
     }
 
-    private void teleport(LivingEntity entity) {
-        if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
-            if (isFreeToUse()) {
-                if (getSequence() > 7) {
-                    if (entity != null && entity == getCreator()) {
-                        teleportToDestination(entity);
+    private void teleport(LivingEntity entity){
+        if(getDoorMode() == DoorMode.TELEPORT_ONLY){
+            if(isFreeToUse()){
+                if(getSequence() > 7){
+                    if(entity !=  null && entity == getCreator()){
+                        if(getDimensionDestination().dimension().equals(entity.level().dimension())){
+                            entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
+                        }else{
+                            BeyonderUtil.teleportEntityTroughDimensions(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
+                        }
                     }
-                } else {
-                    if (entity != null) {
-                        teleportToDestination(entity);
+                }else{
+                    if(entity !=  null){
+                        if(getDimensionDestination().dimension().equals(entity.level().dimension())){
+                            entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
+                        }else{
+                            BeyonderUtil.teleportEntityTroughDimensions(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
+                        }
                     }
                 }
             }
         }
-    }
-    private void teleportToDestination(LivingEntity entity) {
-        if (dimensionDestination == null && !this.entityData.get(DIMENSION_ID).isEmpty()) {
-            if (level().getServer() != null) {
-                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION,
-                        new ResourceLocation(this.entityData.get(DIMENSION_ID)));
-                ServerLevel targetLevel = level().getServer().getLevel(dimKey);
-                if (targetLevel != null) {
-                    dimensionDestination = targetLevel;
-                }
+
+        if(getDoorMode() == DoorMode.DOOR_MIRAGE){
+            if(isFreeToUse() && entity != null) {
+                entity.getPersistentData().remove("xDoorMirageStuck");
+                entity.getPersistentData().remove("yDoorMirageStuck");
+                entity.getPersistentData().remove("zDoorMirageStuck");
+                entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
             }
-        }
-        if (dimensionDestination == null) {
-            return;
-        }
-        float x = getTeleportX();
-        float y = getTeleportY();
-        float z = getTeleportZ();
-        if (dimensionDestination.equals(entity.level())) {
-            entity.teleportTo(x, y, z);
-        } else {
-            BeyonderUtil.teleportEntityTroughDimensions(entity, dimensionDestination, x, y, z);
         }
     }
 
@@ -242,7 +274,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.entityData.define(X, 0F);
         this.entityData.define(Y, 0F);
         this.entityData.define(Z, 0F);
-        this.entityData.define(DIMENSION_ID, "");
+        this.entityData.define(DESTINATION, this.level().dimension().location().toString());
     }
 
     @Override
@@ -253,17 +285,6 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 this.entityData.set(DOOR_MODE, mode);
             } catch (IllegalArgumentException ignored) {
                 delete();
-            }
-        }
-        if(tag.contains("dimensionId")) {
-            this.entityData.set(DIMENSION_ID, tag.getString("dimensionId"));
-            if (level().getServer() != null) {
-                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION,
-                        new ResourceLocation(tag.getString("dimensionId")));
-                ServerLevel targetLevel = level().getServer().getLevel(dimKey);
-                if (targetLevel != null) {
-                    this.dimensionDestination = targetLevel;
-                }
             }
         }
         if (tag.contains("doorAnimationKind")) {
@@ -304,6 +325,13 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         if(tag.contains("z")){
             this.entityData.set(Z, tag.getFloat("z"));
         }
+        if(tag.contains("destination")){
+            this.entityData.set(DESTINATION, tag.getString("destination"));
+        }
+
+        if(tag.contains("creator")){
+            this.creator = tag.getUUID("creator");
+        }
     }
 
     @Override
@@ -320,10 +348,9 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         tag.putFloat("x", this.entityData.get(X));
         tag.putFloat("y", this.entityData.get(Y));
         tag.putFloat("z", this.entityData.get(Z));
-        String dimId = this.entityData.get(DIMENSION_ID);
-        if (!dimId.isEmpty()) {
-            tag.putString("dimensionId", dimId);
-        }
+        tag.putString("destination", this.entityData.get(DESTINATION));
+
+        tag.putUUID("creator", this.creator);
     }
 
     @Override
@@ -334,17 +361,34 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     private PlayState predicate(AnimationState<ApprenticeDoorEntity> animationState) {
         AnimationController<ApprenticeDoorEntity> controller = animationState.getController();
 
-        if (!this.entityData.get(HAS_PLAYED_ANIMATION)) {
-            controller.setAnimation(RawAnimation.begin().then(getOpenAnimation(), Animation.LoopType.PLAY_ONCE));
-            return PlayState.CONTINUE;
+        if (this.getDoorMode() == DoorMode.TELEPORT_ONLY) {
+            if (!this.entityData.get(HAS_PLAYED_ANIMATION)) {
+                controller.setAnimation(RawAnimation.begin().then(getOpenAnimation(), Animation.LoopType.PLAY_ONCE));
+                return PlayState.CONTINUE;
+            }
+
+            if (this.entityData.get(IS_DYING)) {
+                controller.setAnimation(RawAnimation.begin().then(getCloseAnimation(), Animation.LoopType.PLAY_ONCE));
+                return PlayState.CONTINUE;
+            }
+
+            controller.setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
         }
 
-        if (this.entityData.get(IS_DYING)) {
-            controller.setAnimation(RawAnimation.begin().then(getCloseAnimation(), Animation.LoopType.PLAY_ONCE));
-            return PlayState.CONTINUE;
+        if(this.getDoorMode() == DoorMode.DOOR_MIRAGE){
+            controller.setAnimationSpeed(2.0f);
+
+            if (!this.entityData.get(HAS_PLAYED_ANIMATION)) {
+                controller.setAnimation(RawAnimation.begin().then(getOpenAnimation(), Animation.LoopType.PLAY_ONCE));
+                return PlayState.CONTINUE;
+            }
+
+            if (this.entityData.get(IS_DYING)) {
+                controller.setAnimation(RawAnimation.begin().then(getCloseAnimation(), Animation.LoopType.PLAY_ONCE));
+                return PlayState.CONTINUE;
+            }
         }
 
-        controller.setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
         return PlayState.CONTINUE;
     }
 

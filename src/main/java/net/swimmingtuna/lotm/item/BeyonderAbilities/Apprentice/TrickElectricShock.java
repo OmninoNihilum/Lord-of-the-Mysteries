@@ -60,7 +60,7 @@ public class TrickElectricShock extends SimpleAbilityItem {
             boolean electricShock = tag.getBoolean("trickmasterElectricShock");
             tag.putBoolean("trickmasterElectricShock", !electricShock);
             if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("Electric Shock turned " + (electricShock ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
+                pPlayer.displayClientMessage(Component.literal("Electric Shock Turned " + (electricShock ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
             }
         }
     }

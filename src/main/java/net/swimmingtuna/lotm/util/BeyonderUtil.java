@@ -69,6 +69,7 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
+import net.swimmingtuna.lotm.entity.CustomFallingBlockEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
@@ -1701,6 +1702,8 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKTELEKENISIS.get(), applyAbilityStrengthened((75.0f - (sequence * 9.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((120.0f - (sequence * 13.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((90.0f - (sequence * 10.5f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
+
         return damageMap;
     }
 
@@ -2285,7 +2288,7 @@ public class BeyonderUtil {
             PlayerAllyData allyData = serverLevel.getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
             Set<UUID> allyUUIDs = allyData.getAllies(livingEntity.getUUID());
             for (UUID allyUUID : allyUUIDs) {
-                LivingEntity ally = getEntityFromUUID(serverLevel, allyUUID);
+                LivingEntity ally = getLivingEntityFromUUID(serverLevel, allyUUID);
                 if (ally != null) {
                     allyEntities.add(ally);
                 }
@@ -2293,6 +2296,8 @@ public class BeyonderUtil {
         }
         return allyEntities;
     }
+
+
 
     public static void makeAlly(LivingEntity user, LivingEntity allyToBe) {
         if (user.level() instanceof ServerLevel serverLevel) {
@@ -3353,5 +3358,26 @@ public class BeyonderUtil {
             serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0,0,0,0,0);
         }
     }
+
+    public static LivingEntity getLivingEntityFromUUID(Level level, UUID uuid) {
+        if (level instanceof ServerLevel serverLevel) {
+            Entity entity = serverLevel.getEntity(uuid);
+            if (entity instanceof LivingEntity livingEntity) {
+                return livingEntity;
+            }
+        }
+        return null;
+    }
+
+    public static CustomFallingBlockEntity getCustomFallingBlockFromUUID(Level level, UUID uuid) {
+        if (level instanceof ServerLevel serverLevel) {
+            Entity entity = serverLevel.getEntity(uuid);
+            if (entity instanceof CustomFallingBlockEntity fallingBlock) {
+                return fallingBlock;
+            }
+        }
+        return null;
+    }
+
 
 }

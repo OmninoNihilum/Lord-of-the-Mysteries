@@ -380,7 +380,7 @@ public class ItemInit {
     public static final RegistryObject<Item> EXILE = ITEMS.register("exile",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_MIRAGE = ITEMS.register("doormirage",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new DoorMirage(new Item.Properties().stacksTo(1)));
 
     //3
     public static final RegistryObject<Item> SPATIAL_CAGE = ITEMS.register("spatialcage",

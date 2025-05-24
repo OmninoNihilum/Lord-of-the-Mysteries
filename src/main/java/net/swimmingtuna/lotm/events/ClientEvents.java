@@ -1,5 +1,6 @@
 package net.swimmingtuna.lotm.events;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,6 +23,7 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.client.AbilityOverlay;
 import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorMirage;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
@@ -100,7 +102,31 @@ public class ClientEvents {
         } else if (event.getRenderer().shadowRadius == 0.0f) {
             event.getRenderer().shadowRadius = 1.0f;
         }
+        if(DoorMirage.isActive(entity)){
+            float counter = DoorMirage.getCounter(entity);
+            float opacity = 1f - (counter / 100f);
+
+            // Force blend state
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.setShaderColor(1f, 1f, 1f, opacity);
+        }
     }
+
+    /*
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
+        LivingEntity entity = event.getEntity();
+        //APPRENTICE DOOR MIRAGE
+        if(DoorMirage.isActive(entity)){
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            RenderSystem.disableBlend();
+        }
+    }
+
+     */
+
 
 
 }

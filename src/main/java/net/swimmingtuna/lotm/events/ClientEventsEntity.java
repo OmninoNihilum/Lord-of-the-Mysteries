@@ -75,11 +75,14 @@ public class ClientEventsEntity {
         event.registerEntityRenderer(EntityInit.DRAGON_BREATH_ENTITY.get(), DragonBreathRenderer::new);
         event.registerEntityRenderer(EntityInit.WIND_BLADE_ENTITY.get(), WindBladeRenderer::new);
         event.registerEntityRenderer(EntityInit.WIND_CUSHION_ENTITY.get(), WindCushionRenderer::new);
+        event.registerEntityRenderer(EntityInit.CUSTOM_FALLING_BLOCK_ENTITY.get(), CustomFallingBlockRenderer::new);
+
     }
 
 
     @SubscribeEvent
     public static void registerParticleProvidersEvent(final RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(ParticleInit.DOOR.get(), DoorParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.ACIDRAIN_PARTICLE.get(), AcidRainParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), PlayerTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.MOB_TRAIL_PARTICLE.get(), MobTrailParticle.Provider::new);

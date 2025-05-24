@@ -55,7 +55,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
             boolean telekenisis = tag.getBoolean("trickmasterTelekenisis");
             tag.putBoolean("trickmasterTelekenisis", !telekenisis);
             if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("Telekenisis Turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
+                pPlayer.displayClientMessage(Component.literal("Telekenisis Turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
             }
         }
     }
@@ -67,20 +67,21 @@ public class TrickTelekenisis extends SimpleAbilityItem {
         if (!livingEntity.level().isClientSide() && tag.getBoolean("trickmasterTelekenisis") && livingEntity.tickCount % 5 == 0) {
             if (BeyonderUtil.getSpirituality(livingEntity) >= 10) {
                 for (Entity entity : livingEntity.level().getEntitiesOfClass(Entity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTELEKENISIS.get())))) {
-                    if (entity != livingEntity && (entity instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity)) || (entity instanceof LivingEntity living && !BeyonderUtil.areAllies(livingEntity, living))) {
+                    if (entity == livingEntity) {
+                        continue;
+                    }
+                    if ((entity instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity)) || (entity instanceof LivingEntity living && !BeyonderUtil.areAllies(livingEntity, living))) {
                         double x = entity.getX() - livingEntity.getX();
                         double y = entity.getY() - livingEntity.getY();
                         double z = entity.getZ() - livingEntity.getZ();
                         double magnitude = Math.sqrt(x * x + y * y + z * z);
-                        if (entity != livingEntity) {
-                            entity.setDeltaMovement(x / magnitude * 4, y / magnitude * 4, z / magnitude * 4);
-                        }
+                        entity.setDeltaMovement(x / magnitude * 4, y / magnitude * 4, z / magnitude * 4);
                         entity.hurtMarked = true;
                         float amount;
                         if (entity instanceof LivingEntity living) {
-                            amount = 10 - BeyonderUtil.getSequence(living);
+                            amount = 10 - BeyonderUtil.getSequence(living) * 10;
                         } else if (entity instanceof Projectile projectile) {
-                            amount = (int) ((BeyonderUtil.getScale(entity) * 3) + (Math.abs(projectile.getDeltaMovement().y() + projectile.getDeltaMovement().x() + projectile.getDeltaMovement().z())));
+                            amount = (int) ((BeyonderUtil.getScale(entity) * 3) + (Math.abs(projectile.getDeltaMovement().y() + projectile.getDeltaMovement().x() + projectile.getDeltaMovement().z())) * 3);
                         } else {
                             amount = 0;
                         }
@@ -119,7 +120,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal(""));
+        tooltipComponents.add(Component.literal("Upon use, enables or disables your telekenisis. If enabled, all projectiles and other entities will be pushed away from you at the cost of spirituality for each entity pushed away."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("10 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
