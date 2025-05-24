@@ -159,30 +159,30 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(5, ItemInit.BLINK.get());
         items.put(5, ItemInit.BLINKAFTERIMAGE.get());
 
-        items.put(4, ItemInit.BLINK_STATE.get());
-        items.put(4, ItemInit.EXILE.get());
+        //items.put(4, ItemInit.BLINK_STATE.get());
+        //items.put(4, ItemInit.EXILE.get());
         items.put(4, ItemInit.DOOR_MIRAGE.get());
 
-        items.put(3, ItemInit.SPATIAL_CAGE.get());
-        items.put(3, ItemInit.SPATIAL_TEARING.get());
+        //items.put(3, ItemInit.SPATIAL_CAGE.get());
+        //items.put(3, ItemInit.SPATIAL_TEARING.get());
 
-        items.put(2, ItemInit.SYMBOLIZATION.get());
-        items.put(2, ItemInit.DIMENSIONAL_SIGHT.get());
-        items.put(2, ItemInit.REPLICATE.get());
-        items.put(2, ItemInit.SEALING.get());
+        //items.put(2, ItemInit.SYMBOLIZATION.get());
+        //items.put(2, ItemInit.DIMENSIONAL_SIGHT.get());
+        //items.put(2, ItemInit.REPLICATE.get());
+        //items.put(2, ItemInit.SEALING.get());
 
-        items.put(1, ItemInit.SPACE_FRAGMENTATION.get());
-        items.put(1, ItemInit.GRAVITY_MANIPULATION.get());
-        items.put(1, ItemInit.SPATIAL_SEAL.get());
-        items.put(1, ItemInit.SPATIAL_LOCK_ON.get());
+        //items.put(1, ItemInit.SPACE_FRAGMENTATION.get());
+        //items.put(1, ItemInit.GRAVITY_MANIPULATION.get());
+        //items.put(1, ItemInit.SPATIAL_SEAL.get());
+        //items.put(1, ItemInit.SPATIAL_LOCK_ON.get());
 
-        items.put(0, ItemInit.DOOR_SPATIAL_LOCK_ON.get());
-        items.put(0, ItemInit.DOOR_DIMENSION_CLOSING.get());
-        items.put(0, ItemInit.DOOR_SEALED_SPACE.get());
-        items.put(0, ItemInit.DOOR_LAYERING.get());
-        items.put(0, ItemInit.DOOR_GAMMA_RAY_BURST.get());
-        items.put(0, ItemInit.CONCEPTUALIZATION.get());
-        items.put(0, ItemInit.REPLICATION.get());
+        //items.put(0, ItemInit.DOOR_SPATIAL_LOCK_ON.get());
+        //items.put(0, ItemInit.DOOR_DIMENSION_CLOSING.get());
+        //items.put(0, ItemInit.DOOR_SEALED_SPACE.get());
+        //items.put(0, ItemInit.DOOR_LAYERING.get());
+        //items.put(0, ItemInit.DOOR_GAMMA_RAY_BURST.get());
+        //items.put(0, ItemInit.CONCEPTUALIZATION.get());
+        //items.put(0, ItemInit.REPLICATION.get());
 
         return items;
     }
