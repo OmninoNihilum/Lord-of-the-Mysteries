@@ -15,6 +15,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -107,7 +108,10 @@ public class FlashEntity extends AbstractHurtingProjectile {
                 }
             } else if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
                 for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 15))) {
-                    if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity) && isEntityLookingAtThis(livingEntity)) {
+                    if (livingEntity != owner && isEntityLookingAtThis(livingEntity)) {
+                        if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
+                            mob.setTarget(null);
+                        }
                         BeyonderUtil.applyMobEffect(livingEntity, ModEffects.FLASH.get(), (int) (20 * BeyonderUtil.getScale(this) / BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFLASH.get())), 1, true, true);
                     }
                 }

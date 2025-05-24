@@ -10,6 +10,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -31,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static net.swimmingtuna.lotm.util.BeyonderUtil.applyMobEffect;
 
 public class ApprenticeClass implements BeyonderClass {
     @Override
@@ -64,6 +69,9 @@ public class ApprenticeClass implements BeyonderClass {
         return List.of(10000, 5000, 3000, 1800, 1200, 700, 450, 300, 175, 125);
     }
 
+
+
+
     @Override
     public List<Integer> mentalStrength() {
         return List.of(560, 380, 285, 220, 180, 140, 100, 80, 65, 40);
@@ -93,26 +101,33 @@ public class ApprenticeClass implements BeyonderClass {
                 tag.putInt("maxScribedAbilities", 20);
             }
             if (sequenceLevel == 5) {
+                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
                 tag.putInt("maxScribedAbilities", 25);
             }
             if (sequenceLevel == 4) {
+                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
                 tag.putInt("maxScribedAbilities", 30);
             }
             if (sequenceLevel == 3) {
+                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 35);
             }
             if (sequenceLevel == 2) {
+                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 40);
             }
             if (sequenceLevel == 1) {
+                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 45);
             }
             if (sequenceLevel == 0) {
+                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 50);
             }
         }
 
     }
+
 
     @Override
     public Multimap<Integer, Item> getItems() {
@@ -134,9 +149,9 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(8, ItemInit.TRICKLOUDNOISE.get());
         items.put(8, ItemInit.TRICKBLACKCURTAIN.get());
 
-        items.put(7, ItemInit.ASTROLOGER_SPIRIT_VISION.get());
+        //items.put(7, ItemInit.ASTROLOGER_SPIRIT_VISION.get());
 
-        items.put(6, ItemInit.RECORDSCRIBE.get());
+        //items.put(6, ItemInit.RECORDSCRIBE.get());
         items.put(6, ItemInit.SCRIBEABILITIES.get());
 
         items.put(5, ItemInit.TRAVELERSDOOR.get());

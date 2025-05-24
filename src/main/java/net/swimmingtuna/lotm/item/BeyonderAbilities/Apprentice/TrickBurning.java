@@ -31,7 +31,7 @@ public class TrickBurning extends SimpleAbilityItem {
 
 
     public TrickBurning(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 8, 0, 20);
+        super(properties, BeyonderClassInit.APPRENTICE, 8, 100, 300);
     }
 
     @Override
@@ -119,8 +119,8 @@ public class TrickBurning extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, cause all projectile's not near your allies to have a chance to explode based on their size and your sequence. If they don't explode, they'll be set on fire."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("100").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

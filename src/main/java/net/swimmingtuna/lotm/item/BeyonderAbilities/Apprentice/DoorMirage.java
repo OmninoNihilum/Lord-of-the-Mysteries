@@ -2,8 +2,6 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -16,16 +14,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.Placate;
 import net.swimmingtuna.lotm.networking.packet.DoorMirageDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +36,12 @@ public class DoorMirage extends SimpleAbilityItem {
     private static final Random RANDOM = new Random();
 
     public DoorMirage(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 4, 0, 0);
+        super(properties, BeyonderClassInit.APPRENTICE, 4, 0, 20);
     }
 
     @Override
-    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand){
-        if(!checkAll(livingEntity)){
+    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
+        if (!checkAll(livingEntity)) {
             return InteractionResult.FAIL;
         }
         mirage(livingEntity);
@@ -54,9 +50,8 @@ public class DoorMirage extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
-    public static void mirage(LivingEntity entity){
+    public static void mirage(LivingEntity entity) {
         CompoundTag tag = entity.getPersistentData();
-        tag.putBoolean("doorMirageIsActive", !tag.getBoolean("doorMirageIsActive"));
         boolean mirage = tag.getBoolean("doorMirageIsActive");
         tag.putBoolean("doorMirageIsActive", !mirage);
         if (entity instanceof Player pPlayer) {
@@ -65,48 +60,56 @@ public class DoorMirage extends SimpleAbilityItem {
         resetCounter(entity);
     }
 
-    public static void mirageTick(LivingEntity entity){
-        if(entity.level().isClientSide) return;
-        if(isActive(entity)){
-            if(getCounter(entity) < 100){
+    public static void mirageTick(LivingEntity entity) {
+        if (entity.level().isClientSide) return;
+        if (isActive(entity)) {
+            if (getCounter(entity) < 100) {
                 setCounter(entity, getCounter(entity) + 1);
             }
-            if(entity.level() instanceof ServerLevel level){
-                level.sendParticles(ParticleInit.DOOR.get(), entity.getX(), entity.getY() + entity.getBbHeight()/2, entity.getZ(), getCounter(entity)/10, 0.2, 0.25, 0.2, 0.01);
+            if (entity.level() instanceof ServerLevel level) {
+                level.sendParticles(ParticleInit.DOOR.get(), entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), getCounter(entity) / 10, 0.2, 0.25, 0.2, 0.01);
             }
         }
-        if(getInvincibilityCounter(entity) > 0){
+        if (getInvincibilityCounter(entity) > 0) {
             setInvincibilityCounter(entity, getInvincibilityCounter(entity) - 1);
         }
 
-        if(entity.getPersistentData().contains("xDoorMirageStuck") && entity.getPersistentData().contains("yDoorMirageStuck") && entity.getPersistentData().contains("zDoorMirageStuck")){
+        if (entity.getPersistentData().contains("xDoorMirageStuck") && entity.getPersistentData().contains("yDoorMirageStuck") && entity.getPersistentData().contains("zDoorMirageStuck")) {
             entity.teleportTo(entity.getPersistentData().getDouble("xDoorMirageStuck"), entity.getPersistentData().getDouble("yDoorMirageStuck"), entity.getPersistentData().getDouble("zDoorMirageStuck"));
+        }
+        if (!entity.level().isClientSide() && entity.getPersistentData().getBoolean("doorMirageIsActive")) {
+            if (BeyonderUtil.getSpirituality(entity) > 3) {
+                BeyonderUtil.useSpirituality(entity, 3);
+            } else {
+                entity.getPersistentData().putBoolean("doorMirageIsActive", false);
+                entity.sendSystemMessage(Component.literal("Door Mirage turned off due to lack of spirituality").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+            }
         }
     }
 
-    public static void resetCounter(LivingEntity entity){
+    public static void resetCounter(LivingEntity entity) {
         setCounter(entity, 0);
     }
 
-    public static boolean isActive(LivingEntity entity){
+    public static boolean isActive(LivingEntity entity) {
         return entity.getPersistentData().getBoolean("doorMirageIsActive");
     }
 
-    public static int getCounter(LivingEntity entity){
+    public static int getCounter(LivingEntity entity) {
         return entity.getPersistentData().getInt("doorMirageDodgeCounter");
     }
 
-    public static void setCounter(LivingEntity entity, int counter){
+    public static void setCounter(LivingEntity entity, int counter) {
         entity.getPersistentData().putInt("doorMirageDodgeCounter", counter);
         DoorMirageDataS2C packet = new DoorMirageDataS2C(entity.getId(), entity.getPersistentData());
         INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with((() -> entity)), packet);
     }
 
-    public static int getInvincibilityCounter(LivingEntity entity){
+    public static int getInvincibilityCounter(LivingEntity entity) {
         return entity.getPersistentData().getInt("doorMirageInvincibilityCounter");
     }
 
-    public static void setInvincibilityCounter(LivingEntity entity, int counter){
+    public static void setInvincibilityCounter(LivingEntity entity, int counter) {
         entity.getPersistentData().putInt("doorMirageInvincibilityCounter", counter);
     }
 
@@ -120,22 +123,14 @@ public class DoorMirage extends SimpleAbilityItem {
                     return;
                 }
                 if (DoorMirage.getCounter(attacked) >= BeyonderUtil.getDamage(attacked).get(ItemInit.DOOR_MIRAGE.get())) {
-                    if (BeyonderUtil.getSpirituality(attacked) >= 500) {
-                        event.setCanceled(true);
-                        if (attacked instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Successfully dodged an attack").withStyle(BeyonderUtil.getStyle(player)), true);
-                        }
-                        DoorMirage.setInvincibilityCounter(attacked, 15);
-                        BeyonderUtil.useSpirituality(attacked, 500);
-                        if (attacker instanceof LivingEntity livingAttacker)
-                            DoorMirage.summonDoorOnAttacker(attacked, livingAttacker);
-                        DoorMirage.resetCounter(attacked);
-                        return;
-                    } else {
-                        if (attacked instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Not enough spirituality to dodge the attack").withStyle(BeyonderUtil.getStyle(player)), true);
-                        }
+                    event.setCanceled(true);
+                    if (attacked instanceof Player player) {
+                        player.displayClientMessage(Component.literal("Successfully dodged an attack").withStyle(BeyonderUtil.getStyle(player)), true);
                     }
+                    DoorMirage.setInvincibilityCounter(attacked, 15);
+                    if (attacker instanceof LivingEntity livingAttacker)
+                        DoorMirage.summonDoorOnAttacker(attacked, livingAttacker);
+                    DoorMirage.resetCounter(attacked);
                 } else {
                     if (attacked instanceof Player player) {
                         player.displayClientMessage(Component.literal("Dodge not ready yet. Dodge counter ready in: " + (int) (DoorMirage.getCounter(attacked)) / 20 + " seconds").withStyle(BeyonderUtil.getStyle(player)), true);
@@ -145,7 +140,7 @@ public class DoorMirage extends SimpleAbilityItem {
         }
     }
 
-    public static void summonDoorOnAttacker(LivingEntity attacked, LivingEntity attacker){
+    public static void summonDoorOnAttacker(LivingEntity attacked, LivingEntity attacker) {
         float yaw = -attacked.getYRot() + 180;
         int x = getSafeSpaceCoordinates(attacker)[0];
         int y = getSafeSpaceCoordinates(attacker)[1];
@@ -155,37 +150,38 @@ public class DoorMirage extends SimpleAbilityItem {
         attacker.level().addFreshEntity(door);
     }
 
-    public static int[] getSafeSpaceCoordinates(LivingEntity entity){
+    public static int[] getSafeSpaceCoordinates(LivingEntity entity) {
         Random random = new Random();
         float range = 10;
         int maxAttempts = 100;
         int x = entity.getBlockX();
         int y = entity.getBlockY();
         int z = entity.getBlockZ();
-        for(int i = 0; i < maxAttempts; i++){
+        for (int i = 0; i < maxAttempts; i++) {
             int xOffSet = random.nextInt((int) range * 2) - (int) range;
             int yOffSet = random.nextInt((int) range * 2) - (int) range;
             int zOffSet = random.nextInt((int) range * 2) - (int) range;
-            double distanceSq = xOffSet*xOffSet + yOffSet*yOffSet + zOffSet*zOffSet;
-            if (distanceSq <= range*range) {
+            double distanceSq = xOffSet * xOffSet + yOffSet * yOffSet + zOffSet * zOffSet;
+            if (distanceSq <= range * range) {
                 BlockPos pos = entity.blockPosition().offset(xOffSet, yOffSet, zOffSet);
-                if(entity.level().getBlockState(pos).isAir() && entity.level().getBlockState(pos.below()).entityCanStandOn(entity.level(), pos.below(), entity)){
-                    return new int[] {pos.getX(), pos.getY(), pos.getZ()};
+                if (entity.level().getBlockState(pos).isAir() && entity.level().getBlockState(pos.below()).entityCanStandOn(entity.level(), pos.below(), entity)) {
+                    return new int[]{pos.getX(), pos.getY(), pos.getZ()};
                 }
             }
         }
-        return new int[] {x, y, z};
+        return new int[]{x, y, z};
     }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, starts to transform in a series of doors, that in each 5 seconds will teleport an attacker away."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("10 Second").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("60/s").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);

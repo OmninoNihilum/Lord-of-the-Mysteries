@@ -77,7 +77,6 @@ public class ScribeAbilities extends SimpleAbilityItem {
                 if (storage.hasScribedAbility(ability)) {
                     storage.useScribeAbility(ability);
                     if (livingEntity instanceof Player player) {
-
                         player.displayClientMessage(Component.literal("1 copy deleted.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                     }
                 } else {
@@ -112,9 +111,9 @@ public class ScribeAbilities extends SimpleAbilityItem {
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level
-            level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, opens a menu that you can use to get your scribed abilities."));
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("Upon use, opens a menu that you can use to get your scribed abilities. In order to scribe an ability, look at someone using an ability and you'll have a chance, depending on how strong it is relative to you, to gain the ability to use it once, or one more time depending on if you already had it recorded or not."));
+        tooltipComponents.add(Component.literal("Left click while not shifting accept the copy or shift left click to deny it"));
         tooltipComponents.add(Component.literal("Use while sneaking with an ability in your off-hand to get how many copies of that ability you have scribed so far."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));

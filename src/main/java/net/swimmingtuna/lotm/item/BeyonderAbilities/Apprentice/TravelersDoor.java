@@ -186,13 +186,10 @@ public class TravelersDoor extends SimpleAbilityItem {
 
         MinecraftServer server = player.level().getServer();
         if (server == null) return player.level();
-        System.out.println("Attempting to find dimension: " + dimensionId);
         ResourceKey<Level> dimKey;
         try {
             dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionId));
-            System.out.println("Created resource key: " + dimKey);
         } catch (Exception e) {
-            System.out.println("Failed to create resource key, trying fallbacks");
             if (dimensionId.toLowerCase().contains("nether")) {
                 dimKey = Level.NETHER;
             } else if (dimensionId.toLowerCase().contains("end")) {
@@ -204,10 +201,8 @@ public class TravelersDoor extends SimpleAbilityItem {
 
         ServerLevel level = server.getLevel(dimKey);
         if (level != null) {
-            System.out.println("Found dimension: " + level);
             return level;
         } else {
-            System.out.println("Dimension not found, defaulting to current level");
             return player.level();
         }
     }
@@ -245,6 +240,8 @@ public class TravelersDoor extends SimpleAbilityItem {
         tooltipComponents.add(Component.literal("\"Ally Name\", \"Instant\"(Optional)"));
         tooltipComponents.add(Component.literal("Shift + Right-click to set waypoint at current position"));
         tooltipComponents.add(Component.literal("Left-click air to cycle between waypoints"));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("300 to teleport to waypoint or create a door to a location. None to set a waypoint. ").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
