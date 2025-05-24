@@ -354,6 +354,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                DoorMirage.mirageTick(livingEntity);
                 ApprenticeClass.apprenticeHideHand(event);
                 MisfortuneImplosion.misfortuneImplosionLightning(event);
                 VolcanicEruption.volcanicEruptionTick(event);
@@ -488,6 +489,7 @@ public class ModEvents {
         Entity attacker = event.getSource().getEntity();
         if (attacker != null) {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
+                DoorMirage.doorMirageAttackEvent(event);
                 BlinkAfterimage.travelerBlinkPassive(event);
                 CompoundTag tag = attacked.getPersistentData();
                 TrickEscapeTrick.escapeTrickAttackEvent(event);

@@ -186,25 +186,18 @@ public class TravelersDoor extends SimpleAbilityItem {
 
         MinecraftServer server = player.level().getServer();
         if (server == null) return player.level();
-
-        // Debug output to see what dimension ID we're trying to use
         System.out.println("Attempting to find dimension: " + dimensionId);
-
-        // Handle common dimension names without requiring exact ResourceLocation format
         ResourceKey<Level> dimKey;
         try {
-            // Try to create a resource location directly
             dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionId));
             System.out.println("Created resource key: " + dimKey);
         } catch (Exception e) {
-            // If that fails, try some fallbacks
             System.out.println("Failed to create resource key, trying fallbacks");
             if (dimensionId.toLowerCase().contains("nether")) {
                 dimKey = Level.NETHER;
             } else if (dimensionId.toLowerCase().contains("end")) {
                 dimKey = Level.END;
             } else {
-                // Default to overworld if we can't figure it out
                 dimKey = Level.OVERWORLD;
             }
         }
@@ -246,7 +239,10 @@ public class TravelersDoor extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Right-click to teleport to selected waypoint. You can also type coordinates in chat to teleport to them. At sequence 3, you can also type in the name of a dimension"));
+        tooltipComponents.add(Component.literal("Upon use, blink in the direction you're looking."));
+        tooltipComponents.add(Component.literal("You can also type coordinates or an ally name in the chat on the following format while holding this item in order to go to that location."));
+        tooltipComponents.add(Component.literal("\"X\", \"Y\", \"Z\", \"Dimension\"(Optional), \"Instant\"(Optional)"));
+        tooltipComponents.add(Component.literal("\"Ally Name\", \"Instant\"(Optional)"));
         tooltipComponents.add(Component.literal("Shift + Right-click to set waypoint at current position"));
         tooltipComponents.add(Component.literal("Left-click air to cycle between waypoints"));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

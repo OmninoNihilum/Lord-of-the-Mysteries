@@ -10,31 +10,37 @@ import software.bernie.geckolib.model.GeoModel;
 
 public class ApprenticeDoorModel extends GeoModel<ApprenticeDoorEntity> {
     private ResourceLocation getModel(ApprenticeDoorEntity door){
-        ResourceLocation model = new ResourceLocation(LOTM.MOD_ID, "");
+        ResourceLocation model;
         if(door.getSequence() > 7){
             model = new ResourceLocation(LOTM.MOD_ID, "geo/low_sequence_door.geo.json");
-        }else{
+        }else if(door.getSequence() >3){
             model = new ResourceLocation(LOTM.MOD_ID, "geo/mid_sequence_door.geo.json");
+        }else{
+            model = new ResourceLocation(LOTM.MOD_ID, "geo/high_sequence_door.geo.json");
         }
         return model;
     }
 
     private ResourceLocation getTexture(ApprenticeDoorEntity door){
-        ResourceLocation texture = new ResourceLocation(LOTM.MOD_ID, "");
+        ResourceLocation texture;
         if(door.getSequence() > 7){
             texture = new ResourceLocation(LOTM.MOD_ID, "textures/entity/low_sequence_door.png");
-        }else{
+        }else if(door.getSequence() > 3){
             texture = new ResourceLocation(LOTM.MOD_ID, "textures/entity/mid_sequence_door.png");
+        }else{
+            texture = new ResourceLocation(LOTM.MOD_ID, "textures/entity/high_sequence_door.png");
         }
         return texture;
     }
 
     private ResourceLocation getAnimation(ApprenticeDoorEntity door){
-        ResourceLocation animation = new ResourceLocation(LOTM.MOD_ID, "");
+        ResourceLocation animation;
         if(door.getSequence() > 7){
             animation = new ResourceLocation(LOTM.MOD_ID, "animations/low_sequence_door.animation.json");
-        }else{
+        }else if(door.getSequence() > 3){
             animation = new ResourceLocation(LOTM.MOD_ID, "animations/mid_sequence_door.animation.json");
+        }else{
+            animation = new ResourceLocation(LOTM.MOD_ID, "animations/high_sequence_door.animation.json");
         }
         return animation;
     }

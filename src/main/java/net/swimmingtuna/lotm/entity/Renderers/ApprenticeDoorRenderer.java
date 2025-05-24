@@ -15,11 +15,13 @@ public class ApprenticeDoorRenderer extends GeoEntityRenderer<ApprenticeDoorEnti
     }
 
     private ResourceLocation getTexture(ApprenticeDoorEntity door){
-        ResourceLocation texture = new ResourceLocation(LOTM.MOD_ID, "");
+        ResourceLocation texture;
         if(door.getSequence() > 7){
             texture = new ResourceLocation(LOTM.MOD_ID, "textures/entity/low_sequence_door.png");
-        }else{
+        }else if(door.getSequence() > 3){
             texture = new ResourceLocation(LOTM.MOD_ID, "textures/entity/mid_sequence_door.png");
+        }else{
+            texture = new ResourceLocation(LOTM.MOD_ID, "textures/entity/high_sequence_door.png");
         }
         return texture;
     }

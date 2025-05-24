@@ -128,6 +128,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<LightningEntity>> LIGHTNING_ENTITY =
             ENTITIES.register("lightning_entity", () -> EntityType.Builder.<LightningEntity>of(LightningEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(200).build("lightning_entity"));
+    public static final RegistryObject<EntityType<CustomFallingBlockEntity>> CUSTOM_FALLING_BLOCK_ENTITY =
+            ENTITIES.register("custom_falling_block_entity", () -> EntityType.Builder.<CustomFallingBlockEntity>of(CustomFallingBlockEntity::new, MobCategory.MISC)
+                    .sized(0.98f,0.98f).clientTrackingRange(10).updateInterval(20).build("custom_falling_block_entity"));
     public static final RegistryObject<EntityType<WhisperOfCorruptionEntity>> WHISPERS_OF_CORRUPTION_ENTITY =
             ENTITIES.register("whisperofcorruption", () -> EntityType.Builder.<WhisperOfCorruptionEntity>of(WhisperOfCorruptionEntity::new, MobCategory.MISC)
                     .sized(1.0f,1.0f).build("whisperofcorruption"));

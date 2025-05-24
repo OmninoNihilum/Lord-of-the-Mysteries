@@ -26,13 +26,13 @@ import java.util.List;
 public class Blink extends SimpleAbilityItem {
 
     public Blink(Properties properties) {
-        super(properties, BeyonderClassInit.SPECTATOR, 0, 0, 0);
+        super(properties, BeyonderClassInit.APPRENTICE, 0, 0, 0);
     }
 
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
         int blinkDistance = player.getPersistentData().getInt("trickmasterBlinkDistance");
-        if (!checkAll(player, BeyonderClassInit.SPECTATOR.get(), 0, blinkDistance, true)) {
+        if (!checkAll(player, BeyonderClassInit.APPRENTICE.get(), 0, blinkDistance, true)) {
             return InteractionResult.FAIL;
         }
         addCooldown(player, this, 10);
@@ -93,7 +93,7 @@ public class Blink extends SimpleAbilityItem {
 
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 
     @Override
