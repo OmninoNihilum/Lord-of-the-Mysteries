@@ -17,7 +17,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -60,7 +59,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.swimmingtuna.lotm.LOTM;
@@ -1695,7 +1693,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKESCAPETRICK.get(), applyAbilityStrengthened(15.0f - (sequence + abilityWeakness), abilityStrengthened));
         damageMap.put(ItemInit.TRICKWIND.get(), applyAbilityStrengthened((150 - (sequence * 15.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKBURNING.get(), applyAbilityStrengthened((300.0f - sequence * 30) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKELECTRICSHOCK.get(), applyAbilityStrengthened((30.0f - sequence * 1.5f) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKELECTRICSHOCK.get(), applyAbilityStrengthened((15.0f - sequence) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKFLASH.get(), applyAbilityStrengthened(1.5f + abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKFOG.get(), applyAbilityStrengthened((30.0f - sequence * 3) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKLOUDNOISE.get(), applyAbilityStrengthened((300.0f - (270.0f * (8.0f / sequence))) / abilityWeakness, abilityStrengthened));
@@ -2298,7 +2296,6 @@ public class BeyonderUtil {
     }
 
 
-
     public static void makeAlly(LivingEntity user, LivingEntity allyToBe) {
         if (user.level() instanceof ServerLevel serverLevel) {
             PlayerAllyData allyData = serverLevel.getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
@@ -2735,7 +2732,7 @@ public class BeyonderUtil {
         }
     }
 
-    public static boolean scribeLookingAtYou(Player target, LivingEntity scribe) {
+    public static boolean scribeLookingAtYou(LivingEntity target, LivingEntity scribe) {
         double radius = 30.0;
         double angleThreshold = 45.0;
         if (currentPathwayAndSequenceMatchesNoException(scribe, BeyonderClassInit.APPRENTICE.get(), 6)) {
@@ -2890,10 +2887,7 @@ public class BeyonderUtil {
 
     public static boolean sequenceAbleCopy(LivingEntity entity) {
         int sequence = getSequence(entity);
-        if (getPathway(entity) == BeyonderClassInit.APPRENTICE.get() && sequence <= 6) {
-            return true;
-        }
-        return false;
+        return getPathway(entity) == BeyonderClassInit.APPRENTICE.get() && sequence <= 6;
     }
 
     public static boolean sequenceAbleCopy(BeyonderHolder holder) {
@@ -2905,21 +2899,19 @@ public class BeyonderUtil {
     }
 
     public static void copyAbilities(Level level, LivingEntity living, SimpleAbilityItem ability) { //marked
-        if (living instanceof Player player) {
-            int playerSequence = getSequence(player);
-            int abilitySequence = ability.getRequiredSequence();
-            for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(50))) {
-                if (BeyonderUtil.isBeyonderCapable(entity) && entity != player) {
-                    if (currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 6)) {
-                        if (entity instanceof Player scribe) {
-                            if (BeyonderUtil.scribeLookingAtYou(player, scribe)) {
-                                if (checkValidAbilityCopy(new ItemStack(ability))) {
-                                    if (player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).map(storage -> storage.getScribedAbilitiesCount()).orElse(0) < player.getPersistentData().getInt("maxScribedAbilities")) {
-                                        if (copyAbilityTest(playerSequence, abilitySequence)) {
-                                            if (!pendingAbilityCopies.containsKey(scribe.getUUID())) {
-                                                pendingAbilityCopies.put(scribe.getUUID(), ability);
-                                            }
-                                        }
+        int abilitySequence = ability.getRequiredSequence();
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(50))) {
+            if (entity == living) {
+                continue;
+            }
+            if (BeyonderUtil.isBeyonderCapable(entity)) {
+                if (currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 6)) {
+                    if (BeyonderUtil.scribeLookingAtYou(living, entity)) {
+                        if (checkValidAbilityCopy(new ItemStack(ability))) {
+                            if (entity.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).map(storage -> storage.getScribedAbilitiesCount()).orElse(0) < entity.getPersistentData().getInt("maxScribedAbilities")) {
+                                if (copyAbilityTest(getSequence(entity), abilitySequence)) {
+                                    if (!pendingAbilityCopies.containsKey(entity.getUUID())) {
+                                        pendingAbilityCopies.put(entity.getUUID(), ability);
                                     }
                                 }
                             }
@@ -2970,6 +2962,11 @@ public class BeyonderUtil {
             if (currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 6)) {
                 player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).ifPresent(storage -> {
                     storage.useScribeAbility(ability);
+                    if (storage.getRemainUses(ability) == 0) {
+                        if (living.getMainHandItem().getItem() == ability) {
+                            living.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                        }
+                    }
                 });
             }
         }
@@ -2977,8 +2974,7 @@ public class BeyonderUtil {
 
     public static boolean checkAbilityIsCopied(LivingEntity living, Item ability) { //marked
         if (living instanceof Player player) {
-            int sequence = BeyonderUtil.getSequence(player);
-            if (currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.APOTHECARY.get(), 6))
+            if (currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.APPRENTICE.get(), 6))
                 return player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null)
                         .map(storage -> storage.hasScribedAbility(ability))
                         .orElse(false);
@@ -2987,12 +2983,19 @@ public class BeyonderUtil {
     }
 
 
+
     public static boolean copyAbilityTest(int copierSequence, int targetAbilitySequence) {
         double chance = 0.3 + (0.7 / 9) * (targetAbilitySequence - copierSequence);
         chance = Math.max(0.05, Math.min(chance, 1));
-
-        return Math.random() < chance;
+        if (copierSequence < targetAbilitySequence - 2) {
+            chance = 1.01;
+        } else if (targetAbilitySequence <= 4 && copierSequence > 4) {
+            chance = chance / 2;
+        }
+        double random = Math.random();
+        return random < chance;
     }
+
 
     public static boolean checkValidAbilityCopy(ItemStack ability) {
         List<ItemStack> invalidAbilities = new ArrayList<>();
@@ -3355,7 +3358,7 @@ public class BeyonderUtil {
 
     public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
         if (living.level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0,0,0,0,0);
+            serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0, 0, 0, 0, 0);
         }
     }
 

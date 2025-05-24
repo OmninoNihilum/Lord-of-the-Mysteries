@@ -249,13 +249,15 @@ public class EyeOfDemonHunting extends SimpleAbilityItem {
         if (!entity.level().isClientSide() && entity instanceof ServerPlayer player && entity.tickCount % 5 == 0) {
             if (tag.getBoolean("demonHuntingEye")) {
                 for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(100))) {
-                    double x = living.getX();
-                    double y = living.getY();
-                    double z = living.getZ();
-                    if (living instanceof Player || living instanceof PlayerMobEntity) {
-                        LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
-                    } else if (living instanceof Monster) {
-                        LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.MOB_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
+                    if (living != entity) {
+                        double x = living.getX();
+                        double y = living.getY();
+                        double z = living.getZ();
+                        if (living instanceof Player || living instanceof PlayerMobEntity) {
+                            LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
+                        } else if (living instanceof Monster) {
+                            LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.MOB_TRAIL_PARTICLE.get(), x, y, z, 0, 0, 0), player);
+                        }
                     }
                 }
             }

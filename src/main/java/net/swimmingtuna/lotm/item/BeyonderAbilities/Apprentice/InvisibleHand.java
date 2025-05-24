@@ -269,8 +269,8 @@ public class InvisibleHand extends SimpleAbilityItem {
         tooltipComponents.add(Component.literal("When you grow stronger, you will also be able to manipulate weaker entities."));
         tooltipComponents.add(Component.literal("Left Click to switch between increasing/decreasing distance."));
         tooltipComponents.add(Component.literal("Shift to increase/decrease distance"));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("none").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("none").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, isAdvanced);
