@@ -245,7 +245,7 @@ public class GuardianBoxEntity extends Entity {
         if (entity.getPersistentData().getInt("divineHandGuarding") >= 1) {
             if (entity.getPersistentData().contains("divineHandUUID")) {
                 UUID divineHandUUID = entity.getPersistentData().getUUID("divineHandUUID");
-                LivingEntity divineEntity = BeyonderUtil.getEntityFromUUID(entity.level(), divineHandUUID);
+                LivingEntity divineEntity = BeyonderUtil.getLivingEntityFromUUID(entity.level(), divineHandUUID);
                 if (divineEntity != null && divineEntity.isAlive() && divineEntity != entity && BeyonderUtil.areAllies(divineEntity, entity)) {
                     divineEntity.hurt(event.getSource(), event.getAmount());
                     event.setAmount(0);

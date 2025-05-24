@@ -229,7 +229,7 @@ public class BeyonderEntityData extends SavedData {
             }
         }
     }
-    private static void selectAndUseAbility(Mob mob) {
+    public static void selectAndUseAbility(Mob mob) {
         List<Item> availableAbilities = getAbilities(mob);
         if (availableAbilities.isEmpty()) {
             return;

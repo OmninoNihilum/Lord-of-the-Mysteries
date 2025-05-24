@@ -17,6 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -562,6 +563,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.BLINK_STATE.get());
                 abilityNames.add(ItemInit.EXILE.get());
                 abilityNames.add(ItemInit.DOOR_MIRAGE.get());
+                abilityNames.add(ItemInit.CREATE_CONCEALED_BUNDLE.get());
             }
             if (sequence <= 3) {
                 abilityNames.add(ItemInit.SPATIAL_CAGE.get());
@@ -2819,6 +2821,33 @@ public class BeyonderUtil {
             if (newEntity != null) {
                 newEntity.restoreFrom(entity);
                 newEntity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
+                entity.discard();
+                destinationWorld.addFreshEntity(newEntity);
+            }
+        }
+    }
+
+    public static void teleportEntityTroughDimensionsChat(Entity entity, ResourceLocation dimensionKey, double x, double y, double z){
+        if(entity == null || entity.level().isClientSide()){
+            return;
+        }
+
+        ServerLevel currentWorld = (ServerLevel) entity.level();
+        MinecraftServer server = currentWorld.getServer();
+        ResourceKey<Level> dimResourceKey = ResourceKey.create(Registries.DIMENSION, dimensionKey);
+        ServerLevel destinationWorld = server.getLevel(dimResourceKey);
+
+        if(destinationWorld == null){
+            return;
+        }
+
+        if(entity instanceof ServerPlayer player){
+            player.teleportTo(destinationWorld, x, y, z, player.getYRot(), player.getXRot());
+        }else{
+            Entity newEntity = entity.getType().create(destinationWorld);
+            if(newEntity != null){
+                newEntity.restoreFrom(entity);
+                newEntity.moveTo(x , y, z, entity.getYRot(), entity.getXRot());
                 entity.discard();
                 destinationWorld.addFreshEntity(newEntity);
             }

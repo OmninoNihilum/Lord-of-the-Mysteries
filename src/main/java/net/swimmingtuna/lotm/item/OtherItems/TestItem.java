@@ -17,6 +17,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
@@ -81,6 +82,11 @@ public class TestItem extends SimpleAbilityItem {
                         pPlayer.getCooldowns().removeCooldown(stack.getItem());
                     }
                 }
+            }
+            for (PlayerMobEntity playerMobEntity : player.level().getEntitiesOfClass(PlayerMobEntity.class, player.getBoundingBox().inflate(30))) {
+                playerMobEntity.setPathway(BeyonderClassInit.SPECTATOR.get());
+                playerMobEntity.setSequence(7);
+                playerMobEntity.setTarget(player);
             }
             int ignoreDamage = tag.getInt("luckIgnoreDamage");
             player.sendSystemMessage(Component.literal("Ignore Damage is " + ignoreDamage));

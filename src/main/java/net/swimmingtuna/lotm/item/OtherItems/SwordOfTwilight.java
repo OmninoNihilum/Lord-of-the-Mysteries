@@ -101,7 +101,7 @@ public class SwordOfTwilight extends SwordItem implements GeoItem {
                 UUID uuid = tag.getUUID("twilightSwordOwnerUUID");
                 if (x >= 1) {
                     tag.putInt("twilightSwordSpawnTick", x - 1);
-                    LivingEntity swordOwner = BeyonderUtil.getEntityFromUUID(livingEntity.level(), uuid);
+                    LivingEntity swordOwner = BeyonderUtil.getLivingEntityFromUUID(livingEntity.level(), uuid);
                     if (swordOwner.isAlive()) {
                         if (x == 21) {
                             SwordOfTwilightEntity swordOfTwilight = new SwordOfTwilightEntity(EntityInit.SWORD_OF_TWILIGHT_ENTITY.get(), livingEntity.level());

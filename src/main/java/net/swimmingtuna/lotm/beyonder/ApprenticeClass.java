@@ -84,7 +84,7 @@ public class ApprenticeClass implements BeyonderClass {
 
     @Override
     public List<Double> maxHealth() {
-        return List.of(350.0, 250.0, 186.0, 136.0, 96.0, 66.0, 54.0, 48.0, 28.0, 22.0);
+        return List.of(45.0, 40.0, 40.0, 35.0, 32.0, 28.0, 28.0, 23.0, 20.0, 20.0);
     }
 
     @Override
@@ -162,6 +162,7 @@ public class ApprenticeClass implements BeyonderClass {
         //items.put(4, ItemInit.BLINK_STATE.get());
         //items.put(4, ItemInit.EXILE.get());
         items.put(4, ItemInit.DOOR_MIRAGE.get());
+        items.put(4, ItemInit.CREATE_CONCEALED_BUNDLE.get());
 
         //items.put(3, ItemInit.SPATIAL_CAGE.get());
         //items.put(3, ItemInit.SPATIAL_TEARING.get());

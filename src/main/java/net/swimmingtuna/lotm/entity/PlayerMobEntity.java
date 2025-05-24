@@ -3,6 +3,7 @@ package net.swimmingtuna.lotm.entity;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -23,6 +24,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -52,18 +54,34 @@ import net.swimmingtuna.lotm.entity.EntityGoals.PlayerMobGoals;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.SoundInit;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupBeyondersBehaviour;
+import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupTargetBehaviour;
+import net.swimmingtuna.lotm.util.EntityUtil.behaviour.task.BeyonderAttack;
 import net.swimmingtuna.lotm.util.PlayerMobs.ItemManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.NameManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerName;
 import net.swimmingtuna.lotm.util.PlayerMobs.ProfileUpdater;
+import net.tslat.smartbrainlib.api.SmartBrainOwner;
+import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
+import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
+import net.tslat.smartbrainlib.api.core.behaviour.FirstApplicableBehaviour;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.move.MoveToWalkTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.path.SetRandomWalkTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.path.SetWalkTargetToAttackTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.target.InvalidateAttackTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.target.SetPlayerLookTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.target.SetRandomLookTarget;
+import net.tslat.smartbrainlib.api.core.sensor.ExtendedSensor;
+import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
+import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
+import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyPlayersSensor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-public class PlayerMobEntity extends Monster implements RangedAttackMob, CrossbowAttackMob {
+public class PlayerMobEntity extends Monster implements RangedAttackMob, CrossbowAttackMob, SmartBrainOwner<PlayerMobEntity> {
 
     @Nullable
     private GameProfile profile;
@@ -73,8 +91,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private ResourceLocation cape;
     private boolean skinAvailable;
     private boolean capeAvailable;
-
-    protected BeyonderClass requiredClass;
 
 
     public double xCloakO;
@@ -88,6 +104,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final UUID BABY_SPEED_BOOST_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
     private static final AttributeModifier BABY_SPEED_BOOST = new AttributeModifier(BABY_SPEED_BOOST_ID, "Baby speed boost", 0.5D, AttributeModifier.Operation.MULTIPLY_BASE);
 
+    private static final EntityDataAccessor<String> PATHWAY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> MENTAL_STRENGTH = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHILD = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<String> NAME = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
@@ -97,19 +114,14 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Integer> MAXSPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
 
-    private boolean canBreakDoors;
-    private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, (difficulty) -> difficulty == Difficulty.HARD);
-    private final RangedBowAttackGoal<PlayerMobEntity> bowAttackGoal = new RangedBowAttackGoal<>(this, 1.0D, 20, 15.0F);
-    private final RangedCrossbowAttackGoal<PlayerMobEntity> crossbowAttackGoal = new RangedCrossbowAttackGoal<>(this, 1.0D, 15.0F);
-
-    public PlayerMobEntity(Level worldIn, BeyonderClass requiredClass) {
-        this(EntityInit.PLAYER_MOB_ENTITY.get(), worldIn, requiredClass);
+    public PlayerMobEntity(Level worldIn, BeyonderClass requiredClass, int sequence) {
+        this(EntityInit.PLAYER_MOB_ENTITY.get(), worldIn, requiredClass, sequence);
     }
 
-    public PlayerMobEntity(EntityType<? extends Monster> entityType, Level worldIn, BeyonderClass requiredClass) {
+    public PlayerMobEntity(EntityType<? extends Monster> entityType, Level worldIn, BeyonderClass requiredClass, int sequence) {
         super(entityType, worldIn);
-        this.requiredClass = requiredClass;
-        setCombatTask();
+        this.setSequence(sequence);
+        this.setPathway(requiredClass);
     }
 
     public PlayerMobEntity(EntityType<PlayerMobEntity> playerMobEntityEntityType, Level level) {
@@ -117,37 +129,14 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     public static AttributeSupplier.Builder registerAttributes() {
-        return LivingEntity.createLivingAttributes()
-                .add(Attributes.FOLLOW_RANGE, 35D)
-                .add(Attributes.ATTACK_KNOCKBACK)
-                .add(Attributes.ATTACK_DAMAGE, 3.5D)
-                .add(Attributes.MOVEMENT_SPEED, 0.24D);
-    }
+        return LivingEntity.createLivingAttributes().add
+                (Attributes.MAX_HEALTH, 20).add
+                (Attributes.ATTACK_KNOCKBACK).add
+                (Attributes.FOLLOW_RANGE, 50f).add
+                (Attributes.ARMOR, 3.0D).add
+                (Attributes.ATTACK_DAMAGE, 2f).add
+                (Attributes.MOVEMENT_SPEED, 0.250f);
 
-    private boolean targetTwin(LivingEntity livingEntity) {
-        return Configs.COMMON.attackTwin.get() || !(livingEntity instanceof Player && livingEntity.getName().getString().equals(getUsername().getDisplayName()));
-    }
-
-    protected void registerGoals() {
-        goalSelector.addGoal(1, new PlayerMobGoals.PlayerMobSpawnCowGoals(this));
-        goalSelector.addGoal(0, new FloatGoal(this));
-        goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        goalSelector.addGoal(5, new RandomLookAroundGoal(this));
-        addBehaviourGoals();
-    }
-
-    private void addBehaviourGoals() {
-        if (canOpenDoor()) {
-            goalSelector.addGoal(1, new OpenDoorGoal(this, true));
-            ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
-        }
-
-        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.2D, false));
-        goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-
-        targetSelector.addGoal(1, new HurtByTargetGoal(this, ZombifiedPiglin.class));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::targetTwin));
-        targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
     private boolean canOpenDoor() {
@@ -158,6 +147,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     protected void defineSynchedData() {
         super.defineSynchedData();
         getEntityData().define(NAME, "");
+        getEntityData().define(PATHWAY, "");
         getEntityData().define(IS_CHILD, false);
         getEntityData().define(IS_CHARGING_CROSSBOW, false);
         getEntityData().define(SEQUENCE, -1);
@@ -202,11 +192,27 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     @Override
-    public void setItemSlot(EquipmentSlot slotIn, ItemStack stack) {
-        super.setItemSlot(slotIn, stack);
-        if (!level().isClientSide) {
-            setCombatTask();
-        }
+    @NotNull
+    protected Brain.Provider<?> brainProvider() {
+        return new SmartBrainProvider<>(this);
+    }
+
+    @Override
+    @NotNull
+    public Iterable<ItemStack> getArmorSlots() {
+        return List.of();
+    }
+
+
+
+    @Override
+    public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+        super.setItemSlot(equipmentSlot, itemStack);
+    }
+
+    @Override
+    public @NotNull ItemStack getItemBySlot(EquipmentSlot slot) {
+        return super.getItemBySlot(slot);
     }
 
     @Override
@@ -251,13 +257,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public void tick() {
         CompoundTag tag = this.getPersistentData();
         if (!this.level().isClientSide()) {
-            if (tag.getInt("CSlifetime") >= 1) {
-                tag.putInt("CSlifetime", tag.getInt("CSlifetime") - 1);
-            }
-            if (tag.getInt("CSlifetime") == 1) {
-                this.discard();
-                this.getOwner().setHealth(this.getHealth());
-            }
+            System.out.println("PATHWAY IS " + getCurrentPathway());
             if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN)) {
                 this.discard();
             }
@@ -340,72 +340,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Nullable
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
-        spawnData = super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
-        RandomSource randomSource = level.getRandom();
-        populateDefaultEquipmentSlots(randomSource, difficulty);
-        populateDefaultEquipmentEnchantments(randomSource, difficulty);
-
-        if (!hasUsername())
-            setUsername(NameManager.INSTANCE.getRandomName());
-
-        setCombatTask();
-        float specialMultiplier = difficulty.getSpecialMultiplier();
-        setCanPickUpLoot(randomSource.nextFloat() < Configs.COMMON.pickupItemsChance.get() * specialMultiplier);
-        setCanBreakDoors(randomSource.nextFloat() < specialMultiplier * 0.1F);
-
-        double rangeBonus = randomSource.nextDouble() * 1.5 * specialMultiplier;
-        if (rangeBonus > 1.0)
-            getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Range Bonus", rangeBonus, AttributeModifier.Operation.MULTIPLY_TOTAL));
-
-        if (randomSource.nextFloat() < specialMultiplier * 0.05F)
-            getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(new AttributeModifier("Health Bonus", randomSource.nextDouble() * 3.0 + 1.0, AttributeModifier.Operation.MULTIPLY_TOTAL));
-
-        if (randomSource.nextFloat() < specialMultiplier * 0.15F)
-            getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(new AttributeModifier("Damage Bonus", randomSource.nextDouble() + 0.5, AttributeModifier.Operation.MULTIPLY_TOTAL));
-
-        if (randomSource.nextFloat() < specialMultiplier * 0.2F)
-            getAttribute(Attributes.MOVEMENT_SPEED).addPermanentModifier(new AttributeModifier("Speed Bonus", randomSource.nextDouble() * 2.0 * 0.24 + 0.01, AttributeModifier.Operation.MULTIPLY_TOTAL));
-
-        if (randomSource.nextDouble() < Configs.COMMON.babySpawnChance.get())
-            setBaby(true);
-
-        return spawnData;
-    }
-
-    public void setCombatTask() {
-        if (!level().isClientSide) {
-            goalSelector.removeGoal(bowAttackGoal);
-            goalSelector.removeGoal(crossbowAttackGoal);
-
-            ItemStack itemstack = getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, this::canFireProjectileWeapon));
-            if (itemstack.getItem() instanceof CrossbowItem) {
-                goalSelector.addGoal(2, crossbowAttackGoal);
-            } else if (itemstack.getItem() instanceof BowItem) {
-                bowAttackGoal.setMinAttackInterval(level().getDifficulty() != Difficulty.HARD ? 20 : 40);
-                goalSelector.addGoal(2, bowAttackGoal);
-            }
-        }
-    }
-
-    public void setCanBreakDoors(boolean enabled) {
-        if (GoalUtils.hasGroundPathNavigation(this)) {
-            if (canBreakDoors != enabled) {
-                canBreakDoors = enabled;
-                ((GroundPathNavigation) getNavigation()).setCanOpenDoors(enabled || canOpenDoor());
-                if (enabled)
-                    goalSelector.addGoal(1, breakDoorGoal);
-                else
-                    goalSelector.removeGoal(breakDoorGoal);
-            }
-        } else if (canBreakDoors) {
-            goalSelector.removeGoal(breakDoorGoal);
-            canBreakDoors = false;
-        }
-    }
 
     public boolean canFireProjectileWeapon(Item item) {
         return item instanceof ProjectileWeaponItem weaponItem && canFireProjectileWeapon(weaponItem);
@@ -425,6 +359,36 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return entityData.get(IS_CHARGING_CROSSBOW);
     }
 
+    @Override
+    public List<ExtendedSensor<PlayerMobEntity>> getSensors() {
+        return ObjectArrayList.of(new NearbyLivingEntitySensor<>(), new NearbyPlayersSensor<>(), new HurtBySensor<>());
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        tickBrain(this);
+    }
+
+    @Override
+    public BrainActivityGroup<PlayerMobEntity> getCoreTasks() {
+        return BrainActivityGroup.coreTasks(new GroupBeyondersBehaviour<>(), new MoveToWalkTarget<>(), new GroupTargetBehaviour<>());
+    }
+
+    @Override
+    public BrainActivityGroup<PlayerMobEntity> getIdleTasks() {
+        return BrainActivityGroup.idleTasks(new FirstApplicableBehaviour<>(new SetPlayerLookTarget<>(), new SetRandomLookTarget<>(), new SetRandomWalkTarget<>().dontAvoidWater()));
+    }
+
+
+    @Override
+    public BrainActivityGroup<PlayerMobEntity> getFightTasks() {
+        return BrainActivityGroup.fightTasks(new InvalidateAttackTarget<>(), new SetWalkTargetToAttackTarget<>(), new BeyonderAttack<>());
+    }
+    @Override
+    @NotNull
+    public HumanoidArm getMainArm() {
+        return HumanoidArm.RIGHT;
+    }
     @Override
     public void setChargingCrossbow(boolean isCharging) {
         entityData.set(IS_CHARGING_CROSSBOW, isCharging);
@@ -465,11 +429,11 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (!StringUtil.isNullOrEmpty(username)) {
             compound.putString("Username", username);
         }
-        compound.putBoolean("CanBreakDoors", canBreakDoors);
         compound.putBoolean("IsBaby", isBaby());
         if (profile != null && profile.isComplete()) {
             compound.put("Profile", NbtUtils.writeGameProfile(new CompoundTag(), profile));
         }
+        compound.putString("Pathway", this.entityData.get(PATHWAY));
         compound.putInt("MentalStrength", this.getMentalStrength());
         compound.putInt("Sequence", this.getCurrentSequence());
         compound.putInt("Spirituality", this.getSpirituality());
@@ -486,13 +450,15 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             setUsername(NameManager.INSTANCE.getRandomName());
         }
         setBaby(compound.getBoolean("IsBaby"));
-        setCanBreakDoors(compound.getBoolean("CanBreakDoors"));
 
         if (compound.contains("Profile", Tag.TAG_COMPOUND)) {
             profile = NbtUtils.readGameProfile(compound.getCompound("Profile"));
         }
         if (compound.contains("sequence")) {
             this.setSequence(compound.getInt("sequence"));
+        }
+        if (compound.contains("Pathway")) {
+            this.setPathway(BeyonderUtil.getPathwayByName(compound.getString("Pathway")));
         }
         if (compound.contains("MentalStrength")) {
             this.setMentalStrength(compound.getInt("MentalStrength"));
@@ -506,14 +472,19 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (compound.contains("MaxSpirituality")) {
             this.setMaxSpirituality(compound.getInt("MaxSpirituality"));
         }
-
-        setCombatTask();
     }
 
 
-    public void setPathway (BeyonderClass classToBeSet) {
-        this.requiredClass = classToBeSet;
-        BeyonderHolder.updateMaxHealthModifier(this, classToBeSet.maxHealth().get(getCurrentSequence()));
+    public void setPathway(BeyonderClass pathway) {
+        if (pathway == null) {
+            this.entityData.set(PATHWAY, "");
+            BeyonderHolder.resetMaxHealthModifier(this);
+        } else {
+            this.entityData.set(PATHWAY, BeyonderUtil.getPathwayName(pathway));
+            if (getCurrentSequence() != -1) {
+                BeyonderHolder.updateMaxHealthModifier(this, pathway.maxHealth().get(getCurrentSequence()));
+            }
+        }
     }
 
     public void setSpirituality(int spirituality) {
@@ -537,7 +508,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return this.entityData.get(MAXSPIRITUALITY);
     }
     public BeyonderClass getCurrentPathway() {
-        return this.requiredClass;
+        return BeyonderUtil.getPathwayByName(entityData.get(PATHWAY));
     }
 
     @Override
@@ -635,6 +606,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             getProfile();
         }
     }
+
     public boolean useSpirituality(int amount) {
         if (this.getSpirituality() - amount < 0) {
             return false;

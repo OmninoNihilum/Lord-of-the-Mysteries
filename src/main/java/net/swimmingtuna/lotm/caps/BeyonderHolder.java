@@ -295,4 +295,16 @@ public class BeyonderHolder extends PlayerCapability {
         player.setHealth(player.getMaxHealth());
     }
 
+    public static void resetMaxHealthModifier(@Nullable LivingEntity player) {
+        if (player == null) return;
+        @Nullable AttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
+        if (healthAttribute == null) return;
+        if (healthAttribute.getModifier(HEALTH_MODIFIER_UUID) != null) {
+            healthAttribute.removeModifier(HEALTH_MODIFIER_UUID);
+        }
+        if (player.getHealth() > player.getMaxHealth()) {
+            player.setHealth(player.getMaxHealth());
+        }
+    }
+
 }

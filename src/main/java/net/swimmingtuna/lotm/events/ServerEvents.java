@@ -233,65 +233,67 @@ public class ServerEvents {
                 event.setCanceled(true);
                 return;
             }
-
             if (BeyonderUtil.getSpirituality(player) < 300) {
                 player.displayClientMessage(Component.literal("You need 300 spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 event.setCanceled(true);
                 return;
             }
             if (coordsTravel(message)) {
-                String[] coordinates;
-                String dimensionId = null;
-
-                if (hasDimensionId(message)) {
-                    // Check if player can teleport across dimensions (sequence < 3)
-                    int sequence = BeyonderUtil.getSequence(player);
-                    if (sequence >= 3) {
-                        player.displayClientMessage(Component.literal("Your current sequence doesn't allow cross-dimensional teleportation").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
-                        event.setCanceled(true);
-                        return;
-                    }
-
-                    dimensionId = getDimensionId(message);
-                    String[] parts = message.replace(",", " ").trim().split("\\s+");
-                    coordinates = new String[3];
-                    System.arraycopy(parts, parts.length - 3, coordinates, 0, 3);
-                } else {
-                    coordinates = message.replace(",", " ").trim().split("\\s+");
-                }
-
+                String[] coordinates = message.replace(",", " ").trim().split("\\s+");
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
+                String dimensionId = null;
+                if(hasDimensionId(message)) dimensionId = getDimensionId(message);
+                Level dimension = getDimensionFromId(normalizeDimensionId(dimensionId), player.getServer(), player);
+                if(!canTravelBetweenDimensions(player, dimension)){
+                    player.displayClientMessage(Component.literal("Destination is in a inaccessible Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
+                    event.setCanceled(true);
+                    return;
+                }
+                String text = "Door created to " + x + ", " + y + ", " + z + ", in the " + formatDimensionId(dimension) + " Dimension";
+                if(!isCoordinateInstant(message)) {
+                    spawnDoor(player, x, y, z, dimension);
+                }
+                if(isCoordinateInstant(message)){
+                    BeyonderUtil.teleportEntityTroughDimensionsChat(player, dimension.dimension().location(), x, y, z);
+                    text = "Teleported to " + x + ", " + y + ", " + z + ", in the " + formatDimensionId(dimension) + " Dimension";
+                }
 
-                spawnDoor(player, x, y, z, dimensionId);
-
-                BeyonderUtil.useSpirituality(player, 300);
+                player.displayClientMessage(Component.literal(text).withStyle(BeyonderUtil.getStyle(player)), true);
+                BeyonderUtil.useSpirituality(player,300);
                 event.setCanceled(true);
                 return;
             }
-
             Player targetPlayer = null;
             for (Player serverPlayer : level.players()) {
-                if (serverPlayer.getName().getString().toLowerCase().equals(message.toLowerCase())) {
+                if (serverPlayer.getName().getString().toLowerCase().equals(trimPlayerName(message).toLowerCase())) {
                     targetPlayer = serverPlayer;
                     break;
                 }
             }
             if (targetPlayer != null) {
                 if(BeyonderUtil.areAllies(targetPlayer, event.getPlayer())){
-                    if (targetPlayer.level() != player.level() && BeyonderUtil.getSequence(player) >= 3) {
-                        player.displayClientMessage(Component.literal("Your current sequence doesn't allow cross-dimensional teleportation").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
-                        event.setCanceled(true);
-                        return;
-                    }
-
                     int x = (int)targetPlayer.getX();
                     int y = (int)targetPlayer.getY();
                     int z = (int)targetPlayer.getZ();
-                    player.teleportTo(x, y, z);
+                    Level dimension = targetPlayer.level();
+                    String text;
+
+                    if(canTravelBetweenDimensions(player, dimension)) {
+                        if (isPlayerInstant(message)) {
+                            player.teleportTo(x, y, z);
+                            text = "Teleported to " + targetPlayer.getName().getString();
+                        } else {
+                            spawnDoor(player, x, y, z, targetPlayer.level());
+                            text = "Door created leading to " + targetPlayer.getName().getString();
+                        }
+                    }else{
+                        text = "Targeted player is in inaccessible Dimension";
+                    }
+
                     BeyonderUtil.useSpirituality(player, 300);
-                    event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)), true);
+                    event.getPlayer().displayClientMessage(Component.literal(text).withStyle(BeyonderUtil.getStyle(player)), true);
                 } else {
                     event.getPlayer().displayClientMessage(Component.literal("Player is not your ally").withStyle(BeyonderUtil.getStyle(player)), true);
                 }

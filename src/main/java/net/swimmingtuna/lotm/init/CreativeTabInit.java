@@ -181,6 +181,7 @@ public class CreativeTabInit {
                         event.accept(ItemInit.BLINK_STATE.get());
                         event.accept(ItemInit.EXILE.get());
                         event.accept(ItemInit.DOOR_MIRAGE.get());
+                        event.accept(ItemInit.CREATE_CONCEALED_BUNDLE.get());
                         event.accept(ItemInit.SPATIAL_CAGE.get());
                         event.accept(ItemInit.SPATIAL_TEARING.get());
                         event.accept(ItemInit.SYMBOLIZATION.get());

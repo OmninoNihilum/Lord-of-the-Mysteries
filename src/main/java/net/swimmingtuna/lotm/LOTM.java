@@ -35,6 +35,7 @@ import net.swimmingtuna.lotm.entity.Renderers.*;
 import net.swimmingtuna.lotm.events.ClientEvents;
 import net.swimmingtuna.lotm.init.*;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.screen.ConcealedBundleScreen;
 import net.swimmingtuna.lotm.screen.PotionCauldronScreen;
 import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.CustomEntityDataSerializers;
@@ -370,6 +371,7 @@ public class LOTM {
             event.accept(ItemInit.BLINK_STATE);
             event.accept(ItemInit.EXILE);
             event.accept(ItemInit.DOOR_MIRAGE);
+            event.accept(ItemInit.CREATE_CONCEALED_BUNDLE);
             event.accept(ItemInit.SPATIAL_CAGE);
             event.accept(ItemInit.SPATIAL_TEARING);
             event.accept(ItemInit.SYMBOLIZATION);
@@ -491,6 +493,7 @@ public class LOTM {
             ItemBlockRenderTypes.setRenderLayer(BlockInit.VISIONARY_ORANGE_STAINED_GLASS_PANE.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(BlockInit.VISIONARY_GLASS_PANE.get(), RenderType.translucent());
             MenuScreens.register(MenuInit.POTION_CAULDRON_MENU.get(), PotionCauldronScreen::new);
+            MenuScreens.register(MenuInit.CONCEALED_BUNDLE_MENU.get(), ConcealedBundleScreen::new);
         }
     }
 }

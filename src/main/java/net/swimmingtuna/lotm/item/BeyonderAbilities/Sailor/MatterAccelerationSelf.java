@@ -159,7 +159,15 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             }
         }
         if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof Blink && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 5)) {
-            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", doorBlinkDistance + 10);
+            if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") < BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINK.get())) {
+                livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", doorBlinkDistance + 10);
+            }
+            if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") >= BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINK.get())) {
+                if (livingEntity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("Blink Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                }
+                livingEntity.getPersistentData().putInt("monsterLuckGifting", 0);
+            }
             if (livingEntity instanceof Player player) {
                 player.displayClientMessage(Component.literal("Blink Distance is " + doorBlinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
             }

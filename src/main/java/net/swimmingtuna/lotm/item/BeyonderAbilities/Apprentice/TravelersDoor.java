@@ -126,6 +126,15 @@ public class TravelersDoor extends SimpleAbilityItem {
         return false;
     }
 
+    public static String normalizeDimensionId(@Nullable String dimensionId){
+        if(dimensionId != null) {
+            if (dimensionId.equals("nether") || dimensionId.equals("minecraft:nether") || dimensionId.equals("the_nether")) return "minecraft:the_nether";
+            if (dimensionId.equals("end") || dimensionId.equals("minecraft:end") || dimensionId.equals("the_end")) return "minecraft:the_end";
+            if (dimensionId.equals("overworld")) return "minecraft:overworld";
+        }else return "";
+        return dimensionId;
+    }
+
     public static String getDimensionId(String message) {
         message = message.replace(",", " ");
         String[] parts = message.trim().split("\\s+");
@@ -179,6 +188,59 @@ public class TravelersDoor extends SimpleAbilityItem {
         return null;
     }
 
+    public static Level getDimensionFromId(@Nullable String dimensionId, MinecraftServer server, LivingEntity entity){
+        if(dimensionId != null) {
+            ResourceLocation location = new ResourceLocation(dimensionId);
+            ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, location);
+            if ((server.getLevel(dimensionKey) != null)) return server.getLevel(dimensionKey);
+        }
+        return entity.level();
+    }
+
+    public static boolean canTravelBetweenDimensions(LivingEntity user, Level destination){
+        if(user.level() != destination){
+            return BeyonderUtil.getSequence(user) < 4;
+        }
+        return true;
+    }
+
+    public static String formatDimensionId(Level dimension) {
+        String rawId = dimension.dimension().location().getPath();
+        rawId = rawId.replace("_", " ").toLowerCase();
+
+        StringBuilder formatted = new StringBuilder();
+        boolean capitalizeNext = true;
+        for (char c : rawId.toCharArray()) {
+            if (capitalizeNext && Character.isLetter(c)) {
+                formatted.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+            } else {
+                formatted.append(c);
+            }
+            if (c == ' ') {
+                capitalizeNext = true;
+            }
+        }
+
+        String output = formatted.toString();
+        if (output.startsWith("The ")) {
+            output = output.substring(4);
+        }
+
+        return output;
+    }
+
+    public static boolean isCoordinateInstant(String message){
+        message = message.replace(",", " ");
+        String[] parts = message.trim().split("\\s+");
+        for (int i = 3; i < parts.length; i++) {
+            if (parts[i].equalsIgnoreCase("instant")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Level getTargetLevel(Player player, String dimensionId) {
         if (dimensionId == null) {
             return player.level();
@@ -215,8 +277,7 @@ public class TravelersDoor extends SimpleAbilityItem {
         return new double[] {x, z};
     }
 
-    public static void spawnDoor(Player player, int x, int y, int z, String dimensionId){
-        Level targetLevel = getTargetLevel(player, dimensionId);
+    public static void spawnDoor(Player player, int x, int y, int z, Level destination){
         float yaw = -player.getYRot() + 180;
         ApprenticeDoorEntity.DoorAnimationKind animationKind = ApprenticeDoorEntity.DoorAnimationKind.BELLOW;
         if(player.level().getBlockState(new BlockPos((int) Math.floor(getHorizontalLookCoordinates(player, 2)[0]),
@@ -224,17 +285,32 @@ public class TravelersDoor extends SimpleAbilityItem {
                 (int) Math.floor(getHorizontalLookCoordinates(player, 2)[1]))).isAir()){
             animationKind = ApprenticeDoorEntity.DoorAnimationKind.FADE_IN;
         }
-
-        ApprenticeDoorEntity door = new ApprenticeDoorEntity(player.level(), player, BeyonderUtil.getSequence(player), 150, yaw, x, y, z, targetLevel, animationKind);
-        door.teleportTo(getHorizontalLookCoordinates(player, 2)[0], player.getY(), getHorizontalLookCoordinates(player, 2)[1]);
-
+        ApprenticeDoorEntity door = new ApprenticeDoorEntity(player.level(), player, BeyonderUtil.getSequence(player), 150, yaw, x, y, z, destination, animationKind);
+        door.setPos(getHorizontalLookCoordinates(player, 2)[0], player.getY(), getHorizontalLookCoordinates(player, 2)[1]);
         player.level().addFreshEntity(door);
+    }
+
+    public static String trimPlayerName(String message){
+        message = message.replace(",", " ");
+        String[] parts = message.trim().split("\\s+");
+        if(parts.length < 3) return parts[0];
+        return "";
+    }
+
+    public static Boolean isPlayerInstant(String message){
+        message = message.replace(",", " ");
+        String[] parts = message.trim().split("\\s+");
+        for (String part : parts) {
+            if (part.equalsIgnoreCase("instant")) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, blink in the direction you're looking."));
         tooltipComponents.add(Component.literal("You can also type coordinates or an ally name in the chat on the following format while holding this item in order to go to that location."));
         tooltipComponents.add(Component.literal("\"X\", \"Y\", \"Z\", \"Dimension\"(Optional), \"Instant\"(Optional)"));
         tooltipComponents.add(Component.literal("\"Ally Name\", \"Instant\"(Optional)"));

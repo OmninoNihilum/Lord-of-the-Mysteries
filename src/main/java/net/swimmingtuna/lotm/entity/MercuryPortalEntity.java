@@ -39,14 +39,14 @@ public class MercuryPortalEntity extends Entity implements GeoEntity {
                 this.discard();
             } else if (this.tickCount < 40 && this.getPersistentData().contains("mercuryPortalOwner")) {
                 UUID uuid = this.getPersistentData().getUUID("mercuryPortalOwner");
-                LivingEntity owner = BeyonderUtil.getEntityFromUUID(this.level(), uuid);
+                LivingEntity owner = BeyonderUtil.getLivingEntityFromUUID(this.level(), uuid);
                 if (owner != null) {
                     this.setYaw(owner.getYRot());
                     this.setPitch(owner.getXRot());
                 }
             } else if (this.tickCount == 40 && this.getPersistentData().contains("mercuryPortalOwner")) {
                 UUID uuid = this.getPersistentData().getUUID("mercuryPortalOwner");
-                LivingEntity owner = BeyonderUtil.getEntityFromUUID(this.level(), uuid);
+                LivingEntity owner = BeyonderUtil.getLivingEntityFromUUID(this.level(), uuid);
                 if (owner != null && owner.isAlive()) {
                     Vec3 lookVec = owner.getLookAngle().normalize();
                     Vec3 targetPos = owner.position().add(lookVec.scale(50));

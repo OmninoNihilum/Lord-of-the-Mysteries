@@ -22,6 +22,7 @@ import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderCharacteristic;
 import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderPotion;
 import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderResetPotion;
 import net.swimmingtuna.lotm.item.OtherItems.*;
+import net.swimmingtuna.lotm.item.SealedArtifacts.ConcealedBundle;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.item.SealedArtifacts.SymphonyOfHatred;
 import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
@@ -381,6 +382,8 @@ public class ItemInit {
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_MIRAGE = ITEMS.register("doormirage",
             () -> new DoorMirage(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CREATE_CONCEALED_BUNDLE = ITEMS.register("createconcealedbundle",
+            () -> new CreateConcealedBundle(new Item.Properties().stacksTo(1)));
 
     //3
     public static final RegistryObject<Item> SPATIAL_CAGE = ITEMS.register("spatialcage",
@@ -536,6 +539,9 @@ public class ItemInit {
             () -> new SymphonyOfHatred(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> WINTRYBLADE = ITEMS.register("wintryblade",
             () -> new WintryBlade(Tiers.NETHERITE, 4,-2,new Item.Properties()));
+    public static final RegistryObject<Item> CONCEALED_BUNDLE = ITEMS.register("concealed_bundle",
+            () -> new ConcealedBundle(new Item.Properties().stacksTo(1)));
+
 
 
     //ARMOR

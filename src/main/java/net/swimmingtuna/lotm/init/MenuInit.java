@@ -9,6 +9,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.screen.ConcealedBundleMenu;
 import net.swimmingtuna.lotm.screen.PotionCauldronMenu;
 
 public class MenuInit {
@@ -17,7 +18,8 @@ public class MenuInit {
 
     public static final RegistryObject<MenuType<PotionCauldronMenu>> POTION_CAULDRON_MENU =
             registerMenuType("potion_cauldron_menu", PotionCauldronMenu::new);
-
+    public static final RegistryObject<MenuType<ConcealedBundleMenu>> CONCEALED_BUNDLE_MENU =
+            registerMenuType("concealed_bundle_menu", ConcealedBundleMenu::new);
 
     private static <T extends AbstractContainerMenu> RegistryObject<MenuType<T>> registerMenuType(String name, IContainerFactory<T> factory) {
         return MENUS.register(name, () -> IForgeMenuType.create(factory));

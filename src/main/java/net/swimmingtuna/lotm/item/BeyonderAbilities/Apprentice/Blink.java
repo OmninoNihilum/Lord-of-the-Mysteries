@@ -26,7 +26,7 @@ import java.util.List;
 public class Blink extends SimpleAbilityItem {
 
     public Blink(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 0, 0, 0);
+        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0);
     }
 
     @Override
