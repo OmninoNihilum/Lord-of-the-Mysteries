@@ -109,7 +109,7 @@ public class LightningRedirection extends SimpleAbilityItem {
                 AABB searchBox = living.getBoundingBox().inflate((int) (float) BeyonderUtil.getDamage(living).get(ItemInit.LIGHTNING_REDIRECTION.get()));
                 List<LivingEntity> possibleTargets = living.level().getEntitiesOfClass(LivingEntity.class, searchBox, entity -> !entity.isSpectator() && entity.isPickable() && entity != living);
                 LivingEntity bestTarget = null;
-                double bestDotProduct = 0.99;
+                double bestDotProduct = 0.98;
                 Vec3 eyePosition = living.getEyePosition();
                 Vec3 lookVector = living.getLookAngle();
                 for (LivingEntity target : possibleTargets) {
@@ -123,7 +123,7 @@ public class LightningRedirection extends SimpleAbilityItem {
                         }
                     }
                 }
-                AABB aabb = new AABB(living.getX() - 75, living.getY() - 75, living.getZ() - 75, living.getX() + 75, living.getY() + 200, living.getZ() + 75);
+                AABB aabb = new AABB(living.getX() - 150, living.getY() - 75, living.getZ() - 150, living.getX() + 150, living.getY() + 200, living.getZ() + 150);
                 for (LightningEntity lightning : living.level().getEntitiesOfClass(LightningEntity.class, aabb)) {
                     if (bestTarget != null && lightning.getTargetEntity() != bestTarget && !BeyonderUtil.areAllies(bestTarget, living)) {
                         lightning.setTargetEntity(bestTarget);

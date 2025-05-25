@@ -157,7 +157,7 @@ public class CycleOfFate extends SimpleAbilityItem {
         }
     }
 
-    public static void cycleOfFateDeath(LivingDeathEvent event) { //might need to utilize how I can save world states or smth
+    public static void cycleOfFateDeath(LivingDeathEvent event) {
         LivingEntity entity = event.getEntity();
         if (!entity.level().isClientSide()) {
             CompoundTag tag = entity.getPersistentData();
@@ -171,29 +171,38 @@ public class CycleOfFate extends SimpleAbilityItem {
             int cycleAge = tag.getInt("monsterCycleOfFateEntityAge");
             int cycleAgeDecay = tag.getInt("monsterCycleOfFateEntityAgeDecay");
             int cycleCorruption = tag.getInt("monsterCycleOfFateEntityCorruption");
+
             if (tag.contains("monsterCycleOfFateHolder")) {
                 Player player = entity.level().getPlayerByUUID(tag.getUUID("monsterCycleOfFateHolder"));
-                if (cycleCounter >= 1 && tag.getInt("monsterCycleOfFate") == 0 && tag.getInt("monsterCycleOfFateUser") == 0) { //for other entities caught in cycle
+                if (cycleCounter >= 1 && tag.getInt("monsterCycleOfFate") == 0 && tag.getInt("monsterCycleOfFateUser") == 0) {
                     if (player != null) {
-                        tag.putBoolean("monsterCycleOfFateIsDead", true);
-                        entity.setHealth(cycleHealth);
+                        // Cancel death FIRST
                         event.setCanceled(true);
                         LOTM.LOGGER.info("Death event canceled for due to CYCLE OF FATE" + entity);
-                        entity.teleportTo(cycleX, cycleY + 400, cycleZ);
-                        entity.setHealth(cycleHealth);
-                        entity.getPersistentData().putInt("age", cycleAge);
-                        entity.getPersistentData().putInt("ageDecay", cycleAgeDecay);
-                        entity.getPersistentData().putInt("corruption", cycleCorruption);
-                        if (entity instanceof Player player1) {
-                            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player1);
-                            holder.setSequence(cycleSequence);
-                            holder.setSpirituality(cycleSpirituality);
-                        }
-                        if (entity instanceof PlayerMobEntity playerMobEntity) {
-                            playerMobEntity.setSequence(cycleSequence);
-                            playerMobEntity.setSpirituality(cycleSpirituality);
-                        }
+
+                        // Mark as temporarily dead for visual effects
+                        tag.putBoolean("monsterCycleOfFateIsDead", true);
+
+                        // Schedule restoration for next tick to avoid timing issues
+                        entity.level().getServer().execute(() -> {
+                            entity.teleportTo(cycleX, cycleY + 400, cycleZ);
+                            entity.setHealth(Math.max(1.0f, cycleHealth)); // Ensure health is at least 1
+                            entity.getPersistentData().putInt("age", cycleAge);
+                            entity.getPersistentData().putInt("ageDecay", cycleAgeDecay);
+                            entity.getPersistentData().putInt("corruption", cycleCorruption);
+
+                            if (entity instanceof Player player1) {
+                                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player1);
+                                holder.setSequence(cycleSequence);
+                                holder.setSpirituality(cycleSpirituality);
+                            }
+                            if (entity instanceof PlayerMobEntity playerMobEntity) {
+                                playerMobEntity.setSequence(cycleSequence);
+                                playerMobEntity.setSpirituality(cycleSpirituality);
+                            }
+                        });
                     } else {
+                        // Clean up if player no longer exists
                         tag.putInt("monsterCycleOfFateEntity", 0);
                         tag.putInt("monsterCycleOfFateEntityX", 0);
                         tag.putInt("monsterCycleOfFateEntityY", 0);
@@ -209,85 +218,114 @@ public class CycleOfFate extends SimpleAbilityItem {
                 }
             }
 
-            if (tag.getInt("monsterCycleOfFateUser") >= 1 && entity instanceof Player pPlayer && BeyonderHolderAttacher.getHolderUnwrap(pPlayer).getSpirituality() >= 1000) {
-                int userX = tag.getInt("monsterCycleOfFateUserX");
-                int userY = tag.getInt("monsterCycleOfFateUserY");
-                int userZ = tag.getInt("monsterCycleOfFateUserZ");
-                int userHealth = tag.getInt("monsterCycleOfFateUserHealth");
-                int userSequence = tag.getInt("monsterCycleOfFateUserSequence");
-                int userAge = tag.getInt("monsterCycleOfFateUserAge");
-                int userAgeDecay = tag.getInt("monsterCycleOfFateUserAgeDecay");
-                int userCorruption = tag.getInt("monsterCycleOfFateUserCorruption");
-                for (LivingEntity living : entity.level().getEntitiesOfClass(LivingEntity.class, pPlayer.getBoundingBox().inflate(800))) {
-                    CompoundTag livingTag = living.getPersistentData();
-                    int livingCounter = livingTag.getInt("monsterCycleOfFate");
-                    if (livingCounter >= 1) {
-                        int livingX = livingTag.getInt("monsterCycleOfFateX");
-                        int livingY = livingTag.getInt("monsterCycleOfFateY");
-                        int livingZ = livingTag.getInt("monsterCycleOfFateZ");
-                        int livingHealth = livingTag.getInt("monsterCycleOfFateHealth");
-                        int livingSequence = livingTag.getInt("monsterCycleOfFateSequence");
-                        int livingSpirituaity = livingTag.getInt("monsterCycleOfFateSpirituality");
-                        int spiritualityMultiplier = livingTag.getInt("monsterCycleOfFateMultiplier");
-                        if (living instanceof Player player1) {
-                            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player1);
-                            holder.setSequence(livingSequence);
-                            holder.setSpirituality(livingSpirituaity);
-                            BeyonderHolderAttacher.getHolderUnwrap(pPlayer).useSpirituality(1000 * spiritualityMultiplier);
-                            tag.putInt("monsterCycleOfFateMultiplier", spiritualityMultiplier + 1);
-                        }
-                        if (living instanceof PlayerMobEntity playerMobEntity) {
-                            playerMobEntity.setSequence(livingSequence);
-                            playerMobEntity.setSpirituality(livingSpirituaity);
-                        }
-                        restorePotionEffectsFromTag(living, livingTag);
-                        living.teleportTo(livingX, livingY, livingZ);
-                        living.setHealth(livingHealth);
-                        living.getPersistentData().putInt("age", userAge);
-                        living.getPersistentData().putInt("ageDecay", userAgeDecay);
-                        living.getPersistentData().putInt("corruption", userCorruption);
-                        livingTag.putInt("monsterCycleOfFate", 60);
-                        tag.putInt("monsterCycleOfFateUser", 70);
+            // Handle user death (the one who cast the ability)
+            if (tag.getInt("monsterCycleOfFateUser") >= 1 && entity instanceof Player pPlayer) {
+                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
+                if (holder.getSpirituality() >= 1000) {
+                    // Cancel death FIRST
+                    event.setCanceled(true);
+                    LOTM.LOGGER.info("Death event canceled for user due to CYCLE OF FATE: " + pPlayer);
+
+                    int userX = tag.getInt("monsterCycleOfFateUserX");
+                    int userY = tag.getInt("monsterCycleOfFateUserY");
+                    int userZ = tag.getInt("monsterCycleOfFateUserZ");
+                    int userHealth = tag.getInt("monsterCycleOfFateUserHealth");
+                    int userSequence = tag.getInt("monsterCycleOfFateUserSequence");
+                    int userAge = tag.getInt("monsterCycleOfFateUserAge");
+                    int userAgeDecay = tag.getInt("monsterCycleOfFateUserAgeDecay");
+                    int userCorruption = tag.getInt("monsterCycleOfFateUserCorruption");
+
+                    // Schedule restoration for next tick
+                    entity.level().getServer().execute(() -> {
+                        // Restore user first
                         pPlayer.teleportTo(userX, userY, userZ);
+                        pPlayer.setHealth(Math.max(1.0f, userHealth)); // Ensure health is at least 1
                         restorePotionEffectsFromTag(pPlayer, tag);
-                        pPlayer.setHealth(userHealth);
-                        event.setCanceled(true);
-                        LOTM.LOGGER.info("Death event canceled for due to CYCLE OF FATE" + pPlayer);
-                        BeyonderHolderAttacher.getHolderUnwrap(pPlayer).setSequence(userSequence);
-                        for (LivingEntity pEntity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(800))) {
-                            if (pEntity != pPlayer && pEntity != living) {
-                                CompoundTag pTag = pEntity.getPersistentData();
-                                int entityCounter = pTag.getInt("monsterCycleOfFateEntity");
-                                if (entityCounter >= 1) {
-                                    tag.putBoolean("monsterCycleOfFateIsDead", false);
-                                    restorePotionEffectsFromTag(pEntity, pTag);
-                                    int entityX = pTag.getInt("monsterCycleOfFateEntityX");
-                                    int entityY = pTag.getInt("monsterCycleOfFateEntityY");
-                                    int entityZ = pTag.getInt("monsterCycleOfFateEntityZ");
-                                    int entityHealth = pTag.getInt("monsterCycleOfFateEntityHealth");
-                                    int entitySequence = pTag.getInt("monsterCycleOfFateEntitySequence");
-                                    int entitySpirituality = pTag.getInt("monsterCycleOfFateEntitySpirituality");
-                                    int entityAge = pTag.getInt("monsterCycleOfFateEntityAge");
-                                    int entityAgeDecay = pTag.getInt("monsterCycleOfFateEntityAgeDecay");
-                                    int entityCorruption = pTag.getInt("monsterCycleOfFateEntityCorruption");
-                                    pEntity.teleportTo(entityX, entityY, entityZ);
-                                    pEntity.setHealth(entityHealth);
-                                    pEntity.getPersistentData().putInt("age", entityAge);
-                                    pEntity.getPersistentData().putInt("ageDecay", entityAgeDecay);
-                                    pEntity.getPersistentData().putInt("corruption", entityCorruption);
-                                    if (pEntity instanceof Player player1) {
-                                        BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player1);
-                                        holder.setSequence(entitySequence);
-                                        holder.setSpirituality(entitySpirituality);
-                                    }
-                                    if (pEntity instanceof PlayerMobEntity playerMobEntity) {
-                                        playerMobEntity.setSequence(entitySequence);
-                                        playerMobEntity.setSpirituality(entitySpirituality);
+                        holder.setSequence(userSequence);
+                        pPlayer.getPersistentData().putInt("age", userAge);
+                        pPlayer.getPersistentData().putInt("ageDecay", userAgeDecay);
+                        pPlayer.getPersistentData().putInt("corruption", userCorruption);
+
+                        // Reset timers
+                        tag.putInt("monsterCycleOfFateUser", 70);
+
+                        // Handle all affected entities
+                        for (LivingEntity living : entity.level().getEntitiesOfClass(LivingEntity.class, pPlayer.getBoundingBox().inflate(800))) {
+                            CompoundTag livingTag = living.getPersistentData();
+                            int livingCounter = livingTag.getInt("monsterCycleOfFate");
+
+                            if (livingCounter >= 1) {
+                                int livingX = livingTag.getInt("monsterCycleOfFateX");
+                                int livingY = livingTag.getInt("monsterCycleOfFateY");
+                                int livingZ = livingTag.getInt("monsterCycleOfFateZ");
+                                int livingHealth = livingTag.getInt("monsterCycleOfFateHealth");
+                                int livingSequence = livingTag.getInt("monsterCycleOfFateSequence");
+                                int livingSpirituaity = livingTag.getInt("monsterCycleOfFateSpirituality");
+                                int spiritualityMultiplier = Math.max(1, livingTag.getInt("monsterCycleOfFateMultiplier"));
+
+                                // Use spirituality with multiplier
+                                holder.useSpirituality(1000 * spiritualityMultiplier);
+                                livingTag.putInt("monsterCycleOfFateMultiplier", spiritualityMultiplier + 1);
+
+                                // Restore target entity
+                                if (living instanceof Player player1) {
+                                    BeyonderHolder targetHolder = BeyonderHolderAttacher.getHolderUnwrap(player1);
+                                    targetHolder.setSequence(livingSequence);
+                                    targetHolder.setSpirituality(livingSpirituaity);
+                                }
+                                if (living instanceof PlayerMobEntity playerMobEntity) {
+                                    playerMobEntity.setSequence(livingSequence);
+                                    playerMobEntity.setSpirituality(livingSpirituaity);
+                                }
+
+                                restorePotionEffectsFromTag(living, livingTag);
+                                living.teleportTo(livingX, livingY, livingZ);
+                                living.setHealth(Math.max(1.0f, livingHealth)); // Ensure health is at least 1
+                                living.getPersistentData().putInt("age", livingTag.getInt("monsterCycleOfFateAge"));
+                                living.getPersistentData().putInt("ageDecay", livingTag.getInt("monsterCycleOfFateAgeDecay"));
+                                living.getPersistentData().putInt("corruption", livingTag.getInt("monsterCycleOfFateCorruption"));
+                                livingTag.putInt("monsterCycleOfFate", 60);
+
+                                // Handle other entities in the area
+                                for (LivingEntity pEntity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(800))) {
+                                    if (pEntity != pPlayer && pEntity != living) {
+                                        CompoundTag pTag = pEntity.getPersistentData();
+                                        int entityCounter = pTag.getInt("monsterCycleOfFateEntity");
+                                        if (entityCounter >= 1) {
+                                            pTag.putBoolean("monsterCycleOfFateIsDead", false);
+                                            restorePotionEffectsFromTag(pEntity, pTag);
+
+                                            int entityX = pTag.getInt("monsterCycleOfFateEntityX");
+                                            int entityY = pTag.getInt("monsterCycleOfFateEntityY");
+                                            int entityZ = pTag.getInt("monsterCycleOfFateEntityZ");
+                                            int entityHealth = pTag.getInt("monsterCycleOfFateEntityHealth");
+                                            int entitySequence = pTag.getInt("monsterCycleOfFateEntitySequence");
+                                            int entitySpirituality = pTag.getInt("monsterCycleOfFateEntitySpirituality");
+                                            int entityAge = pTag.getInt("monsterCycleOfFateEntityAge");
+                                            int entityAgeDecay = pTag.getInt("monsterCycleOfFateEntityAgeDecay");
+                                            int entityCorruption = pTag.getInt("monsterCycleOfFateEntityCorruption");
+
+                                            pEntity.teleportTo(entityX, entityY, entityZ);
+                                            pEntity.setHealth(Math.max(1.0f, entityHealth)); // Ensure health is at least 1
+                                            pEntity.getPersistentData().putInt("age", entityAge);
+                                            pEntity.getPersistentData().putInt("ageDecay", entityAgeDecay);
+                                            pEntity.getPersistentData().putInt("corruption", entityCorruption);
+
+                                            if (pEntity instanceof Player player1) {
+                                                BeyonderHolder entityHolder = BeyonderHolderAttacher.getHolderUnwrap(player1);
+                                                entityHolder.setSequence(entitySequence);
+                                                entityHolder.setSpirituality(entitySpirituality);
+                                            }
+                                            if (pEntity instanceof PlayerMobEntity playerMobEntity) {
+                                                playerMobEntity.setSequence(entitySequence);
+                                                playerMobEntity.setSpirituality(entitySpirituality);
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
+                    });
                 }
             }
         }
