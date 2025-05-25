@@ -1701,7 +1701,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKLOUDNOISE.get(), applyAbilityStrengthened((300.0f - (270.0f * (8.0f / sequence))) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTELEKENISIS.get(), applyAbilityStrengthened((75.0f - (sequence * 9.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((120.0f - (sequence * 13.5f)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((90.0f - (sequence * 10.5f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((70.0f - (sequence * 10f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
 
         return damageMap;
@@ -2226,7 +2226,11 @@ public class BeyonderUtil {
             BeyonderClass pathway = getPathway(livingEntity);
             if (pathway != null) {
                 int sequence = BeyonderUtil.getSequence(livingEntity);
-                mentalStrength = pathway.mentalStrength().get(sequence);
+                if (sequence != -1) {
+                    mentalStrength = pathway.mentalStrength().get(sequence);
+                } else {
+                    mentalStrength = 10;
+                }
             }
         }
         return Math.max(1, mentalStrength * mobReducer);

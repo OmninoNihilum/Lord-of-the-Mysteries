@@ -507,6 +507,7 @@ public class Astrolabe extends Item {
                         }
                     } else {
                         boolean structureFound = false;
+                        boolean actuallyFoundStructure = false;
                         String searchName = resourceLocation.getPath().toLowerCase(Locale.ROOT);
                         for (Map.Entry<ResourceKey<Structure>, Structure> entry : structureRegistry.entrySet()) {
                             ResourceKey<Structure> key = entry.getKey();
@@ -526,6 +527,7 @@ public class Astrolabe extends Item {
                                     int searchRadius = maxDistance * 2;
                                     if (distanceFromStructure <= searchRadius) {
                                         BeyonderUtil.useSpirituality(player, maxDistance * 4);
+                                        actuallyFoundStructure = true;
                                         player.sendSystemMessage(Component.literal("Found " + structureName + " near: ").withStyle(ChatFormatting.LIGHT_PURPLE).append(Component.literal("X: " + nearestX + " Z: " + nearestZ).withStyle(ChatFormatting.GREEN)));
                                     } else {
                                         player.sendSystemMessage(Component.literal("No " + structureResourceKey.location().getPath().replace('_', ' ') + " found").withStyle(ChatFormatting.RED));
@@ -534,8 +536,8 @@ public class Astrolabe extends Item {
                                 }
                             }
                         }
-                        if (foundResource && !structureFound) {
-                            player.sendSystemMessage(Component.literal("No strucutre in range").withStyle(ChatFormatting.RED));
+                        if (structureFound && !actuallyFoundStructure) {
+                            player.sendSystemMessage(Component.literal("No structure in range").withStyle(ChatFormatting.RED));
                         }
                     }
                 }

@@ -284,6 +284,60 @@ public class BeyonderEntityData extends SavedData {
         }
     }
 
+    public static void selectAndUseAbility(Mob mob, LivingEntity target) {
+        List<Item> availableAbilities = getAbilities(mob);
+        if (availableAbilities.isEmpty()) {
+            return;
+        }
+
+        if (mob.level().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ONLY_USE_ABILITIES_ON_PLAYERS) && !(target instanceof Player)) {
+            return;
+        }
+
+        List<WeightedAbility> weightedAbilities = new ArrayList<>();
+        int currentSpirituality = BeyonderUtil.getSpirituality(mob);
+        for (Item item : availableAbilities) {
+            if (item instanceof SimpleAbilityItem abilityItem) {
+                String cooldownKey = "abilityCooldownFor" + abilityItem.getDescription().getString();
+                int currentCooldown = mob.getPersistentData().getInt(cooldownKey);
+                if (currentCooldown == 0 && currentSpirituality >= abilityItem.getRequiredSpirituality()) {
+                    int priority = abilityItem.getPriority(mob, target);
+                    if (priority > 0) {
+                        weightedAbilities.add(new WeightedAbility(abilityItem, priority));
+                    }
+                }
+            }
+        }
+
+        if (weightedAbilities.isEmpty()) {
+            return;
+        }
+
+        SimpleAbilityItem selectedAbility = selectWeightedAbility(weightedAbilities);
+        if (selectedAbility != null) {
+            int totalPriority = 0;
+            for (WeightedAbility ability : weightedAbilities) {
+                totalPriority += ability.weight;
+            }
+
+            Level level = mob.level();
+            if (level instanceof ServerLevel) {
+                String entityName = mob.getName().getString();
+                String abilityName = selectedAbility.getDescription().getString();
+                int abilityPriority = 0;
+                for (WeightedAbility ability : weightedAbilities) {
+                    if (ability.abilityItem == selectedAbility) {
+                        abilityPriority = ability.weight;
+                        break;
+                    }
+                }
+                LOTM.LOGGER.info("{} chose ability {} with a {}/{} probability", entityName, abilityName, abilityPriority, totalPriority);
+            }
+            mob.setItemInHand(InteractionHand.MAIN_HAND, selectedAbility.getDefaultInstance());
+            useAvailableAbilityAsMob(mob);
+        }
+    }
+
     private static SimpleAbilityItem selectWeightedAbility(List<WeightedAbility> weightedAbilities) {
         int totalWeight = 0;
         for (WeightedAbility ability : weightedAbilities) {

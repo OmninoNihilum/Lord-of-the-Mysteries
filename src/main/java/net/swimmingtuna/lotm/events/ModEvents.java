@@ -842,11 +842,6 @@ public class ModEvents {
                     }
                 }
             }
-            if (livingEntity.getType().toString().contains("vessel_of_calamity")) {
-                BlockPos pos = livingEntity.blockPosition();
-                ItemEntity netherstar = new ItemEntity(livingEntity.level(), pos.getX(), pos.getY(), pos.getZ(), Items.NETHER_STAR.getDefaultInstance());
-                livingEntity.level().addFreshEntity(netherstar);
-            }
         }
     }
 

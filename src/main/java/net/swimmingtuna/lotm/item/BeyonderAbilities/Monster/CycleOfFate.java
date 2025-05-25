@@ -22,6 +22,7 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
@@ -75,7 +76,7 @@ public class CycleOfFate extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use on an entity traps a target in a cycle of fate. If you die near the target or 60 seconds pass, everything around them will be reset to how it was when you used the ability on them. Including cooldowns, position, potion effects, and, excluding you, spirituality. Each reset will cost you 1000 spirituality, and you can stop the cycle by clicking on the target again, or running out of spirituality"));
+        tooltipComponents.add(Component.literal("Upon use on an entity traps a target in a cycle of fate. If you die near the target, everything around them will be reset to how it was when you used the ability on them. Including cooldowns, position, potion effects, and, excluding you, spirituality. Each reset will cost you 1000 more spirituality than the last, and you can stop the cycle by clicking on the target again, or running out of spirituality"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1000").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("3 Minutes").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -177,6 +178,7 @@ public class CycleOfFate extends SimpleAbilityItem {
                         tag.putBoolean("monsterCycleOfFateIsDead", true);
                         entity.setHealth(cycleHealth);
                         event.setCanceled(true);
+                        LOTM.LOGGER.info("Death event canceled for due to CYCLE OF FATE" + entity);
                         entity.teleportTo(cycleX, cycleY + 400, cycleZ);
                         entity.setHealth(cycleHealth);
                         entity.getPersistentData().putInt("age", cycleAge);
@@ -208,7 +210,6 @@ public class CycleOfFate extends SimpleAbilityItem {
             }
 
             if (tag.getInt("monsterCycleOfFateUser") >= 1 && entity instanceof Player pPlayer && BeyonderHolderAttacher.getHolderUnwrap(pPlayer).getSpirituality() >= 1000) {
-                BeyonderHolderAttacher.getHolderUnwrap(pPlayer).useSpirituality(1000);
                 int userX = tag.getInt("monsterCycleOfFateUserX");
                 int userY = tag.getInt("monsterCycleOfFateUserY");
                 int userZ = tag.getInt("monsterCycleOfFateUserZ");
@@ -227,10 +228,13 @@ public class CycleOfFate extends SimpleAbilityItem {
                         int livingHealth = livingTag.getInt("monsterCycleOfFateHealth");
                         int livingSequence = livingTag.getInt("monsterCycleOfFateSequence");
                         int livingSpirituaity = livingTag.getInt("monsterCycleOfFateSpirituality");
+                        int spiritualityMultiplier = livingTag.getInt("monsterCycleOfFateMultiplier");
                         if (living instanceof Player player1) {
                             BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player1);
                             holder.setSequence(livingSequence);
                             holder.setSpirituality(livingSpirituaity);
+                            BeyonderHolderAttacher.getHolderUnwrap(pPlayer).useSpirituality(1000 * spiritualityMultiplier);
+                            tag.putInt("monsterCycleOfFateMultiplier", spiritualityMultiplier + 1);
                         }
                         if (living instanceof PlayerMobEntity playerMobEntity) {
                             playerMobEntity.setSequence(livingSequence);
@@ -248,6 +252,7 @@ public class CycleOfFate extends SimpleAbilityItem {
                         restorePotionEffectsFromTag(pPlayer, tag);
                         pPlayer.setHealth(userHealth);
                         event.setCanceled(true);
+                        LOTM.LOGGER.info("Death event canceled for due to CYCLE OF FATE" + pPlayer);
                         BeyonderHolderAttacher.getHolderUnwrap(pPlayer).setSequence(userSequence);
                         for (LivingEntity pEntity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(800))) {
                             if (pEntity != pPlayer && pEntity != living) {
@@ -326,6 +331,7 @@ public class CycleOfFate extends SimpleAbilityItem {
 
                 if (userTag == 1) {
                     tag.putInt("monsterCycleOfFateUserX", 0);
+                    tag.putInt("monsterCycleOfFateMultiplier", 1);
                     tag.putInt("monsterCycleOfFateUserY", 0);
                     tag.putInt("monsterCycleOfFateUserZ", 0);
                     tag.putInt("monsterCycleOfFateUserHealth", 0);

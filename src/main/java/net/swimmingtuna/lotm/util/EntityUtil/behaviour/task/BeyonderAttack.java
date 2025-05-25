@@ -49,7 +49,7 @@ public class BeyonderAttack<E extends LivingEntity> extends ExtendedBehaviour<E>
     protected void start(E entity) {
         LivingEntity target = BrainUtils.getMemory(entity, MemoryModuleType.ATTACK_TARGET);
         if (entity instanceof Mob mob){
-            BeyonderEntityData.selectAndUseAbility(mob);
+            BeyonderEntityData.selectAndUseAbility(mob, target);
         }
     }
 }
