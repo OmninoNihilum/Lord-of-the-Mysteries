@@ -47,9 +47,11 @@ public class BeyonderAttack<E extends LivingEntity> extends ExtendedBehaviour<E>
 
     @Override
     protected void start(E entity) {
-        System.out.println("START CALLED");
         LivingEntity target = BrainUtils.getMemory(entity, MemoryModuleType.ATTACK_TARGET);
         if (entity instanceof Mob mob){
+            if (mob.getTarget() != null) {
+                target = mob.getTarget();
+            }
             BeyonderEntityData.selectAndUseAbility(mob, target);
         }
     }

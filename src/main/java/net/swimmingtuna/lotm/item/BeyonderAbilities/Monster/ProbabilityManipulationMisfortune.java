@@ -57,7 +57,7 @@ public class ProbabilityManipulationMisfortune extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use on a target or typing a player's name in chat, gives them all misfortunate/cataclysmic events"));
+        tooltipComponents.add(Component.literal("Upon use on a target or typing a player's name in chat, gives them all misfortunate/cataclysmic events. Use on the air to give all non-allies around you all the misfortune events. Use while shifting to include allies and yourself."));
         tooltipComponents.add(Component.literal("Left click for Probability Manipulation: Infinite Fortune"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1000 if on a single target, 3500 otherwise").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("25 Seconds").withStyle(ChatFormatting.YELLOW)));
@@ -99,7 +99,7 @@ public class ProbabilityManipulationMisfortune extends SimpleAbilityItem {
         if (!level.isClientSide()) {
             for (Player pPlayer : level.players()) {
                 for (LivingEntity livingEntity : pPlayer.level().getEntitiesOfClass(LivingEntity.class, pPlayer.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.PROBABILITYMISFORTUNE.get())))) {
-                    if (player.isShiftKeyDown()) {
+                    if (!player.isShiftKeyDown()) {
                         if (livingEntity != player && !BeyonderUtil.areAllies(player, livingEntity)) {
                             giveMisfortuneEvents(livingEntity);
                         }

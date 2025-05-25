@@ -68,7 +68,7 @@ public class ProbabilityManipulationFortune extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) { //add if cursor is on a projectile, lightning goes to projectile and pwoers it
-        if (!checkAll(player, BeyonderClassInit.MONSTER.get(), 3500,1000, true)) {
+        if (!checkAll(player, BeyonderClassInit.MONSTER.get(), 3500, 1000, true)) {
             return InteractionResult.FAIL;
         }
         probabilityWipeWorld(player);
@@ -102,13 +102,7 @@ public class ProbabilityManipulationFortune extends SimpleAbilityItem {
         if (!level.isClientSide()) {
             for (Player pPlayer : level.players()) {
                 for (LivingEntity livingEntity : pPlayer.level().getEntitiesOfClass(LivingEntity.class, pPlayer.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.PROBABILITYFORTUNE.get())))) {
-                    if (player.isShiftKeyDown()) {
-                        if (livingEntity != player) {
-                            giveFortuneEvents(livingEntity);
-                        }
-                    } else {
-                        giveFortuneEvents(livingEntity);
-                    }
+                    giveFortuneEvents(livingEntity);
                 }
             }
         }
@@ -124,6 +118,7 @@ public class ProbabilityManipulationFortune extends SimpleAbilityItem {
         tag.putInt("luckIgnoreMobs", tag.getInt("luckIgnoreMobs" + 10));
         tag.putInt("luckAttackerPoisoned", tag.getInt("luckIgnoreDamage" + 10));
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("MONSTER_ABILITY", ChatFormatting.GRAY);

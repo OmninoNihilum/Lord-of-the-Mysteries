@@ -47,10 +47,12 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.EntityGoals.PlayerMobGoals;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.SoundInit;
@@ -290,8 +292,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public void tick() {
         CompoundTag tag = this.getPersistentData();
         if (!this.level().isClientSide()) {
-            System.out.println("PATHWAY IS " + getCurrentPathway());
-            System.out.println("SEQUENCE IS " + getCurrentSequence());
             if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN)) {
                 this.discard();
             }
@@ -612,7 +612,52 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return this.entityData.get(MAXSPIRITUALITY);
     }
     public BeyonderClass getCurrentPathway() {
-        return BeyonderUtil.getPathwayByName(entityData.get(PATHWAY));
+        if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SpectatorClass) {
+            return BeyonderClassInit.SPECTATOR.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SailorClass) {
+            return BeyonderClassInit.SAILOR.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SeerClass) {
+            return BeyonderClassInit.SEER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ApprenticeClass) {
+            return BeyonderClassInit.APPRENTICE.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MarauderClass) {
+            return BeyonderClassInit.MARAUDER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SecretsSupplicantClass) {
+            return BeyonderClassInit.SECRETSSUPPLICANT.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof BardClass) {
+            return BeyonderClassInit.BARD.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ReaderClass) {
+            return BeyonderClassInit.READER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SleeplessClass) {
+            return BeyonderClassInit.SLEEPLESS.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof WarriorClass) {
+            return BeyonderClassInit.WARRIOR.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof HunterClass) {
+            return BeyonderClassInit.HUNTER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof AssassinClass) {
+            return BeyonderClassInit.ASSASSIN.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SavantClass) {
+            return BeyonderClassInit.SAVANT.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MysteryPryerClass) {
+            return BeyonderClassInit.MYSTERYPRYER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof CorpseCollectorClass) {
+            return BeyonderClassInit.CORPSECOLLECTOR.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof LawyerClass) {
+            return BeyonderClassInit.LAWYER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MonsterClass) {
+            return BeyonderClassInit.MONSTER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ApothecaryClass) {
+            return BeyonderClassInit.APOTHECARY.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof PlanterClass) {
+            return BeyonderClassInit.PLANTER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ArbiterClass) {
+            return BeyonderClassInit.ARBITER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof PrisonerClass) {
+            return BeyonderClassInit.PRISONER.get();
+        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof CriminalClass) {
+            return BeyonderClassInit.CRIMINAL.get();
+        }
+        return null;
     }
 
     @Override

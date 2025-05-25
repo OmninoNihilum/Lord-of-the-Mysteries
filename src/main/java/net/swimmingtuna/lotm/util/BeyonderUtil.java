@@ -1798,9 +1798,9 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_7_potion ingredients 2 alexscaves:pure_darkness legendary_monsters:ancient_spike arphex:giant_spinneret macabre:mortis_essence faded_conquest_2:key_of_death");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_6_potion ingredients 2 cataclysm:monstrous_horn illageandspillage:spellbound_book bosses_of_mass_destruction:void_thorn illageandspillage:bag_of_horrors minecraft:nether_star");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_5_potion ingredients 2 soulsweapons:chaos_crown cataclysm:witherite_ingot animatedmobsmod:ender_spectre arphex:crusher_claw alexscaves:immortal_embryo");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_4_potion ingredients 2 macabre:gargamaw_heart cataclysm:ignitium_ingot eeeabsmobs:guardian_core arphex:void_geode_shard iceandfire:dragon_skull_fire");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_4_potion ingredients 2 macabre:gargamaw_heart cataclysm:ignitium_ingot iceandfire:dragon_skull_fire legendary_monsters:air_rune arphex:void_geode_shard");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_3_potion ingredients 1 minecraft:nether_star iceandfire:dragon_skull_ice arphex:abyssal_crystal");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_2_potion ingredients 1 terramity:giant_sniffers_hoof soulsweapons:lord_soul_day_stalker soulsweapons:lord_soul_night_prowler minecraft:iron_ingot");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_2_potion ingredients 1 terramity:music_sheet_of_the_legendary_super_sniffer soulsweapons:lord_soul_day_stalker minecraft:iron_ingot");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:netherite_block");
 
         // Sailor Potions
@@ -1811,25 +1811,25 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_5_potion ingredients 2 aquamirae:frozen_key soulsweapons:essence_of_eventide soulsweapons:darkin_blade alexscaves:immortal_embryo arphex:void_geode_shard");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_4_potion ingredients 2 macabre:baal_heart alexscaves:tectonic_shard cataclysm:abyssal_egg terramity:belt_of_the_gnome_king iceandfire:dragon_skull_ice");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_3_potion ingredients 1 soulsweapons:essence_of_luminescence iceandfire:dragon_skull_lightning arphex:void_geode");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_2_potion ingredients 1 terramity:angel_feather soulsweapons:lord_soul_day_stalker soulsweapons:lord_soul_night_prowler minecraft:lightning_rod");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_2_potion ingredients 1 terramity:music_sheet_of_the_legendary_super_sniffer soulsweapons:lord_soul_night_prowler minecraft:lightning_rod");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:diamond_block");
 
         // Spectator Potions
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_9_potion ingredients 2 iceandfire:cyclops_eye legendary_monsters:dinosaur_bone born_in_chaos_v1:nightmare_claw macabre:eye arphex:venomous_appendage");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_8_potion ingredients 2 faded_conquest_2:stormclasher_katana alexscaves:heavy_bone born_in_chaos_v1:seedof_chaos born_in_chaos_v1:spider_mandible arphex:mangled_spider_flesh");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_7_potion ingredients 2 deeperdarker:soul_crystal arphex:void_geode_shard bosses_of_mass_destruction:ancient_anima mutantmonsters:endersoul_hand legendary_monsters:withered_bone");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_6_potion ingredients 2 awakened_bosses:herobrine_ingot faded_conquest_2:war_claymore born_in_chaos_v1:lifestealer_bone arphex:abyssal_shard legendary_monsters:lava_eaters_skin");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_6_potion ingredients 2 awakened_bosses:herobrine_nugget faded_conquest_2:war_claymore born_in_chaos_v1:lifestealer_bone arphex:abyssal_shard legendary_monsters:lava_eaters_skin");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_5_potion ingredients 2 soulsweapons:essence_of_eventide soulsweapons:lord_soul_rose aquamirae:frozen_key cataclysm:witherite_ingot animatedmobsmod:ender_spectre");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_4_potion ingredients 2 macabre:gomoria_heart cataclysm:ignitium_ingot iceandfire:dragon_skull_lightning arphex:void_geode_shard sleepy_hollows:spectral_essence");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_3_potion ingredients 1 born_in_chaos_v1:lord_pumpkinheads_hat_helmet iceandfire:dragon_skull_fire arphex:fire_opal");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_day_stalker soulsweapons:lord_soul_night_prowler minecraft:spyglass");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_4_potion ingredients 2 macabre:gomoria_heart cataclysm:ignitium_ingot arphex:fire_opal_shard sleepy_hollows:lootbag iceandfire:dragon_skull_lightning");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_3_potion ingredients 1 born_in_chaos_v1:lord_pumpkinheads_lamp arphex:fire_opal iceandfire:dragon_skull_fire");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_night_prowler minecraft:spyglass");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:emerald_block");
 
         // Warrior Potions
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_9_potion ingredients 2 mowziesmobs:sol_visage zoniex:deathly_onyx mowziesmobs:wrought_axe macabre:rattails deeperdarker:sculk_bone");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_9_potion ingredients 2 mowziesmobs:sol_visage zoniex:deathly_onyx mowziesmobs:wrought_axe macabre:rattails born_in_chaos_v1:fangofthe_hound_leader");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_8_potion ingredients 2 aether:silver_dungeon_key iceandfire:hydra_fang terramity:spiteful_soul mutantmonsters:hulk_hammer macabre:blindbaloon_item");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_7_potion ingredients 2 aether:gold_dungeon_key bosses_of_mass_destruction:blazing_eye macabre:mortis_essence arphex:scarab_seal bosses_of_mass_destruction:obsidian_heart");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_6_potion ingredients 2 awakened_bosses:herobrine_nugget macabre:rootofinfestation iceandfire:hydra_fang born_in_chaos_v1:soul_cutlass minecraft:white_banner");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_6_potion ingredients 2 awakened_bosses:herobrine_nugget macabre:rootofinfestation legendary_monsters:lava_eaters_skin born_in_chaos_v1:soul_cutlass minecraft:white_banner");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_5_potion ingredients 2 soulsweapons:lord_soul_rose soulsweapons:chaos_crown soulsweapons:essence_of_eventide cataclysm:witherite_ingot cataclysm:gauntlet_of_guard");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_4_potion ingredients 2 alexscaves:tectonic_shard macabre:valamon_heart iceandfire:dragon_skull_lightning eeeabsmobs:guardian_core terramity:belt_of_the_gnome_king");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_3_potion ingredients 1 terramity:perish_staff iceandfire:dragon_skull_fire arphex:abyssal_crystal");
