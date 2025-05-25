@@ -2805,26 +2805,27 @@ public class BeyonderUtil {
     }
 
 
-    public static void teleportEntityTroughDimensions(Entity entity, Level destinationLevel, double x, double y, double z) {
-        if (entity == null || entity.level().isClientSide()) {
+    public static void teleportEntityThroughDimensions(Entity entity, ResourceLocation dimensionKey, double x, double y, double z){
+        if(entity == null || entity.level().isClientSide()){
             return;
         }
 
         ServerLevel currentWorld = (ServerLevel) entity.level();
         MinecraftServer server = currentWorld.getServer();
-        ServerLevel destinationWorld = server.getLevel(destinationLevel.dimension());
+        ResourceKey<Level> dimResourceKey = ResourceKey.create(Registries.DIMENSION, dimensionKey);
+        ServerLevel destinationWorld = server.getLevel(dimResourceKey);
 
-        if (destinationWorld == null) {
+        if(destinationWorld == null){
             return;
         }
 
-        if (entity instanceof ServerPlayer player) {
+        if(entity instanceof ServerPlayer player){
             player.teleportTo(destinationWorld, x, y, z, player.getYRot(), player.getXRot());
-        } else {
+        }else{
             Entity newEntity = entity.getType().create(destinationWorld);
-            if (newEntity != null) {
+            if(newEntity != null){
                 newEntity.restoreFrom(entity);
-                newEntity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
+                newEntity.moveTo(x , y, z, entity.getYRot(), entity.getXRot());
                 entity.discard();
                 destinationWorld.addFreshEntity(newEntity);
             }

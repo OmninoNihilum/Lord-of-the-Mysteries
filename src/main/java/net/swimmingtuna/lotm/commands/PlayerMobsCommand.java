@@ -70,7 +70,6 @@ public class PlayerMobsCommand {
                                 .withColor(ChatFormatting.YELLOW)
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, entity.getUUID().toString()))
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityTooltipInfo(entity.getType(), entity.getUUID(), entity.getName()))));
-                source.sendSuccess(() -> Component.translatable(LangKeys.COMMANDS_SPAWN_SUCCESS.key(), name), true);
                 return 1;
             }
         }

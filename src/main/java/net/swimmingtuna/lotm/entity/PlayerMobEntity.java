@@ -114,6 +114,13 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Integer> MAXSPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
 
+
+    private boolean canBreakDoors;
+    private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, (difficulty) -> difficulty == Difficulty.HARD);
+    private final RangedBowAttackGoal<PlayerMobEntity> bowAttackGoal = new RangedBowAttackGoal<>(this, 1.0D, 20, 15.0F);
+    private final RangedCrossbowAttackGoal<PlayerMobEntity> crossbowAttackGoal = new RangedCrossbowAttackGoal<>(this, 1.0D, 15.0F);
+
+
     public PlayerMobEntity(Level worldIn, BeyonderClass requiredClass, int sequence) {
         this(EntityInit.PLAYER_MOB_ENTITY.get(), worldIn, requiredClass, sequence);
     }
@@ -139,8 +146,34 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
     }
 
+    private boolean targetTwin(LivingEntity livingEntity) {
+        return Configs.COMMON.attackTwin.get() || !(livingEntity instanceof Player && livingEntity.getName().getString().equals(getUsername().getDisplayName()));
+    }
+
     private boolean canOpenDoor() {
         return Configs.COMMON.openDoors.get() && level().getDifficulty().getId() >= Configs.COMMON.openDoorsDifficulty.get().getId();
+    }
+
+    protected void registerGoals() {
+        goalSelector.addGoal(1, new PlayerMobGoals.PlayerMobSpawnCowGoals(this));
+        goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        goalSelector.addGoal(5, new RandomLookAroundGoal(this));
+        addBehaviourGoals();
+    }
+
+    private void addBehaviourGoals() {
+        if (canOpenDoor()) {
+            goalSelector.addGoal(1, new OpenDoorGoal(this, true));
+            ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
+        }
+
+        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.2D, false));
+        goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+
+        targetSelector.addGoal(1, new HurtByTargetGoal(this, ZombifiedPiglin.class));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::targetTwin));
+        targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
     @Override
@@ -258,6 +291,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         CompoundTag tag = this.getPersistentData();
         if (!this.level().isClientSide()) {
             System.out.println("PATHWAY IS " + getCurrentPathway());
+            System.out.println("SEQUENCE IS " + getCurrentSequence());
             if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN)) {
                 this.discard();
             }
@@ -340,6 +374,73 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
     }
 
+    @SuppressWarnings("deprecation")
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
+        spawnData = super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
+        RandomSource randomSource = level.getRandom();
+        populateDefaultEquipmentSlots(randomSource, difficulty);
+        populateDefaultEquipmentEnchantments(randomSource, difficulty);
+
+        if (!hasUsername())
+            setUsername(NameManager.INSTANCE.getRandomName());
+
+        setCombatTask();
+        float specialMultiplier = difficulty.getSpecialMultiplier();
+        setCanPickUpLoot(randomSource.nextFloat() < Configs.COMMON.pickupItemsChance.get() * specialMultiplier);
+        setCanBreakDoors(randomSource.nextFloat() < specialMultiplier * 0.1F);
+
+        double rangeBonus = randomSource.nextDouble() * 1.5 * specialMultiplier;
+        if (rangeBonus > 1.0)
+            getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Range Bonus", rangeBonus, AttributeModifier.Operation.MULTIPLY_TOTAL));
+
+        if (randomSource.nextFloat() < specialMultiplier * 0.05F)
+            getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(new AttributeModifier("Health Bonus", randomSource.nextDouble() * 3.0 + 1.0, AttributeModifier.Operation.MULTIPLY_TOTAL));
+
+        if (randomSource.nextFloat() < specialMultiplier * 0.15F)
+            getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(new AttributeModifier("Damage Bonus", randomSource.nextDouble() + 0.5, AttributeModifier.Operation.MULTIPLY_TOTAL));
+
+        if (randomSource.nextFloat() < specialMultiplier * 0.2F)
+            getAttribute(Attributes.MOVEMENT_SPEED).addPermanentModifier(new AttributeModifier("Speed Bonus", randomSource.nextDouble() * 2.0 * 0.24 + 0.01, AttributeModifier.Operation.MULTIPLY_TOTAL));
+
+        if (randomSource.nextDouble() < Configs.COMMON.babySpawnChance.get())
+            setBaby(true);
+
+        return spawnData;
+    }
+
+    public void setCombatTask() {
+        if (!level().isClientSide) {
+            goalSelector.removeGoal(bowAttackGoal);
+            goalSelector.removeGoal(crossbowAttackGoal);
+
+            ItemStack itemstack = getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, this::canFireProjectileWeapon));
+            if (itemstack.getItem() instanceof CrossbowItem) {
+                goalSelector.addGoal(2, crossbowAttackGoal);
+            } else if (itemstack.getItem() instanceof BowItem) {
+                bowAttackGoal.setMinAttackInterval(level().getDifficulty() != Difficulty.HARD ? 20 : 40);
+                goalSelector.addGoal(2, bowAttackGoal);
+            }
+        }
+    }
+
+    public void setCanBreakDoors(boolean enabled) {
+        if (GoalUtils.hasGroundPathNavigation(this)) {
+            if (canBreakDoors != enabled) {
+                canBreakDoors = enabled;
+                ((GroundPathNavigation) getNavigation()).setCanOpenDoors(enabled || canOpenDoor());
+                if (enabled)
+                    goalSelector.addGoal(1, breakDoorGoal);
+                else
+                    goalSelector.removeGoal(breakDoorGoal);
+            }
+        } else if (canBreakDoors) {
+            goalSelector.removeGoal(breakDoorGoal);
+            canBreakDoors = false;
+        }
+    }
+
 
     public boolean canFireProjectileWeapon(Item item) {
         return item instanceof ProjectileWeaponItem weaponItem && canFireProjectileWeapon(weaponItem);
@@ -358,6 +459,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public boolean isChargingCrossbow() {
         return entityData.get(IS_CHARGING_CROSSBOW);
     }
+
+
 
     @Override
     public List<ExtendedSensor<PlayerMobEntity>> getSensors() {
@@ -384,6 +487,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public BrainActivityGroup<PlayerMobEntity> getFightTasks() {
         return BrainActivityGroup.fightTasks(new InvalidateAttackTarget<>(), new SetWalkTargetToAttackTarget<>(), new BeyonderAttack<>());
     }
+
     @Override
     @NotNull
     public HumanoidArm getMainArm() {
@@ -454,8 +558,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (compound.contains("Profile", Tag.TAG_COMPOUND)) {
             profile = NbtUtils.readGameProfile(compound.getCompound("Profile"));
         }
-        if (compound.contains("sequence")) {
-            this.setSequence(compound.getInt("sequence"));
+        if (compound.contains("Sequence")) {
+            this.setSequence(compound.getInt("Sequence"));
         }
         if (compound.contains("Pathway")) {
             this.setPathway(BeyonderUtil.getPathwayByName(compound.getString("Pathway")));

@@ -100,8 +100,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         if(getDoorMode() == DoorMode.TELEPORT_ONLY){
             if(!this.level().isClientSide){
                 handleLife();
-                if(BeyonderUtil.isEntityColliding(this, this.level(), 0.5)){
-                    Entity entity = BeyonderUtil.checkEntityCollision(this, this.level(), 0.5);
+                if(BeyonderUtil.isEntityColliding(this, this.level(), 1.0)){
+                    Entity entity = BeyonderUtil.checkEntityCollision(this, this.level(), 1.0);
                     if(entity instanceof Player player){
                         if(player.isShiftKeyDown()) teleport(player);
                     }else if(entity instanceof LivingEntity living){
@@ -201,16 +201,18 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             }
         }
 
-        if (life > 15){
-            this.entityData.set(HAS_PLAYED_ANIMATION, false);
-            this.entityData.set(FREE_TO_USE, false);
-        }else{
-            this.entityData.set(HAS_PLAYED_ANIMATION, true);
-            this.entityData.set(IS_DYING, true);
-            this.entityData.set(FREE_TO_USE, true);
+        if(getDoorMode() == DoorMode.DOOR_MIRAGE) {
+            if (life > 15) {
+                this.entityData.set(HAS_PLAYED_ANIMATION, false);
+                this.entityData.set(FREE_TO_USE, false);
+            } else {
+                this.entityData.set(HAS_PLAYED_ANIMATION, true);
+                this.entityData.set(IS_DYING, true);
+                this.entityData.set(FREE_TO_USE, true);
+            }
+            if (life > 0) this.entityData.set(LIFE, life - 1);
+            else delete();
         }
-        if(life > 0) this.entityData.set(LIFE, life - 1);
-        else delete();
     }
 
     private void teleport(LivingEntity entity){
@@ -221,7 +223,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         if(getDimensionDestination().dimension().equals(entity.level().dimension())){
                             entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
                         }else{
-                            BeyonderUtil.teleportEntityTroughDimensions(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
+                            BeyonderUtil.teleportEntityThroughDimensions(entity, getDimensionDestination().dimension().location(), getTeleportX(), getTeleportY(), getTeleportZ());
                         }
                     }
                 }else{
@@ -229,7 +231,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         if(getDimensionDestination().dimension().equals(entity.level().dimension())){
                             entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
                         }else{
-                            BeyonderUtil.teleportEntityTroughDimensions(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
+                            BeyonderUtil.teleportEntityThroughDimensions(entity, getDimensionDestination().dimension().location(), getTeleportX(), getTeleportY(), getTeleportZ());
                         }
                     }
                 }
