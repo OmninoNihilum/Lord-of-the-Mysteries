@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -40,20 +41,22 @@ public class PlayerMobsCommand {
                             return 1;
                         })
                 ).then(Commands.literal("spawn")
-                        .executes(context -> spawnPlayerMob(context.getSource(), null, context.getSource().getPosition(), null, -1))
+                        .executes(context -> spawnPlayerMob(context.getSource(), null, context.getSource().getPosition(), null, -1, 1))
                         .then(Commands.argument("username", StringArgumentType.string())
-                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), context.getSource().getPosition(), null, -1))
+                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), context.getSource().getPosition(), null, -1, 1))
                                 .then(Commands.argument("pos", Vec3Argument.vec3())
-                                        .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), null, -1))
+                                        .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), null, -1, 1))
                                         .then(Commands.argument("pathway", BeyonderClassArgument.beyonderClass())
-                                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), BeyonderClassArgument.getBeyonderClass(context, "pathway"), -1))
+                                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), BeyonderClassArgument.getBeyonderClass(context, "pathway"), -1, 1))
                                                 .then(Commands.argument("sequence", IntegerArgumentType.integer(0, 9))
-                                                        .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), BeyonderClassArgument.getBeyonderClass(context, "pathway"), IntegerArgumentType.getInteger(context, "sequence")))))))
+                                                        .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), BeyonderClassArgument.getBeyonderClass(context, "pathway"), IntegerArgumentType.getInteger(context, "sequence"), 1))
+                                                        .then(Commands.argument("attack_chance", IntegerArgumentType.integer(0, 100))
+                                                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), BeyonderClassArgument.getBeyonderClass(context, "pathway"), IntegerArgumentType.getInteger(context, "sequence"), IntegerArgumentType.getInteger(context, "attack_chance"))))))))
                 ));
     }
 
 
-    private static int spawnPlayerMob(CommandSourceStack source, @Nullable String username, Vec3 pos, @Nullable BeyonderClass pathway, int sequence) throws CommandSyntaxException {
+    private static int spawnPlayerMob(CommandSourceStack source, @Nullable String username, Vec3 pos, @Nullable BeyonderClass pathway, int sequence, int attackChance) throws CommandSyntaxException {
         BlockPos blockpos = BlockPos.containing(pos);
         if (!Level.isInSpawnableBounds(blockpos)) {
             throw INVALID_POS.create();
@@ -75,6 +78,7 @@ public class PlayerMobsCommand {
                         entity.setSequence(sequence);
                     }
                 }
+                entity.setAttackChance(attackChance);
 
                 ForgeEventFactory.onFinalizeSpawn(entity, source.getLevel(), source.getLevel().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
 
@@ -91,6 +95,4 @@ public class PlayerMobsCommand {
             }
         }
     }
-
 }
-

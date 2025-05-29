@@ -32,6 +32,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.IronGolem;
@@ -48,16 +49,19 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.EntityGoals.PlayerMobGoals;
 import net.swimmingtuna.lotm.init.*;
+import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupBeyondersBehaviour;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupTargetBehaviour;
-import net.swimmingtuna.lotm.util.EntityUtil.behaviour.task.BeyonderAttack;
+import net.swimmingtuna.lotm.util.EntityUtil.behaviour.PassiveAttackBehavior;
+import net.swimmingtuna.lotm.util.EntityUtil.behaviour.task.*;
 import net.swimmingtuna.lotm.util.PlayerMobs.ItemManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.NameManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerName;
@@ -77,6 +81,7 @@ import net.tslat.smartbrainlib.api.core.sensor.ExtendedSensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyPlayersSensor;
+import net.tslat.smartbrainlib.util.BrainUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -116,22 +121,24 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Integer> MAXSPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_CLONE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ATTACK_CHANCE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
 
 
     private boolean canBreakDoors;
     private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, (difficulty) -> difficulty == Difficulty.HARD);
-    private final RangedBowAttackGoal<PlayerMobEntity> bowAttackGoal = new RangedBowAttackGoal<>(this, 1.0D, 20, 15.0F);
-    private final RangedCrossbowAttackGoal<PlayerMobEntity> crossbowAttackGoal = new RangedCrossbowAttackGoal<>(this, 1.0D, 15.0F);
+    private final BeyonderRangedAttackGoal<PlayerMobEntity> bowAttackGoal = new BeyonderRangedAttackGoal<>(this, 1.0D, 20, 15.0F);
+    private final BeyonderRangedCrossbowAttackGoal<PlayerMobEntity> crossbowAttackGoal = new BeyonderRangedCrossbowAttackGoal<>(this, 1.0D, 15.0F);
 
 
     public PlayerMobEntity(Level worldIn, BeyonderClass requiredClass, int sequence) {
-        this(EntityInit.PLAYER_MOB_ENTITY.get(), worldIn, requiredClass, sequence);
+        this(EntityInit.PLAYER_MOB_ENTITY.get(), worldIn, requiredClass, sequence, 1);
     }
 
-    public PlayerMobEntity(EntityType<? extends Monster> entityType, Level worldIn, BeyonderClass requiredClass, int sequence) {
+    public PlayerMobEntity(EntityType<? extends Monster> entityType, Level worldIn, BeyonderClass requiredClass, int sequence, int attack_chance) {
         super(entityType, worldIn);
         this.setSequence(sequence);
         this.setPathway(requiredClass);
+        setAttackChance(attack_chance);
     }
 
     public PlayerMobEntity(EntityType<PlayerMobEntity> playerMobEntityEntityType, Level level) {
@@ -165,7 +172,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     protected void registerGoals() {
-        goalSelector.addGoal(1, new PlayerMobGoals.PlayerMobSpawnCowGoals(this));
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
         goalSelector.addGoal(5, new RandomLookAroundGoal(this));
@@ -178,12 +184,12 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
         }
 
-        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.2D, false));
+        goalSelector.addGoal(3, new BeyonderMeleeAttackGoal(this, 1.2D, false));
         goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0D));
 
-        targetSelector.addGoal(1, new HurtByTargetGoal(this, ZombifiedPiglin.class));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::targetTwin));
-        targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        targetSelector.addGoal(1, new BeyonderAwareHurtByTargetGoal(this, ZombifiedPiglin.class));
+        //targetSelector.addGoal(2, new BeyonderNearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::targetTwin));
+        //targetSelector.addGoal(3, new BeyonderNearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
     @Override
@@ -200,6 +206,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(SPIRITUALITY_REGEN, 0);
         getEntityData().define(MAX_LIFE, 0);
         getEntityData().define(IS_CLONE, false);
+        getEntityData().define(ATTACK_CHANCE, 0);
     }
 
 
@@ -309,6 +316,17 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         super.tick();
         if (!this.level().isClientSide()) {
             if (this.tickCount % 60 == 0) {
+                if (this.getTarget() != null) {
+                    LOTM.LOGGER.info("Target is " + this.getTarget().getName().getString());
+                } else {
+                    LOTM.LOGGER.info("Target is null");
+                }
+                LivingEntity target = BrainUtils.getMemory(this, MemoryModuleType.ATTACK_TARGET);
+                if (target == null) {
+                    LOTM.LOGGER.info("MEMORY Target is null");
+                } else {
+                    LOTM.LOGGER.info("MEMORY Target is " + target.getName().getString());
+                }
                 BeyonderEntityData.selectAndUseAbility(this);
             }
             if (getMaxlife() != 0) {
@@ -361,6 +379,28 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         xCloak += x * 0.25D;
         zCloak += z * 0.25D;
         yCloak += y * 0.25D;
+    }
+
+    @Override
+    public LivingEntity getTarget() {
+        return BrainUtils.getMemory(this, MemoryModuleType.ATTACK_TARGET);
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if (target == null) {
+            BrainUtils.clearMemory(this, MemoryModuleType.ATTACK_TARGET);
+        } else {
+            BrainUtils.setMemory(this, MemoryModuleType.ATTACK_TARGET, target);
+        }
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (BeyonderUtil.areAllies(target, this)) {
+            return false;
+        }
+        return super.canAttack(target);
     }
 
     @Override
@@ -483,7 +523,13 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return entityData.get(IS_CHARGING_CROSSBOW);
     }
 
+    public void setAttackChance(int newChance) {
+        this.entityData.set(ATTACK_CHANCE, newChance);
+    }
 
+    public int getAttackChance() {
+        return this.entityData.get(ATTACK_CHANCE);
+    }
 
     @Override
     public List<ExtendedSensor<PlayerMobEntity>> getSensors() {
@@ -497,7 +543,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
     @Override
     public BrainActivityGroup<PlayerMobEntity> getCoreTasks() {
-        return BrainActivityGroup.coreTasks(new GroupBeyondersBehaviour<>(), new MoveToWalkTarget<>(), new GroupTargetBehaviour<>());
+        return BrainActivityGroup.coreTasks(new GroupBeyondersBehaviour<>(), new MoveToWalkTarget<>(), new GroupTargetBehaviour<>(), new PassiveAttackBehavior<>());
     }
 
     @Override
@@ -567,6 +613,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         compound.putInt("MaxSpirituality", this.getMaxSpirituality());
         compound.putInt("MaxLife", this.getMaxlife());
         compound.putBoolean("Clone", this.getIsClone());
+        compound.putInt("AttackChance", this.getAttackChance());
     }
 
     @Override
@@ -606,6 +653,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
         if (compound.contains("Clone")) {
             this.setMaxLife(compound.getInt("Clone"));
+        }
+        if (compound.contains("AttackChance")) {
+            this.setAttackChance(compound.getInt("AttackChance"));
         }
     }
 
@@ -884,4 +934,3 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return rand.nextDouble() <= Math.max(0, baseChance * Math.max(looting + 1, 1));
     }
 }
-
