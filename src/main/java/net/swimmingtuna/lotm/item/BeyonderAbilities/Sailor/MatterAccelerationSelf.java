@@ -83,7 +83,7 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             // Destroy blocks in a 5-block radius around the current position
             List<BlockPos> blockPositions = new ArrayList<>();
             float damage = BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get());
-            for (BlockPos offsetedPos : BlockPos.betweenClosed(pos.offset(-((int)damage / 2), -((int)damage / 2), -((int)damage / 2)), pos.offset(((int)damage / 2), ((int)damage / 2), ((int)damage / 2)))) {
+            for (BlockPos offsetedPos : BlockPos.betweenClosed(pos.offset(-((int) damage / 2), -((int) damage / 2), -((int) damage / 2)), pos.offset(((int) damage / 2), ((int) damage / 2), ((int) damage / 2)))) {
                 if (visitedPositions.contains(offsetedPos)) continue;
                 visitedPositions.add(offsetedPos);
                 BlockState blockState = level.getBlockState(offsetedPos);
@@ -161,12 +161,11 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
         if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof Blink && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 5)) {
             if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") < BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINK.get())) {
                 livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", doorBlinkDistance + 10);
-            }
-            if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") >= BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINK.get())) {
+            } else {
                 if (livingEntity instanceof Player player) {
                     player.displayClientMessage(Component.literal("Blink Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
                 }
-                livingEntity.getPersistentData().putInt("monsterLuckGifting", 0);
+                livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", 0);
             }
             if (livingEntity instanceof Player player) {
                 player.displayClientMessage(Component.literal("Blink Distance is " + doorBlinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);

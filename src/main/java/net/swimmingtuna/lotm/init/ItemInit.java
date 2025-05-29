@@ -602,6 +602,8 @@ public class ItemInit {
             () -> new AllyMaker(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ASTROLABE = ITEMS.register("astrolabe",
             () -> new Astrolabe(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> WORM_OF_STAR = ITEMS.register("wormofstar",
+            () -> new WormOfStar(new Item.Properties().stacksTo(16)));
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM = ITEMS.register("forced_update_item_6",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM_2 = ITEMS.register("forced_update_item_1",

@@ -84,12 +84,8 @@ public class TestItem extends SimpleAbilityItem {
                 }
             }
             for (PlayerMobEntity playerMobEntity : player.level().getEntitiesOfClass(PlayerMobEntity.class, player.getBoundingBox().inflate(30))) {
-                playerMobEntity.setPathway(BeyonderClassInit.SPECTATOR.get());
-                playerMobEntity.setSequence(7);
-                playerMobEntity.setTarget(player);
+                playerMobEntity.setCreator(playerMobEntity.getUUID());
             }
-            int ignoreDamage = tag.getInt("luckIgnoreDamage");
-            player.sendSystemMessage(Component.literal("Ignore Damage is " + ignoreDamage));
 
         }
 

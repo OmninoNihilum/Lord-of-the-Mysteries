@@ -20,6 +20,7 @@ public class CreativeTabInit {
                     .displayItems((parameters, event) -> {
                         event.accept(ItemInit.BEYONDER_ABILITY_USER.get());
                         event.accept(ItemInit.ASTROLABE.get());
+                        event.accept(ItemInit.WORM_OF_STAR.get());
                         event.accept(ItemInit.MIND_READING.get());
                         event.accept(ItemInit.AWE.get());
                         event.accept(ItemInit.FRENZY.get());

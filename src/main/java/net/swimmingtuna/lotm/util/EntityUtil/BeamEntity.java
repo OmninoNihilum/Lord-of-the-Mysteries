@@ -391,7 +391,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                                 if (this.breaksBlocks() && !EXCLUDED_BLOCKS.contains(this.level().getBlockState(mutablePos).getBlock())) {
                                     this.level().destroyBlock(mutablePos, false);
                                 }
-                            } else if (this.tickCount % 5 == 0 && getIsTwilight() && this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState()) {
+                            } else if (this.tickCount % 5 == 0 && getIsTwilight() && this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState()) {
                                 if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
                                     this.level().setBlock(mutablePos, Blocks.DIRT.defaultBlockState(), 11);
                                 } else {

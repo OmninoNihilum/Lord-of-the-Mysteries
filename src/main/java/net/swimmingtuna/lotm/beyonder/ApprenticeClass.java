@@ -160,7 +160,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(5, ItemInit.BLINKAFTERIMAGE.get());
 
         //items.put(4, ItemInit.BLINK_STATE.get());
-        //items.put(4, ItemInit.EXILE.get());
+        items.put(4, ItemInit.EXILE.get());
         items.put(4, ItemInit.DOOR_MIRAGE.get());
         items.put(4, ItemInit.CREATE_CONCEALED_BUNDLE.get());
 

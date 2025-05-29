@@ -35,6 +35,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -52,10 +53,7 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.EntityGoals.PlayerMobGoals;
-import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.init.EntityInit;
-import net.swimmingtuna.lotm.init.GameRuleInit;
-import net.swimmingtuna.lotm.init.SoundInit;
+import net.swimmingtuna.lotm.init.*;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupBeyondersBehaviour;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupTargetBehaviour;
@@ -64,6 +62,7 @@ import net.swimmingtuna.lotm.util.PlayerMobs.ItemManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.NameManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerName;
 import net.swimmingtuna.lotm.util.PlayerMobs.ProfileUpdater;
+import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.tslat.smartbrainlib.api.SmartBrainOwner;
 import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
 import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
@@ -101,7 +100,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public double xCloak;
     public double yCloak;
     public double zCloak;
-    private LivingEntity owner;
+    private UUID creator;
 
     private static final UUID BABY_SPEED_BOOST_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
     private static final AttributeModifier BABY_SPEED_BOOST = new AttributeModifier(BABY_SPEED_BOOST_ID, "Baby speed boost", 0.5D, AttributeModifier.Operation.MULTIPLY_BASE);
@@ -116,6 +115,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Integer> SPIRITUALITY_REGEN = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MAXSPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_CLONE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
 
 
     private boolean canBreakDoors;
@@ -136,6 +136,13 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
     public PlayerMobEntity(EntityType<PlayerMobEntity> playerMobEntityEntityType, Level level) {
         super(playerMobEntityEntityType,level);
+    }
+
+    public boolean shouldIgnoreGamerule() {
+        if (this.getMaxlife() == 4) {
+            return true;
+        }
+        return false;
     }
 
     public static AttributeSupplier.Builder registerAttributes() {
@@ -192,6 +199,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(SPIRITUALITY, 0);
         getEntityData().define(SPIRITUALITY_REGEN, 0);
         getEntityData().define(MAX_LIFE, 0);
+        getEntityData().define(IS_CLONE, false);
     }
 
 
@@ -211,7 +219,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (force || random.nextFloat() < (level().getDifficulty() == Difficulty.HARD ? 0.5F : 0.1F)) {
             ItemStack stack = ItemManager.INSTANCE.getRandomMainHand(random);
             setItemSlot(EquipmentSlot.MAINHAND, stack);
-
             if (level().getDifficulty().getId() >= Configs.COMMON.offhandDifficultyLimit.get().getId() && random.nextDouble() > Configs.COMMON.offhandSpawnChance.get()) {
                 if (stack.getItem() instanceof ProjectileWeaponItem && Configs.COMMON.allowTippedArrows.get()) {
                     var potions = new ArrayList<>(ForgeRegistries.POTIONS.getKeys());
@@ -294,15 +301,22 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public void tick() {
         CompoundTag tag = this.getPersistentData();
         if (!this.level().isClientSide()) {
-            if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN)) {
+            if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN) && !shouldIgnoreGamerule()) {
                 this.discard();
             }
             this.setSpirituality(this.getSpirituality() + this.getSpiritualityRegen());
         }
         super.tick();
         if (!this.level().isClientSide()) {
+            if (this.tickCount % 60 == 0) {
+                BeyonderEntityData.selectAndUseAbility(this);
+            }
             if (getMaxlife() != 0) {
                 if (this.tickCount > getMaxlife()) {
+                    if (this.getPersistentData().getBoolean("shouldDropWormOfStar")) {
+                        ItemEntity wormOfStarEntity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), new ItemStack(ItemInit.WORM_OF_STAR.get()));
+                        this.level().addFreshEntity(wormOfStarEntity);
+                    }
                     this.discard();
                 }
             }
@@ -552,6 +566,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         compound.putInt("Spirituality", this.getSpirituality());
         compound.putInt("MaxSpirituality", this.getMaxSpirituality());
         compound.putInt("MaxLife", this.getMaxlife());
+        compound.putBoolean("Clone", this.getIsClone());
     }
 
     @Override
@@ -589,6 +604,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (compound.contains("MaxLife")) {
             this.setMaxLife(compound.getInt("MaxLife"));
         }
+        if (compound.contains("Clone")) {
+            this.setMaxLife(compound.getInt("Clone"));
+        }
     }
 
 
@@ -612,6 +630,13 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
     public int getSpirituality() {
         return this.entityData.get(SPIRITUALITY);
+    }
+
+    public void setIsClone(boolean isClone) {
+        this.entityData.set(IS_CLONE, isClone);
+    }
+    public boolean getIsClone() {
+        return this.entityData.get(IS_CLONE);
     }
 
     public int getSpiritualityRegen() {
@@ -812,12 +837,13 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             return skin;
         return cape;
     }
-    public LivingEntity getOwner() {
-        return this.owner;
+    public LivingEntity getCreator() {
+        return BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
     }
-    public void setOwner(LivingEntity owner) {
-        this.owner = owner;
+    public void setCreator(UUID owner) {
+        creator = owner;
     }
+
     public static ItemStack getDrop(LivingEntity entity, DamageSource source, int looting) {
         if (entity.level().isClientSide() || entity.getHealth() > 0)
             return ItemStack.EMPTY;

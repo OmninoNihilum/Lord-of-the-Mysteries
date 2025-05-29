@@ -536,9 +536,6 @@ public class Astrolabe extends Item {
                                 }
                             }
                         }
-                        if (structureFound && !actuallyFoundStructure) {
-                            player.sendSystemMessage(Component.literal("No structure in range").withStyle(ChatFormatting.RED));
-                        }
                     }
                 }
                 if (!foundResource) {
@@ -557,6 +554,7 @@ public class Astrolabe extends Item {
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Use in order to gauge the danger around you, with the more damage this item takes, the higher the danger level.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GOLD));
         tooltipComponents.add(Component.literal("Type in a biome, structure, entity name, or block to get it's location.").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
+        tooltipComponents.add(Component.literal("For modded structures, blocks, biomes, or entities, you need to type the untranslated name. For example, lotm:corpse_cathedral").withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD));
         tooltipComponents.add(Component.literal("You can also type in a player's name followed by either (sequence, location, inventory, luck, misfortune, health, or pathway) to get that data").withStyle(ChatFormatting.LIGHT_PURPLE).withStyle(ChatFormatting.BOLD));
         tooltipComponents.add(Component.literal("Be warned, if you try to divine information about a player who is many sequences above you, they might know.").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
         super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);

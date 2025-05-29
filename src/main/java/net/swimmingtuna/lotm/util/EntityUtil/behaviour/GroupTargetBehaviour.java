@@ -7,6 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.tslat.smartbrainlib.api.core.behaviour.ExtendedBehaviour;
 import net.tslat.smartbrainlib.util.BrainUtils;
 
@@ -57,17 +58,14 @@ public class GroupTargetBehaviour<E extends LivingEntity> extends ExtendedBehavi
         LivingEntity target = BrainUtils.getMemory(entity, MemoryModuleType.HURT_BY_ENTITY);
         PlayerAllyData allyData = entity.getCommandSenderWorld().getServer().getLevel(entity.getCommandSenderWorld().dimension()).getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
         Set<UUID> alliesUUID = allyData.getAllies(entity.getUUID());
-
         for (UUID uuid : alliesUUID) {
-            Entity entityFromUUID = ((ServerLevel) entity.level()).getEntity(uuid);
-            if (entityFromUUID == target)return;
+            Entity entityFromUUID = BeyonderUtil.getEntityFromUUID(entity.level(), uuid);
+            if (entityFromUUID == target) return;
         }
         BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
         for (UUID uuid : alliesUUID) {
-            Entity entityFromUUID = ((ServerLevel) entity.level()).getEntity(uuid);
-
+            Entity entityFromUUID = BeyonderUtil.getEntityFromUUID(entity.level(), uuid);
             if (entityFromUUID instanceof LivingEntity livingAlly) {
-
                 if (!BrainUtils.hasMemory(livingAlly.getBrain(), MemoryModuleType.ATTACK_TARGET)){ // prob gets checked often, but need to be sure memory exists
                     BrainUtils.addMemories(livingAlly.getBrain(), MemoryModuleType.ATTACK_TARGET);
                 }

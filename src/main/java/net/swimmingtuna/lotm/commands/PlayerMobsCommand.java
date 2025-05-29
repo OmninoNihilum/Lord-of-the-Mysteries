@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.LangKeys;
@@ -38,15 +40,20 @@ public class PlayerMobsCommand {
                             return 1;
                         })
                 ).then(Commands.literal("spawn")
-                        .executes(context -> spawnPlayerMob(context.getSource(), null, context.getSource().getPosition()))
+                        .executes(context -> spawnPlayerMob(context.getSource(), null, context.getSource().getPosition(), null, -1))
                         .then(Commands.argument("username", StringArgumentType.string())
-                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), context.getSource().getPosition()))
+                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), context.getSource().getPosition(), null, -1))
                                 .then(Commands.argument("pos", Vec3Argument.vec3())
-                                        .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"))))))
-        );
+                                        .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), null, -1))
+                                        .then(Commands.argument("pathway", BeyonderClassArgument.beyonderClass())
+                                                .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), BeyonderClassArgument.getBeyonderClass(context, "pathway"), -1))
+                                                .then(Commands.argument("sequence", IntegerArgumentType.integer(0, 9))
+                                                        .executes(context -> spawnPlayerMob(context.getSource(), StringArgumentType.getString(context, "username"), Vec3Argument.getVec3(context, "pos"), BeyonderClassArgument.getBeyonderClass(context, "pathway"), IntegerArgumentType.getInteger(context, "sequence")))))))
+                ));
     }
 
-    private static int spawnPlayerMob(CommandSourceStack source, @Nullable String username, Vec3 pos) throws CommandSyntaxException {
+
+    private static int spawnPlayerMob(CommandSourceStack source, @Nullable String username, Vec3 pos, @Nullable BeyonderClass pathway, int sequence) throws CommandSyntaxException {
         BlockPos blockpos = BlockPos.containing(pos);
         if (!Level.isInSpawnableBounds(blockpos)) {
             throw INVALID_POS.create();
@@ -56,15 +63,25 @@ public class PlayerMobsCommand {
                 throw SUMMON_FAILED.create();
             } else {
                 entity.moveTo(pos.x, pos.y, pos.z, entity.getYRot(), entity.getXRot());
+
+                // Set username
                 if (username != null)
                     entity.setUsername(username);
                 else
                     entity.setUsername(NameManager.INSTANCE.getRandomName());
+                if (pathway != null) {
+                    entity.setPathway(pathway);
+                    if (sequence != -1) {
+                        entity.setSequence(sequence);
+                    }
+                }
+
                 ForgeEventFactory.onFinalizeSpawn(entity, source.getLevel(), source.getLevel().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
 
                 if (!source.getLevel().tryAddFreshEntityWithPassengers(entity)) {
                     throw DUPLICATE_UUID.create();
                 }
+
                 MutableComponent name = MutableComponent.create(entity.getDisplayName().getContents())
                         .withStyle(Style.EMPTY
                                 .withColor(ChatFormatting.YELLOW)

@@ -52,7 +52,7 @@ public class BeyonderAttack<E extends LivingEntity> extends ExtendedBehaviour<E>
             if (mob.getTarget() != null) {
                 target = mob.getTarget();
             }
-            BeyonderEntityData.selectAndUseAbility(mob, target);
+            //BeyonderEntityData.selectAndUseAbility(mob, target);
         }
     }
 }

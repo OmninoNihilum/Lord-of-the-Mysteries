@@ -16,9 +16,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
@@ -220,6 +222,23 @@ public class ModEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void mobEffectEvent(MobEffectEvent.Remove event) {
+        if (!event.getEntity().level().isClientSide()) {
+            LivingEntity livingEntity = event.getEntity();
+            if (event.getEffect() == ModEffects.BATTLEHYPNOTISM.get() && livingEntity instanceof Mob mob && mob.getTarget() != null && !(mob.getTarget() instanceof Player)) {
+                int playersFound = 0;
+                for (Player player : mob.level().getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(12))) {
+                    playersFound++;
+                    mob.setTarget(player);
+                }
+                if (playersFound == 0) {
+                    mob.setTarget(null);
+                }
+            }
+        }
+    }
+
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
@@ -353,6 +372,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                Blink.handleAfterimageSpawning(livingEntity);
                 Exile.exileTickEvent(event);
                 DoorMirage.mirageTick(livingEntity);
                 ApprenticeClass.apprenticeHideHand(event);
@@ -727,6 +747,10 @@ public class ModEvents {
                     event.setCanceled(true);
                 }
             }
+            if (entity instanceof PlayerMobEntity playerMob && playerMob.getMaxlife() == 4) {
+                event.setCanceled(true);
+                event.setAmount(0);
+            }
         }
     }
 
@@ -924,7 +948,7 @@ public class ModEvents {
             }
             if (entity instanceof LivingEntity livingEntity) {
                 if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
-                    if (!playerMobEntity.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN)) {
+                    if (!playerMobEntity.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN) && !playerMobEntity.shouldIgnoreGamerule()) {
                         event.setCanceled(true);
                     } else {
                         playerMobEntity.setSpirituality(playerMobEntity.getMaxSpirituality());

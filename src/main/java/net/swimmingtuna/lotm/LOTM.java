@@ -387,6 +387,7 @@ public class LOTM {
             event.accept(ItemInit.CONCEPTUALIZATION);
             event.accept(ItemInit.REPLICATION);
             event.accept(ItemInit.ASTROLABE);
+            event.accept(ItemInit.WORM_OF_STAR);
         }
         if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS) {
             event.accept(BlockInit.VISIONARY_BARRIER_BLOCK);
