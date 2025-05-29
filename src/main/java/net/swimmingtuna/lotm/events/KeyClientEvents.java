@@ -111,8 +111,8 @@ public class KeyClientEvents {
         public static void onFogDensityEvent(ViewportEvent.RenderFog event) {
             Player player = Minecraft.getInstance().player;
             if (ClientFogData.getFogTimer() >= 40) {
-                event.setFarPlaneDistance(100 - ClientFogData.getFogTimer() * 2);
-                event.setNearPlaneDistance(90 - ClientFogData.getFogTimer() * 2);
+                event.setFarPlaneDistance(Math.max(7,100 - ClientFogData.getFogTimer() * 2));
+                event.setNearPlaneDistance(Math.max(1,90 - ClientFogData.getFogTimer() * 2));
                 event.setCanceled(true);
             } else if (player.level().dimension().equals(DimensionInit.SPIRIT_WORLD_LEVEL_KEY)) {
                 event.setFogShape(FogShape.SPHERE);

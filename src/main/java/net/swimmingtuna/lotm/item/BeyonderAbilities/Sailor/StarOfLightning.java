@@ -69,11 +69,15 @@ public class StarOfLightning extends SimpleAbilityItem {
         if (sailorLightningStar == 1) {
             StarOfLightning.starOfLightningExplode(livingEntity, livingEntity.getOnPos(), 15);
             tag.putInt("sailorLightningStar", 0);
+            tag.putInt("sailorLightningStarLightning", 20);
+        }
+        if (tag.getInt("sailorLightningStarLightning") >= 1) {
             Level level = livingEntity.level();
+            tag.putInt("sailorLightningStarLightning", tag.getInt("sailorLightningStarLightning") - 1);
             float searchRadius = Math.min(300, BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()));
             AABB searchArea = new AABB(livingEntity.getX() - searchRadius, livingEntity.getY() - searchRadius, livingEntity.getZ() - searchRadius, livingEntity.getX() + searchRadius, livingEntity.getY() + searchRadius, livingEntity.getZ() + searchRadius);
             List<LivingEntity> potentialTargets = level.getEntitiesOfClass(LivingEntity.class, searchArea, target -> target != livingEntity && target.isAlive() && !BeyonderUtil.areAllies(livingEntity, target));
-            for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()); i++) {
+            for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()) / 20; i++) {
                 LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), livingEntity.level());
                 lightningEntity.setSpeed(50);
                 lightningEntity.setDamage((int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()) / 1.5f));

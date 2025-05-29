@@ -123,7 +123,7 @@ public class LightningRedirection extends SimpleAbilityItem {
                         }
                     }
                 }
-                AABB aabb = new AABB(living.getX() - 150, living.getY() - 75, living.getZ() - 150, living.getX() + 150, living.getY() + 200, living.getZ() + 150);
+                AABB aabb = new AABB(living.getX() - 175, living.getY() - 75, living.getZ() - 175, living.getX() + 175, living.getY() + 300, living.getZ() + 175);
                 for (LightningEntity lightning : living.level().getEntitiesOfClass(LightningEntity.class, aabb)) {
                     if (bestTarget != null && lightning.getTargetEntity() != bestTarget && !BeyonderUtil.areAllies(bestTarget, living)) {
                         lightning.setTargetEntity(bestTarget);

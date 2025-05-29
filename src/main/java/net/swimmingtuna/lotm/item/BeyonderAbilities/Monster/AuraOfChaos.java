@@ -163,7 +163,6 @@ public class AuraOfChaos extends SimpleAbilityItem {
                             }
                         }
                         livingEntity.getPersistentData().putDouble("misfortune", livingEntity.getPersistentData().getDouble("misfortune") + (3 * enhancement));
-
                     }
                 }
             }

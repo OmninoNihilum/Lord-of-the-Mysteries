@@ -50,9 +50,11 @@ public class TrickFog extends SimpleAbilityItem {
     public static void createFog(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get());
-            for (LivingEntity living : BeyonderUtil.getNonAlliesNearby(livingEntity, damage)) {
-                if (living instanceof ServerPlayer serverPlayer) {
-                    LOTMNetworkHandler.sendToPlayer(new ClientFogDataS2C( damage * 6), serverPlayer);
+            for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(damage  * 2))) {
+                if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living) ) {
+                    if (living instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientFogDataS2C(damage * 6), serverPlayer);
+                    }
                 }
             }
         }

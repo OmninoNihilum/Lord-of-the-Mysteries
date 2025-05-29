@@ -111,6 +111,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Boolean> IS_CHILD = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<String> NAME = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> SEQUENCE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> MAX_LIFE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SPIRITUALITY_REGEN = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MAXSPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
@@ -190,6 +191,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(MAXSPIRITUALITY, 100);
         getEntityData().define(SPIRITUALITY, 0);
         getEntityData().define(SPIRITUALITY_REGEN, 0);
+        getEntityData().define(MAX_LIFE, 0);
     }
 
 
@@ -298,6 +300,13 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             this.setSpirituality(this.getSpirituality() + this.getSpiritualityRegen());
         }
         super.tick();
+        if (!this.level().isClientSide()) {
+            if (getMaxlife() != 0) {
+                if (this.tickCount > getMaxlife()) {
+                    this.discard();
+                }
+            }
+        }
         xCloakO = xCloak;
         yCloakO = yCloak;
         zCloakO = zCloak;
@@ -542,6 +551,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         compound.putInt("Sequence", this.getCurrentSequence());
         compound.putInt("Spirituality", this.getSpirituality());
         compound.putInt("MaxSpirituality", this.getMaxSpirituality());
+        compound.putInt("MaxLife", this.getMaxlife());
     }
 
     @Override
@@ -575,6 +585,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
         if (compound.contains("MaxSpirituality")) {
             this.setMaxSpirituality(compound.getInt("MaxSpirituality"));
+        }
+        if (compound.contains("MaxLife")) {
+            this.setMaxLife(compound.getInt("MaxLife"));
         }
     }
 
@@ -610,6 +623,12 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
     public int getMaxSpirituality() {
         return this.entityData.get(MAXSPIRITUALITY);
+    }
+    public void setMaxLife(int maxLife) {
+        this.entityData.set(MAX_LIFE, maxLife);
+    }
+    public int getMaxlife() {
+        return this.entityData.get(MAX_LIFE);
     }
     public BeyonderClass getCurrentPathway() {
         if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SpectatorClass) {

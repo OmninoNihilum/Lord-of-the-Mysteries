@@ -248,7 +248,6 @@ public class ModEvents {
                 ClientAbilityKeyResetData.decrementAbilityResetTimer();
                 if (ClientAbilityKeyResetData.getAbilityResetTimer() == 1) {
                     ClientAbilityCombinationData.resetKeysClicked();
-                    System.out.println("Client timer is " + ClientAbilityKeyResetData.getAbilityResetTimer());
                     player.displayClientMessage(Component.literal("_ _ _ _ _").withStyle(ChatFormatting.BOLD), true);
                 }
             }
@@ -266,7 +265,7 @@ public class ModEvents {
         if (player.level().isClientSide() || event.phase != TickEvent.Phase.START) {
             return;
         }
-        if (!player.level().isClientSide() && holder.currentClassMatches(BeyonderClassInit.MONSTER) && sequence <= 8 && player.tickCount % 5 == 0) {
+        if (!player.level().isClientSide() && holder.currentClassMatches(BeyonderClassInit.MONSTER) && sequence <= 9 && player.tickCount % 5 == 0) {
             MonsterClass.checkForProjectiles(player);
         }
         if (!player.level().isClientSide() && player.tickCount % 20 == 0) {
@@ -354,6 +353,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                Exile.exileTickEvent(event);
                 DoorMirage.mirageTick(livingEntity);
                 ApprenticeClass.apprenticeHideHand(event);
                 MisfortuneImplosion.misfortuneImplosionLightning(event);

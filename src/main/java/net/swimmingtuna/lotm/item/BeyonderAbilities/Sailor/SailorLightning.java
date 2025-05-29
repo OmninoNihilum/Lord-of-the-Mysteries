@@ -124,12 +124,13 @@ public class SailorLightning extends SimpleAbilityItem {
         if (!level.isClientSide()) {
             Vec3 lookVec = player.getLookAngle();
             BeyonderUtil.useSpirituality(player, 100);
-            float speed = 10.0f;
+            float speed = 17 - BeyonderUtil.getSequence(player);
             LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), level);
             lightningEntity.setSpeed(speed);
             lightningEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.SAILOR_LIGHTNING.get()));
             lightningEntity.setDeltaMovement(lookVec.x, lookVec.y, lookVec.z);
             lightningEntity.setMaxLength(30);
+            lightningEntity.setOwner(player);
             lightningEntity.setOwner(player);
             lightningEntity.teleportTo(player.getX(), player.getEyeY(), player.getZ());
             level.addFreshEntity(lightningEntity);
@@ -140,7 +141,7 @@ public class SailorLightning extends SimpleAbilityItem {
         if (!level.isClientSide()) {
             Vec3 lookVec = player.getLookAngle();
             BeyonderUtil.useSpirituality(player, 200);
-            float speed = 10.0f;
+            float speed = 17 - BeyonderUtil.getSequence(player);
             if (player instanceof Player pPlayer) {
                 ItemStack itemStack = player.getUseItem();
                 pPlayer.getCooldowns().addCooldown(itemStack.getItem(), 10 + (BeyonderUtil.getSequence(player) * 2));
@@ -174,7 +175,7 @@ public class SailorLightning extends SimpleAbilityItem {
 
     public static void lightningHighPlayerMob(PlayerMobEntity player, Level level) {
         if (!level.isClientSide()) {
-            float speed = 10.0f;
+            float speed = 17 - BeyonderUtil.getSequence(player);
             LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), level);
             lightningEntity.setSpeed(speed);
             lightningEntity.setDeltaMovement(0, -2, 0);
@@ -190,7 +191,7 @@ public class SailorLightning extends SimpleAbilityItem {
     public static void lightningTargetEntity(LivingEntity targetEntity, LivingEntity player) {
         if (!player.level().isClientSide()) {
             LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), player.level());
-            lightningEntity.setSpeed(15.0f);
+            lightningEntity.setSpeed(18.0f - BeyonderUtil.getSequence(player));
             BeyonderUtil.useSpirituality(player,100);
             Vec3 lookVec = player.getLookAngle();
             lightningEntity.setDeltaMovement(lookVec.x, lookVec.y, lookVec.z);

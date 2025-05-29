@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -106,15 +107,17 @@ public class FlashEntity extends AbstractHurtingProjectile {
                         }
                     }
                 }
-            } else if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
-                for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 15))) {
-                    if (livingEntity != owner && isEntityLookingAtThis(livingEntity)) {
+            } if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner && this.tickCount > 40) {
+                for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 25))) {
+                    if (isEntityLookingAtThis(livingEntity)) {
                         if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
                             mob.setTarget(null);
                         }
-                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.FLASH.get(), (int) (20 * BeyonderUtil.getScale(this) / BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFLASH.get())), 1, true, true);
+                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.FLASH.get(), (int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get()) * BeyonderUtil.getScale(this)), 1, true, true);
                     }
                 }
+            }
+            if (this.tickCount >= 42) {
                 this.discard();
             }
         }

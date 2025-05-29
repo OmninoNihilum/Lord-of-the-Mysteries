@@ -23,6 +23,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -52,6 +53,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.phys.*;
@@ -1557,7 +1559,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.HURRICANE.get(), applyAbilityStrengthened((900.0f - (sequence * 150)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.LIGHTNING_BALL.get(), applyAbilityStrengthened((15.0f + (15 - sequence * 4.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.LIGHTNING_BALL_ABSORB.get(), applyAbilityStrengthened((15.0f + (15 - sequence * 4.5f)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.LIGHTNING_BRANCH.get(), applyAbilityStrengthened((45.0f - (sequence * 4.5f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.LIGHTNING_BRANCH.get(), applyAbilityStrengthened((100.0f - (sequence * 10.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.LIGHTNING_REDIRECTION.get(), applyAbilityStrengthened((187.5f - (sequence * 90)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.LIGHTNING_STORM.get(), applyAbilityStrengthened((750.0f - (sequence * 120)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MATTER_ACCELERATION_BLOCKS.get(), applyAbilityStrengthened((15.0f - sequence * 1.5f) / abilityWeakness, abilityStrengthened));
@@ -1566,7 +1568,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.RAGING_BLOWS.get(), applyAbilityStrengthened((15.0f - (sequence * 1.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.RAIN_EYES.get(), applyAbilityStrengthened((750.0f - (sequence * 75)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.ROAR.get(), applyAbilityStrengthened((15.0f - sequence * 1.5f) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.SAILOR_LIGHTNING.get(), applyAbilityStrengthened((180.0f - (30 * sequence)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.SAILOR_LIGHTNING.get(), applyAbilityStrengthened((170.0f - (27 * sequence)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SAILOR_LIGHTNING_TRAVEL.get(), applyAbilityStrengthened((600.0f - (sequence * 225)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SAILORPROJECTILECTONROL.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SIREN_SONG_HARM.get(), applyAbilityStrengthened((150.0f - (sequence * 18)) / abilityWeakness, abilityStrengthened));
@@ -1599,7 +1601,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.DREAM_WALKING.get(), applyAbilityStrengthened((0.0f), abilityStrengthened));
         damageMap.put(ItemInit.DREAM_WEAVING.get(), applyAbilityStrengthened((30.0f - (sequence * 4.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.ENVISION_BARRIER.get(), applyAbilityStrengthened((151.5f - (sequence * 30)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.ENVISION_DEATH.get(), applyAbilityStrengthened((float) ((75.0f + (dreamIntoReality * 7.5f)) - (sequence * 15)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.ENVISION_DEATH.get(), applyAbilityStrengthened((float) ((20.0f + (dreamIntoReality * 5f)) - (sequence * 15)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.ENVISION_HEALTH.get(), applyAbilityStrengthened((float) (0.99f - (sequence * 0.075f) + (dreamIntoReality * 0.075f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.ENVISION_KINGDOM.get(), applyAbilityStrengthened((0.0f), abilityStrengthened));
         damageMap.put(ItemInit.ENVISION_LIFE.get(), applyAbilityStrengthened((4.5f + (sequence * 1.5f)) * abilityWeakness, abilityStrengthened));
@@ -1696,13 +1698,14 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKWIND.get(), applyAbilityStrengthened((150 - (sequence * 15.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKBURNING.get(), applyAbilityStrengthened((300.0f - sequence * 30) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKELECTRICSHOCK.get(), applyAbilityStrengthened((15.0f - sequence) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKFLASH.get(), applyAbilityStrengthened(1.5f + abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKFLASH.get(), applyAbilityStrengthened(200.0f - (sequence * 20.0f * abilityWeakness), abilityStrengthened));
         damageMap.put(ItemInit.TRICKFOG.get(), applyAbilityStrengthened((30.0f - sequence * 3) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKLOUDNOISE.get(), applyAbilityStrengthened((300.0f - (270.0f * (8.0f / sequence))) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTELEKENISIS.get(), applyAbilityStrengthened((75.0f - (sequence * 9.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((120.0f - (sequence * 13.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((70.0f - (sequence * 10f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), -abilityStrengthened));
 
         return damageMap;
     }
@@ -2261,6 +2264,29 @@ public class BeyonderUtil {
         return false;
     }
 
+    public static double findSurfaceY(Entity entity, double x, double z, ResourceKey<Level> dimensionKey) {
+        MinecraftServer server = entity.level().getServer();
+        if (server == null) return -1;
+        ServerLevel targetWorld = server.getLevel(dimensionKey);
+        if (targetWorld == null) return -1;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        int blockX = Mth.floor(x);
+        int blockZ = Mth.floor(z);
+        for (int y = targetWorld.getMaxBuildHeight() - 1; y >= targetWorld.getMinBuildHeight(); y--) {
+            pos.set(blockX, y, blockZ);
+            if (targetWorld.canSeeSky(pos)) {
+                BlockPos belowPos = pos.below();
+                BlockState belowState = targetWorld.getBlockState(belowPos);
+                if (!belowState.isAir() && belowState.isSolidRender(targetWorld, belowPos)) {
+                    return y + 1.0;
+                }
+            }
+        }
+
+        // Fallback: return world spawn Y if no suitable surface found
+        return targetWorld.getSharedSpawnPos().getY();
+    }
+
     public static float getAntiDivination(LivingEntity livingEntity) {
         int mentalStrength = 1;
         if (!livingEntity.level().isClientSide()) {
@@ -2805,8 +2831,8 @@ public class BeyonderUtil {
     }
 
 
-    public static void teleportEntityThroughDimensions(Entity entity, ResourceLocation dimensionKey, double x, double y, double z){
-        if(entity == null || entity.level().isClientSide()){
+    public static void teleportEntityThroughDimensions(Entity entity, ResourceLocation dimensionKey, double x, double y, double z) {
+        if (entity == null || entity.level().isClientSide()) {
             return;
         }
 
@@ -2815,25 +2841,25 @@ public class BeyonderUtil {
         ResourceKey<Level> dimResourceKey = ResourceKey.create(Registries.DIMENSION, dimensionKey);
         ServerLevel destinationWorld = server.getLevel(dimResourceKey);
 
-        if(destinationWorld == null){
+        if (destinationWorld == null) {
             return;
         }
 
-        if(entity instanceof ServerPlayer player){
+        if (entity instanceof ServerPlayer player) {
             player.teleportTo(destinationWorld, x, y, z, player.getYRot(), player.getXRot());
-        }else{
+        } else {
             Entity newEntity = entity.getType().create(destinationWorld);
-            if(newEntity != null){
+            if (newEntity != null) {
                 newEntity.restoreFrom(entity);
-                newEntity.moveTo(x , y, z, entity.getYRot(), entity.getXRot());
+                newEntity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
                 entity.discard();
                 destinationWorld.addFreshEntity(newEntity);
             }
         }
     }
 
-    public static void teleportEntityTroughDimensionsChat(Entity entity, ResourceLocation dimensionKey, double x, double y, double z){
-        if(entity == null || entity.level().isClientSide()){
+    public static void teleportEntityTroughDimensionsChat(Entity entity, ResourceLocation dimensionKey, double x, double y, double z) {
+        if (entity == null || entity.level().isClientSide()) {
             return;
         }
 
@@ -2842,17 +2868,17 @@ public class BeyonderUtil {
         ResourceKey<Level> dimResourceKey = ResourceKey.create(Registries.DIMENSION, dimensionKey);
         ServerLevel destinationWorld = server.getLevel(dimResourceKey);
 
-        if(destinationWorld == null){
+        if (destinationWorld == null) {
             return;
         }
 
-        if(entity instanceof ServerPlayer player){
+        if (entity instanceof ServerPlayer player) {
             player.teleportTo(destinationWorld, x, y, z, player.getYRot(), player.getXRot());
-        }else{
+        } else {
             Entity newEntity = entity.getType().create(destinationWorld);
-            if(newEntity != null){
+            if (newEntity != null) {
                 newEntity.restoreFrom(entity);
-                newEntity.moveTo(x , y, z, entity.getYRot(), entity.getXRot());
+                newEntity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
                 entity.discard();
                 destinationWorld.addFreshEntity(newEntity);
             }
@@ -3015,7 +3041,6 @@ public class BeyonderUtil {
         }
         return false;
     }
-
 
 
     public static boolean copyAbilityTest(int copierSequence, int targetAbilitySequence) {
@@ -3379,7 +3404,7 @@ public class BeyonderUtil {
     public static List<LivingEntity> getNonAlliesNearby(LivingEntity living, float inflation) {
         List<LivingEntity> nonAllies = new ArrayList<>();
         for (LivingEntity livingEntity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(inflation))) {
-            if (livingEntity != living && !areAllies(living, livingEntity)) {
+            if (!areAllies(living, livingEntity) && living != livingEntity) {
                 nonAllies.add(livingEntity);
             }
         }
@@ -3416,5 +3441,38 @@ public class BeyonderUtil {
         return null;
     }
 
+    public static BeyonderClass chooseRandomPathway() {
+        Random random = new Random();
+        int choice = random.nextInt(5);
+
+        return switch (choice) {
+            case 0 -> BeyonderClassInit.SPECTATOR.get();
+            case 1 -> BeyonderClassInit.WARRIOR.get();
+            case 2 -> BeyonderClassInit.MONSTER.get();
+            case 3 -> BeyonderClassInit.APPRENTICE.get();
+            case 4 -> BeyonderClassInit.SAILOR.get();
+            default -> BeyonderClassInit.SPECTATOR.get(); // Fallback (shouldn't happen)
+        };
+    }
+    public static int chooseRandomSequence(int lowestSequence) {
+        Random random = new Random();
+        if (lowestSequence > 9) {
+            lowestSequence = 9;
+        }
+        int range = (9 - lowestSequence) + 1;
+        return switch (random.nextInt(range)) {
+            case 0 -> lowestSequence;
+            case 1 -> lowestSequence + 1;
+            case 2 -> lowestSequence + 2;
+            case 3 -> lowestSequence + 3;
+            case 4 -> lowestSequence + 4;
+            case 5 -> lowestSequence + 5;
+            case 6 -> lowestSequence + 6;
+            case 7 -> lowestSequence + 7;
+            case 8 -> lowestSequence + 8;
+            case 9 -> 9;
+            default -> lowestSequence;
+        };
+    }
 
 }

@@ -379,7 +379,7 @@ public class ItemInit {
     public static final RegistryObject<Item> BLINK_STATE = ITEMS.register("blinkstate",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> EXILE = ITEMS.register("exile",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new Exile(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_MIRAGE = ITEMS.register("doormirage",
             () -> new DoorMirage(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CREATE_CONCEALED_BUNDLE = ITEMS.register("createconcealedbundle",

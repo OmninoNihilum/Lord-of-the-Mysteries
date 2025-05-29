@@ -50,6 +50,7 @@ public class TrickFlash extends SimpleAbilityItem {
             FlashEntity flash = new FlashEntity(EntityInit.FLASH_ENTITY.get(), livingEntity.level());
             Vec3 lookVec = livingEntity.getLookAngle();
             flash.setDeltaMovement(lookVec.scale(1.5));
+            flash.setOwner(livingEntity);
             flash.hurtMarked = true;
             flash.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
             livingEntity.level().addFreshEntity(flash);

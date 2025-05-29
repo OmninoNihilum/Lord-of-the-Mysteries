@@ -66,7 +66,7 @@ public class ApprenticeClass implements BeyonderClass {
 
     @Override
     public List<Integer> spiritualityLevels() {
-        return List.of(10000, 5000, 3000, 1800, 1200, 700, 450, 300, 175, 125);
+        return List.of(30000, 12000, 7000, 3500, 2300, 900, 550, 400, 225, 150);
     }
 
 

@@ -84,7 +84,7 @@ public class Astrolabe extends Item {
             boolean foundResource = false;
             String resourceKey = message.replace(' ', '_');
             int attempts = 0;
-            int maxDistance = (int) (BeyonderUtil.getDivination(player) * 20.0);
+            int maxDistance = (int) (BeyonderUtil.getDivination(player) * 30.0);
             ResourceLocation resourceLocation;
             try {
                 resourceLocation = new ResourceLocation(resourceKey);

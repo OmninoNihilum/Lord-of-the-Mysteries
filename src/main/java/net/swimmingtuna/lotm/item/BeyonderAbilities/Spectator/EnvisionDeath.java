@@ -43,7 +43,7 @@ public class EnvisionDeath extends SimpleAbilityItem {
             for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(maxAmount * 10))) {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
                     if (!(entity instanceof Player)) {
-                        maxAmount *= 8;
+                        maxAmount *= 25;
                     }
                     int entityHealth = (int) entity.getHealth();
                     if (entityHealth <= maxAmount) {

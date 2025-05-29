@@ -26,6 +26,11 @@ public class BiomeInit {
     public static final ResourceKey<Biome> FROZEN_LANDSCAPE = ResourceKey.create(Registries.BIOME,
             new ResourceLocation(LOTM.MOD_ID, "frozen_landscape"));
 
+    public static final ResourceLocation BEYONDER_MOUNTAINS = new ResourceLocation(LOTM.MOD_ID, "beyonder_mountains");
+    public static final ResourceLocation CALAMITY_PEAKS = new ResourceLocation(LOTM.MOD_ID, "calamity_peaks");
+    public static final ResourceLocation GLACIAL_LANDSCAPE = new ResourceLocation(LOTM.MOD_ID, "glacial_landscape");
+    public static final ResourceLocation HELLISH_CLIFFS = new ResourceLocation(LOTM.MOD_ID, "hellish_cliffs");
+
     public static void boostrap(BootstapContext<Biome> context) {
         context.register(FROZEN_LANDSCAPE, frozenLandscape(context));
     }

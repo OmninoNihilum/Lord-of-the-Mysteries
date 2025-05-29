@@ -31,6 +31,7 @@ import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -206,6 +207,7 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
         double minY = this.getY() - 10;
         double maxY = this.getY() + hurricaneHeight;
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        List<BlockPos> blocksToDestroy = new ArrayList<>();
         int currentY = (int) minY + (this.tickCount % 3);
         while (currentY <= maxY) {
             double heightRatio = (currentY - minY) / (maxY - minY);
@@ -217,14 +219,24 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
                     int x = (int) (this.getX() + Math.cos(angle) * r);
                     int z = (int) (this.getZ() + Math.sin(angle) * r);
                     mutablePos.set(x, currentY, z);
+
                     if (!this.level().getBlockState(mutablePos).isAir() &&
                             !this.level().getBlockState(mutablePos).liquid() &&
                             this.level().getBlockState(mutablePos).getDestroySpeed(this.level(), mutablePos) >= 0) {
-                        this.level().removeBlock(mutablePos, false);
+                        blocksToDestroy.add(new BlockPos(x, currentY, z));
                     }
                 }
             }
             currentY += 3;
+        }
+        blocksToDestroy.sort((pos1, pos2) -> Integer.compare(pos2.getY(), pos1.getY()));
+        int blocksDestroyed = 0;
+        for (BlockPos pos : blocksToDestroy) {
+            if (blocksDestroyed >= 125) {
+                break;
+            }
+            this.level().removeBlock(pos, false);
+            blocksDestroyed++;
         }
     }
 
