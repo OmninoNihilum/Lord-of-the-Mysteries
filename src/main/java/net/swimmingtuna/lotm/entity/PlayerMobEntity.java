@@ -57,6 +57,7 @@ import net.swimmingtuna.lotm.init.*;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupBeyondersBehaviour;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupTargetBehaviour;
+import net.swimmingtuna.lotm.util.EntityUtil.behaviour.PassiveAttackBehaviour;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.task.BeyonderAttack;
 import net.swimmingtuna.lotm.util.PlayerMobs.ItemManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.NameManager;
@@ -116,6 +117,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Integer> MAXSPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_CLONE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ATTACK_CHANCE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
 
 
     private boolean canBreakDoors;
@@ -125,13 +127,14 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
 
     public PlayerMobEntity(Level worldIn, BeyonderClass requiredClass, int sequence) {
-        this(EntityInit.PLAYER_MOB_ENTITY.get(), worldIn, requiredClass, sequence);
+        this(EntityInit.PLAYER_MOB_ENTITY.get(), worldIn, requiredClass, sequence, 1);
     }
 
-    public PlayerMobEntity(EntityType<? extends Monster> entityType, Level worldIn, BeyonderClass requiredClass, int sequence) {
+    public PlayerMobEntity(EntityType<? extends Monster> entityType, Level worldIn, BeyonderClass requiredClass, int sequence, int attack_chance) {
         super(entityType, worldIn);
         this.setSequence(sequence);
         this.setPathway(requiredClass);
+        setAttackChance(attack_chance);
     }
 
     public PlayerMobEntity(EntityType<PlayerMobEntity> playerMobEntityEntityType, Level level) {
@@ -200,6 +203,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(SPIRITUALITY_REGEN, 0);
         getEntityData().define(MAX_LIFE, 0);
         getEntityData().define(IS_CLONE, false);
+        getEntityData().define(ATTACK_CHANCE, 0);
     }
 
 
@@ -483,7 +487,13 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return entityData.get(IS_CHARGING_CROSSBOW);
     }
 
+    public void setAttackChance(int newCHance) {
+        this.entityData.set(ATTACK_CHANCE, newCHance);
+    }
 
+    public int getAttackChance() {
+        return this.entityData.get(ATTACK_CHANCE);
+    }
 
     @Override
     public List<ExtendedSensor<PlayerMobEntity>> getSensors() {
@@ -497,7 +507,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
     @Override
     public BrainActivityGroup<PlayerMobEntity> getCoreTasks() {
-        return BrainActivityGroup.coreTasks(new GroupBeyondersBehaviour<>(), new MoveToWalkTarget<>(), new GroupTargetBehaviour<>());
+        return BrainActivityGroup.coreTasks(new GroupBeyondersBehaviour<>(), new MoveToWalkTarget<>(), new GroupTargetBehaviour<>(), new PassiveAttackBehaviour<>());
     }
 
     @Override
@@ -567,6 +577,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         compound.putInt("MaxSpirituality", this.getMaxSpirituality());
         compound.putInt("MaxLife", this.getMaxlife());
         compound.putBoolean("Clone", this.getIsClone());
+        compound.putInt("AttackChance", this.getAttackChance());
     }
 
     @Override
@@ -606,6 +617,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
         if (compound.contains("Clone")) {
             this.setMaxLife(compound.getInt("Clone"));
+        }
+        if (compound.contains("AttackChacne")) {
+            this.setAttackChance(compound.getInt("AttackChance"));
         }
     }
 
