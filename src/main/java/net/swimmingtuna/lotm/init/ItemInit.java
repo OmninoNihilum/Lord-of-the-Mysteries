@@ -22,10 +22,7 @@ import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderCharacteristic;
 import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderPotion;
 import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderResetPotion;
 import net.swimmingtuna.lotm.item.OtherItems.*;
-import net.swimmingtuna.lotm.item.SealedArtifacts.ConcealedBundle;
-import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
-import net.swimmingtuna.lotm.item.SealedArtifacts.SymphonyOfHatred;
-import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
+import net.swimmingtuna.lotm.item.SealedArtifacts.*;
 import net.swimmingtuna.lotm.util.ModArmorMaterials;
 
 public class ItemInit {
@@ -365,6 +362,8 @@ public class ItemInit {
     //5
     public static final RegistryObject<Item> TRAVELERSDOOR = ITEMS.register("travelersdoor",
             () -> new TravelersDoor(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TRAVELERSDOORHOME = ITEMS.register("travelersdoorwaypoint",
+            () -> new TravelersDoorWaypoint(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> INVISIBLEHAND = ITEMS.register("invisiblehand",
             () -> new InvisibleHand(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> BLINK = ITEMS.register("blink",
@@ -386,7 +385,8 @@ public class ItemInit {
             () -> new DoorMirage(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CREATE_CONCEALED_BUNDLE = ITEMS.register("createconcealedbundle",
             () -> new CreateConcealedBundle(new Item.Properties().stacksTo(1)));
-
+    public static final RegistryObject<Item> CREATE_CONCEALED_SPACE = ITEMS.register("createconcealedspace",
+            () -> new ConcealedSpace(new Item.Properties().stacksTo(1)));
     //3
     public static final RegistryObject<Item> SPATIAL_CAGE = ITEMS.register("spatialcage",
             () -> new Item(new Item.Properties().stacksTo(1)));
@@ -543,6 +543,9 @@ public class ItemInit {
             () -> new WintryBlade(Tiers.NETHERITE, 4,-2,new Item.Properties()));
     public static final RegistryObject<Item> CONCEALED_BUNDLE = ITEMS.register("concealed_bundle",
             () -> new ConcealedBundle(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CONCEALED_DOOR = ITEMS.register("concealed_door",
+            () -> new ConcealedDoor(new Item.Properties().stacksTo(1).durability(250)));
+
 
 
 

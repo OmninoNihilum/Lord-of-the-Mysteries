@@ -20,12 +20,14 @@ import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 
@@ -243,31 +245,35 @@ public class ServerEvents {
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
-                String dimensionId = null;
-                if(hasDimensionId(message)) dimensionId = getDimensionId(message);
-                Level dimension = getDimensionFromId(normalizeDimensionId(dimensionId), player.getServer(), player);
-                if(!canTravelBetweenDimensions(player, dimension)){
-                    player.displayClientMessage(Component.literal("Destination is in a inaccessible Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
+
+                Level destination = player.level();
+                if(hasDimensionId(message)){
+                    destination = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message));
+                }
+
+                if(!canTeleportAcrossDimensions(player, destination)){
+                    event.getPlayer().displayClientMessage(Component.literal("Target is in an inaccessible dimension").withStyle(ChatFormatting.RED), true);
                     event.setCanceled(true);
                     return;
                 }
-                String text = "Door created to " + x + ", " + y + ", " + z + ", in the " + formatDimensionId(dimension) + " Dimension";
-                if(!isCoordinateInstant(message)) {
-                    spawnDoor(player, x, y, z, dimension);
-                }
-                if(isCoordinateInstant(message)){
-                    BeyonderUtil.teleportEntityTroughDimensionsChat(player, dimension.dimension().location(), x, y, z);
-                    text = "Teleported to " + x + ", " + y + ", " + z + ", in the " + formatDimensionId(dimension) + " Dimension";
-                }
 
-                player.displayClientMessage(Component.literal(text).withStyle(BeyonderUtil.getStyle(player)), true);
+                String dimensionName = getDimensionName(destination.dimension().location().getPath());
+
+                boolean isInstant = isInstant(message);
+                if(!isInstant){
+                    spawnDoor(player, x, y, z, destination);
+                    event.getPlayer().displayClientMessage(Component.literal("Door created leading to " + x + ", " + y + ", " + z + ", in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
+                }else{
+                    BeyonderUtil.teleportEntityThroughDimensions(player, destination.dimension().location(), x, y, z);
+                    event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z + ", in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
+                }
                 BeyonderUtil.useSpirituality(player,300);
                 event.setCanceled(true);
                 return;
             }
             Player targetPlayer = null;
             for (Player serverPlayer : level.players()) {
-                if (serverPlayer.getName().getString().toLowerCase().equals(trimPlayerName(message).toLowerCase())) {
+                if (serverPlayer.getName().getString().toLowerCase().equals(message.toLowerCase())) {
                     targetPlayer = serverPlayer;
                     break;
                 }
@@ -277,24 +283,27 @@ public class ServerEvents {
                     int x = (int)targetPlayer.getX();
                     int y = (int)targetPlayer.getY();
                     int z = (int)targetPlayer.getZ();
-                    Level dimension = targetPlayer.level();
-                    String text;
+                    Level destination = targetPlayer.level();
 
-                    if(canTravelBetweenDimensions(player, dimension)) {
-                        if (isPlayerInstant(message)) {
-                            player.teleportTo(x, y, z);
-                            text = "Teleported to " + targetPlayer.getName().getString();
-                        } else {
-                            spawnDoor(player, x, y, z, targetPlayer.level());
-                            text = "Door created leading to " + targetPlayer.getName().getString();
-                        }
-                    }else{
-                        text = "Targeted player is in inaccessible Dimension";
+                    if(!canTeleportAcrossDimensions(player, destination)){
+                        event.getPlayer().displayClientMessage(Component.literal("Target is in an inaccessible dimension").withStyle(ChatFormatting.RED), true);
+                        event.setCanceled(true);
+                        return;
                     }
 
-                    BeyonderUtil.useSpirituality(player, 300);
-                    event.getPlayer().displayClientMessage(Component.literal(text).withStyle(BeyonderUtil.getStyle(player)), true);
-                } else {
+                    String dimensionName = getDimensionName(destination.dimension().location().getPath());
+
+                    boolean isInstant = isInstantPlayer(message);
+                    if(!isInstant){
+                        spawnDoor(player, x, y, z, destination);
+                        event.getPlayer().displayClientMessage(Component.literal("Door created leading to " + targetPlayer.getName() + " in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
+                    }else{
+                        player.teleportTo(x, y, z);
+                        event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName() + " in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
+                    }
+                    BeyonderUtil.useSpirituality(player,300);
+                    event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)), true);
+                }else{
                     event.getPlayer().displayClientMessage(Component.literal("Player is not your ally").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
             } else {
@@ -302,7 +311,9 @@ public class ServerEvents {
             }
             event.setCanceled(true);
         }
-
+        if(!player.level().isClientSide && player.getMainHandItem().getItem() instanceof TravelersDoorWaypoint && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 5)){
+            TravelersDoorWaypoint.setWaypointName(player, message);
+        }
         ItemStack heldItem = player.getMainHandItem();
         if (!heldItem.isEmpty() && heldItem.getItem() instanceof Prophecy && !player.getCooldowns().isOnCooldown(ItemInit.PROPHECY.get())) {
             if (BeyonderUtil.getSpirituality(player) >= 1500) {

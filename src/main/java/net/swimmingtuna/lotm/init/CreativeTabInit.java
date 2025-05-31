@@ -175,11 +175,13 @@ public class CreativeTabInit {
                         event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION.get());
                         event.accept(ItemInit.RECORDSCRIBE.get());
                         event.accept(ItemInit.TRAVELERSDOOR.get());
+                        event.accept(ItemInit.TRAVELERSDOORHOME.get());
                         event.accept(ItemInit.INVISIBLEHAND.get());
                         event.accept(ItemInit.BLINK.get());
                         event.accept(ItemInit.BLINKAFTERIMAGE.get());
                         event.accept(ItemInit.SCRIBEABILITIES.get());
                         event.accept(ItemInit.BLINK_STATE.get());
+                        event.accept(ItemInit.CREATE_CONCEALED_SPACE.get());
                         event.accept(ItemInit.EXILE.get());
                         event.accept(ItemInit.DOOR_MIRAGE.get());
                         event.accept(ItemInit.CREATE_CONCEALED_BUNDLE.get());

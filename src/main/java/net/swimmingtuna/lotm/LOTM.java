@@ -311,6 +311,7 @@ public class LOTM {
             event.accept(ItemInit.SIREN_SONG_STUN);
             event.accept(ItemInit.SIREN_SONG_STRENGTHEN);
             event.accept(ItemInit.DEATHKNELL);
+            event.accept(ItemInit.CONCEALED_DOOR);
             event.accept(ItemInit.SYMPHONYOFHATRED);
             event.accept(ItemInit.WINTRYBLADE);
             event.accept(ItemInit.SWORDOFDAWN);
@@ -365,6 +366,7 @@ public class LOTM {
             event.accept(ItemInit.ASTROLOGER_SPIRIT_VISION);
             event.accept(ItemInit.RECORDSCRIBE);
             event.accept(ItemInit.TRAVELERSDOOR);
+            event.accept(ItemInit.TRAVELERSDOORHOME);
             event.accept(ItemInit.INVISIBLEHAND);
             event.accept(ItemInit.BLINK);
             event.accept(ItemInit.BLINKAFTERIMAGE);
@@ -374,6 +376,7 @@ public class LOTM {
             event.accept(ItemInit.DOOR_MIRAGE);
             event.accept(ItemInit.SEPARATE_WORM_OF_STAR);
             event.accept(ItemInit.CREATE_CONCEALED_BUNDLE);
+            event.accept(ItemInit.CREATE_CONCEALED_SPACE);
             event.accept(ItemInit.SPATIAL_CAGE);
             event.accept(ItemInit.SPATIAL_TEARING);
             event.accept(ItemInit.SYMBOLIZATION);
@@ -475,6 +478,7 @@ public class LOTM {
         public static void onClientSetup(FMLClientSetupEvent event) {
             EntityRenderers.register(EntityInit.LUCK_BOTTLE_ENTITY.get(), ThrownItemRenderer::new);
             ItemBlockRenderTypes.setRenderLayer(BlockInit.VISIONARY_BARRIER_BLOCK.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(BlockInit.VOID_GLASS.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(BlockInit.LOTM_BLUE_STAINED_GLASS.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(BlockInit.LOTM_WHITE_STAINED_GLASS.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(BlockInit.LOTM_LIGHT_BLUE_STAINED_GLASS.get(), RenderType.cutout());

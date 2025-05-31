@@ -203,6 +203,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(6, ItemInit.SCRIBEABILITIES.get());
 
         items.put(5, ItemInit.TRAVELERSDOOR.get());
+        items.put(5, ItemInit.TRAVELERSDOORHOME.get());
         items.put(5, ItemInit.INVISIBLEHAND.get());
         items.put(5, ItemInit.BLINK.get());
         items.put(5, ItemInit.BLINKAFTERIMAGE.get());
@@ -211,6 +212,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(4, ItemInit.EXILE.get());
         items.put(4, ItemInit.DOOR_MIRAGE.get());
         items.put(4, ItemInit.CREATE_CONCEALED_BUNDLE.get());
+        items.put(4, ItemInit.CREATE_CONCEALED_SPACE.get());
         items.put(4, ItemInit.SEPARATE_WORM_OF_STAR.get());
         //items.put(3, ItemInit.SPATIAL_CAGE.get());
         //items.put(3, ItemInit.SPATIAL_TEARING.get());

@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -31,102 +32,56 @@ import java.util.List;
 public class TravelersDoor extends SimpleAbilityItem {
 
     public TravelersDoor(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 5, 300, 20);
+        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0);
     }
+
 
     @Override
-    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        CompoundTag tag = player.getPersistentData();
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
-        }
-        if (player.isShiftKeyDown()) {
-            setWaypoint(player, stack, tag);
-        } else {
-            useSpirituality(player);
-            teleportToWaypoint(player, tag, stack);
-        }
-        addCooldown(player);
-        return InteractionResult.SUCCESS;
-    }
-
-    private void setWaypoint(LivingEntity player, ItemStack stack, CompoundTag tag) {
-        if (!player.level().isClientSide) {
-            int waypoint = tag.getInt("doorWaypoint");
-            tag.putDouble("x" + waypoint, player.getX());
-            tag.putDouble("y" + waypoint, player.getY());
-            tag.putDouble("z" + waypoint, player.getZ());
-            String coords = String.format("Waypoint %d set at: %.1f, %.1f, %.1f", waypoint, player.getX(), player.getY(), player.getZ());
-            if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal(coords).withStyle(BeyonderUtil.getStyle(player)), true);
-            }
-        }
-    }
-
-    private void teleportToWaypoint(LivingEntity livingEntity, CompoundTag tag, ItemStack stack) {
-        if (!livingEntity.level().isClientSide) {
-            int waypoint = tag.getInt("doorWaypoint");
-            double x = tag.getDouble("x" + waypoint);
-            double y = tag.getDouble("y" + waypoint);
-            double z = tag.getDouble("z" + waypoint);
-            if (x != 0 && y != 0 && z != 0) {
-                livingEntity.teleportTo(x, y, z);
-                String coords = String.format("Teleported to %.1f, %.1f, %.1f", x, y, z);
-                if (livingEntity instanceof Player pPlayer) {
-                    pPlayer.displayClientMessage(Component.literal(coords).withStyle(BeyonderUtil.getStyle(pPlayer)), true);
-                }
-            } else if (livingEntity instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("No waypoint found").withStyle(ChatFormatting.RED), true);
-            }
-        }
-    }
-
-    public static boolean coordsTravel(String message) {
-        message = message.replace(",", " ").trim();
-        message = message.replaceAll("\\s+", " ");
-        try {
-            String[] parts = message.split(" ");
-
-            // If we have 3 parts, they must all be integers
-            if (parts.length == 3) {
-                for (String part : parts) {
-                    Integer.parseInt(part);
-                }
-                return true;
-            }
-            // If we have 4+ parts, the last 3 parts must be integers
-            else if (parts.length >= 4) {
-                // Try to parse the last 3 elements as integers
-                for (int i = parts.length - 3; i < parts.length; i++) {
-                    Integer.parseInt(parts[i]);
-                }
-                return true;
-            }
-
-            return false;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("You can type coordinates or an ally's name in chat using the following pattern to travel to them."));
+        tooltipComponents.add(Component.literal("\"X\", \"Y\", \"Z\", \"Dimension ID\" (optional)"));
+        tooltipComponents.add(Component.literal("\"Ally Name\", instant (optional)"));
+        tooltipComponents.add(Component.literal("\"X\", \"Y\" and \"Z\" are the coordinates. \"Dimension ID\" is the target dimension's ID (optional)."));
+        tooltipComponents.add(Component.literal("\"Ally Name\" is the nickname of the ally you want to travel to. 'instant' determines if the travel is immediate."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("300").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
+        tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
+        super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
     public static boolean hasDimensionId(String message) {
-        message = message.replace(",", " ");
-        String[] parts = message.trim().split("\\s+");
-        if (parts.length > 3) {
-            try {
-                for (int i = parts.length - 3; i < parts.length; i++) {
-                    Integer.parseInt(parts[i]);
-                }
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
+        message = message.replace(",", " ").trim();
+        message = message.replaceAll("\\s+", " ");
+        String[] parts = message.split(" ");
+
+        if (parts.length >= 4) {
+            return !parts[3].equalsIgnoreCase("instant");
         }
+
         return false;
     }
 
-    public static String normalizeDimensionId(@Nullable String dimensionId){
+    public static String getDimensionId(String message) {
+        message = message.replace(",", " ").trim();
+        message = message.replaceAll("\\s+", " ");
+        String[] parts = message.split(" ");
+
+        if (parts.length >= 4) {
+            return parts[3];
+        }
+
+        return "";
+    }
+
+    public static ServerLevel getLevelFromId(MinecraftServer server, String dimensionId) {
+        String normalizedId = normalizeDimensionId(dimensionId);
+        ResourceLocation location = new ResourceLocation(normalizedId);
+        ResourceKey<Level> levelKey = ResourceKey.create(Registries.DIMENSION, location);
+        return server.getLevel(levelKey);
+    }
+
+    public static String normalizeDimensionId(String dimensionId){
         if(dimensionId != null) {
             if (dimensionId.equals("nether") || dimensionId.equals("minecraft:nether") || dimensionId.equals("the_nether")) return "minecraft:the_nether";
             if (dimensionId.equals("end") || dimensionId.equals("minecraft:end") || dimensionId.equals("the_end")) return "minecraft:the_end";
@@ -135,138 +90,80 @@ public class TravelersDoor extends SimpleAbilityItem {
         return dimensionId;
     }
 
-    public static String getDimensionId(String message) {
-        message = message.replace(",", " ");
-        String[] parts = message.trim().split("\\s+");
-        if (parts.length > 3) {
-            try {
-                // Make sure the last 3 parts are integers
-                for (int i = parts.length - 3; i < parts.length; i++) {
+    public static boolean coordsTravel(String message) {
+        message = message.replace(",", " ").trim();
+        message = message.replaceAll("\\s+", " ");
+        try {
+            String[] parts = message.split(" ");
+            if (parts.length < 3 || parts.length > 5) return false;
+
+            for (int i = 0; i < 3; i++) {
+                Integer.parseInt(parts[i]);
+            }
+
+            for (int i = 3; i < parts.length; i++) {
+                try {
                     Integer.parseInt(parts[i]);
+                    return false;
+                } catch (NumberFormatException e) {
                 }
+            }
 
-                // Extract dimension ID from the message
-                // If it's just one word before the coordinates
-                if (parts.length == 4) {
-                    String dim = parts[0].toLowerCase();
-                    // Ensure the dimension has the correct minecraft: namespace
-                    if (dim.equals("nether")) {
-                        return "minecraft:the_nether";
-                    } else if (dim.equals("end")) {
-                        return "minecraft:the_end";
-                    } else if (dim.equals("overworld")) {
-                        return "minecraft:overworld";
-                    } else {
-                        // For modded dimensions, assume they use their own namespace
-                        return dim;
-                    }
-                } else {
-                    // If the dimension name has multiple words (like "the end")
-                    StringBuilder dimensionId = new StringBuilder();
-                    for (int i = 0; i < parts.length - 3; i++) {
-                        if (i > 0) dimensionId.append("_");
-                        dimensionId.append(parts[i].toLowerCase());
-                    }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
-                    String dim = dimensionId.toString();
-                    // Apply the correct namespace
-                    if (dim.equals("the_nether") || dim.equals("nether")) {
-                        return "minecraft:the_nether";
-                    } else if (dim.equals("the_end") || dim.equals("end")) {
-                        return "minecraft:the_end";
-                    } else if (dim.equals("overworld")) {
-                        return "minecraft:overworld";
-                    } else {
-                        // For modded dimensions, attempt to add minecraft: namespace
-                        return dim;
-                    }
+    public static String getDimensionName(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        input = input.replace("_", " ").trim();
+
+        if (input.toLowerCase().startsWith("the ")) {
+            input = input.substring(4).trim();
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (String word : input.split("\\s+")) {
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)));
+                if (word.length() > 1) {
+                    result.append(word.substring(1).toLowerCase());
                 }
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    public static Level getDimensionFromId(@Nullable String dimensionId, MinecraftServer server, LivingEntity entity){
-        if(dimensionId != null) {
-            ResourceLocation location = new ResourceLocation(dimensionId);
-            ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, location);
-            if ((server.getLevel(dimensionKey) != null)) return server.getLevel(dimensionKey);
-        }
-        return entity.level();
-    }
-
-    public static boolean canTravelBetweenDimensions(LivingEntity user, Level destination){
-        if(user.level() != destination){
-            return BeyonderUtil.getSequence(user) < 4;
-        }
-        return true;
-    }
-
-    public static String formatDimensionId(Level dimension) {
-        String rawId = dimension.dimension().location().getPath();
-        rawId = rawId.replace("_", " ").toLowerCase();
-
-        StringBuilder formatted = new StringBuilder();
-        boolean capitalizeNext = true;
-        for (char c : rawId.toCharArray()) {
-            if (capitalizeNext && Character.isLetter(c)) {
-                formatted.append(Character.toUpperCase(c));
-                capitalizeNext = false;
-            } else {
-                formatted.append(c);
-            }
-            if (c == ' ') {
-                capitalizeNext = true;
+                result.append(" ");
             }
         }
 
-        String output = formatted.toString();
-        if (output.startsWith("The ")) {
-            output = output.substring(4);
-        }
-
-        return output;
+        return result.toString().trim();
     }
 
-    public static boolean isCoordinateInstant(String message){
-        message = message.replace(",", " ");
-        String[] parts = message.trim().split("\\s+");
-        for (int i = 3; i < parts.length; i++) {
-            if (parts[i].equalsIgnoreCase("instant")) {
-                return true;
-            }
+    public static boolean canTeleportAcrossDimensions(LivingEntity entity, Level destination){
+        return entity.level().dimension() == destination.dimension() || BeyonderUtil.getSequence(entity) <= 3;
+    }
+
+    public static boolean isInstant(String message) {
+        message = message.replace(",", " ").trim();
+        message = message.replaceAll("\\s+", " ");
+        String[] parts = message.split(" ");
+
+        if (parts.length >= 4 && parts[3].equalsIgnoreCase("instant")) {
+            return true;
         }
+
+        if (parts.length >= 5 && parts[4].equalsIgnoreCase("instant")) {
+            return true;
+        }
+
         return false;
     }
 
-    public static Level getTargetLevel(Player player, String dimensionId) {
-        if (dimensionId == null) {
-            return player.level();
-        }
+    public static boolean isInstantPlayer(String message) {
+        message = message.replace(",", " ").trim();
+        message = message.replaceAll("\\s+", " ");
+        String[] parts = message.split(" ");
 
-        MinecraftServer server = player.level().getServer();
-        if (server == null) return player.level();
-        ResourceKey<Level> dimKey;
-        try {
-            dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionId));
-        } catch (Exception e) {
-            if (dimensionId.toLowerCase().contains("nether")) {
-                dimKey = Level.NETHER;
-            } else if (dimensionId.toLowerCase().contains("end")) {
-                dimKey = Level.END;
-            } else {
-                dimKey = Level.OVERWORLD;
-            }
-        }
-
-        ServerLevel level = server.getLevel(dimKey);
-        if (level != null) {
-            return level;
-        } else {
-            return player.level();
-        }
+        return parts.length >= 2 && parts[1].equalsIgnoreCase("instant");
     }
 
     public static double[] getHorizontalLookCoordinates(Player player, double distance){
@@ -290,73 +187,8 @@ public class TravelersDoor extends SimpleAbilityItem {
         player.level().addFreshEntity(door);
     }
 
-    public static String trimPlayerName(String message){
-        message = message.replace(",", " ");
-        String[] parts = message.trim().split("\\s+");
-        if(parts.length < 3) return parts[0];
-        return "";
-    }
-
-    public static Boolean isPlayerInstant(String message){
-        message = message.replace(",", " ");
-        String[] parts = message.trim().split("\\s+");
-        for (String part : parts) {
-            if (part.equalsIgnoreCase("instant")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("You can also type coordinates or an ally name in the chat on the following format while holding this item in order to go to that location."));
-        tooltipComponents.add(Component.literal("\"X\", \"Y\", \"Z\", \"Dimension\"(Optional), \"Instant\"(Optional)"));
-        tooltipComponents.add(Component.literal("\"Ally Name\", \"Instant\"(Optional)"));
-        tooltipComponents.add(Component.literal("Shift + Right-click to set waypoint at current position"));
-        tooltipComponents.add(Component.literal("Left-click air to cycle between waypoints"));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("300 to teleport to waypoint or create a door to a location. None to set a waypoint. ").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
-        tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
-        super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
-    }
-
-    @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (entity instanceof Player player && !level.isClientSide && player.getMainHandItem().getItem() == ItemInit.TRAVELERSDOOR.get()) {
-            if (isSelected) {
-                CompoundTag tag = player.getPersistentData();
-                int currentWaypoint = tag.getInt("doorWaypoint");
-                double x = tag.getDouble("x" + currentWaypoint);
-                double y = tag.getDouble("y" + currentWaypoint);
-                double z = tag.getDouble("z" + currentWaypoint);
-
-                if (tag.contains("x" + currentWaypoint)) {
-                    String coords = String.format("Waypoint %d: %.1f, %.1f, %.1f",
-                            currentWaypoint, x, y, z);
-                    player.displayClientMessage(Component.literal(coords)
-                            .withStyle(BeyonderUtil.getStyle(player)), true);
-                }
-            }
-        }
-    }
-
-    public static void clearAllWaypoints(LivingEntity livingEntity) {
-        if (!livingEntity.level().isClientSide) {
-            CompoundTag tag = livingEntity.getPersistentData();
-            for (int i = 0; i < 100; i++) {
-                tag.remove("x" + i);
-                tag.remove("y" + i);
-                tag.remove("z" + i);
-            }
-        }
-    }
-
-
-    @Override
-    public Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("APPRENTICES_ABILITY", ChatFormatting.BLUE);
+    public @NotNull Rarity getRarity(ItemStack pStack) {
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
     }
 }

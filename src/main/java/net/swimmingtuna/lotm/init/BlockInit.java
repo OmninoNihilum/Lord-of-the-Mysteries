@@ -5,6 +5,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -12,6 +13,8 @@ import net.minecraftforge.registries.RegistryObject;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.blocks.MonsterDomainBlock;
 import net.swimmingtuna.lotm.blocks.PotionCauldron;
+import net.swimmingtuna.lotm.blocks.RealVoidBlock;
+import net.swimmingtuna.lotm.blocks.VoidGlass;
 import net.swimmingtuna.lotm.blocks.glass_pane.LOTMGlassPane;
 import net.swimmingtuna.lotm.blocks.glass_pane.LOTMStainedGlassPane;
 import net.swimmingtuna.lotm.blocks.spectator_blocks.*;
@@ -215,7 +218,19 @@ public class BlockInit {
             () -> lotmStainedGlassPane(DyeColor.LIME));
     public static final RegistryObject<Block> POTION_CAULDRON = registerBlock("potion_cauldron",
             () -> new PotionCauldron(BlockBehaviour.Properties.copy(Blocks.DEEPSLATE_BRICKS).noOcclusion()));
+    public static final RegistryObject<Block> VOID_BLOCK = registerBlock("void_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.NONE)
+                    .strength(-1.0F, 3600000.0F)
+                    .noLootTable()
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 15)));
 
+    public static final RegistryObject<Block> VOID_GLASS = registerBlock("void_glass",
+            VoidGlass::new);
+
+    public static final RegistryObject<Block> REAL_VOID_BLOCK = registerBlock("real_void_block",
+            RealVoidBlock::new);
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);

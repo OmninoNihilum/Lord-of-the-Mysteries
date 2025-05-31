@@ -11,9 +11,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.blocks.RealVoidBlockRenderer;
 import net.swimmingtuna.lotm.entity.Model.*;
 import net.swimmingtuna.lotm.entity.Renderers.*;
 import net.swimmingtuna.lotm.entity.Renderers.PlayerMobRenderer.PlayerMobRenderer;
+import net.swimmingtuna.lotm.init.BlockEntityInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -76,6 +78,7 @@ public class ClientEventsEntity {
         event.registerEntityRenderer(EntityInit.WIND_BLADE_ENTITY.get(), WindBladeRenderer::new);
         event.registerEntityRenderer(EntityInit.WIND_CUSHION_ENTITY.get(), WindCushionRenderer::new);
         event.registerEntityRenderer(EntityInit.CUSTOM_FALLING_BLOCK_ENTITY.get(), CustomFallingBlockRenderer::new);
+        event.registerBlockEntityRenderer(BlockEntityInit.REAL_VOID_BLOCK_ENTITY.get(), RealVoidBlockRenderer::new);
 
     }
 

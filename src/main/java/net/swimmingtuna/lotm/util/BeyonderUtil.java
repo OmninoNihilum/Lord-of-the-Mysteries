@@ -70,6 +70,7 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
+import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.entity.CustomFallingBlockEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -95,6 +96,7 @@ import net.swimmingtuna.lotm.util.ScribeRecording.CapabilityScribeAbilities;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
+import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import org.jetbrains.annotations.Nullable;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -558,6 +560,7 @@ public class BeyonderUtil {
             }
             if (sequence <= 5) {
                 abilityNames.add(ItemInit.TRAVELERSDOOR.get());
+                abilityNames.add(ItemInit.TRAVELERSDOORHOME.get());
                 abilityNames.add(ItemInit.INVISIBLEHAND.get());
                 abilityNames.add(ItemInit.BLINK.get());
                 abilityNames.add(ItemInit.BLINKAFTERIMAGE.get());
@@ -567,6 +570,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.EXILE.get());
                 abilityNames.add(ItemInit.DOOR_MIRAGE.get());
                 abilityNames.add(ItemInit.CREATE_CONCEALED_BUNDLE.get());
+                abilityNames.add(ItemInit.CREATE_CONCEALED_SPACE.get());
                 abilityNames.add(ItemInit.SEPARATE_WORM_OF_STAR.get());
             }
             if (sequence <= 3) {
@@ -1203,7 +1207,7 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new MonsterDomainLeftClickC2S());
             } else if (heldItem.getItem() instanceof InvisibleHand) {
                 LOTMNetworkHandler.sendToServer(new ToggleDistanceC2S());
-            } else if (heldItem.getItem() instanceof TravelersDoor) {
+            } else if (heldItem.getItem() instanceof TravelersDoorWaypoint) {
                 LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
             } else if (heldItem.getItem() instanceof ScribeAbilities) {
                 LOTMNetworkHandler.sendToServer(new ScribeCopyAbilityC2S());
@@ -1347,7 +1351,7 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new CalamityEnhancementLeftClickC2S());
             } else if (heldItem.getItem() instanceof DeathKnell) {
                 LOTMNetworkHandler.sendToServer(new DeathKnellLeftClickC2S());
-            } else if (heldItem.getItem() instanceof TravelersDoor) {
+            } else if (heldItem.getItem() instanceof TravelersDoorWaypoint) {
                 LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
             } else if (heldItem.getItem() instanceof ProbabilityManipulationFortune) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYMISFORTUNE.get())));
@@ -1740,6 +1744,19 @@ public class BeyonderUtil {
         return Math.abs(prevX - currentX) > MOVEMENT_THRESHOLD ||
                 Math.abs(prevY - currentY) > MOVEMENT_THRESHOLD ||
                 Math.abs(prevZ - currentZ) > MOVEMENT_THRESHOLD;
+    }
+
+    public static LivingEntity checkLivingEntityCollision(Entity entity, Level level, Double radius) {
+        AABB entityBoundingBox = entity.getBoundingBox();
+        AABB searchArea = entityBoundingBox.inflate(radius);
+        for (Entity otherEntity : level.getEntities(entity, searchArea, otherEntity -> true)) {
+            if (entityBoundingBox.intersects(otherEntity.getBoundingBox())) {
+                if(otherEntity instanceof LivingEntity living) {
+                    return living;
+                }
+            }
+        }
+        return null;
     }
 
     private static void updatePositions(Entity entity, CompoundTag tag) {
@@ -3284,6 +3301,20 @@ public class BeyonderUtil {
         }
     }
 
+    public static ApprenticeDoorEntity getDoorFromUUID(Level level, UUID uuid) {
+        if (level instanceof ServerLevel serverLevel) {
+            Entity entity = serverLevel.getEntity(uuid);
+            if (entity instanceof ApprenticeDoorEntity door) {
+                return door;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isConcealed(LivingEntity entity) {
+        return entity.level().dimension() == DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
+    }
+
     public static void removeTags(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
             CompoundTag tag = livingEntity.getPersistentData();
@@ -3297,7 +3328,7 @@ public class BeyonderUtil {
             tag.putInt("invisibleHandCounter", 0);
             tag.putDouble("invisibleHandDistance", 0);
             tag.putInt("travelBlinkDistance", 0);
-            TravelersDoor.clearAllWaypoints(livingEntity);
+            TravelersDoorWaypoint.clearAllWaypoints(livingEntity);
             tag.putBoolean("monsterAuraOfChaos", false);
             tag.putBoolean("monsterChaosWalkerCombat", false);
             tag.putInt("monsterCyclePotionEffectsCount", 0);
