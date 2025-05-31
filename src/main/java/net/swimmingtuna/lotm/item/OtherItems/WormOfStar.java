@@ -31,6 +31,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +50,7 @@ public class WormOfStar extends Item {
 
     @Override
     public int getMaxStackSize(ItemStack stack) {
-        return 1028;
+        return LOTM.getMaxStackCount();
     }
 
     @Override

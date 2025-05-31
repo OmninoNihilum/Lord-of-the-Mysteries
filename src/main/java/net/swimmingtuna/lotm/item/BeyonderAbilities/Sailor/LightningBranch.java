@@ -58,6 +58,7 @@ public class LightningBranch extends SimpleAbilityItem {
             lightningEntity.setMaxLength(130 - (sequence * 20));
             lightningEntity.setOwner(player);
             lightningEntity.setOwner(player);
+            lightningEntity.setMentalDamage(lightningEntity.mentalDamageAmount());
             lightningEntity.setBranchOut(true);
             lightningEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LIGHTNING_BRANCH.get()));
             lightningEntity.teleportTo(player.getX(), player.getY(), player.getZ());

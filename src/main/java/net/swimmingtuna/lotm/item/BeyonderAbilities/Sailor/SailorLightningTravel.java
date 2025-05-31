@@ -61,6 +61,7 @@ public class SailorLightningTravel extends SimpleAbilityItem {
             lightningEntity.setOwner(player);
             lightningEntity.setDamage(25);
             lightningEntity.setOwner(player);
+            lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
             player.getPersistentData().putInt("sailorLightningTravel", 5);
             lightningEntity.teleportTo(player.getX(), player.getY(), player.getZ());
             level.addFreshEntity(lightningEntity);

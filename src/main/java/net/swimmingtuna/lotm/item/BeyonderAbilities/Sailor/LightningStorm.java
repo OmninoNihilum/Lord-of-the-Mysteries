@@ -86,6 +86,7 @@ public class LightningStorm extends SimpleAbilityItem {
                     lightningEntity.setDeltaMovement((Math.random() * 0.4) - 0.2, -4, (Math.random() * 0.4) - 0.2);
                     lightningEntity.setMaxLength(30);
                     lightningEntity.setOwner(livingEntity);
+                    lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
                     lightningEntity.setNoUp(true);
                     lightningEntity.teleportTo(x1 + ((Math.random() * 300) - (double) 300 / 2), y1 + 130, z1 + ((Math.random() * 300) - (double) 300 / 2));
                     livingEntity.level().addFreshEntity(lightningEntity);
@@ -109,6 +110,7 @@ public class LightningStorm extends SimpleAbilityItem {
                 lightningEntity.setDeltaMovement((Math.random() * 0.4) - 0.2, -4, (Math.random() * 0.4) - 0.2);
                 lightningEntity.setMaxLength(30);
                 lightningEntity.setOwner(livingEntity);
+                lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
                 lightningEntity.setDamage((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.LIGHTNING_STORM.get()) / 30);
                 lightningEntity.setNoUp(true);
                 lightningEntity.teleportTo(sailorStormVecX + ((Math.random() * distance) - distance / 2), sailorStormVecY + 130, sailorStormVecZ + ((Math.random() * distance) - distance / 2));

@@ -105,6 +105,7 @@ public class StarOfLightning extends SimpleAbilityItem {
 
                 lightningEntity.setMaxLength(10);
                 lightningEntity.setOwner(livingEntity);
+                lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
                 lightningEntity.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
                 livingEntity.level().addFreshEntity(lightningEntity);
             }

@@ -132,6 +132,7 @@ public class SailorLightning extends SimpleAbilityItem {
             lightningEntity.setMaxLength(30);
             lightningEntity.setOwner(player);
             lightningEntity.setOwner(player);
+            lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
             lightningEntity.teleportTo(player.getX(), player.getEyeY(), player.getZ());
             level.addFreshEntity(lightningEntity);
         }
@@ -152,6 +153,7 @@ public class SailorLightning extends SimpleAbilityItem {
             lightningEntity.setMaxLength(30);
             lightningEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.SAILOR_LIGHTNING.get()));
             lightningEntity.setOwner(player);
+            lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
             lightningEntity.teleportTo(player.getX(), player.getEyeY(), player.getZ());
             lightningEntity.setTargetPos(targetPos);
             level.addFreshEntity(lightningEntity);
@@ -166,6 +168,7 @@ public class SailorLightning extends SimpleAbilityItem {
             lightningEntity.setDeltaMovement(0, -2, 0);
             lightningEntity.setMaxLength(60);
             lightningEntity.setOwner(livingEntity);
+            lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
             lightningEntity.setDamage((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SAILOR_LIGHTNING.get()));
             lightningEntity.setOwner(livingEntity);
             lightningEntity.teleportTo(livingEntity.getX() + ((Math.random() * 150) - 75), livingEntity.getY() + 60, livingEntity.getZ() + ((Math.random() * 150) - 75));
@@ -183,6 +186,7 @@ public class SailorLightning extends SimpleAbilityItem {
             lightningEntity.setDamage(20 - (player.getCurrentSequence() * 2));
             lightningEntity.setOwner(player);
             lightningEntity.setOwner(player);
+            lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
             lightningEntity.teleportTo(player.getX() + ((Math.random() * 150) - 75), player.getY() + 60, player.getZ() + ((Math.random() * 150) - 75));
             level.addFreshEntity(lightningEntity);
         }
@@ -200,6 +204,7 @@ public class SailorLightning extends SimpleAbilityItem {
             lightningEntity.setTargetPos(targetEntity.position());
             lightningEntity.setOwner(player);
             lightningEntity.setOwner(player);
+            lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
             player.level().addFreshEntity(lightningEntity);
         }
     }

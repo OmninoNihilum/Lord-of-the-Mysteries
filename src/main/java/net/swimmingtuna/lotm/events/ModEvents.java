@@ -10,6 +10,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -213,7 +215,10 @@ public class ModEvents {
                 entity.getPersistentData().putInt("noRegenerationEffectHealth", (int) entity.getHealth());
             }
             if (!event.getEntity().level().isClientSide() && event.getEntity().hasEffect(ModEffects.BENEFICIAL_EFFECTS_BLOCKER.get())) {
-                event.setCanceled(true);
+                MobEffect addedEffect = event.getEffectInstance().getEffect();
+                if (addedEffect.getCategory() == MobEffectCategory.BENEFICIAL) {
+                    entity.removeEffect(addedEffect);
+                }
             }
         }
     }

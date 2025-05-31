@@ -31,7 +31,6 @@ import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.Renderers.*;
 import net.swimmingtuna.lotm.events.ClientEvents;
 import net.swimmingtuna.lotm.init.*;
-import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.screen.ConcealedBundleScreen;
 import net.swimmingtuna.lotm.screen.PotionCauldronScreen;
@@ -49,7 +48,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(LOTM.MOD_ID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class LOTM {
@@ -63,7 +61,7 @@ public class LOTM {
     public static final String MOD_ID = "lotm";
     public static final Logger LOGGER = LogUtils.getLogger();
     public static int getMaxStackCount() {
-        return 1024;
+        return 1028;
     }
 
 

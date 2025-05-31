@@ -4,6 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -18,6 +19,8 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.Nullable;
@@ -173,31 +176,18 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
     public static void addCooldown(LivingEntity livingEntity, Item item, int cooldown) {
         if (!(livingEntity instanceof Player pPlayer && pPlayer.isCreative())) {
-            if (livingEntity instanceof Player player) {
-                int wormOfStarAmount = 0;
-                for (ItemStack itemStack : player.getInventory().items) {
-                    if (itemStack.is(ItemInit.WORM_OF_STAR.get())) {
-                        wormOfStarAmount += itemStack.getCount();
-                    }
-                }
+            if (livingEntity instanceof Player player && player.getPersistentData().getBoolean("wormOfStarChoice")) {
+                CompoundTag tag = player.getPersistentData();
+                int wormOfStarAmount = tag.getInt("wormOfStar");
                 if (wormOfStarAmount == 0) {
                     player.getCooldowns().addCooldown(item, cooldown);
                 } else {
                     int maxReduction = cooldown / 2;
                     int actualReduction = Math.min(maxReduction, wormOfStarAmount);
                     int newCooldown = cooldown - actualReduction;
-                    int wormsToConsume = actualReduction;
-                    for (ItemStack itemStack : player.getInventory().items) {
-                        if (itemStack.is(ItemInit.WORM_OF_STAR.get()) && wormsToConsume > 0) {
-                            int stackCount = itemStack.getCount();
-                            if (stackCount <= wormsToConsume) {
-                                wormsToConsume -= stackCount;
-                                itemStack.setCount(0);
-                            } else {
-                                itemStack.shrink(wormsToConsume);
-                                wormsToConsume = 0;
-                            }
-                        }
+                    tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                     }
                     player.getCooldowns().addCooldown(item, newCooldown);
                 }

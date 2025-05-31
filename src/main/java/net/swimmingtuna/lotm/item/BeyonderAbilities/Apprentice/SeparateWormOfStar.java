@@ -18,6 +18,7 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -42,19 +43,15 @@ public class SeparateWormOfStar extends SimpleAbilityItem {
     private void separateWormOfStar(LivingEntity player) {
         if (!player.level().isClientSide()) {
             CompoundTag tag = player.getPersistentData();
-            int wormOfStarAmount = tag.getInt("wormOfStar");
-            int wormOfStarSeparationAmount = tag.getInt("wormOfStarSeparationAmount");
-            tag.putInt("wormOfStar", wormOfStarAmount - wormOfStarSeparationAmount);
-            if (player instanceof ServerPlayer serverPlayer) {
-                LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-            }
-            for (int i = 0; i < wormOfStarSeparationAmount; i++) {
-                if (player instanceof Player pPlayer) {
-                    pPlayer.getInventory().add(ItemInit.WORM_OF_STAR.get().getDefaultInstance());
-                }
+            boolean x = tag.getBoolean("wormOfStarChoice");
+            tag.putBoolean("wormOfStarChoice", !x);
+            String message = "Worms of Star will " + (!x ? "" : "NOT ") + "be used to reduce cooldown";
+            if (player instanceof Player pPlayer) {
+                pPlayer.displayClientMessage(Component.literal(message).withStyle(BeyonderUtil.getStyle(player)), true);
             }
         }
     }
+
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {

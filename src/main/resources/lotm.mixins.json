@@ -8,19 +8,20 @@
     "EntityCollisionMixin",
     "EntityTickMixin",
     "ExplosionNoKnockback",
-    "InventoryStackMixin",
-    "ItemSettingsMixin",
+    "ItemStackMixin",
     "MixinBrewingStandMenu",
     "MixinItems",
     "MixinPotionItem",
     "MixinSplashPotionItem",
     "MobAttackMixin",
     "ServerPlayNetworkDesyncFixMixin",
+    "SlotMixin",
     "StructureBlockRenderMixin",
     "StructureBlockUnlimit"
   ],
   "client": [
     "ItemInHandRendererMixin",
+    "ItemRendererMixin",
     "StructureBlockRenderMixin"
   ],
   "server": [],

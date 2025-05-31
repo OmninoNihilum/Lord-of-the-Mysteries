@@ -346,6 +346,10 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), this.level());
                 lightningEntity.setSpeed(20.0f);
                 lightningEntity.setDamage(8);
+                if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
+                    lightningEntity.setOwner(owner);
+                }
+                lightningEntity.setMentalDamage(lightningEntity.mentalDamageAmount());
                 lightningEntity.setDeltaMovement((Math.random() * 0.4) - 0.2, -1, (Math.random() * 0.4) - 0.2);
                 lightningEntity.setMaxLength(10);
                 lightningEntity.setNoUp(true);

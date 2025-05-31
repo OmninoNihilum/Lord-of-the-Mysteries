@@ -70,11 +70,6 @@ public class LOTMNetworkHandler {
                 .encoder(DeathKnellLeftClickC2S::toByte)
                 .consumerMainThread(DeathKnellLeftClickC2S::handle)
                 .add();
-        INSTANCE.messageBuilder(WormOfStarLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(WormOfStarLeftClickC2S::new)
-                .encoder(WormOfStarLeftClickC2S::toByte)
-                .consumerMainThread(WormOfStarLeftClickC2S::handle)
-                .add();
         INSTANCE.messageBuilder(SwordOfSilverC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(SwordOfSilverC2S::new)
                 .encoder(SwordOfSilverC2S::toByte)

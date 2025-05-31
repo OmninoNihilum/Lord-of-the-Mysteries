@@ -1041,8 +1041,6 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof DawnWeaponry) {
                 LOTMNetworkHandler.sendToServer(new DawnWeaponryLeftClickC2S());
-            } else if (heldItem.getItem() instanceof WormOfStar) {
-                LOTMNetworkHandler.sendToServer(new WormOfStarLeftClickC2S());
             }
             else if (heldItem.getItem() instanceof SwordOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new SwordOfTwilightC2S());
@@ -1226,8 +1224,6 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
                 LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
-            } else if (heldItem.getItem() instanceof WormOfStar) {
-                LOTMNetworkHandler.sendToServer(new WormOfStarLeftClickC2S());
             }
             if (heldItem.getItem() instanceof AqueousLightPush) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_PULL.get())));
@@ -3431,7 +3427,12 @@ public class BeyonderUtil {
             tag.putBoolean("lightningRedirection", false);
             tag.putBoolean("trickmasterTelekenisis", false);
             tag.putInt("escapeTrickCount", 0);
+            tag.putInt("wormOfStar", 0);
+            if (livingEntity instanceof ServerPlayer serverPlayer) {
+                LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(0), serverPlayer);
+            }
             tag.putBoolean("shouldntRenderSecretsSorcererHand", false);
+            tag.putBoolean("wormOfStarChoice", false);
         }
     }
 

@@ -22,6 +22,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
@@ -451,8 +452,10 @@ public class LightningEntity extends AbstractHurtingProjectile {
                         lightningEntity.setDeltaMovement(this.getPersistentData().getDouble("sailorLightningDMX") + (Math.random() * 0.5) - 0.25, this.getPersistentData().getDouble("sailorLightningDMY") + (Math.random() * 0.5) - 0.25, this.getPersistentData().getDouble("sailorLightningDMZ") + (Math.random() * 0.5) - 0.25);
                         lightningEntity.setMaxLength(100);
                         lightningEntity.setDamage(8);
+                        lightningEntity.setDamage(mentalDamageAmount());
                         lightningEntity.teleportTo(lastPos.x(), lastPos.y(), lastPos.z());
                         lightningEntity.setSynchedMovement(true);
+
                         lightningEntity.getPersistentData().putDouble("lightningBranchDMY", this.getPersistentData().getDouble("sailorLightningDMY") + (Math.random() * 0.8) - 0.4);
                         lightningEntity.getPersistentData().putDouble("lightningBranchDMX", this.getPersistentData().getDouble("sailorLightningDMX") + (Math.random() * 0.8) - 0.4);
                         lightningEntity.getPersistentData().putDouble("lightningBranchDMZ", this.getPersistentData().getDouble("sailorLightningDMZ") + (Math.random() * 0.8) - 0.4);
@@ -523,8 +526,8 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
         try {
             // Calculate safe bounds for BlockPos.betweenClosed
-            BlockPos minPos = hitPos.offset((int) -radius, (int) -radius, (int) -radius);
-            BlockPos maxPos = hitPos.offset((int) radius, (int) radius, (int) radius);
+            BlockPos minPos = hitPos.offset((int) -radius / 2, (int) -radius / 2, (int) -radius / 2);
+            BlockPos maxPos = hitPos.offset((int) radius / 2, (int) radius / 2, (int) radius / 2);
 
             // Safety check for block iteration
             if (minPos.getX() > maxPos.getX() || minPos.getY() > maxPos.getY() || minPos.getZ() > maxPos.getZ()) {
@@ -591,17 +594,32 @@ public class LightningEntity extends AbstractHurtingProjectile {
                         } else {
                             livingEntity.hurt(livingEntity.damageSources().lightningBolt(), damage * 1.2f);
                         }
+                        if (getMentalDamage() != 0) {
+                            BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
+                        }
                     } else {
                         if (!BeyonderUtil.isBeyonderCapable(livingEntity)) {
                             if (this.getOwner() != null) {
+                                if (getMentalDamage() != 0) {
+                                    BeyonderUtil.applyMentalDamage(getOwner(), livingEntity, getMentalDamage());
+                                }
                                 livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()), damage * 1.4f);
                             } else {
+                                if (getMentalDamage() != 0) {
+                                    BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
+                                }
                                 livingEntity.hurt(livingEntity.damageSources().lightningBolt(), damage * 1.4f);
                             }
                         } else {
                             if (this.getOwner() != null) {
+                                if (getMentalDamage() != 0) {
+                                    BeyonderUtil.applyMentalDamage(getOwner(), livingEntity, getMentalDamage());
+                                }
                                 livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()),damage * 0.9f);
                             } else {
+                                if (getMentalDamage() != 0) {
+                                    BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
+                                }
                                 livingEntity.hurt(livingEntity.damageSources().lightningBolt(), damage * 0.9f);
                             }
                         }
@@ -650,13 +668,27 @@ public class LightningEntity extends AbstractHurtingProjectile {
         if (!this.level().isClientSide()) {
             if (result.getEntity() instanceof LivingEntity entity) {
                 entity.hurt(BeyonderUtil.lightningSource(this), getDamage());
-                if (this.getOwner() != null) {
+                if (this.getOwner() != null && getMentalDamage() != 0) {
                     BeyonderUtil.applyMentalDamage(owner, entity, getMentalDamage());
                 }
                 this.shouldDiscard = true;  // Mark for discard instead of immediate discard
             }
         }
         super.onHitEntity(result);
+    }
+
+    public int mentalDamageAmount() {
+        int amount = 0;
+        if (this.getOwner() != null) {
+            if (BeyonderUtil.currentPathwayAndSequenceMatches(this.getOwner(), BeyonderClassInit.SAILOR.get(), 1)) {
+                if (BeyonderUtil.getSequence(this.getOwner()) == 1) {
+                    return 2;
+                } else {
+                    return 5;
+                }
+            }
+        }
+        return amount;
     }
 
     public int getMaxLength() {

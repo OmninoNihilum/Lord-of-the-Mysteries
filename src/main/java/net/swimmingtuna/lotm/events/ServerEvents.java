@@ -19,11 +19,14 @@ import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SeparateWormOfStar;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.Map;
@@ -95,7 +98,7 @@ public class ServerEvents {
             }
             if (player.getPersistentData().getInt("tyrantMentionedInChat") >= 1 && message.toLowerCase().contains("yes")) {
                 if (BeyonderUtil.getSpirituality(player) >= 800) {
-                    BeyonderUtil.useSpirituality(player,800);
+                    BeyonderUtil.useSpirituality(player, 800);
                     player.getPersistentData().putInt("sailorLightningStorm1", 300);
                     player.getPersistentData().putInt("sailorStormVecX1", (int) player.getX());
                     player.getPersistentData().putInt("sailorStormVecY1", (int) player.getY());
@@ -188,14 +191,14 @@ public class ServerEvents {
             event.setCanceled(true);
         }
         String message = event.getMessage().getString();
-        if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof EnvisionLocation &&  BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.SPECTATOR.get(), 0)) {
+        if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof EnvisionLocation && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.SPECTATOR.get(), 0)) {
             if (!BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
                 player.displayClientMessage(Component.literal("You are not of the Spectator pathway").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
                 event.setCanceled(true);
                 return;
             }
             if (BeyonderUtil.getSpirituality(player) < BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get())) {
-                player.displayClientMessage(Component.literal("You need " + (int)(BeyonderUtil.getDreamIntoReality(player)) + " spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
+                player.displayClientMessage(Component.literal("You need " + (int) (BeyonderUtil.getDreamIntoReality(player)) + " spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
                 event.setCanceled(true);
                 return;
             }
@@ -219,9 +222,9 @@ public class ServerEvents {
                 }
             }
             if (targetPlayer != null) {
-                int x = (int)targetPlayer.getX();
-                int y = (int)targetPlayer.getY();
-                int z = (int)targetPlayer.getZ();
+                int x = (int) targetPlayer.getX();
+                int y = (int) targetPlayer.getY();
+                int z = (int) targetPlayer.getZ();
                 player.teleportTo(x, y, z);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
             } else {
@@ -247,11 +250,11 @@ public class ServerEvents {
                 int z = Integer.parseInt(coordinates[2]);
 
                 Level destination = player.level();
-                if(hasDimensionId(message)){
+                if (hasDimensionId(message)) {
                     destination = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message));
                 }
 
-                if(!canTeleportAcrossDimensions(player, destination)){
+                if (!canTeleportAcrossDimensions(player, destination)) {
                     event.getPlayer().displayClientMessage(Component.literal("Target is in an inaccessible dimension").withStyle(ChatFormatting.RED), true);
                     event.setCanceled(true);
                     return;
@@ -260,14 +263,14 @@ public class ServerEvents {
                 String dimensionName = getDimensionName(destination.dimension().location().getPath());
 
                 boolean isInstant = isInstant(message);
-                if(!isInstant){
+                if (!isInstant) {
                     spawnDoor(player, x, y, z, destination);
                     event.getPlayer().displayClientMessage(Component.literal("Door created leading to " + x + ", " + y + ", " + z + ", in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
-                }else{
+                } else {
                     BeyonderUtil.teleportEntityThroughDimensions(player, destination.dimension().location(), x, y, z);
                     event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z + ", in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
-                BeyonderUtil.useSpirituality(player,300);
+                BeyonderUtil.useSpirituality(player, 300);
                 event.setCanceled(true);
                 return;
             }
@@ -279,13 +282,13 @@ public class ServerEvents {
                 }
             }
             if (targetPlayer != null) {
-                if(BeyonderUtil.areAllies(targetPlayer, event.getPlayer())){
-                    int x = (int)targetPlayer.getX();
-                    int y = (int)targetPlayer.getY();
-                    int z = (int)targetPlayer.getZ();
+                if (BeyonderUtil.areAllies(targetPlayer, event.getPlayer())) {
+                    int x = (int) targetPlayer.getX();
+                    int y = (int) targetPlayer.getY();
+                    int z = (int) targetPlayer.getZ();
                     Level destination = targetPlayer.level();
 
-                    if(!canTeleportAcrossDimensions(player, destination)){
+                    if (!canTeleportAcrossDimensions(player, destination)) {
                         event.getPlayer().displayClientMessage(Component.literal("Target is in an inaccessible dimension").withStyle(ChatFormatting.RED), true);
                         event.setCanceled(true);
                         return;
@@ -294,16 +297,16 @@ public class ServerEvents {
                     String dimensionName = getDimensionName(destination.dimension().location().getPath());
 
                     boolean isInstant = isInstantPlayer(message);
-                    if(!isInstant){
+                    if (!isInstant) {
                         spawnDoor(player, x, y, z, destination);
                         event.getPlayer().displayClientMessage(Component.literal("Door created leading to " + targetPlayer.getName() + " in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
-                    }else{
+                    } else {
                         player.teleportTo(x, y, z);
                         event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName() + " in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                     }
-                    BeyonderUtil.useSpirituality(player,300);
+                    BeyonderUtil.useSpirituality(player, 300);
                     event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)), true);
-                }else{
+                } else {
                     event.getPlayer().displayClientMessage(Component.literal("Player is not your ally").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
             } else {
@@ -311,7 +314,7 @@ public class ServerEvents {
             }
             event.setCanceled(true);
         }
-        if(!player.level().isClientSide && player.getMainHandItem().getItem() instanceof TravelersDoorWaypoint && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 5)){
+        if (!player.level().isClientSide && player.getMainHandItem().getItem() instanceof TravelersDoorWaypoint && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 5)) {
             TravelersDoorWaypoint.setWaypointName(player, message);
         }
         ItemStack heldItem = player.getMainHandItem();
@@ -363,6 +366,31 @@ public class ServerEvents {
             } else {
                 player.displayClientMessage(Component.literal("You require 1500 Spirituality").withStyle(ChatFormatting.RED), true);
             }
+        }
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof SeparateWormOfStar && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 4)) {
+            int wormOfStarSeparationAmount = Integer.parseInt(message.trim());
+            if (wormOfStarSeparationAmount <= 0) {
+                player.displayClientMessage(Component.literal("Please enter a positive number!").withStyle(ChatFormatting.RED), true);
+                event.setCanceled(true);
+                return;
+            }
+            CompoundTag tag = player.getPersistentData();
+            int wormOfStarAmount = tag.getInt("wormOfStar");
+            if (wormOfStarSeparationAmount > wormOfStarAmount) {
+                player.displayClientMessage(Component.literal("You don't have enough Worms of Star! You have: " + wormOfStarAmount).withStyle(ChatFormatting.BLUE), true);
+                event.setCanceled(true); // Cancel the chat message
+                return;
+            }
+            tag.putInt("wormOfStar", wormOfStarAmount - wormOfStarSeparationAmount);
+            LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), player);
+            ItemStack wormStack = new ItemStack(ItemInit.WORM_OF_STAR.get(), wormOfStarSeparationAmount);
+            player.getInventory().add(wormStack);
+            if (!wormStack.isEmpty()) {
+                player.drop(wormStack, false);
+            }
+
+            player.displayClientMessage(Component.literal("Successfully separated " + wormOfStarSeparationAmount + " Worms of Star!").withStyle(ChatFormatting.BLUE), true);
+            event.setCanceled(true);
         }
     }
 }
