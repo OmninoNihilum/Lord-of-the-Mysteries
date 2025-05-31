@@ -97,7 +97,7 @@ public class Configs {
             babySpawnChance = builder
                     .comment("Chance that a player mob will spawn as a baby.",
                             "Set to -1 to disable.")
-                    .defineInRange("Baby Spawn Chance", 0.1D, -1D, 1D);
+                    .defineInRange("Baby Spawn Chance", -1D, -1D, 1D);
 
             dimensionBlocklistStrings = builder
                     .comment("The id of the dimensions to block spawning in.",

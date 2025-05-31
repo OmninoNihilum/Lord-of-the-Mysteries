@@ -22,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Blink;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SeparateWormOfStar;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
@@ -169,6 +170,19 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             }
             if (livingEntity instanceof Player player) {
                 player.displayClientMessage(Component.literal("Blink Distance is " + doorBlinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+            }
+        }
+        if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof SeparateWormOfStar && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 4)) {
+            if (livingEntity.getPersistentData().getInt("wormOfStarSeparationAmount") < 100) {
+                livingEntity.getPersistentData().putInt("wormOfStarSeparationAmount", livingEntity.getPersistentData().getInt("wormOfStarSeparationAmount") + 10);
+            } else {
+                if (livingEntity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("Worm of Star Separation amount is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                }
+                livingEntity.getPersistentData().putInt("wormOfStarSeparationAmount", 0);
+            }
+            if (livingEntity instanceof Player player) {
+                player.displayClientMessage(Component.literal("Worm of Star Separation amount is " + livingEntity.getPersistentData().getInt("wormOfStarSeparationAmount")).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
             }
         }
     }

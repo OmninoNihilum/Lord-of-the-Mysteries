@@ -5,13 +5,12 @@ import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,8 +26,10 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +55,7 @@ public class ApprenticeClass implements BeyonderClass {
         );
     }
 
+
     @Override
     public List<Integer> antiDivination() {
         return List.of(50, 40, 35, 25, 20, 10, 7, 5, 1, 1);
@@ -68,8 +70,6 @@ public class ApprenticeClass implements BeyonderClass {
     public List<Integer> spiritualityLevels() {
         return List.of(30000, 12000, 7000, 3500, 2300, 900, 550, 400, 225, 150);
     }
-
-
 
 
     @Override
@@ -91,6 +91,8 @@ public class ApprenticeClass implements BeyonderClass {
     public void tick(LivingEntity player, int sequenceLevel) {
         if (player.level().getGameTime() % 50 == 0) {
             CompoundTag tag = player.getPersistentData();
+            int maxWormCount = 0;
+            int wormRegenAmount = 0;
             if (sequenceLevel == 9) {
             }
             if (sequenceLevel == 8) {
@@ -105,27 +107,73 @@ public class ApprenticeClass implements BeyonderClass {
                 tag.putInt("maxScribedAbilities", 25);
             }
             if (sequenceLevel == 4) {
+                maxWormCount = 200;
+                wormRegenAmount = 1;
+                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+                if (player instanceof ServerPlayer serverPlayer) {
+                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
                 tag.putInt("maxScribedAbilities", 30);
             }
             if (sequenceLevel == 3) {
+                maxWormCount = 800;
+                wormRegenAmount = 3;
+                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+                if (player instanceof ServerPlayer serverPlayer) {
+                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 35);
             }
             if (sequenceLevel == 2) {
+                maxWormCount = 4000;
+                wormRegenAmount = 10;
+                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+                if (player instanceof ServerPlayer serverPlayer) {
+                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 40);
             }
             if (sequenceLevel == 1) {
+                maxWormCount = 16000;
+                wormRegenAmount = 25;
+                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+                if (player instanceof ServerPlayer serverPlayer) {
+                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 45);
             }
             if (sequenceLevel == 0) {
+                maxWormCount = 80000;
+                wormRegenAmount = 100;
+                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+                if (player instanceof ServerPlayer serverPlayer) {
+                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 50);
             }
+            if (sequenceLevel <= 4) {
+                if (tag.getInt("wormOfStar") < maxWormCount * 0.1) {
+                    player.sendSystemMessage(Component.literal("Died due to a lack of Worms of Star").withStyle(ChatFormatting.DARK_RED).withStyle(ChatFormatting.BOLD));
+                    player.kill();
+                } else if (tag.getInt("wormOfStar") < maxWormCount * 0.25) {
+                    player.sendSystemMessage(Component.literal("You can't handle the low amount of Worms of Star and will soon die").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    player.hurt(player.damageSources().magic(), player.getMaxHealth() / 7);
+                    BeyonderUtil.applyMobEffect(player, MobEffects.BLINDNESS, 100, 1, true, true);
+                } else if (tag.getInt("wormOfStar") < maxWormCount * 0.5) {
+                    player.sendSystemMessage(Component.literal("You are dangerously low on Worms of Star and are taking damage because of it").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    player.hurt(player.damageSources().magic(), player.getMaxHealth() / 10);
+                    BeyonderUtil.applyMobEffect(player, MobEffects.DARKNESS, 100, 1, true, true);
+                } else if (tag.getInt("wormOfStar") < maxWormCount * 0.75) {
+                    player.hurt(player.damageSources().magic(), player.getMaxHealth() / 20);
+                    player.sendSystemMessage(Component.literal("You are over exerting yourself, and shouldn't separate any more Worms of Stars").withStyle(ChatFormatting.YELLOW).withStyle(ChatFormatting.BOLD));
+                }
+            }
         }
-
     }
 
 
@@ -163,7 +211,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(4, ItemInit.EXILE.get());
         items.put(4, ItemInit.DOOR_MIRAGE.get());
         items.put(4, ItemInit.CREATE_CONCEALED_BUNDLE.get());
-
+        items.put(4, ItemInit.SEPARATE_WORM_OF_STAR.get());
         //items.put(3, ItemInit.SPATIAL_CAGE.get());
         //items.put(3, ItemInit.SPATIAL_TEARING.get());
 
@@ -241,7 +289,7 @@ public class ApprenticeClass implements BeyonderClass {
 
     public static final Map<UUID, Boolean> lastSentHandStates = new HashMap<>();
 
-    public static void apprenticeHideHand(LivingEvent.LivingTickEvent event) {
+    public static void apprenticeTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 40 == 0) {
             CompoundTag tag = livingEntity.getPersistentData();

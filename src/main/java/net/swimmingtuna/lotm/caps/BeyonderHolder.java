@@ -22,6 +22,7 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClearAbilitiesS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.core.PlayerCapability;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.EntityCapabilityStatusPacket;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.SimpleEntityCapabilityStatusPacket;
@@ -100,6 +101,9 @@ public class BeyonderHolder extends PlayerCapability {
         this.spiritualityRegen = this.currentClass.spiritualityRegen().get(this.currentSequence);
         updateMaxHealthModifier(this.player, this.currentClass.maxHealth().get(sequence));
         this.player.setHealth(this.player.getMaxHealth());
+        if (newClass == BeyonderClassInit.APPRENTICE.get() && sequence <= 4) {
+            this.player.getPersistentData().putInt("wormOfStar", BeyonderUtil.maxWormAmount(livingEntity));
+        }
         updateTracking();
 
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);

@@ -23,6 +23,7 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.client.AbilityOverlay;
 import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
+import net.swimmingtuna.lotm.client.WormOfStarOverlay;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorMirage;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
@@ -68,6 +69,7 @@ public class ClientEvents {
     public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("flash_overlay", FlashOverlay.INSTANCE);
         event.registerAbove(VanillaGuiOverlay.EXPERIENCE_BAR.id(), "spirituality_overlay", SpiritualityBarOverlay.INSTANCE);
+        event.registerAboveAll("worm_of_star_overlay", WormOfStarOverlay.INSTANCE);
         //event.registerAbove(VanillaGuiOverlay.PLAYER_HEALTH.id(), "lotm_health_overlay", HealthBarOverlay.INSTANCE);
         event.registerAboveAll("ability_overlay", AbilityOverlay.INSTANCE);
     }

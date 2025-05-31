@@ -105,10 +105,6 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
 
-
-
-
-
     public int getSpirituality() {
         return this.requiredSpirituality;
     }
@@ -178,13 +174,38 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public static void addCooldown(LivingEntity livingEntity, Item item, int cooldown) {
         if (!(livingEntity instanceof Player pPlayer && pPlayer.isCreative())) {
             if (livingEntity instanceof Player player) {
-                player.getCooldowns().addCooldown(item, cooldown);
+                int wormOfStarAmount = 0;
+                for (ItemStack itemStack : player.getInventory().items) {
+                    if (itemStack.is(ItemInit.WORM_OF_STAR.get())) {
+                        wormOfStarAmount += itemStack.getCount();
+                    }
+                }
+                if (wormOfStarAmount == 0) {
+                    player.getCooldowns().addCooldown(item, cooldown);
+                } else {
+                    int maxReduction = cooldown / 2;
+                    int actualReduction = Math.min(maxReduction, wormOfStarAmount);
+                    int newCooldown = cooldown - actualReduction;
+                    int wormsToConsume = actualReduction;
+                    for (ItemStack itemStack : player.getInventory().items) {
+                        if (itemStack.is(ItemInit.WORM_OF_STAR.get()) && wormsToConsume > 0) {
+                            int stackCount = itemStack.getCount();
+                            if (stackCount <= wormsToConsume) {
+                                wormsToConsume -= stackCount;
+                                itemStack.setCount(0);
+                            } else {
+                                itemStack.shrink(wormsToConsume);
+                                wormsToConsume = 0;
+                            }
+                        }
+                    }
+                    player.getCooldowns().addCooldown(item, newCooldown);
+                }
             } else {
                 livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
             }
         }
     }
-
     public void addCooldown(LivingEntity player) {
         addCooldown(player, this, this.cooldown);
     }
@@ -222,7 +243,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public static boolean checkRequiredClass(LivingEntity living, BeyonderClass requiredClass, boolean message) {
         if (!BeyonderUtil.currentPathwayMatchesNoException(living, requiredClass)) {
             String name = requiredClass.sequenceNames().get(9);
-            if(message && living instanceof Player player)
+            if (message && living instanceof Player player)
                 player.displayClientMessage(
                         Component.literal("You are not of the ").withStyle(ChatFormatting.AQUA).append(
                                 Component.literal(name).withStyle(requiredClass.getColorFormatting())).append(
@@ -235,7 +256,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public static boolean checkRequiredSequence(LivingEntity living, int requiredSequence, boolean message) {
         int sequence = BeyonderUtil.getSequence(living);
         if (sequence > requiredSequence) {
-            if(message && living instanceof Player player)
+            if (message && living instanceof Player player)
                 player.displayClientMessage(
                         Component.literal("You need to be sequence ").withStyle(ChatFormatting.AQUA).append(
                                 Component.literal(String.valueOf(requiredSequence)).withStyle(ChatFormatting.YELLOW)).append(
@@ -248,7 +269,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public static boolean checkSpirituality(LivingEntity living, int requiredSpirituality, boolean message) {
         int spirituality = BeyonderUtil.getSpirituality(living);
         if (spirituality < requiredSpirituality) {
-            if(message && living instanceof Player player)
+            if (message && living instanceof Player player)
                 player.displayClientMessage(
                         Component.literal("You need ").withStyle(ChatFormatting.AQUA).append(
                                 Component.literal(String.valueOf(requiredSpirituality)).withStyle(ChatFormatting.YELLOW)).append(
@@ -259,13 +280,9 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
 
-
     public static boolean checkAll(LivingEntity living, BeyonderClass requiredClass, int requiredSequence, int requiredSpirituality, boolean message) {
         return checkRequiredClass(living, requiredClass, message) && checkRequiredSequence(living, requiredSequence, message) && checkSpirituality(living, requiredSpirituality, message);
     }
-
-
-
 
 
     public static void useSpirituality(LivingEntity livingEntity, int spirituality) {
@@ -288,7 +305,6 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public int getRequiredSpirituality() {
         return this.requiredSpirituality;
     }
-
 
 
     public BeyonderClass getRequiredPathway() {
@@ -340,10 +356,15 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
     public interface scribeAbilitiesStorage {
         Map<Item, Integer> getScribedAbilities();
+
         void copyScribeAbility(Item ability);
+
         boolean hasScribedAbility(Item ability);
+
         void useScribeAbility(Item ability);
+
         int getRemainUses(Item ability);
+
         int getScribedAbilitiesCount();
     }
 }

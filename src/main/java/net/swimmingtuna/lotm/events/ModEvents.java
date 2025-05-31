@@ -1,8 +1,6 @@
 package net.swimmingtuna.lotm.events;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -20,12 +18,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -41,7 +37,6 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -85,6 +80,7 @@ import net.swimmingtuna.lotm.util.ClientData.ClientAbilityKeyResetData;
 import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
+import net.swimmingtuna.lotm.util.PlayerMobs.PlayerMobSequenceData;
 import net.swimmingtuna.lotm.util.SpiritWorldVisibilityTracker;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.util.effect.NoRegenerationEffect;
@@ -375,7 +371,7 @@ public class ModEvents {
                 Blink.handleAfterimageSpawning(livingEntity);
                 Exile.exileTickEvent(event);
                 DoorMirage.mirageTick(livingEntity);
-                ApprenticeClass.apprenticeHideHand(event);
+                ApprenticeClass.apprenticeTick(event);
                 MisfortuneImplosion.misfortuneImplosionLightning(event);
                 VolcanicEruption.volcanicEruptionTick(event);
                 LightningRedirection.lightningRedirectionTick(event);
@@ -926,6 +922,9 @@ public class ModEvents {
                 byte[] keysClicked = new byte[5];
                 persistentData.putByteArray("keysClicked", keysClicked);
             }
+            if (BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 4)) {
+                persistentData.putInt("wormOfStar", BeyonderUtil.maxWormAmount(player));
+            }
         }
     }
 
@@ -933,6 +932,7 @@ public class ModEvents {
     public static void onLivingJoinWorld(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
         if (!entity.level().isClientSide()) {
+            PlayerMobSequenceData.onEntityJoinLevel(event);
             if (!(entity instanceof Player && !(entity instanceof PlayerMobEntity)) && entity instanceof LivingEntity living) {
                 if (entity.level() instanceof ServerLevel serverLevel) {
                     BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
@@ -981,6 +981,9 @@ public class ModEvents {
     public static void onEntityRemoved(EntityLeaveLevelEvent event) {
         if (event.getEntity() instanceof LivingEntity) {
             SpiritWorldVisibilityTracker.removeEntity(event.getEntity().getUUID());
+        }
+        if (!event.getEntity().level().isClientSide()) {
+            PlayerMobSequenceData.onEntityLeaveLevel(event); //add it to do the sequence and pathway stuff
         }
     }
 

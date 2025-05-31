@@ -85,6 +85,7 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
 import net.swimmingtuna.lotm.item.OtherItems.SwordOfSilver;
 import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
+import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.*;
@@ -566,6 +567,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.EXILE.get());
                 abilityNames.add(ItemInit.DOOR_MIRAGE.get());
                 abilityNames.add(ItemInit.CREATE_CONCEALED_BUNDLE.get());
+                abilityNames.add(ItemInit.SEPARATE_WORM_OF_STAR.get());
             }
             if (sequence <= 3) {
                 abilityNames.add(ItemInit.SPATIAL_CAGE.get());
@@ -1035,7 +1037,10 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof DawnWeaponry) {
                 LOTMNetworkHandler.sendToServer(new DawnWeaponryLeftClickC2S());
-            } else if (heldItem.getItem() instanceof SwordOfTwilight) {
+            } else if (heldItem.getItem() instanceof WormOfStar) {
+                LOTMNetworkHandler.sendToServer(new WormOfStarLeftClickC2S());
+            }
+            else if (heldItem.getItem() instanceof SwordOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new SwordOfTwilightC2S());
             } else if (heldItem.getItem() instanceof Gigantification) {
                 LOTMNetworkHandler.sendToServer(new GigantificationC2S());
@@ -1217,6 +1222,8 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
                 LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
+            } else if (heldItem.getItem() instanceof WormOfStar) {
+                LOTMNetworkHandler.sendToServer(new WormOfStarLeftClickC2S());
             }
             if (heldItem.getItem() instanceof AqueousLightPush) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_PULL.get())));
@@ -1225,7 +1232,7 @@ public class BeyonderUtil {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_DROWN.get())));
                 heldItem.shrink(1);
             }
-            if (heldItem.getItem() instanceof TrickBurning) {
+            else if (heldItem.getItem() instanceof TrickBurning) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFREEZING.get())));
                 heldItem.shrink(1);
             } else if (heldItem.getItem() instanceof TrickFreezing) {
@@ -3475,4 +3482,22 @@ public class BeyonderUtil {
         };
     }
 
+    public static int maxWormAmount(LivingEntity living) {
+        int max = 0;
+        if (!living.level().isClientSide()) {
+            int sequence = getSequence(living);
+            if (sequence == 4) {
+                return 200;
+            } else if (sequence == 3) {
+                return 800;
+            } else if (sequence == 2) {
+                return 4000;
+            } else if (sequence == 1) {
+                return 16000;
+            } else if (sequence == 0) {
+                return 80000;
+            }
+        }
+        return max;
+    }
 }

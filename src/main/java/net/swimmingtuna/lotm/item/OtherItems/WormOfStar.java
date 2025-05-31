@@ -48,6 +48,11 @@ public class WormOfStar extends Item {
     }
 
     @Override
+    public int getMaxStackSize(ItemStack stack) {
+        return 1028;
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {
         ItemStack stack = pPlayer.getItemInHand(pHand);
         if (!pLevel.isClientSide()) {

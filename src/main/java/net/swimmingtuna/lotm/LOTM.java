@@ -31,6 +31,7 @@ import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.Renderers.*;
 import net.swimmingtuna.lotm.events.ClientEvents;
 import net.swimmingtuna.lotm.init.*;
+import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.screen.ConcealedBundleScreen;
 import net.swimmingtuna.lotm.screen.PotionCauldronScreen;
@@ -61,6 +62,9 @@ public class LOTM {
 
     public static final String MOD_ID = "lotm";
     public static final Logger LOGGER = LogUtils.getLogger();
+    public static int getMaxStackCount() {
+        return 1024;
+    }
 
 
 
@@ -368,6 +372,7 @@ public class LOTM {
             event.accept(ItemInit.BLINK_STATE);
             event.accept(ItemInit.EXILE);
             event.accept(ItemInit.DOOR_MIRAGE);
+            event.accept(ItemInit.SEPARATE_WORM_OF_STAR);
             event.accept(ItemInit.CREATE_CONCEALED_BUNDLE);
             event.accept(ItemInit.SPATIAL_CAGE);
             event.accept(ItemInit.SPATIAL_TEARING);

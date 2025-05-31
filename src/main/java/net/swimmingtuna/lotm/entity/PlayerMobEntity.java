@@ -558,6 +558,14 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     @Override
+    public int getMaxSpawnClusterSize() {
+        return 5;
+    }
+
+
+
+
+    @Override
     @NotNull
     public HumanoidArm getMainArm() {
         return HumanoidArm.RIGHT;

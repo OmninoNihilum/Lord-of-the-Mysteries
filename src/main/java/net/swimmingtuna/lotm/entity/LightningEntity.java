@@ -36,6 +36,7 @@ import java.util.UUID;
 
 public class LightningEntity extends AbstractHurtingProjectile {
     private static final EntityDataAccessor<Integer> DAMAGE = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> MENTAL_DAMAGE = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MAX_LENGTH = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> SPEED = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> FALL_DOWN = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.BOOLEAN);
@@ -98,6 +99,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
         super.defineSynchedData();
         this.entityData.define(MAX_LENGTH, 100);
         this.entityData.define(DAMAGE, 30);
+        this.entityData.define(MENTAL_DAMAGE, 0);
         this.entityData.define(SPEED, 1.0f);
         this.entityData.define(FALL_DOWN, false);
         this.entityData.define(BRANCH_OUT, false);
@@ -118,6 +120,9 @@ public class LightningEntity extends AbstractHurtingProjectile {
         }
         if (compound.contains("Damage")) {
             this.setDamage(compound.getInt("Damage"));
+        }
+        if (compound.contains("MentalDamage")) {
+            this.setMentalDamage(compound.getInt("MentalDamage"));
         }
         if (compound.contains("NoUp")) {
             this.setNoUp(compound.getBoolean("NoUp"));
@@ -179,6 +184,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
         super.addAdditionalSaveData(compound);
         compound.putInt("MaxLength", this.getMaxLength());
         compound.putInt("Damage", this.getDamage());
+        compound.putInt("MentalDamage", this.getMentalDamage());
         compound.putFloat("Speed", this.getSpeed());
         ListTag posList = new ListTag();
         for (Vec3 pos : this.positions) {
@@ -644,6 +650,9 @@ public class LightningEntity extends AbstractHurtingProjectile {
         if (!this.level().isClientSide()) {
             if (result.getEntity() instanceof LivingEntity entity) {
                 entity.hurt(BeyonderUtil.lightningSource(this), getDamage());
+                if (this.getOwner() != null) {
+                    BeyonderUtil.applyMentalDamage(owner, entity, getMentalDamage());
+                }
                 this.shouldDiscard = true;  // Mark for discard instead of immediate discard
             }
         }
@@ -750,5 +759,13 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
     public int getDamage() {
         return this.entityData.get(DAMAGE);
+    }
+
+    public void setMentalDamage(int damage) { //increase by 3x
+        this.entityData.set(MENTAL_DAMAGE, damage);
+    }
+
+    public int getMentalDamage() {
+        return this.entityData.get(MENTAL_DAMAGE);
     }
 }
