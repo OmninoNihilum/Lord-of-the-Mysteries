@@ -83,6 +83,7 @@ public class LOTM {
         BiomeInit.register(modEventBus);
         DamageTypeInit.DAMAGE_TYPES.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(new GameRuleInit());
+        ChunkGeneratorInit.register(modEventBus);
         ItemInit.register(modEventBus);
         BlockInit.register(modEventBus);
         ModEffects.register(modEventBus);

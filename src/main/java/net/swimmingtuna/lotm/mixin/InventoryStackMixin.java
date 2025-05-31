@@ -10,6 +10,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 public interface InventoryStackMixin extends Clearable {
 
 
+    /**
+     * @reason
+     * Worm Of Star should stick more than 64.
+     * @author
+     *      * SwimmingTuna
+     */
     @Overwrite
     default int getMaxStackSize() {
         return LOTM.getMaxStackCount();
