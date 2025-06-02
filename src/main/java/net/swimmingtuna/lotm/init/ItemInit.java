@@ -391,7 +391,7 @@ public class ItemInit {
     public static final RegistryObject<Item> SPATIAL_CAGE = ITEMS.register("spatialcage",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_TEARING = ITEMS.register("spatialtearing",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new SpatialTearing(new Item.Properties().stacksTo(1)));
 
     //2
     public static final RegistryObject<Item> SYMBOLIZATION = ITEMS.register("symbolization",

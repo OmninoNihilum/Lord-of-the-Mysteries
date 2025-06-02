@@ -1715,6 +1715,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), -abilityStrengthened));
         damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + sequence + abilityWeakness , -abilityStrengthened));
+        damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
 
         return damageMap;
     }
