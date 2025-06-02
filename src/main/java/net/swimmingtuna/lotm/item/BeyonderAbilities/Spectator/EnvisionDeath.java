@@ -47,8 +47,7 @@ public class EnvisionDeath extends SimpleAbilityItem {
                     }
                     int entityHealth = (int) entity.getHealth();
                     if (entityHealth <= maxAmount) {
-                        entity.hurt(entity.damageSources().magic(), maxAmount);
-                        BeyonderUtil.applyMentalDamage(player, entity, (float) 1.5 * maxAmount);
+                        BeyonderUtil.applyMentalDamage(player, entity, (float) 2 * maxAmount);
                     }
                 }
             }

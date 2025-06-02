@@ -31,6 +31,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -298,71 +299,92 @@ public class Astrolabe extends Item {
                     List<ServerPlayer> players = server.getPlayerList().getPlayers();
                     for (ServerPlayer targetPlayer : players) {
                         if (message.contains(targetPlayer.getGameProfile().getName().toLowerCase())) {
-                            int x = (int) player.getX();
-                            int y = (int) player.getY();
-                            int z = (int) player.getZ();
-                            int targetX = (int) targetPlayer.getX();
-                            int targetY = (int) targetPlayer.getY();
-                            int targetZ = (int) targetPlayer.getZ();
-                            if (Math.abs((x + y + z) - (targetX + targetY + targetZ)) < maxDistance * 10 || BeyonderUtil.getAntiDivination(targetPlayer) > BeyonderUtil.getDivination(player)) {
-                                int amountToCorrupt = (BeyonderUtil.getSequence(player) - BeyonderUtil.getSequence(targetPlayer) * 25);
-                                if (message.contains("sequence")) {
-                                    if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
-                                        tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
-                                        targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
-                                    } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
-                                        if (BeyonderUtil.getSequence(targetPlayer) > 1) {
+                            boolean spatialIntegration = true;
+                            if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(targetPlayer, BeyonderClassInit.APPRENTICE.get(), 3)) {
+                                if (BeyonderUtil.getSequence(player) != 0 && BeyonderUtil.getSequence(player) != 1) {
+                                    spatialIntegration = false;
+                                }
+                            }
+                            if (spatialIntegration) {
+                                int x = (int) player.getX();
+                                int y = (int) player.getY();
+                                int z = (int) player.getZ();
+                                int targetX = (int) targetPlayer.getX();
+                                int targetY = (int) targetPlayer.getY();
+                                int targetZ = (int) targetPlayer.getZ();
+                                if (Math.abs((x + y + z) - (targetX + targetY + targetZ)) < maxDistance * 10 || BeyonderUtil.getAntiDivination(targetPlayer) > BeyonderUtil.getDivination(player)) {
+                                    int amountToCorrupt = (BeyonderUtil.getSequence(player) - BeyonderUtil.getSequence(targetPlayer) * 25);
+                                    if (message.contains("sequence")) {
+                                        if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
                                             tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
                                             targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                        } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
+                                            if (BeyonderUtil.getSequence(targetPlayer) > 1) {
+                                                tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
+                                                targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                            }
                                         }
-                                    }
-                                    player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s sequence is " + BeyonderUtil.getSequence(targetPlayer)));
-                                } else if (message.contains("location") || message.contains("coordinates")) {
-                                    if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
-                                        tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
-                                        targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
-                                    } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
-                                        if (BeyonderUtil.getSequence(targetPlayer) > 1) {
+                                        player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s sequence is " + BeyonderUtil.getSequence(targetPlayer)));
+                                    } else if (message.contains("location") || message.contains("coordinates")) {
+                                        if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
                                             tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
                                             targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                        } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
+                                            if (BeyonderUtil.getSequence(targetPlayer) > 1) {
+                                                tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
+                                                targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                            }
                                         }
-                                    }
-                                    player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s location is " + targetPlayer.level().dimension().toString() + ": " + targetX + ", " + targetY + ", " + targetZ));
+                                        player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s location is " + targetPlayer.level().dimension().toString() + ": " + targetX + ", " + targetY + ", " + targetZ));
 
-                                } else if (message.contains("inventory") || message.contains("item")) {
-                                    if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
-                                        tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 2);
-                                        targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
-                                    } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
-                                        if (BeyonderUtil.getSequence(targetPlayer) > 1) {
+                                    } else if (message.contains("inventory") || message.contains("item")) {
+                                        if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
                                             tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 2);
                                             targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                        } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
+                                            if (BeyonderUtil.getSequence(targetPlayer) > 1) {
+                                                tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 2);
+                                                targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                            }
                                         }
-                                    }
-                                    StringBuilder inventoryMessage = new StringBuilder();
-                                    boolean hasItems = false;
-                                    for (int i = 0; i < targetPlayer.getInventory().getContainerSize(); i++) {
-                                        ItemStack itemStack = targetPlayer.getInventory().getItem(i);
-                                        if (!itemStack.isEmpty()) {
-                                            hasItems = true;
-                                            inventoryMessage.append("\n- ").append(itemStack.getDisplayName().getString());
+                                        StringBuilder inventoryMessage = new StringBuilder();
+                                        boolean hasItems = false;
+                                        for (int i = 0; i < targetPlayer.getInventory().getContainerSize(); i++) {
+                                            ItemStack itemStack = targetPlayer.getInventory().getItem(i);
+                                            if (!itemStack.isEmpty()) {
+                                                hasItems = true;
+                                                inventoryMessage.append("\n- ").append(itemStack.getDisplayName().getString());
+                                            }
                                         }
-                                    }
 
-                                    if (hasItems) {
-                                        String playerName = targetPlayer.getName().getString();
-                                        player.sendSystemMessage(Component.literal(playerName + "'s inventory contains:").withStyle(ChatFormatting.BOLD)
-                                                .append(Component.literal(inventoryMessage.toString()).withStyle(ChatFormatting.AQUA)));
-                                    } else {
-                                        player.sendSystemMessage(Component.literal("The target player's inventory is empty.").withStyle(ChatFormatting.AQUA));
-                                    }
-                                } else if (message.contains("health")) {
-                                    if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
-                                        tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
-                                    }
-                                    player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s health is " + targetPlayer.getHealth()));
-                                } else if (message.contains("pathway")) {
-                                    if (BeyonderUtil.getPathway(targetPlayer) != null) {
+                                        if (hasItems) {
+                                            String playerName = targetPlayer.getName().getString();
+                                            player.sendSystemMessage(Component.literal(playerName + "'s inventory contains:").withStyle(ChatFormatting.BOLD)
+                                                    .append(Component.literal(inventoryMessage.toString()).withStyle(ChatFormatting.AQUA)));
+                                        } else {
+                                            player.sendSystemMessage(Component.literal("The target player's inventory is empty.").withStyle(ChatFormatting.AQUA));
+                                        }
+                                    } else if (message.contains("health")) {
+                                        if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
+                                            tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt);
+                                        }
+                                        player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s health is " + targetPlayer.getHealth()));
+                                    } else if (message.contains("pathway")) {
+                                        if (BeyonderUtil.getPathway(targetPlayer) != null) {
+                                            if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
+                                                tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 0.75);
+                                                targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                            } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
+                                                if (BeyonderUtil.getSequence(targetPlayer) > 1) {
+                                                    tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 0.75);
+                                                    targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
+                                                }
+                                            }
+                                            player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s pathway is " + BeyonderUtil.getPathway(targetPlayer).toString()));
+                                        } else {
+                                            player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "has no pathway"));
+                                        }
+                                    } else if (message.contains("luck") || message.contains("fortune") || message.contains("unluck") || message.contains("misfortune")) {
                                         if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
                                             tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 0.75);
                                             targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
@@ -372,29 +394,18 @@ public class Astrolabe extends Item {
                                                 targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
                                             }
                                         }
-                                        player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s pathway is " + BeyonderUtil.getPathway(targetPlayer).toString()));
-                                    } else {
-                                        player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "has no pathway"));
+                                        player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s luck and misfortune is " + targetPlayer.getPersistentData().getDouble("luck") + " luck and " + targetPlayer.getPersistentData().getDouble("misfortune") + " misfortune"));
                                     }
-                                } else if (message.contains("luck") || message.contains("fortune") || message.contains("unluck") || message.contains("misfortune")) {
-                                    if (BeyonderUtil.getSequence(player) > 4 && BeyonderUtil.getSequence(targetPlayer) <= 4) {
-                                        tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 0.75);
-                                        targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
-                                    } else if (BeyonderUtil.getSequence(targetPlayer) == 0) {
-                                        if (BeyonderUtil.getSequence(targetPlayer) > 1) {
-                                            tag.putDouble("corruption", tag.getDouble("corruption") + amountToCorrupt * 0.75);
-                                            targetPlayer.sendSystemMessage(Component.literal(player.getName().getString() + "divined about you").withStyle(ChatFormatting.RED));
-                                        }
-                                    }
-                                    player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s luck and misfortune is " + targetPlayer.getPersistentData().getDouble("luck") + " luck and " + targetPlayer.getPersistentData().getDouble("misfortune") + " misfortune"));
+                                    BeyonderUtil.useSpirituality(player, maxDistance * 5);
+                                } else {
+                                    player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + " is too far away or has anti-divination too high for you"));
                                 }
-                                BeyonderUtil.useSpirituality(player, maxDistance * 5);
-                            } else {
-                                player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + " is too far away or has anti-divination too high for you"));
-                            }
 
-                            foundResource = true;
-                            break;
+                                foundResource = true;
+                                break;
+                            } else {
+                                player.sendSystemMessage(Component.literal("The target can't have divination used against them at your sequence").withStyle(ChatFormatting.RED));
+                            }
                         }
                     }
                 }

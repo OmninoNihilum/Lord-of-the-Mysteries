@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import virtuoel.pehkui.api.ScaleData;
@@ -104,12 +105,14 @@ public class StormSealEntity extends AbstractHurtingProjectile {
         float radius = 3 * scaleData.getScale();
         if (!this.level().isClientSide()) {
             for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(radius * 0.75))) {
-                if (livingEntity != null && livingEntity.getMaxHealth() >= 50 && livingEntity != this.getOwner() && (this.getOwner() instanceof LivingEntity living && !BeyonderUtil.areAllies(living, livingEntity))) {
-                    livingEntity.getPersistentData().putInt("inStormSeal", 3600);
-                    livingEntity.getPersistentData().putInt("stormSealX", (int) livingEntity.getX());
-                    livingEntity.getPersistentData().putInt("stormSealY", (int) livingEntity.getY());
-                    livingEntity.getPersistentData().putInt("stormSealZ", (int) livingEntity.getZ());
-                    this.discard();
+                if (this.getOwner() != null && livingEntity != null && livingEntity.getMaxHealth() >= 50 && livingEntity != this.getOwner() && (this.getOwner() instanceof LivingEntity owner && !BeyonderUtil.areAllies(owner, livingEntity))) {
+                    if (BeyonderUtil.canSeal(owner, livingEntity)) {
+                        livingEntity.getPersistentData().putInt("inStormSeal", 3600);
+                        livingEntity.getPersistentData().putInt("stormSealX", (int) livingEntity.getX());
+                        livingEntity.getPersistentData().putInt("stormSealY", (int) livingEntity.getY());
+                        livingEntity.getPersistentData().putInt("stormSealZ", (int) livingEntity.getZ());
+                        this.discard();
+                    }
                 }
             }
             for (int i = 0; i < 36; i++) {
@@ -117,7 +120,7 @@ public class StormSealEntity extends AbstractHurtingProjectile {
                 double x = this.getX() + radius * Math.cos(angle);
                 double z = this.getZ() + radius * Math.sin(angle);
                 if (this.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, this.getY(),z, 0, 0,0,0, 1);
+                    serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, this.getY(), z, 0, 0, 0, 0, 1);
                 }
             }
 

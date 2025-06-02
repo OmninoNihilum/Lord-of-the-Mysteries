@@ -43,6 +43,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
     private static final EntityDataAccessor<Boolean> FALL_DOWN = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> BRANCH_OUT = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NO_UP = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> STAR = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SYNCHED_MOVEMENT = SynchedEntityData.defineId(LightningEntity.class, EntityDataSerializers.BOOLEAN);
 
     private int interpolationSteps = 10;
@@ -105,6 +106,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
         this.entityData.define(FALL_DOWN, false);
         this.entityData.define(BRANCH_OUT, false);
         this.entityData.define(NO_UP, false);
+        this.entityData.define(STAR, false);
         this.entityData.define(SYNCHED_MOVEMENT, false);
     }
 
@@ -127,6 +129,9 @@ public class LightningEntity extends AbstractHurtingProjectile {
         }
         if (compound.contains("NoUp")) {
             this.setNoUp(compound.getBoolean("NoUp"));
+        }
+        if (compound.contains("Star")) {
+            this.setStar(compound.getBoolean("Star"));
         }
         if (compound.contains("SynchedMovement")) {
             this.setSynchedMovement(compound.getBoolean("SynchedMovement"));
@@ -187,6 +192,8 @@ public class LightningEntity extends AbstractHurtingProjectile {
         compound.putInt("Damage", this.getDamage());
         compound.putInt("MentalDamage", this.getMentalDamage());
         compound.putFloat("Speed", this.getSpeed());
+        compound.putBoolean("NoUp", this.getNoUp());
+        compound.putBoolean("Star", this.getStar());
         ListTag posList = new ListTag();
         for (Vec3 pos : this.positions) {
             CompoundTag posTag = new CompoundTag();
@@ -526,8 +533,8 @@ public class LightningEntity extends AbstractHurtingProjectile {
 
         try {
             // Calculate safe bounds for BlockPos.betweenClosed
-            BlockPos minPos = hitPos.offset((int) -radius / 2, (int) -radius / 2, (int) -radius / 2);
-            BlockPos maxPos = hitPos.offset((int) radius / 2, (int) radius / 2, (int) radius / 2);
+            BlockPos minPos = hitPos.offset((int) -radius, (int) -radius, (int) -radius);
+            BlockPos maxPos = hitPos.offset((int) radius, (int) radius, (int) radius);
 
             // Safety check for block iteration
             if (minPos.getX() > maxPos.getX() || minPos.getY() > maxPos.getY() || minPos.getZ() > maxPos.getZ()) {
@@ -535,13 +542,10 @@ public class LightningEntity extends AbstractHurtingProjectile {
                 this.discard();
                 return;
             }
-
-            for (BlockPos pos : BlockPos.betweenClosed(minPos, maxPos)) {
-                if (pos.distSqr(hitPos) <= radius * radius) {
-                    if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0) {
-                        this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                    }
-                }
+            if (!this.getStar()) {
+                BeyonderUtil.destroyBlocksInSphere(this, hitPos, radius * 0.7f, 0);
+            } else {
+                BeyonderUtil.destroyBlocksInSphere(this, hitPos, radius * 0.35f, 0);
             }
 
             // Create explosion AABB
@@ -768,6 +772,15 @@ public class LightningEntity extends AbstractHurtingProjectile {
     public void setNoUp(boolean noUp) {
         this.entityData.set(NO_UP, noUp);
     }
+
+    public boolean getStar() {
+        return this.entityData.get(STAR);
+    }
+
+    public void setStar(boolean star) {
+        this.entityData.set(STAR, star);
+    }
+
 
     public boolean getSynchedMovement() {
         return this.entityData.get(SYNCHED_MOVEMENT);

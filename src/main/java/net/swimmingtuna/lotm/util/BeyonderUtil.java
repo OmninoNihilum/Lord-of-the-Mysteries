@@ -69,6 +69,7 @@ import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
+import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.entity.CustomFallingBlockEntity;
@@ -1527,8 +1528,8 @@ public class BeyonderUtil {
         for (Item item : getAbilities(livingEntity)) {
             if (item == ability && item instanceof SimpleAbilityItem simpleAbilityItem) {
                 if (livingEntity instanceof Player player) {
-                    int currentCooldown = (int) player.getCooldowns().getCooldownPercent(item, 0);
-                    cooldown = simpleAbilityItem.getCooldown() * (100 - currentCooldown) / 100;
+                    int currentCooldownPercent = (int) (player.getCooldowns().getCooldownPercent(item, 0) * 100);
+                    cooldown = simpleAbilityItem.getCooldown() * currentCooldownPercent / 100;
                 }
             }
         }
@@ -1713,13 +1714,14 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((70.0f - (sequence * 10f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), -abilityStrengthened));
+        damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + sequence + abilityWeakness , -abilityStrengthened));
 
         return damageMap;
     }
 
     public static float applyAbilityStrengthened(float damage, float abilityStrengthened) {
         if (abilityStrengthened > 1) {
-            return damage * 1.5f;
+            return damage * 1.5f * Configs.COMMON.damageMultiplier.get();
         }
         return damage;
     }
@@ -1856,7 +1858,7 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_5_potion ingredients 2 soulsweapons:lord_soul_rose soulsweapons:chaos_crown soulsweapons:essence_of_eventide cataclysm:witherite_ingot cataclysm:gauntlet_of_guard");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_4_potion ingredients 2 alexscaves:tectonic_shard macabre:valamon_heart iceandfire:dragon_skull_lightning eeeabsmobs:guardian_core terramity:belt_of_the_gnome_king");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_3_potion ingredients 1 terramity:perish_staff iceandfire:dragon_skull_fire arphex:abyssal_crystal");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_day_stalker soulsweapons:lord_soul_night_prowler minecraft:clock");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_day_stalker minecraft:clock");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:gold_block");
     }
 
@@ -2327,6 +2329,9 @@ public class BeyonderUtil {
     public static boolean areAllies(LivingEntity livingEntity, LivingEntity ally) {
         if (livingEntity.level() instanceof ServerLevel serverLevel) {
             PlayerAllyData allyData = serverLevel.getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
+            if (PlayerMobEntity.isCopyOf(livingEntity, ally)) {
+                return true;
+            }
             return allyData.areAllies(livingEntity.getUUID(), ally.getUUID());
         }
         return false;
@@ -3371,7 +3376,7 @@ public class BeyonderUtil {
             tag.putInt("twilightLight", 0);
             tag.putInt("twilightManifestation", 0);
             tag.putBoolean("warriorDangerSense", false);
-            stopFlying(livingEntity);
+            DreamIntoReality.stopFlying(livingEntity);
             tag.putInt("BarrierRadius", 0);
             tag.putInt("waitMakeLifeTimer", 0);
             tag.putInt("BlinkDistance", 0);
@@ -3433,6 +3438,8 @@ public class BeyonderUtil {
             }
             tag.putBoolean("shouldntRenderSecretsSorcererHand", false);
             tag.putBoolean("wormOfStarChoice", false);
+            tag.putBoolean("doorBlinkState", false);
+            tag.putInt("doorBlinkStateDistance", 0);
         }
     }
 
@@ -3531,5 +3538,51 @@ public class BeyonderUtil {
             }
         }
         return max;
+    }
+
+    public static void startFlying(LivingEntity livingEntity, float flySpeed) {
+        if (livingEntity instanceof Player pPlayer) {
+            Abilities playerAbilities = pPlayer.getAbilities();
+            if (!pPlayer.isCreative()) {
+                playerAbilities.mayfly = true;
+                playerAbilities.flying = true;
+                playerAbilities.setFlyingSpeed(flySpeed);
+            }
+            pPlayer.onUpdateAbilities();
+            if (livingEntity instanceof ServerPlayer serverPlayer) {
+                serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
+            }
+        } else {
+            //stuff
+        }
+    }
+
+    public static void stopFlying(LivingEntity livingEntity) {
+        if (livingEntity instanceof Player player) {
+            Abilities playerAbilities = player.getAbilities();
+            if (!playerAbilities.instabuild) {
+                playerAbilities.mayfly = false;
+                playerAbilities.flying = false;
+            }
+            playerAbilities.setFlyingSpeed(0.05F);
+            player.onUpdateAbilities();
+            if (livingEntity instanceof ServerPlayer serverPlayer) {
+                serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
+            }
+        }
+    }
+
+    public static boolean canSeal(LivingEntity owner, LivingEntity target) {
+        if (!owner.level().isClientSide() && !target.level().isClientSide()) {
+            int sequence = BeyonderUtil.getSequence(owner);
+            int targetSequence = BeyonderUtil.getSequence(target);
+            if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(target, BeyonderClassInit.APPRENTICE.get(), 3)) {
+                if (targetSequence < sequence) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

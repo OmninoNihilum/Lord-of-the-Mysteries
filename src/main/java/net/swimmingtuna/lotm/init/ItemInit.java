@@ -376,7 +376,7 @@ public class ItemInit {
 
     //4
     public static final RegistryObject<Item> BLINK_STATE = ITEMS.register("blinkstate",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new BlinkState(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SEPARATE_WORM_OF_STAR = ITEMS.register("separatewormofstar",
             () -> new SeparateWormOfStar(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> EXILE = ITEMS.register("exile",

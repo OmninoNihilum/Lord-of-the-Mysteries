@@ -36,7 +36,7 @@ import java.util.List;
 public class TwilightFreeze extends SimpleAbilityItem {
 
     public TwilightFreeze(Properties properties) {
-        super(properties, BeyonderClassInit.WARRIOR, 0, 3000, 1800);
+        super(properties, BeyonderClassInit.WARRIOR, 0, 3000, 2400);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class TwilightFreeze extends SimpleAbilityItem {
         tooltipComponents.add(Component.literal("Upon use on an ally or nothing, freeze them or yourself in time, causing your health, potion effects, luck, misfortune, sanity, corruption, age, and spirituality to all stay static for 30 seconds. If used on an enemy, they will be completely stuck and unable to move for 15 seconds."));
         tooltipComponents.add(Component.literal("Left Click for Twilight: Accelerate"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("3000").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("90 Seconds").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Minutes").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

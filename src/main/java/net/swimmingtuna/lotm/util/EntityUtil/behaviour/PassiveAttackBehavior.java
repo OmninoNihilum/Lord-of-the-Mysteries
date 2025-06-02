@@ -3,7 +3,6 @@ package net.swimmingtuna.lotm.util.EntityUtil.behaviour;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -15,8 +14,6 @@ import net.tslat.smartbrainlib.util.BrainUtils;
 
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 public class PassiveAttackBehavior<E extends LivingEntity> extends ExtendedBehaviour<E> {
@@ -55,7 +52,7 @@ public class PassiveAttackBehavior<E extends LivingEntity> extends ExtendedBehav
         return this.canFightTogether.test(entity);
     }
 
-    private E getTarget(E entity){
+    private E getTarget(E entity) {
         List<LivingEntity> nearbyEntities = BrainUtils.getMemory(entity, MemoryModuleType.NEAREST_LIVING_ENTITIES);
         PlayerAllyData allyData = entity.getCommandSenderWorld().getServer().getLevel(entity.getCommandSenderWorld().dimension()).getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
         List<LivingEntity> entities = nearbyEntities.stream().map(entity1 -> (LivingEntity) entity1).toList();
@@ -70,24 +67,25 @@ public class PassiveAttackBehavior<E extends LivingEntity> extends ExtendedBehav
     @Override
     protected void start(E entity) {
         if (entity instanceof PlayerMobEntity beyonderEntity && entity.tickCount % 100 == 0) {
-            System.out.println("1");
             try {
-                float random = new Random().nextFloat(0,100);
+                float random = new Random().nextFloat(0, 100);
                 if (beyonderEntity.getAttackChance() >= random) {
                     if (!BrainUtils.hasMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET)) {
                         BrainUtils.addMemories(entity.getBrain(), MemoryModuleType.ATTACK_TARGET);
                     }
                     E target = getTarget(entity);
                     if (target != null) {
-                        System.out.println("4");
                         BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
-                    } else {
-                        System.out.println("4 Not Worked" );
                     }
-                } else {
-                    System.out.println("Chance failed: " + beyonderEntity.getAttackChance() + " < " + random);
                 }
-            } catch (NullPointerException e){
+                if (beyonderEntity.getCreator() != null) {
+                    LivingEntity livingEntity = beyonderEntity.getCreator();
+                    LivingEntity target = livingEntity.getLastHurtMob();
+                    if (!BeyonderUtil.areAllies(livingEntity, target)) {
+                        BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
+                    }
+                }
+            } catch (NullPointerException e) {
                 LogUtils.getLogger().warn("LOTMC: Attack Chance of Entity was not present ");
             }
         }

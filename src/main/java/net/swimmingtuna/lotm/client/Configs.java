@@ -58,10 +58,11 @@ public class Configs {
 
         public Common(ForgeConfigSpec.Builder builder) {
             builder.push("general");
-            nameLinksSyncTime = builder
+            damageMultiplier = builder
                     .comment("The amount that damage should be multiplied by in the mod, damage doesn't mean damage dealt, but just how much stronger the ability will be in one way or another.",
-                            "The ability can either be made to have a larger range, longer effect duration, more damage, or something else. Very case by case.")
-                    .defineInRange("Damage Multiplier", 1, 1, Integer.MAX_VALUE);
+                            "The ability can either be made to have a larger range, longer effect duration, more damage, or something else. Very case by case.",
+                            "Max of 10, Min of 1.")
+                    .defineInRange("Damage Multiplier", 1, 1, 10);
             attackTwin = builder
                     .comment("If true the player mobs will attack all players",
                             "If false they will ignore players with the same name as themself")

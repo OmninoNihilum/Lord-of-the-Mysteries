@@ -4,6 +4,7 @@ package net.swimmingtuna.lotm.entity;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -105,7 +106,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public double xCloak;
     public double yCloak;
     public double zCloak;
-    private UUID creator;
 
     private static final UUID BABY_SPEED_BOOST_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
     private static final AttributeModifier BABY_SPEED_BOOST = new AttributeModifier(BABY_SPEED_BOOST_ID, "Baby speed boost", 0.5D, AttributeModifier.Operation.MULTIPLY_BASE);
@@ -113,6 +113,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<String> PATHWAY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> MENTAL_STRENGTH = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHILD = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> REGEN_SPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Optional<UUID>> CREATOR_UUID = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<String> NAME = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> SEQUENCE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MAX_LIFE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
@@ -146,7 +148,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     public boolean shouldIgnoreGamerule() {
-        if (this.getMaxlife() == 4) {
+        if (this.getIsClone()) {
             return true;
         }
         return false;
@@ -206,7 +208,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(SPIRITUALITY_REGEN, 0);
         getEntityData().define(MAX_LIFE, 0);
         getEntityData().define(IS_CLONE, false);
+        getEntityData().define(REGEN_SPIRITUALITY, false);
         getEntityData().define(ATTACK_CHANCE, 0);
+        getEntityData().define(CREATOR_UUID, Optional.empty());
     }
 
 
@@ -217,6 +221,17 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (getVehicle() instanceof PathfinderMob mob) {
             yBodyRot = mob.yBodyRot;
         }
+    }
+
+    public static boolean isCopyOf(LivingEntity livingEntity, LivingEntity copy) {
+        if (copy instanceof PlayerMobEntity playerMobEntity) {
+            if (playerMobEntity.getIsClone() && playerMobEntity.getCreator() != null) {
+                if (playerMobEntity.getCreator().getUUID().equals(livingEntity.getUUID())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -308,25 +323,24 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public void tick() {
         CompoundTag tag = this.getPersistentData();
         if (!this.level().isClientSide()) {
+            if (this.tickCount == 10 && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
+                BeyonderHolder.updateMaxHealthModifier(this, this.getCurrentPathway().maxHealth().get(getCurrentSequence()));
+            }
             if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN) && !shouldIgnoreGamerule()) {
                 this.discard();
             }
-            this.setSpirituality(this.getSpirituality() + this.getSpiritualityRegen());
+            if (this.getRegenSpirituality() && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
+                this.setSpirituality(this.getSpirituality() + this.getCurrentPathway().spiritualityRegen().get(this.getCurrentSequence()));
+            } else {
+                if (this.getSpirituality() < this.getMaxSpirituality() / 10 && this.tickCount >= 10) {
+                    this.kill();
+                }
+            }
         }
         super.tick();
         if (!this.level().isClientSide()) {
             if (this.tickCount % 60 == 0) {
-                if (this.getTarget() != null) {
-                    LOTM.LOGGER.info("Target is " + this.getTarget().getName().getString());
-                } else {
-                    LOTM.LOGGER.info("Target is null");
-                }
                 LivingEntity target = BrainUtils.getMemory(this, MemoryModuleType.ATTACK_TARGET);
-                if (target == null) {
-                    LOTM.LOGGER.info("MEMORY Target is null");
-                } else {
-                    LOTM.LOGGER.info("MEMORY Target is " + target.getName().getString());
-                }
                 BeyonderEntityData.selectAndUseAbility(this);
             }
             if (getMaxlife() != 0) {
@@ -621,7 +635,12 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         compound.putInt("MaxSpirituality", this.getMaxSpirituality());
         compound.putInt("MaxLife", this.getMaxlife());
         compound.putBoolean("Clone", this.getIsClone());
+        compound.putBoolean("RegenSpirituality", this.getRegenSpirituality());
         compound.putInt("AttackChance", this.getAttackChance());
+        Optional<UUID> creatorUUID = this.entityData.get(CREATOR_UUID);
+        if (creatorUUID.isPresent()) {
+            compound.putUUID("Creator", creatorUUID.get());
+        }
     }
 
     @Override
@@ -644,6 +663,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (compound.contains("Pathway")) {
             this.setPathway(BeyonderUtil.getPathwayByName(compound.getString("Pathway")));
         }
+        if (compound.contains("Creator")) {
+            this.setCreator(compound.getUUID("Creator"));
+        }
         if (compound.contains("MentalStrength")) {
             this.setMentalStrength(compound.getInt("MentalStrength"));
         }
@@ -660,7 +682,10 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             this.setMaxLife(compound.getInt("MaxLife"));
         }
         if (compound.contains("Clone")) {
-            this.setMaxLife(compound.getInt("Clone"));
+            this.setIsClone(compound.getBoolean("Clone"));
+        }
+        if (compound.contains("RegenSpirituality")) {
+            this.setMaxLife(compound.getInt("RegenSpirituality"));
         }
         if (compound.contains("AttackChance")) {
             this.setAttackChance(compound.getInt("AttackChance"));
@@ -695,6 +720,12 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
     public boolean getIsClone() {
         return this.entityData.get(IS_CLONE);
+    }
+    public void setRegenSpirituality(boolean regenSpirituality) {
+        this.entityData.set(REGEN_SPIRITUALITY, regenSpirituality);
+    }
+    public boolean getRegenSpirituality() {
+        return this.entityData.get(REGEN_SPIRITUALITY);
     }
 
     public int getSpiritualityRegen() {
@@ -896,10 +927,23 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return cape;
     }
     public LivingEntity getCreator() {
-        return BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
+        Optional<UUID> creatorUUID = this.entityData.get(CREATOR_UUID);
+        if (creatorUUID.isPresent()) {
+            return BeyonderUtil.getLivingEntityFromUUID(this.level(), creatorUUID.get());
+        }
+        return null;
     }
-    public void setCreator(UUID owner) {
-        creator = owner;
+
+    public void setCreator(UUID creatorUUID) {
+        this.entityData.set(CREATOR_UUID, Optional.ofNullable(creatorUUID));
+    }
+
+    public void setCreator(LivingEntity creator) {
+        if (creator != null) {
+            setCreator(creator.getUUID());
+        } else {
+            setCreator((UUID) null);
+        }
     }
 
     public static ItemStack getDrop(LivingEntity entity, DamageSource source, int looting) {

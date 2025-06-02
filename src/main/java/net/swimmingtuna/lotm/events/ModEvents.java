@@ -180,7 +180,6 @@ public class ModEvents {
     }
 
 
-
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         BeyonderUtil.leftClickEmpty(event.getEntity());
@@ -203,6 +202,14 @@ public class ModEvents {
     public static void mobEffectEvent(MobEffectEvent.Added event) {
         LivingEntity entity = event.getEntity();
         if (entity.level() instanceof ServerLevel serverLevel) {
+            if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 3) && event.getEffectInstance().getEffect().getCategory() == MobEffectCategory.HARMFUL) {
+                MobEffectInstance currentEffect = event.getEffectInstance();
+                int originalDuration = currentEffect.getDuration();
+                int newDuration = (int) (originalDuration * 0.7);
+                MobEffectInstance reducedEffect = new MobEffectInstance(currentEffect.getEffect(), newDuration, currentEffect.getAmplifier(), currentEffect.isAmbient(), currentEffect.isVisible(), currentEffect.showIcon());
+                entity.removeEffect(currentEffect.getEffect());
+                entity.addEffect(reducedEffect);
+            }
             CalamityEnhancementData data = CalamityEnhancementData.getInstance(serverLevel);
             int chaosLevel = data.getCalamityEnhancement();
             if (chaosLevel != 1) {
@@ -373,7 +380,9 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
-                Blink.handleAfterimageSpawning(livingEntity);
+                //Blink.handleAfterimageSpawning(livingEntity);
+                ApprenticeClass.enableWaterWalking(event);
+                BlinkState.secretsSorcererBlinkState(event);
                 Exile.exileTickEvent(event);
                 DoorMirage.mirageTick(livingEntity);
                 ApprenticeClass.apprenticeTick(event);
@@ -508,13 +517,20 @@ public class ModEvents {
     public static void attackEvent(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntity();
         Entity attacker = event.getSource().getEntity();
+        if (!attacked.level().isClientSide()) {
+            ApprenticeClass.apprenticeAttackEvent(event);
+        }
         if (attacker != null) {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
                 DoorMirage.doorMirageAttackEvent(event);
                 BlinkAfterimage.travelerBlinkPassive(event);
                 CompoundTag tag = attacked.getPersistentData();
                 TrickEscapeTrick.escapeTrickAttackEvent(event);
-                if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(attacked, BeyonderClassInit.SAILOR.get(), 1) && (attacker.getName().getString().toLowerCase().contains("lightning") || attacker.getName().getString().toLowerCase().contains("thunder") || attacker.toString().toLowerCase().contains("lightning") || attacker.toString().toLowerCase().contains("thunder"))) {
+                String entityName = event.getSource().getMsgId().toLowerCase();
+                ApprenticeClass.apprenticeAttackEvent(event);
+                if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(attacked, BeyonderClassInit.SAILOR.get(), 1) &&
+                        (event.getSource().getMsgId().toLowerCase().contains("lightning") ||
+                                event.getSource().getMsgId().toLowerCase().contains("thunder"))) {
                     event.setCanceled(true);
                 }
                 CompoundTag sourceTag = attacker.getPersistentData();

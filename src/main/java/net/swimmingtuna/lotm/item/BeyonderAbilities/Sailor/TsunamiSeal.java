@@ -58,6 +58,7 @@ public class TsunamiSeal extends SimpleAbilityItem {
             player.getPersistentData().putInt("sailorTsunamiSealZ", (int) player.getZ());
         }
     }
+
     public static String getDirectionFromYaw(float yaw) {
         if (yaw < 0) {
             yaw += 360;
@@ -216,16 +217,19 @@ public class TsunamiSeal extends SimpleAbilityItem {
         );
         player.level().getEntitiesOfClass(LivingEntity.class, tsunamiAABB).forEach(livingEntity -> {
             if (livingEntity != player) {
-                if (livingEntity.getMaxHealth() >= 100 || livingEntity instanceof Player && !BeyonderUtil.areAllies(player, livingEntity)) {
-                    player.getPersistentData().putInt("sailorTsunamiSeal", 0);
-                    livingEntity.getPersistentData().putInt("sailorSeal", 1200);
-                    livingEntity.getPersistentData().putInt("sailorSealX", (int) livingEntity.getX());
-                    livingEntity.getPersistentData().putInt("sailorSeaY", (int) livingEntity.getY());
-                    livingEntity.getPersistentData().putInt("sailorSealZ", (int) livingEntity.getZ());
+                if (livingEntity.getMaxHealth() >= 100 || (livingEntity instanceof Player && !BeyonderUtil.areAllies(player, livingEntity))) {
+                    if (BeyonderUtil.canSeal(player, livingEntity)) {
+                        player.getPersistentData().putInt("sailorTsunamiSeal", 0);
+                        livingEntity.getPersistentData().putInt("sailorSeal", 1200);
+                        livingEntity.getPersistentData().putInt("sailorSealX", (int) livingEntity.getX());
+                        livingEntity.getPersistentData().putInt("sailorSeaY", (int) livingEntity.getY());
+                        livingEntity.getPersistentData().putInt("sailorSealZ", (int) livingEntity.getZ());
+                    }
                 }
             }
         });
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SAILOR_ABILITY", ChatFormatting.BLUE);

@@ -26,6 +26,7 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SeparateWormOfSta
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
+import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -172,17 +173,17 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
                 player.displayClientMessage(Component.literal("Blink Distance is " + doorBlinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
             }
         }
-        if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof SeparateWormOfStar && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 4)) {
-            if (livingEntity.getPersistentData().getInt("wormOfStarSeparationAmount") < 100) {
-                livingEntity.getPersistentData().putInt("wormOfStarSeparationAmount", livingEntity.getPersistentData().getInt("wormOfStarSeparationAmount") + 10);
+        if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof WormOfStar && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 4)) {
+            if (livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount") < BeyonderUtil.getMaxSpirituality(livingEntity)) {
+                livingEntity.getPersistentData().putInt("wormOfStarSpiritualityAmount", livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount") + 10);
             } else {
                 if (livingEntity instanceof Player player) {
-                    player.displayClientMessage(Component.literal("Worm of Star Separation amount is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    player.displayClientMessage(Component.literal("Worm of Star Spirituality amount is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
                 }
-                livingEntity.getPersistentData().putInt("wormOfStarSeparationAmount", 0);
+                livingEntity.getPersistentData().putInt("wormOfStarSpiritualityAmount", 0);
             }
             if (livingEntity instanceof Player player) {
-                player.displayClientMessage(Component.literal("Worm of Star Separation amount is " + livingEntity.getPersistentData().getInt("wormOfStarSeparationAmount")).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                player.displayClientMessage(Component.literal("Worm of Star Spirituality amount is " + livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount")).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
             }
         }
     }

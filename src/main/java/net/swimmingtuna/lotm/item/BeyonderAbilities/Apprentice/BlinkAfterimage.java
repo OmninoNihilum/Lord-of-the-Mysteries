@@ -58,7 +58,7 @@ public class BlinkAfterimage extends SimpleAbilityItem {
             boolean afterimage = tag.getBoolean("travelerAfterimage");
             tag.putBoolean("travelerAfterimage", !afterimage);
             if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("Blink Afterimage Turned " + (afterimage ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
+                pPlayer.displayClientMessage(Component.literal("Blink Afterimage Turned " + (afterimage ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
             }
         }
     }
@@ -68,7 +68,6 @@ public class BlinkAfterimage extends SimpleAbilityItem {
         LivingEntity livingEntity = event.getEntity();
         CompoundTag tag = livingEntity.getPersistentData();
         Level level = livingEntity.level();
-
         if (!level.isClientSide() && !event.isCanceled()) {
             if (tag.getBoolean("travelerAfterimage")) {
                 float amount = 50 + (event.getAmount() * BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINKAFTERIMAGE.get()));

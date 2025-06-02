@@ -41,7 +41,7 @@ public class LuckGifting extends SimpleAbilityItem {
             if (!checkAll(player)) {
                 return InteractionResult.FAIL;
             }
-            if ((double) player.getPersistentData().getInt("monsterLuckGifting") / 2 <= player.getPersistentData().getDouble("luck")) {
+            if ((double) player.getPersistentData().getInt("monsterLuckGifting") / 2 >= player.getPersistentData().getDouble("luck")) {
                 if (player instanceof Player pPlayer) {
                     pPlayer.displayClientMessage(Component.literal("Not enough luck").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
                 }

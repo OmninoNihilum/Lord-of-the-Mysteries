@@ -28,6 +28,7 @@ import net.swimmingtuna.lotm.client.WormOfStarOverlay;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorMirage;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
+import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderFlashData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderTransformData;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -105,6 +106,15 @@ public class ClientEvents {
         } else if (event.getRenderer().shadowRadius == 0.0f) {
             event.getRenderer().shadowRadius = 1.0f;
         }
+        if (ClientShouldntRenderFlashData.getShouldntRender(entity.getUUID())) {
+            event.setCanceled(true);
+            if (event.getRenderer().shadowRadius == 1.0f) {
+                event.getRenderer().shadowRadius = 0.0f;
+            }
+        } else if (event.getRenderer().shadowRadius == 0.0f) {
+            event.getRenderer().shadowRadius = 1.0f;
+        }
+
         if(DoorMirage.isActive(entity)){
             float counter = DoorMirage.getCounter(entity);
             float opacity = 1f - (counter / 100f);

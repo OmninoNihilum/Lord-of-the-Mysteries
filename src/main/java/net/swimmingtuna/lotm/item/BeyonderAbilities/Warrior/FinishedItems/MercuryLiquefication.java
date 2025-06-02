@@ -68,6 +68,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
         if (!livingEntity.level().isClientSide()) {
             boolean x = livingEntity.getPersistentData().getBoolean("mercuryLiquefication");
             livingEntity.getPersistentData().putBoolean("mercuryLiquefication", !x);
+            livingEntity.getPersistentData().putInt("mercuryLiqueficationFlyTimer", 5);
             if (livingEntity instanceof Player player) {
                 player.displayClientMessage(Component.literal("Liquefied: " + (x ? "Off" : "On")).withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.BOLD), true);
 
@@ -87,6 +88,9 @@ public class MercuryLiquefication extends SimpleAbilityItem {
         int trapped = tag.getInt("mercuryLiqueficationTrapped");
         int y = tag.getInt("mercuryArmorForm");
         if (!level.isClientSide() && currentState) {
+            if (tag.getInt("mercuryLiqueficationFlyTimer") >= 1) {
+                tag.putInt("mercuryLiqueficationFlyTimer", tag.getInt("mercuryLiqueficationFlyTimer") -1);
+            }
             if (y == 0) {
                 BeyonderUtil.useSpirituality(livingEntity, 10);
             }
@@ -131,10 +135,11 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             if (tag.getInt("mercuryLiqueficationCooldown") >= 1) {
                 tag.putInt("mercuryLiqueficationCooldown", tag.getInt("mercuryLiqueficationCooldown") - 1);
             }
-            if (livingEntity instanceof Player player && !currentState && !player.isCreative() && !player.isSpectator() && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.WARRIOR.get())) {
+            if (livingEntity instanceof Player player && tag.getInt("mercuryLiqueficationFlyTimer") >= 1 && !currentState  && !player.isCreative() && !player.isSpectator() && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.WARRIOR.get()) && !tag.getBoolean("doorBlinkState")) {
                 Abilities playerAbilites = player.getAbilities();
                 playerAbilites.setFlyingSpeed(0.05F);
                 playerAbilites.mayfly = false;
+                player.sendSystemMessage(Component.literal("MERCURY"));
                 playerAbilites.flying = false;
                 player.onUpdateAbilities();
                 if (player instanceof ServerPlayer serverPlayer) {

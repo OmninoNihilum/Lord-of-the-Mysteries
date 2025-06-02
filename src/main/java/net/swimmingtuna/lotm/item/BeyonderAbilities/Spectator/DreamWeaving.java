@@ -101,8 +101,10 @@ public class DreamWeaving extends SimpleAbilityItem {
                 if (entity.getPersistentData().contains("dreamWeavingUUID")) {
                     UUID targetUUID = entity.getPersistentData().getUUID("dreamWeavingUUID");
                     LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(entity.level(), targetUUID);
-                    if (livingEntity.isAlive() && entity instanceof Mob mob) {
-                        mob.setTarget(livingEntity);
+                    if (livingEntity != null) {
+                        if (livingEntity.isAlive() && entity instanceof Mob mob) {
+                            mob.setTarget(livingEntity);
+                        }
                     }
                 }
                 if (deathTimer == 1) {

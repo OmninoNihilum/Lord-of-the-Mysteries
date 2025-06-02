@@ -90,6 +90,11 @@ public class LOTMNetworkHandler {
                 .encoder(SyncShouldntRenderInvisibilityPacketS2C::encode)
                 .consumerMainThread(SyncShouldntRenderInvisibilityPacketS2C::handle)
                 .add();
+        INSTANCE.messageBuilder(SyncFlashRenderS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(SyncFlashRenderS2C::new)
+                .encoder(SyncFlashRenderS2C::encode)
+                .consumerMainThread(SyncFlashRenderS2C::handle)
+                .add();
         INSTANCE.messageBuilder(SyncShouldntRenderHandPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(SyncShouldntRenderHandPacketS2C::new)
                 .encoder(SyncShouldntRenderHandPacketS2C::encode)

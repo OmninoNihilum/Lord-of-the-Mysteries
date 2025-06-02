@@ -72,16 +72,22 @@ public class RoarEntity extends AbstractHurtingProjectile {
         if (!this.level().isClientSide()) {
             Entity entity = result.getEntity();
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
-
-            // Check if the entity is a player, projectile, or a mob with max health > 100
             if (entity instanceof Projectile) {
                 float explosionRadius = 3 * scaleData.getScale();
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
             }
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), (int) (20 * scaleData.getScale()));
-                float explosionRadius = 3 * scaleData.getScale();
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
+                if (getOwner() != null && getOwner() instanceof LivingEntity owner) {
+                    if (!BeyonderUtil.areAllies(livingEntity, owner) && livingEntity != owner) {
+                        livingEntity.hurt(BeyonderUtil.genericSource(this), (int) (20 * scaleData.getScale()));
+                        float explosionRadius = 3 * scaleData.getScale();
+                        this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
+                    }
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this), (int) (20 * scaleData.getScale()));
+                    float explosionRadius = 3 * scaleData.getScale();
+                    this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
+                }
             }
             this.discard();
         }

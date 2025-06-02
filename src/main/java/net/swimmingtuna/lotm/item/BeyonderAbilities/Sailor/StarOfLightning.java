@@ -77,7 +77,7 @@ public class StarOfLightning extends SimpleAbilityItem {
             float searchRadius = Math.min(300, BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()));
             AABB searchArea = new AABB(livingEntity.getX() - searchRadius, livingEntity.getY() - searchRadius, livingEntity.getZ() - searchRadius, livingEntity.getX() + searchRadius, livingEntity.getY() + searchRadius, livingEntity.getZ() + searchRadius);
             List<LivingEntity> potentialTargets = level.getEntitiesOfClass(LivingEntity.class, searchArea, target -> target != livingEntity && target.isAlive() && !BeyonderUtil.areAllies(livingEntity, target));
-            for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()) / 20; i++) {
+            for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()) / 75; i++) {
                 LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), livingEntity.level());
                 lightningEntity.setSpeed(50);
                 lightningEntity.setDamage((int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.STAR_OF_LIGHTNING.get()) / 1.5f));

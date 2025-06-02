@@ -61,7 +61,7 @@ public class DreamIntoReality extends SimpleAbilityItem {
         }
     }
 
-    private void startFlying(LivingEntity player) { //marked
+    public static void startFlying(LivingEntity player) { //marked
         if (!player.level().isClientSide()) {
             int dreamIntoReality = player.getPersistentData().getInt("dreamIntoReality");
             if (dreamIntoReality != 3) {
@@ -85,6 +85,7 @@ public class DreamIntoReality extends SimpleAbilityItem {
             }
         }
     }
+
 
     public static void stopFlying(LivingEntity livingEntity) { //marked
         if (!livingEntity.level().isClientSide()) {

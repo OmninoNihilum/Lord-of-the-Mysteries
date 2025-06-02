@@ -42,20 +42,20 @@ public class LuckChanneling extends SimpleAbilityItem {
     }
 
     private void channelLuck(LivingEntity livingEntity) { //marked
-        if (!livingEntity.level().isClientSide() && livingEntity instanceof Player player) {
-            ItemStack stack = player.getOffhandItem();
+        if (!livingEntity.level().isClientSide()) {
+            ItemStack stack = livingEntity.getOffhandItem();
             if (stack.getItem() == Items.GLASS_BOTTLE) {
-                double luck = player.getPersistentData().getDouble("luck");
+                double luck = livingEntity.getPersistentData().getDouble("luck");
                 ItemStack luckBottle = new ItemStack(ItemInit.LUCKBOTTLEITEM.get());
-                int sequence = BeyonderUtil.getSequence(player);
+                int sequence = BeyonderUtil.getSequence(livingEntity);
                 if (sequence <= 2) {
                     double luckBottleAmount = 0;
-                    for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LUCKCHANNELING.get())))) {
+                    for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.LUCKCHANNELING.get())))) {
                         double newLuck = living.getPersistentData().getDouble("luck");
-                        if (living == player) {
+                        if (living == livingEntity) {
                             living.getPersistentData().putDouble("luck", newLuck / 2);
                             luckBottleAmount += (newLuck);
-                        } else if (!BeyonderUtil.areAllies(player, living)) {
+                        } else if (!BeyonderUtil.areAllies(livingEntity, living)) {
                             luckBottleAmount += newLuck;
                             living.getPersistentData().putDouble("luck", 0);
                         }
@@ -63,15 +63,21 @@ public class LuckChanneling extends SimpleAbilityItem {
                     LuckBottleItem.setLuckAmount(luckBottle, (int) luckBottleAmount);
                 }
                 LuckBottleItem.setLuckAmount(luckBottle, (int) luck);
-                player.displayClientMessage(Component.literal("Channeled " + luck + " luck into this bottle").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD), true);
-                stack.shrink(1);
-                player.getPersistentData().putDouble("luck", 0);
-                if (stack.isEmpty()) {
-                    player.setItemInHand(InteractionHand.OFF_HAND, luckBottle);
-                } else {
-                    player.getInventory().add(luckBottle);
+                if (livingEntity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("Channeled " + luck + " luck into this bottle").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD), true);
                 }
-                player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 1.0F, 1.0F);
+                stack.shrink(1);
+                if (sequence > 2) {
+                    livingEntity.getPersistentData().putDouble("luck", 0);
+                }
+                if (stack.isEmpty()) {
+                    livingEntity.setItemInHand(InteractionHand.OFF_HAND, luckBottle);
+                } else {
+                    if (livingEntity instanceof Player player) {
+                        player.getInventory().add(luckBottle);
+                    }
+                }
+                livingEntity.level().playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
         }
     }
@@ -85,6 +91,7 @@ public class LuckChanneling extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("MONSTER_ABILITY", ChatFormatting.GRAY);

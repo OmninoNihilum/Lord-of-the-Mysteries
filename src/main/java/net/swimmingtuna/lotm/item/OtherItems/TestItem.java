@@ -2,6 +2,7 @@ package net.swimmingtuna.lotm.item.OtherItems;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -85,10 +86,6 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
-            if (player instanceof ServerPlayer serverPlayer) {
-                LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(100), serverPlayer);
-            }
-
         }
 
         return InteractionResult.SUCCESS;

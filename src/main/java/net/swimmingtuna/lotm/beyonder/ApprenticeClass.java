@@ -11,15 +11,20 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
@@ -29,7 +34,6 @@ import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 
 import java.util.HashMap;
 import java.util.List;
@@ -123,6 +127,7 @@ public class ApprenticeClass implements BeyonderClass {
                 if (player instanceof ServerPlayer serverPlayer) {
                     LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                 }
+                applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 1, false, false);
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 35);
             }
@@ -133,7 +138,7 @@ public class ApprenticeClass implements BeyonderClass {
                 if (player instanceof ServerPlayer serverPlayer) {
                     LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                 }
-                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
+                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
                 tag.putInt("maxScribedAbilities", 40);
             }
             if (sequenceLevel == 1) {
@@ -144,6 +149,7 @@ public class ApprenticeClass implements BeyonderClass {
                     LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                 }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
+                applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 45);
             }
             if (sequenceLevel == 0) {
@@ -154,6 +160,7 @@ public class ApprenticeClass implements BeyonderClass {
                     LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                 }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
+                applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 50);
             }
             if (sequenceLevel <= 4) {
@@ -294,6 +301,9 @@ public class ApprenticeClass implements BeyonderClass {
     public static void apprenticeTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 40 == 0) {
+            if (livingEntity instanceof ServerPlayer serverPlayer) {
+                LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(livingEntity.getPersistentData().getInt("wormOfStar")), serverPlayer);
+            }
             CompoundTag tag = livingEntity.getPersistentData();
             boolean currentState = tag.getBoolean("shouldntRenderSecretsSorcererHand");
             if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(livingEntity, BeyonderClassInit.APPRENTICE.get(), 4)) {
@@ -307,6 +317,51 @@ public class ApprenticeClass implements BeyonderClass {
                 if (lastState == null || lastState != currentState) {
                     LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderHandPacketS2C(currentState, playerId));
                     lastSentHandStates.put(playerId, currentState);
+                }
+            }
+        }
+    }
+
+
+    public static void apprenticeAttackEvent(LivingAttackEvent event) {
+        LivingEntity attacked = event.getEntity();
+        if (!attacked.level().isClientSide()) {
+            if (event.getSource().is(DamageTypes.FALL)) {
+                event.setCanceled(true);
+            } else if (event.getSource().is(DamageTypes.ON_FIRE)) {
+                event.setCanceled(true);
+            } else if (event.getSource().is(DamageTypes.IN_FIRE)) {
+                event.setCanceled(true);
+            } else if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    public static void enableWaterWalking(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        Level level = livingEntity.level();
+        if (level.isClientSide()) {
+            return;
+        }
+        if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(livingEntity, BeyonderClassInit.APPRENTICE.get(), 3)) {
+            BlockPos pos = livingEntity.blockPosition();
+            BlockPos belowPos = pos.below();
+            BlockState blockBelow = level.getBlockState(belowPos);
+            BlockState currentBlock = level.getBlockState(pos);
+            if (blockBelow.getBlock() instanceof LiquidBlock || currentBlock.getBlock() instanceof LiquidBlock) {
+                if (!livingEntity.isShiftKeyDown()) {
+                    if (livingEntity.getDeltaMovement().y < 0) {
+                        Vec3 lookVec = livingEntity.getLookAngle().scale(2);
+                        livingEntity.setDeltaMovement(lookVec.x(), 0.01, lookVec.z());
+                        livingEntity.hurtMarked = true;
+                    }
+                    double waterSurfaceY = belowPos.getY() + 1.0;
+                    if (livingEntity.getY() < waterSurfaceY) {
+                        livingEntity.setPos(livingEntity.getX(), waterSurfaceY, livingEntity.getZ());
+                    }
+                    livingEntity.fallDistance = 0.0f;
+                    livingEntity.setOnGround(true);
                 }
             }
         }

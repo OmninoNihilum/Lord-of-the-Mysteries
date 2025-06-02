@@ -111,17 +111,19 @@ public class ServerEvents {
         }
         if (!player.level().isClientSide()) {
             String message = event.getMessage().getString().toLowerCase();
-            if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationWorldFortune && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.MONSTER.get(), 0)) {
+            if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationFortune && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.MONSTER.get(), 0)) {
                 for (Player onlinePlayer : player.level().players()) {
                     if (message.equals(onlinePlayer.getName().getString().toLowerCase())) {
+                        player.sendSystemMessage(Component.literal("Successfully gave " + onlinePlayer.getName().getString() + " all fortunate events").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
                         ProbabilityManipulationFortune.giveFortuneEvents(onlinePlayer);
                         BeyonderUtil.useSpirituality(player, 500);
                     }
                 }
             }
-            if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationWorldFortune && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.MONSTER.get(), 0)) {
+            if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationMisfortune && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.MONSTER.get(), 0)) {
                 for (Player onlinePlayer : player.level().players()) {
                     if (message.equals(onlinePlayer.getName().getString().toLowerCase())) {
+                        player.sendSystemMessage(Component.literal("Successfully gave " + onlinePlayer.getName().getString() + " all misfortunate events").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
                         ProbabilityManipulationMisfortune.giveMisfortuneEvents(onlinePlayer);
                         BeyonderUtil.useSpirituality(player, 500);
                     }
@@ -130,7 +132,8 @@ public class ServerEvents {
             if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationInfiniteMisfortune && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.MONSTER.get(), 0)) {
                 for (Player onlinePlayer : player.level().players()) {
                     if (message.equals(onlinePlayer.getName().getString().toLowerCase())) {
-                        ProbabilityManipulationInfiniteFortune.giveInfiniteFortune(onlinePlayer);
+                        player.sendSystemMessage(Component.literal("Successfully gave " + onlinePlayer.getName().getString() + " infinite misfortune").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
+                        ProbabilityManipulationInfiniteMisfortune.giveInfiniteMisfortune(onlinePlayer);
                         BeyonderUtil.useSpirituality(player, 2000);
                     }
                 }
@@ -138,7 +141,8 @@ public class ServerEvents {
             if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationInfiniteFortune && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.MONSTER.get(), 0)) {
                 for (Player onlinePlayer : player.level().players()) {
                     if (message.equals(onlinePlayer.getName().getString().toLowerCase())) {
-                        ProbabilityManipulationInfiniteMisfortune.giveInfiniteMisfortune(onlinePlayer);
+                        player.sendSystemMessage(Component.literal("Successfully gave " + onlinePlayer.getName().getString() + " infinite fortune").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
+                        ProbabilityManipulationInfiniteFortune.giveInfiniteFortune(onlinePlayer);
                         BeyonderUtil.useSpirituality(player, 2000);
                     }
                 }
