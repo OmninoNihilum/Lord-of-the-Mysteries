@@ -13,7 +13,7 @@ import net.swimmingtuna.lotm.capabilities.concealed_data.IConcealedDataCapabilit
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class IsConcealedProvider implements ICapabilityProvider, INBTSerializable<CompoundTag>  {
+public class IsConcealedProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
     public static Capability<IIsConcealedCapability> IS_CONCEALED = CapabilityManager.get(new CapabilityToken<IIsConcealedCapability>() {});
 
     private IsConcealedCapability isConcealed = null;

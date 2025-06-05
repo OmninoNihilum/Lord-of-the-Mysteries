@@ -120,7 +120,7 @@ public class EyeOfDemonHunting extends SimpleAbilityItem {
                     }
                 }
             }
-            if (entity.tickCount % 10 == 0 && BeyonderUtil.getSequence(entity) <= 4 && BeyonderUtil.currentPathwayMatches(entity, BeyonderClassInit.WARRIOR.get())) {
+            if (entity.tickCount % 10 == 0 && BeyonderUtil.getSequence(entity) <= 4 && BeyonderUtil.currentPathwayMatchesNoException(entity, BeyonderClassInit.WARRIOR.get())) {
                 Vec3 eyePosition = entity.getEyePosition();
                 Vec3 lookVector = entity.getLookAngle();
                 Vec3 reachVector = eyePosition.add(lookVector.x * 35, lookVector.y * 35, lookVector.z * 35);

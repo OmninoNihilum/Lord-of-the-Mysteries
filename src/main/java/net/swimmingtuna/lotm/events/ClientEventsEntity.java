@@ -44,6 +44,7 @@ public class ClientEventsEntity {
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EntityInit.FLASH_ENTITY.get(), FlashEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.SPACE_RIFT_ENTITY.get(), SpaceRiftRenderer::new);
+        event.registerEntityRenderer(EntityInit.SPATIAL_CAGE_ENTITY.get(), SpatialCageRenderer::new);
         event.registerEntityRenderer(EntityInit.LOW_SEQUENCE_DOOR_ENTITY.get(), LowSequenceDoorRenderer::new);
         event.registerEntityRenderer(EntityInit.SWORD_OF_TWILIGHT_ENTITY.get(), SwordOfTwilightEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.MERCURY_CAGE_ENTITY.get(), MercuryCageRenderer::new);

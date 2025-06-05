@@ -67,6 +67,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.client.Configs;
@@ -1696,7 +1697,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TWILIGHTLIGHT.get(), applyAbilityStrengthened((450.0f - (sequence * 90)) / abilityWeakness, abilityStrengthened));
 
         // APPRENTICE
-        damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
+        damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.RECORDSCRIBE.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
         damageMap.put(ItemInit.BLINK.get(), applyAbilityStrengthened(1200 - (sequence * 180) + abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRAVELERSDOOR.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
@@ -1714,7 +1715,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((70.0f - (sequence * 10f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), -abilityStrengthened));
-        damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + sequence + abilityWeakness , -abilityStrengthened));
+        damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + abilityWeakness , -abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
 
         return damageMap;
@@ -3585,5 +3586,46 @@ public class BeyonderUtil {
         }
 
         return true;
+    }
+
+    public static void teleportEntity(LivingEntity entity, Level destination, double x, double y, double z){
+        if(!SealedUtils.isSealed(entity)){
+            teleportEntityThroughDimensions(entity, destination.dimension().location(), x, y ,z);
+        }else if(entity instanceof Player player){
+            player.displayClientMessage(Component.literal("You cant teleport over your existing seal").withStyle(ChatFormatting.RED), false);
+        }
+    }
+
+    public static void teleportEntity(LivingEntity entity, ResourceLocation destination, double x, double y, double z){
+        if(!SealedUtils.isSealed(entity)){
+            teleportEntityThroughDimensions(entity, destination, x, y ,z);
+        }else if(entity instanceof Player player){
+            player.displayClientMessage(Component.literal("You cant teleport over your existing seal").withStyle(ChatFormatting.RED), false);
+        }
+    }
+
+    public static boolean canBreakSeal(LivingEntity entity){
+        int sequence = getSequence(entity);
+        int sealSequence = SealedUtils.sealSequence(entity);
+        if (currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 3)) sequence--;
+        if(sealSequence >= sequence){
+            int spiritualityDivisor = sealSequence - sequence + 1;
+            return getSpirituality(entity) >= SealedUtils.getBreakFreeCost(sealSequence) / spiritualityDivisor;
+        }
+        return false;
+    }
+
+    public static void breakSeal(LivingEntity entity){
+        CompoundTag tag = entity.getPersistentData();
+        SealedUtils.setSealed(entity, false);
+        SealedUtils.setSequence(entity, 9);
+        SealedUtils.setCreator(entity, new UUID(0, 0));
+        SealedUtils.setSealedAbilities(entity, false);
+        if(tag.getBoolean("spatialCageIsSealed")){
+            tag.remove("spatialCageIsSealed");
+            tag.remove("spatialCageX");
+            tag.remove("spatialCageY");
+            tag.remove("spatialCageZ");
+        }
     }
 }

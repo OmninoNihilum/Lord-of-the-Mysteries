@@ -62,6 +62,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<SpaceRiftEntity>> SPACE_RIFT_ENTITY =
             ENTITIES.register("space_rift_entity", () -> EntityType.Builder.<SpaceRiftEntity>of(SpaceRiftEntity::new, MobCategory.MISC)
                     .sized(1f,1f).clientTrackingRange(100).build("space_rift_entity"));
+    public static final RegistryObject<EntityType<SpatialCageEntity>> SPATIAL_CAGE_ENTITY =
+            ENTITIES.register("spatial_cage_entity", () -> EntityType.Builder.<SpatialCageEntity>of(SpatialCageEntity::new, MobCategory.MISC)
+                    .sized(1f,1f).clientTrackingRange(100).build("spatial_cage_entity"));
     public static final RegistryObject<EntityType<LightningBallEntity>> LIGHTNING_BALL =
             ENTITIES.register("lightningball", () -> EntityType.Builder.<LightningBallEntity>of(LightningBallEntity::new, MobCategory.MISC)
                     .sized(1.0f,1.0f).clientTrackingRange(300).build("lightningball"));

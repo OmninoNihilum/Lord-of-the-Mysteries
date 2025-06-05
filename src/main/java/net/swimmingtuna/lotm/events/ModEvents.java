@@ -380,7 +380,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
-                //Blink.handleAfterimageSpawning(livingEntity);
+                SpatialCageEntity.cageTick(livingEntity);
                 ApprenticeClass.enableWaterWalking(event);
                 BlinkState.secretsSorcererBlinkState(event);
                 Exile.exileTickEvent(event);

@@ -91,7 +91,11 @@ public class CorruptionAndLuckHandler {
             if (calamityNearSpawn) {
                 BlockPos entityPos = livingEntity.getOnPos();
                 BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
-                if (entityPos.closerThan(worldSpawnPos, 300)) {
+                try {
+                    if (entityPos.closerThan(worldSpawnPos, 300)) {
+                        shouldntActiveCalamity = true;
+                    }
+                } catch (NullPointerException e) {
                     shouldntActiveCalamity = true;
                 }
             }

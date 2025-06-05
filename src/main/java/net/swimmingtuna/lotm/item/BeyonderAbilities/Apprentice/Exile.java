@@ -93,9 +93,9 @@ public class Exile extends SimpleAbilityItem {
                 tag.putInt("shouldntExileWithDoor", 80);
                 if (livingEntity instanceof Player) {
                     if (destinationWorld != null) {
-                        BeyonderUtil.teleportEntityThroughDimensions(livingEntity, destinationWorld.dimension().location(), x, y, z);
+                        BeyonderUtil.teleportEntity(livingEntity, destinationWorld, x, y, z);
                     } else {
-                        BeyonderUtil.teleportEntityThroughDimensions(livingEntity, Level.OVERWORLD.location(), x, y, z);
+                        BeyonderUtil.teleportEntity(livingEntity, Level.OVERWORLD.location(), x, y, z);
                     }
                 } else {
                     livingEntity.teleportTo(x,y,z);

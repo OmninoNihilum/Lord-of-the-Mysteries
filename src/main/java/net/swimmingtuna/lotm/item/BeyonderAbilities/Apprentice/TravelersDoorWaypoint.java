@@ -123,7 +123,7 @@ public class TravelersDoorWaypoint extends SimpleAbilityItem {
                 }else{
                     coords = String.format("Teleported to %.1f, %.1f, %.1f, in The %s Dimension", x, y, z, getDimensionName(destination.dimension().location().getPath()));
                     if(!waypointName.isEmpty()) coords = String.format("Teleported to Waypoint %s", waypointName);
-                    BeyonderUtil.teleportEntityThroughDimensions(livingEntity, destination.dimension().location(), x, y, z);
+                    BeyonderUtil.teleportEntity(livingEntity, destination, x, y, z);
                 }
                 if (livingEntity instanceof Player pPlayer) {
                     tag.putInt("waypointMessageCooldown", 30);

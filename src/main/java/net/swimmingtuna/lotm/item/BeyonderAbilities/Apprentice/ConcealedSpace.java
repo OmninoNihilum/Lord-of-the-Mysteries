@@ -21,6 +21,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
+import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedUtils;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
@@ -55,7 +56,7 @@ public class ConcealedSpace extends SimpleAbilityItem {
         if(entity.level().isClientSide()) return;
         if(!ConcealedUtils.hasConcealedSpace(entity)) createConcealedSpace(entity);
         else {
-            if(BeyonderUtil.isConcealed(entity)){
+            if(IsConcealedUtils.getIsConcealed(entity)){
                 if(entity.isShiftKeyDown()) changeConcealedSpaceSpawn(entity);
                 else createDoorLeaveConcealedSpace(entity);
             }else{

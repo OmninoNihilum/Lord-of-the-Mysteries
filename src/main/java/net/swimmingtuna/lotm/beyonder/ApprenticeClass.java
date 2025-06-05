@@ -222,7 +222,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(4, ItemInit.CREATE_CONCEALED_SPACE.get());
         items.put(4, ItemInit.SEPARATE_WORM_OF_STAR.get());
 
-        //items.put(3, ItemInit.SPATIAL_CAGE.get());
+        items.put(3, ItemInit.SPATIAL_CAGE.get());
         items.put(3, ItemInit.SPATIAL_TEARING.get());
 
         //items.put(2, ItemInit.SYMBOLIZATION.get());

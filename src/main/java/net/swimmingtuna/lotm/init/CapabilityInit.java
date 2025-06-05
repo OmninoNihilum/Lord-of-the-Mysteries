@@ -16,6 +16,8 @@ import net.swimmingtuna.lotm.capabilities.concealed_data.IConcealedDataCapabilit
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IIsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedProvider;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataCapability;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataProvider;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
 public class CapabilityInit {
@@ -25,6 +27,7 @@ public class CapabilityInit {
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.register(IConcealedDataCapability.class);
         event.register(IIsConcealedCapability.class);
+        event.register(IsConcealedCapability.class);
     }
 
     @SubscribeEvent
@@ -46,6 +49,12 @@ public class CapabilityInit {
                     new IsConcealedProvider()
             );
         }
+        if (!entity.getCapability(SealedDataProvider.SEALED_DATA).isPresent()) {
+            event.addCapability(
+                    new ResourceLocation(MOD_ID, "sealed_data"),
+                    new SealedDataProvider()
+            );
+        }
     }
 
     @SubscribeEvent
@@ -62,6 +71,11 @@ public class CapabilityInit {
         original.getCapability(IsConcealedProvider.IS_CONCEALED).ifPresent(oldData -> {
             clone.getCapability(IsConcealedProvider.IS_CONCEALED).ifPresent(newData -> {
                 ((IsConcealedCapability) newData).copyFrom((IsConcealedCapability) oldData);
+            });
+        });
+        original.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(oldData -> {
+            clone.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(newData -> {
+                ((SealedDataCapability) newData).copyFrom((SealedDataCapability) oldData);
             });
         });
     }

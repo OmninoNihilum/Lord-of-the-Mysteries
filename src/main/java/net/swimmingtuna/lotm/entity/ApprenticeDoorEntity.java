@@ -202,8 +202,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         tag.putString("exileDoorDimension", livingEntity.level().dimension().location().toString());
                         if (livingEntity instanceof Player player) {
                             if (surfaceY != -1) {
-                                BeyonderUtil.teleportEntityThroughDimensions(player, DimensionInit.EXILED_DIMENSION_LEVEL_KEY.location(), x, surfaceY, z);
-                            }
+                                BeyonderUtil.teleportEntity(player, DimensionInit.CONCEALED_SPACE_LEVEL_KEY.location(), x, surfaceY, z);                            }
                         } else {
                             Random random = new Random();
                             livingEntity.getPersistentData().putInt("exileDoorMob", random.nextInt(3));
@@ -364,16 +363,14 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         if (getDimensionDestination().dimension().equals(entity.level().dimension())) {
                             entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
                         } else {
-                            BeyonderUtil.teleportEntityThroughDimensions(entity, getDimensionDestination().dimension().location(), getTeleportX(), getTeleportY(), getTeleportZ());
-                        }
+                            BeyonderUtil.teleportEntity(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());                        }
                     }
                 } else {
                     if (entity != null) {
                         if (getDimensionDestination().dimension().equals(entity.level().dimension())) {
                             entity.teleportTo(getTeleportX(), getTeleportY(), getTeleportZ());
                         } else {
-                            BeyonderUtil.teleportEntityThroughDimensions(entity, getDimensionDestination().dimension().location(), getTeleportX(), getTeleportY(), getTeleportZ());
-                        }
+                            BeyonderUtil.teleportEntity(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());                        }
                     }
                 }
             }
@@ -402,8 +399,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                     IsConcealedUtils.setConcealmentSequence(entity, 9);
                 }
                 this.entityData.set(LIFE, 30);
-                BeyonderUtil.teleportEntityThroughDimensions(entity, getDimensionDestination().dimension().location(), getTeleportX(), getTeleportY(), getTeleportZ());
-            }
+                BeyonderUtil.teleportEntity(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());            }
         }
     }
 

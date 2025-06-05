@@ -16,6 +16,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +55,7 @@ public class CreateDoor extends SimpleAbilityItem {
             BlockPos posRelativeTo = context.getClickedPos().relative(context.getClickedFace());
             Direction direction = context.getClickedFace().getOpposite();
 
-            if (!checkAll(player)) {
+            if (!checkAll(player, BeyonderClassInit.APOTHECARY.get(), 9, 70 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CREATEDOOR.get()), false)) {
                 return InteractionResult.FAIL;
             }
             if (!canCreateDoor(player, targetPos, posRelativeTo)) {
@@ -62,7 +63,7 @@ public class CreateDoor extends SimpleAbilityItem {
             }
             createDoor(player, level, targetPos, posRelativeTo, direction);
             addCooldown(player);
-            useSpirituality(player);
+            useSpirituality(player, 70 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CREATEDOOR.get()));
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS;

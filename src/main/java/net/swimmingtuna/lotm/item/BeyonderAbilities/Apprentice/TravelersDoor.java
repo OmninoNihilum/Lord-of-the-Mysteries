@@ -74,19 +74,19 @@ public class TravelersDoor extends SimpleAbilityItem {
         return "";
     }
 
-    public static ServerLevel getLevelFromId(MinecraftServer server, String dimensionId) {
+    public static ServerLevel getLevelFromId(MinecraftServer server, String dimensionId, Level originalDestination) {
         String normalizedId = normalizeDimensionId(dimensionId);
         ResourceLocation location = new ResourceLocation(normalizedId);
         ResourceKey<Level> levelKey = ResourceKey.create(Registries.DIMENSION, location);
-        return server.getLevel(levelKey);
+        ServerLevel level = server.getLevel(levelKey);
+        return level != null ? level : (ServerLevel) originalDestination;
     }
 
     public static String normalizeDimensionId(String dimensionId){
-        if(dimensionId != null) {
-            if (dimensionId.equals("nether") || dimensionId.equals("minecraft:nether") || dimensionId.equals("the_nether")) return "minecraft:the_nether";
-            if (dimensionId.equals("end") || dimensionId.equals("minecraft:end") || dimensionId.equals("the_end")) return "minecraft:the_end";
-            if (dimensionId.equals("overworld")) return "minecraft:overworld";
-        }else return "";
+        dimensionId = dimensionId.toLowerCase();
+        if (dimensionId.equals("nether") || dimensionId.equals("minecraft:nether") || dimensionId.equals("the_nether")) return "minecraft:the_nether";
+        if (dimensionId.equals("end") || dimensionId.equals("minecraft:end") || dimensionId.equals("the_end")) return "minecraft:the_end";
+        if (dimensionId.equals("overworld")) return "minecraft:overworld";
         return dimensionId;
     }
 

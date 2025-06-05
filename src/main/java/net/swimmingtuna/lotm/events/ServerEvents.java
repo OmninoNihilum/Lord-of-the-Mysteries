@@ -255,8 +255,7 @@ public class ServerEvents {
 
                 Level destination = player.level();
                 if (hasDimensionId(message)) {
-                    destination = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message));
-                }
+                    destination = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message), destination);                }
 
                 if (!canTeleportAcrossDimensions(player, destination)) {
                     event.getPlayer().displayClientMessage(Component.literal("Target is in an inaccessible dimension").withStyle(ChatFormatting.RED), true);
@@ -271,7 +270,7 @@ public class ServerEvents {
                     spawnDoor(player, x, y, z, destination);
                     event.getPlayer().displayClientMessage(Component.literal("Door created leading to " + x + ", " + y + ", " + z + ", in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                 } else {
-                    BeyonderUtil.teleportEntityThroughDimensions(player, destination.dimension().location(), x, y, z);
+                    BeyonderUtil.teleportEntity(player, destination, x, y, z);
                     event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z + ", in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
                 BeyonderUtil.useSpirituality(player, 300);
@@ -305,7 +304,7 @@ public class ServerEvents {
                         spawnDoor(player, x, y, z, destination);
                         event.getPlayer().displayClientMessage(Component.literal("Door created leading to " + targetPlayer.getName() + " in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                     } else {
-                        player.teleportTo(x, y, z);
+                        BeyonderUtil.teleportEntity(player, targetPlayer.level(), x, y, z);
                         event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName() + " in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                     }
                     BeyonderUtil.useSpirituality(player, 300);
