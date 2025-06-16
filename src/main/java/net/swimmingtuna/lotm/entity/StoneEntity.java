@@ -135,7 +135,7 @@ public class StoneEntity extends AbstractArrow {
         this.setYRot(this.getYRot() + yRot);
         this.xRotO = this.getXRot();
         this.yRotO = this.getYRot();
-        if (!this.level().isClientSide() && this.tickCount > 140 && !getRemoveAndHurt()) {
+        if (!this.level().isClientSide() && this.tickCount > 100 && !getRemoveAndHurt()) {
             this.discard();
         }
         if (!this.level().isClientSide()) {

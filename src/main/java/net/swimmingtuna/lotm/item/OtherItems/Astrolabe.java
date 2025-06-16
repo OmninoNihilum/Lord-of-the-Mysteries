@@ -33,7 +33,6 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -90,7 +89,7 @@ public class Astrolabe extends Item {
             try {
                 resourceLocation = new ResourceLocation(resourceKey);
                 if (ForgeRegistries.BLOCKS.containsKey(resourceLocation)) {
-                    maxDistance = maxDistance / 15;
+                    maxDistance = maxDistance / 25;
                     foundResource = true;
                     Block targetBlock = ForgeRegistries.BLOCKS.getValue(resourceLocation);
                     ServerLevel level = (ServerLevel) player.level();

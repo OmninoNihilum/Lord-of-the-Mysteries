@@ -8,6 +8,7 @@
     "EntityCollisionMixin",
     "EntityTickMixin",
     "ExplosionNoKnockback",
+    "IELevelEntityGetterAdapter",
     "ItemStackMixin",
     "MixinBrewingStandMenu",
     "MixinItems",

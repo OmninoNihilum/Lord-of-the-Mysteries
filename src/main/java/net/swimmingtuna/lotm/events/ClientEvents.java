@@ -3,21 +3,19 @@ package net.swimmingtuna.lotm.events;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
@@ -27,14 +25,11 @@ import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
 import net.swimmingtuna.lotm.client.WormOfStarOverlay;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorMirage;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
-import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderFlashData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderTransformData;
+import net.swimmingtuna.lotm.util.SpiritWorld.SpiritWorldHandler;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
@@ -98,6 +93,16 @@ public class ClientEvents {
     @OnlyIn(Dist.CLIENT)
     public static void livingRender(RenderLivingEvent.Pre<?, ?> event) {
         LivingEntity entity = event.getEntity();
+        Player player = Minecraft.getInstance().player;
+        if (player != null && !SpiritWorldHandler.bothInSameWorld(entity, player)) {
+            event.setCanceled(true);
+            if (event.getRenderer().shadowRadius == 1.0f) {
+                event.getRenderer().shadowRadius = 0.0f;
+            }
+        } else if (event.getRenderer().shadowRadius == 0.0f) {
+            event.getRenderer().shadowRadius = 1.0f;
+        }
+
         if (ClientShouldntRenderInvisibilityData.getShouldntRender(entity.getUUID())) {
             event.setCanceled(true);
             if (event.getRenderer().shadowRadius == 1.0f) {

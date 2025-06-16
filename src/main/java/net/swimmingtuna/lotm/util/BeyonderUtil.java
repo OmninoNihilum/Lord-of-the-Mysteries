@@ -3,6 +3,7 @@ package net.swimmingtuna.lotm.util;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -88,7 +89,6 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
 import net.swimmingtuna.lotm.item.OtherItems.SwordOfSilver;
 import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
-import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.*;
@@ -109,7 +109,6 @@ import java.util.function.Predicate;
 import static net.swimmingtuna.lotm.commands.BeyonderRecipeCommand.executeRecipeCommand;
 import static net.swimmingtuna.lotm.init.DamageTypeInit.MENTAL_DAMAGE;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.CycleOfFate.removeCycleEffect;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamIntoReality.stopFlying;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility.removePsychologicalInvisibilityEffect;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.TwilightFreeze.removeTwilightFreezeEffect;
 
@@ -1043,8 +1042,7 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof DawnWeaponry) {
                 LOTMNetworkHandler.sendToServer(new DawnWeaponryLeftClickC2S());
-            }
-            else if (heldItem.getItem() instanceof SwordOfTwilight) {
+            } else if (heldItem.getItem() instanceof SwordOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new SwordOfTwilightC2S());
             } else if (heldItem.getItem() instanceof Gigantification) {
                 LOTMNetworkHandler.sendToServer(new GigantificationC2S());
@@ -1211,6 +1209,8 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
             } else if (heldItem.getItem() instanceof ScribeAbilities) {
                 LOTMNetworkHandler.sendToServer(new ScribeCopyAbilityC2S());
+            } if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
+                LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
             }
         }
     }
@@ -1233,8 +1233,7 @@ public class BeyonderUtil {
             } else if (heldItem.getItem() instanceof AqueousLightPull) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_DROWN.get())));
                 heldItem.shrink(1);
-            }
-            else if (heldItem.getItem() instanceof TrickBurning) {
+            } else if (heldItem.getItem() instanceof TrickBurning) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFREEZING.get())));
                 heldItem.shrink(1);
             } else if (heldItem.getItem() instanceof TrickFreezing) {
@@ -1668,7 +1667,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.PROBABILITYWIPE.get(), applyAbilityStrengthened((300.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYFORTUNEINCREASE.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYMISFORTUNEINCREASE.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.PSYCHESTORM.get(), applyAbilityStrengthened((75.0f - (sequence * 4.5f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.PSYCHESTORM.get(), applyAbilityStrengthened((75.0f - (sequence * 8f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.REBOOTSELF.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPIRITVISION.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.WHISPEROFCORRUPTION.get(), applyAbilityStrengthened(((float) sequence * 1.5f) / abilityWeakness, abilityStrengthened));
@@ -1715,7 +1714,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((70.0f - (sequence * 10f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), -abilityStrengthened));
-        damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + abilityWeakness , -abilityStrengthened));
+        damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
 
         return damageMap;
@@ -1751,7 +1750,7 @@ public class BeyonderUtil {
         AABB searchArea = entityBoundingBox.inflate(radius);
         for (Entity otherEntity : level.getEntities(entity, searchArea, otherEntity -> true)) {
             if (entityBoundingBox.intersects(otherEntity.getBoundingBox())) {
-                if(otherEntity instanceof LivingEntity living) {
+                if (otherEntity instanceof LivingEntity living) {
                     return living;
                 }
             }
@@ -3479,6 +3478,30 @@ public class BeyonderUtil {
         return null;
     }
 
+    public static LivingEntity getClientLivingEntityFromUUID(Level level, UUID uuid) {
+        if (level instanceof ClientLevel clientLevel) {
+            for (Entity entity : clientLevel.entitiesForRendering()) {
+                if (entity instanceof LivingEntity livingEntity && uuid.equals(entity.getUUID())) {
+                    return livingEntity;
+                }
+            }
+
+            if (level.isClientSide() && Minecraft.getInstance().player != null) {
+                Player player = Minecraft.getInstance().player;
+                int renderDistance = Minecraft.getInstance().options.renderDistance().get() * 16;
+                AABB searchArea = new AABB(player.getX() - renderDistance, player.getY() - 128, player.getZ() - renderDistance, player.getX() + renderDistance, player.getY() + 128, player.getZ() + renderDistance);
+                List<Entity> nearbyEntities = level.getEntities((Entity) null, searchArea, entity -> true);
+                for (Entity entity : nearbyEntities) {
+                    if (entity instanceof LivingEntity livingEntity && uuid.equals(entity.getUUID())) {
+                        return livingEntity;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
     public static CustomFallingBlockEntity getCustomFallingBlockFromUUID(Level level, UUID uuid) {
         if (level instanceof ServerLevel serverLevel) {
             Entity entity = serverLevel.getEntity(uuid);
@@ -3502,6 +3525,7 @@ public class BeyonderUtil {
             default -> BeyonderClassInit.SPECTATOR.get(); // Fallback (shouldn't happen)
         };
     }
+
     public static int chooseRandomSequence(int lowestSequence) {
         Random random = new Random();
         if (lowestSequence > 9) {
@@ -3588,40 +3612,40 @@ public class BeyonderUtil {
         return true;
     }
 
-    public static void teleportEntity(LivingEntity entity, Level destination, double x, double y, double z){
-        if(!SealedUtils.isSealed(entity)){
-            teleportEntityThroughDimensions(entity, destination.dimension().location(), x, y ,z);
-        }else if(entity instanceof Player player){
+    public static void teleportEntity(LivingEntity entity, Level destination, double x, double y, double z) {
+        if (!SealedUtils.isSealed(entity)) {
+            teleportEntityThroughDimensions(entity, destination.dimension().location(), x, y, z);
+        } else if (entity instanceof Player player) {
             player.displayClientMessage(Component.literal("You cant teleport over your existing seal").withStyle(ChatFormatting.RED), false);
         }
     }
 
-    public static void teleportEntity(LivingEntity entity, ResourceLocation destination, double x, double y, double z){
-        if(!SealedUtils.isSealed(entity)){
-            teleportEntityThroughDimensions(entity, destination, x, y ,z);
-        }else if(entity instanceof Player player){
+    public static void teleportEntity(LivingEntity entity, ResourceLocation destination, double x, double y, double z) {
+        if (!SealedUtils.isSealed(entity)) {
+            teleportEntityThroughDimensions(entity, destination, x, y, z);
+        } else if (entity instanceof Player player) {
             player.displayClientMessage(Component.literal("You cant teleport over your existing seal").withStyle(ChatFormatting.RED), false);
         }
     }
 
-    public static boolean canBreakSeal(LivingEntity entity){
+    public static boolean canBreakSeal(LivingEntity entity) {
         int sequence = getSequence(entity);
         int sealSequence = SealedUtils.sealSequence(entity);
         if (currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 3)) sequence--;
-        if(sealSequence >= sequence){
+        if (sealSequence >= sequence) {
             int spiritualityDivisor = sealSequence - sequence + 1;
             return getSpirituality(entity) >= SealedUtils.getBreakFreeCost(sealSequence) / spiritualityDivisor;
         }
         return false;
     }
 
-    public static void breakSeal(LivingEntity entity){
+    public static void breakSeal(LivingEntity entity) {
         CompoundTag tag = entity.getPersistentData();
         SealedUtils.setSealed(entity, false);
         SealedUtils.setSequence(entity, 9);
         SealedUtils.setCreator(entity, new UUID(0, 0));
         SealedUtils.setSealedAbilities(entity, false);
-        if(tag.getBoolean("spatialCageIsSealed")){
+        if (tag.getBoolean("spatialCageIsSealed")) {
             tag.remove("spatialCageIsSealed");
             tag.remove("spatialCageX");
             tag.remove("spatialCageY");

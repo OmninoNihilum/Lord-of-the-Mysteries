@@ -1,5 +1,6 @@
 package net.swimmingtuna.lotm.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
@@ -7,16 +8,15 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.server.MinecraftServer;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Optional;
-import com.mojang.authlib.GameProfile;
 
 public class AllyCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {

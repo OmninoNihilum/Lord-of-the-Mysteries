@@ -1,13 +1,18 @@
 package net.swimmingtuna.lotm.networking;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightPacketS2C;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.ScryingEntityPacketS2C;
 import net.swimmingtuna.lotm.networking.packet.*;
 import net.swimmingtuna.lotm.util.AllyInformation.SyncAlliesPacket;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.SimpleEntityCapabilityStatusPacket;
@@ -24,6 +29,7 @@ public class LOTMNetworkHandler {
             PROTOCOL_VERSION::equals
     );
     private static int nextId = 0;
+
     private static int id() {
         return nextId++;
     }
@@ -34,6 +40,13 @@ public class LOTMNetworkHandler {
                 .add(SpiritualityC2S::register)
                 .build();
         packets.forEach(consumer -> consumer.accept(INSTANCE, id()));
+
+
+        INSTANCE.messageBuilder(DimensionalSightCompleteDataPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(DimensionalSightCompleteDataPacketS2C::new)
+                .encoder(DimensionalSightCompleteDataPacketS2C::encode)
+                .consumerMainThread(DimensionalSightCompleteDataPacketS2C::handle)
+                .add();
 
         INSTANCE.messageBuilder(LuckManipulationLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(LuckManipulationLeftClickC2S::new)
@@ -210,15 +223,10 @@ public class LOTMNetworkHandler {
                 .encoder(SyncLeftClickCooldownS2C::encode)
                 .consumerMainThread(SyncLeftClickCooldownS2C::handle)
                 .add();
-        INSTANCE.messageBuilder(SyncShouldntRenderSpiritWorldPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(SyncShouldntRenderSpiritWorldPacketS2C::new)
-                .encoder(SyncShouldntRenderSpiritWorldPacketS2C::encode)
-                .consumerMainThread(SyncShouldntRenderSpiritWorldPacketS2C::handle)
-                .add();
-        INSTANCE.messageBuilder(BatchedSpiritWorldUpdatePacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(BatchedSpiritWorldUpdatePacketS2C::new)
-                .encoder(BatchedSpiritWorldUpdatePacketS2C::encode)
-                .consumerMainThread(BatchedSpiritWorldUpdatePacketS2C::handle)
+        INSTANCE.messageBuilder(SpiritWorldSyncPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(SpiritWorldSyncPacket::new)
+                .encoder(SpiritWorldSyncPacket::toBytes)
+                .consumerMainThread(SpiritWorldSyncPacket::handle)
                 .add();
         INSTANCE.messageBuilder(RequestCooldownSetC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(RequestCooldownSetC2S::new)
@@ -270,6 +278,21 @@ public class LOTMNetworkHandler {
                 .encoder(TravelerWaypointC2S::toByte)
                 .consumerMainThread(TravelerWaypointC2S::handle)
                 .add();
+        INSTANCE.messageBuilder(DimensionalSightPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(DimensionalSightPacketS2C::decode)
+                .encoder(DimensionalSightPacketS2C::encode)
+                .consumerMainThread(DimensionalSightPacketS2C::handle)
+                .add();
+        INSTANCE.messageBuilder(DimensionalSightPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(DimensionalSightPacketS2C::decode)
+                .encoder(DimensionalSightPacketS2C::encode)
+                .consumerMainThread(DimensionalSightPacketS2C::handle)
+                .add();
+        INSTANCE.messageBuilder(ScryingEntityPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ScryingEntityPacketS2C::decode)
+                .encoder(ScryingEntityPacketS2C::encode)
+                .consumerMainThread(ScryingEntityPacketS2C::handle)
+                .add();
     }
 
 
@@ -283,6 +306,22 @@ public class LOTMNetworkHandler {
 
     public static <MSG> void sendToPlayer(MSG message, ServerPlayer player) {
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
+    }
+
+    public static void sendTrackingBlock(BlockPos pos, Level level, Object msg) {
+        if (level.getServer() != null) {
+            PlayerList playerList = level.getServer().getPlayerList();
+            for (int i = 0; i < playerList.getPlayers().size(); ++i) {
+                ServerPlayer serverplayer = playerList.getPlayers().get(i);
+                if (serverplayer.level().dimension() == level.dimension()) {
+                    double d0 = (double) pos.getX() - serverplayer.getX();
+                    double d2 = (double) pos.getZ() - serverplayer.getZ();
+                    if (d0 * d0 + d2 * d2 < 16384.0) {
+                        INSTANCE.sendTo(msg, serverplayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                    }
+                }
+            }
+        }
     }
 }
 

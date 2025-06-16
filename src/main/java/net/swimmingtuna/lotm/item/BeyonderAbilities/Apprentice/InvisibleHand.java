@@ -43,8 +43,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-import static net.swimmingtuna.lotm.util.BeyonderUtil.*;
 import static net.swimmingtuna.lotm.util.BeyonderUtil.getCustomFallingBlockFromUUID;
+import static net.swimmingtuna.lotm.util.BeyonderUtil.getLivingEntityFromUUID;
 
 public class InvisibleHand extends SimpleAbilityItem {
     public InvisibleHand(Properties properties) {

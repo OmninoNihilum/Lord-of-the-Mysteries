@@ -11,6 +11,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.Mahoujin;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.ScryingMahoujin;
 import net.swimmingtuna.lotm.blocks.MonsterDomainBlock;
 import net.swimmingtuna.lotm.blocks.PotionCauldron;
 import net.swimmingtuna.lotm.blocks.RealVoidBlock;
@@ -231,6 +233,12 @@ public class BlockInit {
 
     public static final RegistryObject<Block> REAL_VOID_BLOCK = registerBlock("real_void_block",
             RealVoidBlock::new);
+
+    public static final RegistryObject<Block> DIMENSIONAL_SIGHT = registerBlock("dimensional_sight",
+            ScryingMahoujin::new);
+
+    public static final RegistryObject<Block> MAHOUJIN = registerBlock("mahoujin",
+            Mahoujin::new);
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);

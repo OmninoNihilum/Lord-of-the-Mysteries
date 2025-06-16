@@ -15,7 +15,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -109,11 +110,23 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
 
     public static final Map<UUID, Boolean> lastSentInvisibilityStates = new HashMap<>();
 
-    public static void psychologicalInvisibility(LivingEntity livingEntity) {
+    public static void psychologicalInvisibility(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
         if (livingEntity.tickCount % 10 == 0) {
             CompoundTag tag = livingEntity.getPersistentData();
+            int x = tag.getInt("psychologicalInvisibilityHurt");
+            if (x >= 1) {
+                tag.putInt("psychologicalInvisibilityHurt", x - 1);
+            }
             boolean currentState = tag.getBoolean("psychologicalInvisibility");
             if (currentState) {
+                if (x >= 400) {
+                    removePsychologicalInvisibilityEffect(livingEntity);
+                    if (livingEntity instanceof Player player) {
+                        player.displayClientMessage(Component.literal("You got hit too many times and are no longer invisible!").withStyle(ChatFormatting.RED), true);
+                    }
+                    SimpleAbilityItem.addCooldown(livingEntity, ItemInit.PSYCHOLOGICAL_INVISIBILITY.get(), 240);
+                }
                 Collection<MobEffectInstance> effects = livingEntity.getActiveEffects();
                 effects.forEach(effect -> {
                     if (effect.isAmbient() || effect.isVisible()) {
@@ -139,7 +152,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
     }
 
 
-    public static void psychologicalInvisibilityHurt(LivingHurtEvent event) {
+    public static void psychologicalInvisibilityAttack(LivingAttackEvent event) {
         LivingEntity entity = event.getEntity();
         if (!entity.level().isClientSide()) {
             if (entity.getPersistentData().getBoolean("psychologicalInvisibility")) {
@@ -154,9 +167,6 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
         if (!livingEntity.level().isClientSide()) {
             CompoundTag tag = livingEntity.getPersistentData();
             int x = tag.getInt("psychologicalInvisibilityHurt");
-            if (x >= 1) {
-                tag.putInt("psychologicalInvisibilityHurt", x - 1);
-            }
             if (x >= 400 && livingEntity.getPersistentData().getBoolean("psychologicalInvisibility")) {
                 livingEntity.getPersistentData().putBoolean("psychologicalInvisibility", false);
                 LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, livingEntity.getUUID()));

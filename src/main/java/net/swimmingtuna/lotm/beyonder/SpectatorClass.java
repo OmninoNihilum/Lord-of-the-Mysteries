@@ -350,7 +350,7 @@ public class SpectatorClass implements BeyonderClass {
                 }
             }
             if (tornado == 1) {
-                TornadoEntity tornadoEntity = new TornadoEntity(livingEntity.level(), livingEntity, 0, 0, 0);
+                TornadoEntity tornadoEntity = new TornadoEntity(livingEntity.level(), null, 0, 0, 0);
                 tornadoEntity.setTornadoHeight(100);
                 tornadoEntity.setTornadoRadius(70);
                 if (BeyonderUtil.getSequence(livingEntity) == 0) {

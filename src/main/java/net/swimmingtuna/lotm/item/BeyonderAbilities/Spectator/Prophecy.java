@@ -106,11 +106,11 @@ public class Prophecy extends SimpleAbilityItem {
             CompoundTag tag = livingEntity.getPersistentData();
             int prophecy = tag.getInt("spectatorProphecyItem");
             if (prophecy == 1) {
+                if (livingEntity instanceof Player player) {
+                    player.sendSystemMessage(Component.literal("You prophesized meteors into the world").withStyle(BeyonderUtil.getStyle(livingEntity)));
+                }
                 for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()); i++) {
                     MeteorEntity.summonMultipleMeteors(livingEntity);
-                    if (livingEntity instanceof Player player) {
-                        player.sendSystemMessage(Component.literal("You prophesized meteors into the world").withStyle(BeyonderUtil.getStyle(livingEntity)));
-                    }
                 }
             } else if (prophecy == 2) {
                 for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()); i++) {
@@ -209,7 +209,7 @@ public class Prophecy extends SimpleAbilityItem {
                                 StoneEntity stoneEntity = new StoneEntity(livingEntity.level(), livingEntity);
                                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(stoneEntity);
                                 stoneEntity.teleportTo(blockPos.getX(), blockPos.getY() + 3, blockPos.getZ());
-                                stoneEntity.setDeltaMovement(0, (3 + (Math.random() * (6 - 3))), 0);
+                                stoneEntity.setDeltaMovement(0, (3 + (Math.random() * (4 - 1.5))), 0);
                                 stoneEntity.setStoneYRot((int) (Math.random() * 18));
                                 stoneEntity.setStoneXRot((int) (Math.random() * 18));
                                 scaleData.setScale((float) (1 + (Math.random()) * 2.0f));

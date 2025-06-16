@@ -5,7 +5,8 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.client.renderer.entity.ThrownItemRenderer;import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.PotionItem;
 import net.minecraftforge.api.distmarker.Dist;
@@ -75,7 +76,6 @@ public class LOTM {
         BeyonderClassInit.BEYONDER_CLASS.register(modEventBus);
         BeyonderHolderAttacher.register();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Configs.commonSpec);
-        BlockEntityInit.register(modEventBus);
         EnchantmentInit.register(modEventBus);
         CreativeTabInit.register(modEventBus);
         BiomeInit.register(modEventBus);
@@ -84,6 +84,7 @@ public class LOTM {
         ChunkGeneratorInit.register(modEventBus);
         ItemInit.register(modEventBus);
         BlockInit.register(modEventBus);
+        BlockEntityInit.register(modEventBus);
         ModEffects.register(modEventBus);
         ModAttributes.register(modEventBus);
         EntityInit.register(modEventBus);

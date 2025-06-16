@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -26,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Random;
 
 public class MisfortuneBestowal extends SimpleAbilityItem {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
@@ -82,48 +82,67 @@ public class MisfortuneBestowal extends SimpleAbilityItem {
             CompoundTag pTag = interactionTarget.getPersistentData();
             double misfortune = tag.getDouble("misfortune");
             double pMisfortune = pTag.getDouble("misfortune");
+            Style style = BeyonderUtil.getStyle(player);
             int misfortuneAddValue = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MISFORTUNEBESTOWAL.get());
             pTag.putDouble("misfortune", Math.min(200, pMisfortune + misfortuneAddValue));
             tag.putDouble("misfortune", Math.min(0, misfortune - ((double) misfortuneAddValue / 2)));
             float random = BeyonderUtil.getPositiveRandomInRange(900);
             if (random <= 5) {
                 pTag.putInt("luckMeteor", 2);
-                player.sendSystemMessage(Component.literal("You randomly bestowed a Meteor on " + interactionTarget.getName().toString()));
+                player.sendSystemMessage(Component.literal("You randomly bestowed a Meteor on " + interactionTarget.getName().getString()).withStyle(style));
             } else if (random <= 70) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a Lightning Bolt on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckLightningLOTM", 2);
             } else if (random <= 100) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed the next ability use to not work on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("cantUseAbility", pTag.getInt("cantUseAbility") + 1);
             } else if (random <= 170) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed tripping on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckParalysis", 2);
             } else if (random <= 240) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed unequipping armor on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckUnequipArmor", 2);
             } else if (random <= 260) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a warden on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckWarden", 2);
             } else if (random <=  300) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a lightning bolt on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckLightningMC", 2);
             }  else if (random <= 380) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed an illness on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckPoison", 2);
             } else if (random <= 395) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a tornado on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckTornado", 2);
             } else if (random <= 440) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a falling stone block on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckStone", 2);
             } else if (random <= 500) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed next damage taken to be doubled on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckDoubleDamage", pTag.getInt("luckDoubleDamage") + 1);
             } else if (random <= 510) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a lightning storm on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityLightningStorm", 2);
             } else if (random <= 570) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a ground tremor on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityGroundTremor", 2);
             } else if (random <= 600) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a gaze that causes corruption on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityGaze", 2);
             } else if (random <= 650) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed an undead army on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityUndeadArmy", 2);
             } else if (random <= 690) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a strengthened baby zombie on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityBabyZombie", 2);
             } else if (random <= 740) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a cold breeze on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityBreeze", 2);
             } else if (random <= 800) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a heat wave on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityWave", 2);
             } else if (random <= 900) {
+                player.sendSystemMessage(Component.literal("You randomly bestowed a gas explosion on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("calamityExplosion", 2);
             }
         }

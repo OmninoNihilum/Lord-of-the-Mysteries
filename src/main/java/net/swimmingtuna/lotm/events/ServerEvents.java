@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.events;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -10,19 +11,28 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.SpectatorClass;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DimensionalSight;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SeparateWormOfStar;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationFortune;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationInfiniteFortune;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationInfiniteMisfortune;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationMisfortune;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
@@ -35,6 +45,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 import static net.swimmingtuna.lotm.beyonder.SpectatorClass.EVENT_TO_TAG;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DimensionalSight.findSuitableBlockPos;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor.*;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLife.spawnMob;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation.isThreeIntegers;
@@ -255,7 +266,8 @@ public class ServerEvents {
 
                 Level destination = player.level();
                 if (hasDimensionId(message)) {
-                    destination = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message), destination);                }
+                    destination = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message), destination);
+                }
 
                 if (!canTeleportAcrossDimensions(player, destination)) {
                     event.getPlayer().displayClientMessage(Component.literal("Target is in an inaccessible dimension").withStyle(ChatFormatting.RED), true);
@@ -393,6 +405,34 @@ public class ServerEvents {
             }
 
             player.displayClientMessage(Component.literal("Successfully separated " + wormOfStarSeparationAmount + " Worms of Star!").withStyle(ChatFormatting.BLUE), true);
+            event.setCanceled(true);
+        }
+        if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof DimensionalSight && !player.getCooldowns().isOnCooldown(ItemInit.DIMENSIONAL_SIGHT.get()) && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 3)) {
+            for (ServerPlayer onlinePlayer : player.getServer().getPlayerList().getPlayers()) {
+                System.out.println(onlinePlayer.getName().getString());
+                if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
+                    BlockPos playerPos = player.blockPosition();
+                    BlockPos targetPos = findSuitableBlockPos(level, playerPos);
+                    if (targetPos != null) {
+                        BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
+                        level.setBlock(targetPos, dimensionalSightState, 3);
+                        level.getServer().execute(() -> {
+                            BlockEntity blockEntity = level.getBlockEntity(targetPos);
+                            if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
+                                sightEntity.setCaster(player.getUUID());
+                                sightEntity.viewTarget = onlinePlayer.getName().getString();
+                                sightEntity.scryUniqueID = onlinePlayer.getUUID();
+                                sightEntity.setChanged();
+                                sightEntity.sendUpdates();
+                                player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
+                            }
+                        });
+                    } else {
+                        SimpleAbilityItem.removeCooldown(player, ItemInit.DIMENSIONAL_SIGHT.get(), 0);
+                        player.sendSystemMessage(Component.literal("Could not find a suitable location to place Dimensional Sight.").withStyle(ChatFormatting.RED));
+                    }
+                }
+            }
             event.setCanceled(true);
         }
     }

@@ -8,8 +8,6 @@ import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedDataCapability;
-import net.swimmingtuna.lotm.capabilities.concealed_data.IConcealedDataCapability;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

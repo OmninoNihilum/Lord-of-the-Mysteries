@@ -1031,6 +1031,7 @@ public class CorruptionAndLuckHandler {
                     tornadoEntity.teleportTo(tornadoX, tornadoY, tornadoZ);
                     tornadoEntity.setTornadoRandom(true);
                     tornadoEntity.setDeltaMovement((Math.random() * 2) - 1, 0, (Math.random() * 2) - 1);
+                    livingEntity.level().addFreshEntity(tornadoEntity);
                     tag.putInt("luckTornadoResistance", 5);
                     for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().move(subtractX, subtractY, subtractZ).inflate(40))) {
                         if (isSequence3Monster(entity)) {

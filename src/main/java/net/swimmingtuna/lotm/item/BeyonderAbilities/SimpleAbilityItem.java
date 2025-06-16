@@ -30,9 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static net.swimmingtuna.lotm.util.BeyonderUtil.getAbilities;
-import static net.swimmingtuna.lotm.util.BeyonderUtil.getCooldownsForAbility;
-
 public abstract class SimpleAbilityItem extends Item implements Ability {
     protected final Supplier<? extends BeyonderClass> requiredClass;
     protected final int requiredSequence;

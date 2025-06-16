@@ -83,7 +83,6 @@ import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerMobSequenceData;
-import net.swimmingtuna.lotm.util.SpiritWorldVisibilityTracker;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.util.effect.NoRegenerationEffect;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
@@ -271,6 +270,9 @@ public class ModEvents {
             if (ClientFogData.getFogTimer() >= 1) {
                 ClientFogData.decrementFog();
             }
+            if (player.tickCount % 100 == 0) {
+                //DimensionalSightEntity.debugLoadedChunks();
+            }
             if (ClientAbilityKeyResetData.getAbilityResetTimer() >= 1) {
                 ClientAbilityKeyResetData.decrementAbilityResetTimer();
                 if (ClientAbilityKeyResetData.getAbilityResetTimer() == 1) {
@@ -419,7 +421,7 @@ public class ModEvents {
                 windManipulationGuide(livingEntity);
                 windManipulationSense(livingEntity);
                 sailorLightningTravel(livingEntity);
-                PsychologicalInvisibility.psychologicalInvisibility(livingEntity);
+                PsychologicalInvisibility.psychologicalInvisibility(event);
                 monsterDomainIntHandler(livingEntity);
                 nightmareTick(livingEntity);
                 MonsterClass.calamityUndeadArmy(livingEntity);
@@ -451,8 +453,7 @@ public class ModEvents {
                 EyeOfDemonHunting.eyeTick(event);
                 EyeOfDemonHunting.demonHunterAntiConcealment(event);
                 livingNoMoveEffect(event);
-                PsychologicalInvisibility.psychologicalInvisibilityHurtTick(livingEntity);
-                //sendSpiritWorldPackets(entity);
+                //PsychologicalInvisibility.psychologicalInvisibilityHurtTick(livingEntity);
                 WintryBlade.wintryBladeTick(event);
                 warriorGiant(livingEntity);
                 DeathKnell.deathKnellNegativeTick(livingEntity);
@@ -522,6 +523,7 @@ public class ModEvents {
         }
         if (attacker != null) {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
+                PsychologicalInvisibility.psychologicalInvisibilityAttack(event);
                 DoorMirage.doorMirageAttackEvent(event);
                 BlinkAfterimage.travelerBlinkPassive(event);
                 CompoundTag tag = attacked.getPersistentData();
@@ -534,11 +536,6 @@ public class ModEvents {
                     event.setCanceled(true);
                 }
                 CompoundTag sourceTag = attacker.getPersistentData();
-                boolean entityInSpiritWorld = tag.getBoolean("inSpiritWorld");
-                boolean sourceInSpiritWorld = sourceTag.getBoolean("inSpiritWorld");
-                if (entityInSpiritWorld != sourceInSpiritWorld) {
-                    event.setCanceled(true);
-                }
 
                 //SAILOR FLIGHT
                 if (tag.getInt("sailorFlightDamageCancel") != 0 && event.getSource().is(DamageTypes.FALL)) {
@@ -651,13 +648,8 @@ public class ModEvents {
             if (entitySourceOwner instanceof Projectile projectile && projectile.getOwner() != null) {
                 entitySourceOwner = projectile.getOwner();
             }
-            boolean entityInSpiritWorld = tag.getBoolean("inSpiritWorld");
             if (entitySource != null) {
                 CompoundTag sourceTag = entitySource.getPersistentData();
-                boolean sourceInSpiritWorld = sourceTag.getBoolean("inSpiritWorld");
-                if (entityInSpiritWorld != sourceInSpiritWorld) {
-                    event.setCanceled(true);
-                }
                 if (entity instanceof LivingEntity living) {
                     TrickEscapeTrick.escapeTrickHurtEvent(event);
                     if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.SAILOR.get(), 1) && (entitySource.getName().getString().toLowerCase().contains("lightning") || entitySource.getName().getString().toLowerCase().contains("thunder") || entitySource.toString().toLowerCase().contains("lightning") || entitySource.toString().toLowerCase().contains("thunder"))) {
@@ -728,7 +720,6 @@ public class ModEvents {
                 }
                 //SAILOR FLIGHT
                 if (entity instanceof Player player) {
-                    PsychologicalInvisibility.psychologicalInvisibilityHurt(event);
                     int flightCancel = tag.getInt("sailorFlightDamageCancel");
                     if (!player.level().isClientSide()) {
 
@@ -977,9 +968,9 @@ public class ModEvents {
                 }
             } else if (entity instanceof Projectile projectile) {
                 Entity owner = projectile.getOwner();
-                if (owner != null) {
-                    projectile.getPersistentData().putBoolean("inSpiritWorld", owner.getPersistentData().getBoolean("inSpiritWorld"));
-                }
+                //if (owner != null) {
+                //    projectile.getPersistentData().putBoolean("inSpiritWorld", owner.getPersistentData().getBoolean("inSpiritWorld"));
+                // }
             }
         }
     }
@@ -994,24 +985,16 @@ public class ModEvents {
     public static void onEntityChangeTarget(LivingChangeTargetEvent event) {
         LivingEntity originalEntity = event.getEntity();
         if (!originalEntity.level().isClientSide()) {
-            //spiritWorldChangeTargetEvent(event);
+
         }
     }
 
     @SubscribeEvent
     public static void onEntityRemoved(EntityLeaveLevelEvent event) {
-        if (event.getEntity() instanceof LivingEntity) {
-            SpiritWorldVisibilityTracker.removeEntity(event.getEntity().getUUID());
-        }
         if (!event.getEntity().level().isClientSide()) {
             PlayerMobSequenceData.onEntityLeaveLevel(event); //add it to do the sequence and pathway stuff
         }
     }
-
-//@SubscribeEvent
-//public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-//    SpiritWorldVisibilityTracker.removePlayer(event.getEntity().getUUID());
-//}
 
 
 }

@@ -1,11 +1,9 @@
 package net.swimmingtuna.lotm.util.EntityUtil.behaviour.task;
 
-import java.util.EnumSet;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.Goal.Flag;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.monster.RangedAttackMob;
@@ -14,6 +12,8 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.tslat.smartbrainlib.util.BrainUtils;
+
+import java.util.EnumSet;
 // Import your custom classes
 
 public class BeyonderRangedCrossbowAttackGoal<T extends PlayerMobEntity & RangedAttackMob & CrossbowAttackMob> extends Goal {

@@ -410,7 +410,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
+    public void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("radius", radius);
         tag.putInt("ticks", ticks);

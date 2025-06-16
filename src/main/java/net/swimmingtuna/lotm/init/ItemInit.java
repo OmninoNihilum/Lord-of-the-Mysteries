@@ -13,8 +13,8 @@ import net.swimmingtuna.lotm.armor.SilverArmorItem;
 import net.swimmingtuna.lotm.item.AllyMaker;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.SpiritVision;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
@@ -397,7 +397,7 @@ public class ItemInit {
     public static final RegistryObject<Item> SYMBOLIZATION = ITEMS.register("symbolization",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DIMENSIONAL_SIGHT = ITEMS.register("dimensionalsight",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new DimensionalSight(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> REPLICATE = ITEMS.register("replicate",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SEALING = ITEMS.register("sealing",

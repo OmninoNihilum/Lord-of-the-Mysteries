@@ -1,12 +1,12 @@
 package net.swimmingtuna.lotm.init;
 
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity;
 import net.swimmingtuna.lotm.blocks.PotionCauldronBlockEntity;
 import net.swimmingtuna.lotm.blocks.RealVoidBlockEntity;
@@ -33,6 +33,16 @@ public class BlockEntityInit {
     public static final RegistryObject<BlockEntityType<RealVoidBlockEntity>> REAL_VOID_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("real_void_block_entity",
                     () -> BlockEntityType.Builder.of(RealVoidBlockEntity::new, BlockInit.REAL_VOID_BLOCK.get())
+                            .build(null));
+
+    public static final RegistryObject<BlockEntityType<DimensionalSightTileEntity>> DIMENSIONAL_SIGHT_ENTITY =
+            BLOCK_ENTITIES.register("dimensional_sight_entity",
+                    () -> BlockEntityType.Builder.of(DimensionalSightTileEntity::new, BlockInit.DIMENSIONAL_SIGHT.get())
+                            .build(null));
+
+    public static final RegistryObject<BlockEntityType<DimensionalSightTileEntity>> MAHOUJIN =
+            BLOCK_ENTITIES.register("mahoujin",
+                    () -> BlockEntityType.Builder.of(DimensionalSightTileEntity::new, BlockInit.MAHOUJIN.get())
                             .build(null));
 
     public static void register(IEventBus eventBus) {

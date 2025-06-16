@@ -1,8 +1,6 @@
 package net.swimmingtuna.lotm.capabilities.is_concealed_data;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedDataProvider;
-import net.swimmingtuna.lotm.capabilities.concealed_data.IConcealedDataCapability;
 
 import java.util.Optional;
 import java.util.UUID;

@@ -42,6 +42,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
 
     public SwordOfTwilightEntity(EntityType<? extends SwordOfTwilightEntity> entityType, Level level) {
         super(entityType, level);
+        this.noCulling = true;
     }
 
 
