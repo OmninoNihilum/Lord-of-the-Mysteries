@@ -249,19 +249,6 @@ public class DimensionalSightTileEntity extends MahoujinTileEntity implements Bl
     @Override
     public void tick(Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState, @NotNull DimensionalSightTileEntity blockEntity) {
         if (!level.isClientSide) {
-            if (this.getCasterUUID() != null) {
-                System.out.println(BeyonderUtil.getLivingEntityFromUUID(level, this.getCasterUUID()).getName().getString() + " CASTER!!!");
-            } else {
-                System.out.println("CASTER null");
-            }
-            if (this.viewTarget != null) {
-                System.out.println(this.viewTarget + " VIEW TARGET!!!");
-            }
-            if (this.getScryTarget() != null) {
-                System.out.println(this.getScryTarget().getName().getString() + " SCRY TARGET!!!");
-            } else {
-                System.out.println("SCRY TARGET null");
-            }
             int maxLife = 100;
             if (this.getCasterUUID() != null) {
                 LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(level, this.getCasterUUID());
