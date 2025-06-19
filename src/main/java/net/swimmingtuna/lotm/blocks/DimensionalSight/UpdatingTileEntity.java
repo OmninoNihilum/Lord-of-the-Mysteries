@@ -15,9 +15,7 @@ public class UpdatingTileEntity extends BlockEntity {
         super(type, pos, blockState);
     }
 
-    /**
-     * Sends block updates to clients when the tile entity data changes
-     */
+
     public void sendUpdates() {
         if (this.level != null) {
             this.level.sendBlockUpdated(this.worldPosition, this.level.getBlockState(this.worldPosition), this.level.getBlockState(this.worldPosition), 3);
@@ -27,9 +25,6 @@ public class UpdatingTileEntity extends BlockEntity {
         this.setChanged();
     }
 
-    /**
-     * Called when receiving data packet from server on client side
-     */
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
         super.onDataPacket(net, packet);
@@ -38,18 +33,12 @@ public class UpdatingTileEntity extends BlockEntity {
         }
     }
 
-    /**
-     * Creates the packet to send tile entity data to clients
-     */
     @Nullable
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    /**
-     * Saves the tile entity data to NBT when the chunk is saved
-     */
     @Override
     public CompoundTag getUpdateTag() {
         CompoundTag tag = super.getUpdateTag();

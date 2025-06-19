@@ -14,7 +14,7 @@ public class RealVoidBlock extends Block implements EntityBlock {
     public RealVoidBlock() {
         super(BlockBehaviour.Properties.of()
                 .mapColor(MapColor.NONE)
-                .strength(-1.0F, 3600000.0F)
+                .strength(100.0F, 3600.0F)
                 .noLootTable()
                 .requiresCorrectToolForDrops()
                 .lightLevel(state -> 15));

@@ -5,8 +5,10 @@ import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -17,13 +19,18 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.entity.DimensionalSightSealEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
+import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,34 +48,85 @@ public class DimensionalSight extends SimpleAbilityItem {
         if (!checkAll(player)) {
             return InteractionResult.FAIL;
         }
-        addCooldown(player);
+        addCooldown(player, this, 400);
         useSpirituality(player);
         dimensionalSight(player, pInteractionTarget);
         return InteractionResult.SUCCESS;
     }
 
+    @Override
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+        if (!checkAll(player)) {
+            return InteractionResult.FAIL;
+        }
+        useSpirituality(player);
+        dimensionalSight(player);
+        return InteractionResult.SUCCESS;
+    }
+
+
     public static void dimensionalSight(LivingEntity livingEntity, LivingEntity interactionTarget) {
         Level level = livingEntity.level();
         if (!level.isClientSide()) {
-            BlockPos playerPos = livingEntity.blockPosition();
-            BlockPos targetPos = findSuitableBlockPos(level, playerPos);
-            if (targetPos != null) {
-                BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
-                level.setBlock(targetPos, dimensionalSightState, 3);
-                BlockEntity blockEntity = level.getBlockEntity(targetPos);
-                if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
-                    sightEntity.setCaster(livingEntity);
-                    if (interactionTarget != null) {
-                        sightEntity.viewTarget = interactionTarget.getName().getString();
-                        sightEntity.scryUniqueID = interactionTarget.getUUID();
+            MinecraftServer server = level.getServer();
+            if (server != null) {
+                server.execute(() -> {
+                    BlockPos playerPos = livingEntity.blockPosition();
+                    Vec3 lookPos = livingEntity.getLookAngle().scale(5);
+                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y(), (int) lookPos.z()));
+                    BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
+                    level.setBlock(targetPos, dimensionalSightState, 3);
+                    BlockEntity blockEntity = level.getBlockEntity(targetPos);
+                    if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
                         sightEntity.setCaster(livingEntity);
-                        sightEntity.setChanged();
-                        sightEntity.sendUpdates();
+                        if (interactionTarget != null) {
+                            sightEntity.viewTarget = interactionTarget.getName().getString();
+                            sightEntity.scryUniqueID = interactionTarget.getUUID();
+                            sightEntity.setCaster(livingEntity);
+                            sightEntity.setChanged();
+                            sightEntity.sendUpdates();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    public void dimensionalSight(LivingEntity livingEntity) {
+        if (!livingEntity.level().isClientSide()) {
+            DimensionalSightTileEntity dimensionalSightTileEntity = SimpleAbilityItem.findNearbyDimensionalSight(livingEntity.level(), livingEntity);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.scryUniqueID != null && dimensionalSightTileEntity.getCasterUUID() != null && dimensionalSightTileEntity.getCasterUUID().equals(livingEntity.getUUID())) {
+                DimensionalSightSealEntity sightSealEntity = new DimensionalSightSealEntity(EntityInit.DIMENSIONAL_SIGHT_SEAL_ENTITY.get(), livingEntity.level());
+                sightSealEntity.setSealX((float) dimensionalSightTileEntity.getScryTarget().getX());
+                sightSealEntity.setSealY((float) dimensionalSightTileEntity.getScryTarget().getY());
+                sightSealEntity.setSealZ((float) dimensionalSightTileEntity.getScryTarget().getZ());
+                sightSealEntity.setOwner(livingEntity);
+                Vec3 lookVec = livingEntity.getLookAngle().scale(-10);
+                BlockPos pos = livingEntity.getOnPos();
+                sightSealEntity.setMaxLife((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.DIMENSIONAL_SIGHT.get()));
+                sightSealEntity.teleportTo(pos.getX() + lookVec.z(), pos.getY() + lookVec.y(), pos.getZ() + lookVec.z());
+                livingEntity.level().addFreshEntity(sightSealEntity);
+                dimensionalSightTileEntity.removeThis();
+                this.addCooldown(livingEntity);
+            } else {
+                if (livingEntity.isShiftKeyDown()) {
+                    int amount = 0;
+                    for (DimensionalSightSealEntity dimensionalSightSealEntity : livingEntity.level().getEntitiesOfClass(DimensionalSightSealEntity.class, livingEntity.getBoundingBox().inflate(10))) {
+                        if (dimensionalSightSealEntity.getOwner() == livingEntity) {
+                            amount++;
+                            for (Entity entity : BeyonderUtil.checkEntitiesInLocation(livingEntity, 20, dimensionalSightSealEntity.getSealX(), dimensionalSightSealEntity.getSealY(), dimensionalSightSealEntity.getSealZ())) {
+                                EnvisionLocation.envisionLocationTeleport(entity,dimensionalSightSealEntity.getX(), dimensionalSightSealEntity.getY(), dimensionalSightSealEntity.getZ());
+
+                                livingEntity.sendSystemMessage(Component.literal("ENTITY FOUND " + entity.getName().getString()));
+                            }
+                            dimensionalSightSealEntity.setShouldMessage(false);
+                            dimensionalSightSealEntity.setMaxLife(dimensionalSightSealEntity.tickCount - 1);
+                        }
+                    }
+                    if (amount >= 1) {
+                        this.addCooldown(livingEntity);
                     }
                 }
-            } else {
-                SimpleAbilityItem.removeCooldown(livingEntity, ItemInit.DIMENSIONAL_SIGHT.get(), 0);
-                livingEntity.sendSystemMessage(Component.literal("Could not find a suitable location to place Dimensional Sight.").withStyle(ChatFormatting.RED));
             }
         }
     }

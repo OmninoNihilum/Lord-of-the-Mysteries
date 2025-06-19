@@ -276,6 +276,7 @@
   "item.lotm.tornado": "Tornado",
 
 
+
   "item.lotm.gigantification": "Gigantification",
   "item.lotm.lightofdawn": "Light of Dawn",
   "item.lotm.dawnarmory": "Dawn Armory",
@@ -469,10 +470,53 @@
   "enchantment.lotm.flame": "Flame Aspect",
   "enchantment.lotm.wither": "Withering",
   "enchantment.lotm.confusion": "Confusion",
-  "enchantment.lotm.freeze": "Freeze"
+  "enchantment.lotm.freeze": "Freeze",
 
-
-
+  "entity.lotm.aqueous_light": "Aqueous Light",
+  "entity.lotm.mercury_entity": "Mercury",
+  "entity.lotm.dawn_ray_entity": "Dawn Ray",
+  "entity.lotm.twilight_light_entity": "Twilight Light",
+  "entity.lotm.guardian_box_entity": "Guardian Box",
+  "entity.lotm.death_knell_bullet": "Death Knell Bullet",
+  "entity.lotm.mc_lightning_bolt": "Lightning Bolt",
+  "entity.lotm.water_column": "Water Column",
+  "entity.lotm.roar_entity": "Roar",
+  "entity.lotm.storm_seal_entity": "Storm Seal",
+  "entity.lotm.aqueous_light_pull": "Aqueous Light Pull",
+  "entity.lotm.aqueous_light_push": "Aqueous Light Push",
+  "entity.lotm.dragon_breath": "Dragon Breath",
+  "entity.lotm.meteor": "Meteor",
+  "entity.lotm.sword_of_twilight_entity": "Sword of Twilight",
+  "entity.lotm.space_rift_entity": "Space Rift",
+  "entity.lotm.spatial_cage_entity": "Spatial Cage",
+  "entity.lotm.lightningball": "Lightning Ball",
+  "entity.lotm.circle": "Circle",
+  "entity.lotm.divine_hand_right_entity": "Divine Hand (Right)",
+  "entity.lotm.divine_hand_left_entity": "Divine Hand (Left)",
+  "entity.lotm.meteortrailentity": "Meteor Trail",
+  "entity.lotm.stone": "Stone",
+  "entity.lotm.netherrack": "Netherrack",
+  "entity.lotm.endstone": "End Stone",
+  "entity.lotm.lava": "Lava",
+  "entity.lotm.tornado": "Tornado",
+  "entity.lotm.hurricane_of_light": "Hurricane of Light",
+  "entity.lotm.meteor_no_hurt": "Meteor",
+  "entity.lotm.apprentice_door_entity": "Door",
+  "entity.lotm.flash": "Trickmaster Flash",
+  "entity.lotm.silver_beam_entity": "Silver Light",
+  "entity.lotm.spear_of_dawn_entity": "Spear of Dawn",
+  "entity.lotm.globe_of_twilight_entity": "Globe of Twilight",
+  "entity.lotm.wind_blade": "Wind Blade",
+  "entity.lotm.low_sequence_door_entity": "Low Sequence Door",
+  "entity.lotm.mercury_cage_entity": "Mercury Cage",
+  "entity.lotm.mercury_portal_entity": "Mercury Portal",
+  "entity.lotm.wind_cushion": "Wind Cushion",
+  "entity.lotm.lightning_entity": "Lightning",
+  "entity.lotm.custom_falling_block_entity": "Falling Block",
+  "entity.lotm.whisperofcorruption": "Whisper of Corruption",
+  "entity.lotm.dimensionalsightseal": "Dimensional Sight Seal",
+  "entity.lotm.luck_bottle_entity": "Luck Bottle",
+  "entity.lotm.player_mob": "Player Mob"
 
 
 }

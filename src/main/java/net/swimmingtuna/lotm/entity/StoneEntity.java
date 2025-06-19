@@ -156,11 +156,11 @@ public class StoneEntity extends AbstractArrow {
                             BlockState state = this.level().getBlockState(pos);
                             Block block = state.getBlock();
                             float blockStrength = block.defaultDestroyTime();
-                            float obsidianStrength = Blocks.OBSIDIAN.defaultDestroyTime();
-                            if (blockStrength <= obsidianStrength) {
+                            float bedrockStrength = Blocks.BEDROCK.defaultDestroyTime();
+                            if (blockStrength <= bedrockStrength) {
                                 this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                             }
-                            if (blockStrength >= obsidianStrength) {
+                            if (blockStrength >= bedrockStrength) {
                                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 8, Level.ExplosionInteraction.TNT);
                             }
                         }

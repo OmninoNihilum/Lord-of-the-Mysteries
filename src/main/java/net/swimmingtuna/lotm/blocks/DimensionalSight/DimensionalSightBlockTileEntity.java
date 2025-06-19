@@ -15,20 +15,20 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class MahoujinBlockTileEntity<T extends MahoujinTileEntity> extends BlockTileEntity<T> {
+public class DimensionalSightBlockTileEntity<T extends DimensionalTileEntity> extends BlockTileEntity<T> {
     public static final AABB boundingBox = new AABB(0.0, 0.0, 0.0, 1.0, 0.0625, 1.0);
 
-    public MahoujinBlockTileEntity(BlockBehaviour.Properties material, String name) {
+    public DimensionalSightBlockTileEntity(BlockBehaviour.Properties material, String name) {
         super(material, name);
     }
 
-    public MahoujinBlockTileEntity(String name) {
+    public DimensionalSightBlockTileEntity(String name) {
         this(BlockBehaviour.Properties.copy(Blocks.GLASS).noOcclusion(), name);
     }
 
     @Nullable
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new MahoujinTileEntity(blockPos, blockState);
+        return new DimensionalTileEntity(blockPos, blockState);
     }
 
     public VoxelShape getShape(BlockState bs, BlockGetter bg, BlockPos bp, CollisionContext ctx) {

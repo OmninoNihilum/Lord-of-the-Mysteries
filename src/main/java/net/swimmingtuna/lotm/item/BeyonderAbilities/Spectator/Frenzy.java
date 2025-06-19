@@ -70,7 +70,7 @@ public class Frenzy extends SimpleAbilityItem {
                 if (!checkAll(user)) {
                     return InteractionResult.FAIL;
                 }
-                frenzy(user, level, targetPos, BeyonderUtil.getDreamIntoReality(user));
+                frenzy(user, level, targetPos);
                 return InteractionResult.SUCCESS;
             }
         } else {
@@ -81,7 +81,7 @@ public class Frenzy extends SimpleAbilityItem {
             if (!checkAll(player)) {
                 return InteractionResult.FAIL;
             }
-            frenzy(player, level, targetPos, BeyonderUtil.getDreamIntoReality(player));
+            frenzy(player, level, targetPos);
             addCooldown(player);
             useSpirituality(player);
 
@@ -97,11 +97,11 @@ public class Frenzy extends SimpleAbilityItem {
         }
         addCooldown(player);
         useSpirituality(player);
-        frenzy(player, player.level(), BlockPos.containing(interactionTarget.position()), BeyonderUtil.getDreamIntoReality(player));
+        frenzy(player, player.level(), BlockPos.containing(interactionTarget.position()));
         return InteractionResult.SUCCESS;
     }
 
-    private void frenzy(LivingEntity player, Level level, BlockPos targetPos, int dreamIntoRealityValue) {
+    private void frenzy(LivingEntity player, Level level, BlockPos targetPos) {
         if (!player.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(player);
             double radius = BeyonderUtil.getDamage(player).get(ItemInit.FRENZY.get());

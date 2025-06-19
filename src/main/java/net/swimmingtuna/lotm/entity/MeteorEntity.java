@@ -26,6 +26,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
@@ -109,7 +110,9 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 30.0f, 1.0f);
                 this.discard();
             }
-            Objects.requireNonNull(this.getOwner()).getPersistentData().putInt("calamityIncarnationInMeteor", 0);
+            if (this.getOwner() != null) {
+                (this.getOwner()).getPersistentData().putInt("calamityIncarnationInMeteor", 0);
+            }
         }
     }
 
@@ -212,7 +215,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 hitPos.offset((int) -radius, (int) -radius, (int) -radius),
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
-                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0) {
+                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0 && this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) <= 51) {
                     this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                 }
             }
@@ -232,7 +235,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 hitPos.offset((int) -radius, (int) -radius, (int) -radius),
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
-                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0) {
+                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0 && this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) <= 51) {
                     this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                 }
             }
@@ -293,7 +296,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 float scale = ScaleTypes.BASE.getScaleData(this).getScale();
                 Vec3 lookVec = livingEntity.getLookAngle();
                 if (tag.getInt("calamityIncarnationInMeteor") >= 1 && !livingEntity.onGround()) {
-                    this.teleportTo(livingEntity.getX(), livingEntity.getY() + 1 * scale, livingEntity.getZ());
+                    EnvisionLocation.envisionLocationTeleport((LivingEntity) this.getOwner(),livingEntity.getX(), livingEntity.getY() + 1 * scale, livingEntity.getZ());
                     this.setDeltaMovement(lookVec.x, -1, lookVec.z);
                     this.hurtMarked = true;
                     if (livingEntity.onGround()) {

@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -111,9 +112,20 @@ public class Nightmare extends SimpleAbilityItem {
            if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
                living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
                if (tag.getInt("NightmareTimer") < 300) {
-                   int addToAmount = sequence < 3 ? 200 : 100;
+                   int addToAmount = tag.getInt("NightmareTimer") + (sequence < 3 ? 200 : 100);
                    tag.putInt("NightmareTimer", addToAmount);
-                   livingEntity.sendSystemMessage(Component.literal(name + "'s nightmare value is " + tag.getInt("NightmareTimer") + " / 300"));
+                   ChatFormatting style;
+                   int entitySequence = BeyonderUtil.getSequence(living);
+                   if (entitySequence >= 9 || entitySequence == -1) {
+                       style = ChatFormatting.WHITE;
+                   } else if (entitySequence >= 6) {
+                       style = ChatFormatting.YELLOW;
+                   } else if (entitySequence >= 4) {
+                       style = ChatFormatting.RED;
+                   } else {
+                       style = ChatFormatting.DARK_RED;
+                   }
+                   livingEntity.sendSystemMessage(Component.literal(name + "'s nightmare value is " + tag.getInt("NightmareTimer") + " / 300").withStyle(style));
                } else {
                    tag.putInt("NightmareTimer", 0);
                    if (living instanceof Player) {

@@ -61,7 +61,7 @@ public class StormSeal extends SimpleAbilityItem {
         }
     }
 
-    public static void sealTick(LivingEvent.LivingTickEvent event) {
+    public static void stormSealTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         CompoundTag tag = entity.getPersistentData();
         if (!entity.level().isClientSide()) {

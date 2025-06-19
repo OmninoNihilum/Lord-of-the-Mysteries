@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -294,7 +295,7 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
                         hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), 10 * scale);
+                livingEntity.hurt(BeyonderUtil.lightningSource(this), 10 * scale);
             }
         }
     }
@@ -315,7 +316,11 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
 
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), 10 * scale);
+                if (!(livingEntity instanceof Player)) {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this), 10 * scale);
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this), 6 * scale);
+                }
             }
         }
     }

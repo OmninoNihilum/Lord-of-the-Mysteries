@@ -15,7 +15,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
@@ -391,6 +394,35 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
             }
         }
         return true;
+    }
+
+    public static DimensionalSightTileEntity findNearbyDimensionalSight(Level level, LivingEntity entity) {
+        if (level == null || entity == null) return null;
+        if (!level.isClientSide()) {
+            BlockPos entityPos = entity.blockPosition();
+            int searchRadius = 15;
+            for (int x = -searchRadius; x <= searchRadius; x++) {
+                for (int y = -searchRadius; y <= searchRadius; y++) {
+                    for (int z = -searchRadius; z <= searchRadius; z++) {
+                        BlockPos checkPos = entityPos.offset(x, y, z);
+                        BlockEntity blockEntity = level.getBlockEntity(checkPos);
+                        if (blockEntity instanceof DimensionalSightTileEntity dimensionalSight) {
+                            entity.sendSystemMessage(Component.literal("DIMENSIONAL SIGHT FOUND"));
+                            if (dimensionalSight.getCasterUUID() != null && dimensionalSight.getCasterUUID().equals(entity.getUUID()) && dimensionalSight.getScryUniqueID() != null) {
+                                return dimensionalSight;
+                            } else if (dimensionalSight.getCasterUUID() == null) {
+                                entity.sendSystemMessage(Component.literal("CASTED UUID NULL"));
+                            } else if (!dimensionalSight.getCasterUUID().equals(entity.getUUID())) {
+                                entity.sendSystemMessage(Component.literal("CASTED UUID NOT ENTITY UUID"));
+                            } else if (dimensionalSight.getScryTarget() == null) {
+                                entity.sendSystemMessage(Component.literal("SCRY TARGET NULL"));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public interface scribeAbilitiesStorage {

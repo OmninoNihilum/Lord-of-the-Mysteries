@@ -75,6 +75,7 @@ public class Astrolabe extends Item {
     private static Registry<Structure> getStructureRegistry(ServerLevel level) {
         return level.registryAccess().registryOrThrow(Registries.STRUCTURE);
     }
+    private static final int[] DIVISORS = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 
     public static void astrolabeChatMessage(ServerChatEvent event) {
         ServerPlayer player = event.getPlayer();
@@ -89,7 +90,7 @@ public class Astrolabe extends Item {
             try {
                 resourceLocation = new ResourceLocation(resourceKey);
                 if (ForgeRegistries.BLOCKS.containsKey(resourceLocation)) {
-                    maxDistance = maxDistance / 25;
+                    maxDistance = maxDistance / 40;
                     foundResource = true;
                     Block targetBlock = ForgeRegistries.BLOCKS.getValue(resourceLocation);
                     ServerLevel level = (ServerLevel) player.level();

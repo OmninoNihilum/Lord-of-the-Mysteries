@@ -28,6 +28,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.MercuryLiqueficationC2S;
@@ -256,7 +257,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(150))) {
                 if (living.getPersistentData().contains("mercuryArmor")) {
                     if (living.getPersistentData().getUUID("mercuryArmor").equals(livingEntity.getUUID())) {
-                        living.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+                        EnvisionLocation.envisionLocationTeleport(living, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
                         living.getPersistentData().putInt("mercuryArmorForm", 10);
                     }
                     if (!hasFullSilverArmor(livingEntity)) {

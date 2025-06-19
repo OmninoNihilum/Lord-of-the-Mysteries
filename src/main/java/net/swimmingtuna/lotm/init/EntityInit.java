@@ -14,7 +14,7 @@ import net.swimmingtuna.lotm.entity.*;
 public class EntityInit {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, LOTM.MOD_ID);
 
-    public static final RegistryObject<EntityType<AqueousLightEntity>> AQUEOUS_LIGHT_ENTITY =
+    public static final RegistryObject<EntityType<AqueousLightEntity>> AQUEOUS_LIGHT_ENTITY_DROWN =
             ENTITIES.register("aqueous_light", () -> EntityType.Builder.<AqueousLightEntity>of(AqueousLightEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(100).build(new ResourceLocation(LOTM.MOD_ID, "aqueous_light").toString()));
     public static final RegistryObject<EntityType<MercuryEntity>> MERCURY_ENTITY =
@@ -140,6 +140,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<WhisperOfCorruptionEntity>> WHISPERS_OF_CORRUPTION_ENTITY =
             ENTITIES.register("whisperofcorruption", () -> EntityType.Builder.<WhisperOfCorruptionEntity>of(WhisperOfCorruptionEntity::new, MobCategory.MISC)
                     .sized(1.0f,1.0f).build("whisperofcorruption"));
+    public static final RegistryObject<EntityType<DimensionalSightSealEntity>> DIMENSIONAL_SIGHT_SEAL_ENTITY =
+            ENTITIES.register("dimensionalsightseal", () -> EntityType.Builder.<DimensionalSightSealEntity>of(DimensionalSightSealEntity::new, MobCategory.MISC)
+                    .sized(5.0f,5.0f).build("dimensionalsightseal"));
     public static final RegistryObject<EntityType<LuckBottleEntity>> LUCK_BOTTLE_ENTITY =
             ENTITIES.register("luck_bottle_entity", () -> EntityType.Builder.<LuckBottleEntity>of(LuckBottleEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(100).build("luck_bottle_entity"));

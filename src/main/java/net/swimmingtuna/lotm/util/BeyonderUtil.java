@@ -114,7 +114,7 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems
 
 public class BeyonderUtil {
 
-    private static final Map<UUID, SimpleAbilityItem> pendingAbilityCopies = new HashMap<>();
+    public static final Map<UUID, SimpleAbilityItem> pendingAbilityCopies = new HashMap<>();
 
     public static Projectile getProjectiles(LivingEntity livingEntity) {
         if (livingEntity.level().isClientSide()) {
@@ -1435,25 +1435,36 @@ public class BeyonderUtil {
     }
 
     public static @Nullable BeyonderClass getPathway(LivingEntity living) { //marked
-        if (living instanceof Player player) {
-            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-            return holder.getCurrentClass();
-        } else if (living instanceof PlayerMobEntity playerMobEntity) {
-            return playerMobEntity.getCurrentPathway();
-        } else {
-            if (living.level() instanceof ServerLevel serverLevel) {
-                BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
-                String pathwayString = mappingData.getStringForEntity(living.getType());
-                if (pathwayString != null) {
-                    String lowerPathway = pathwayString.toLowerCase();
-                    for (BeyonderClass beyonderClass : BeyonderClassInit.getRegistry()) {
-                        for (String sequenceName : beyonderClass.sequenceNames()) {
-                            if (lowerPathway.contains(sequenceName.toLowerCase())) {
-                                return beyonderClass;
+        if (!living.level().isClientSide()) {
+            try {
+
+                if (living instanceof Player player) {
+                    BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+                    return holder.getCurrentClass();
+                } else if (living instanceof PlayerMobEntity playerMobEntity) {
+                    return playerMobEntity.getCurrentPathway();
+                } else {
+                    if (living.level() instanceof ServerLevel serverLevel) {
+                        try {
+                            BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
+                            String pathwayString = mappingData.getStringForEntity(living.getType());
+                            if (pathwayString != null) {
+                                String lowerPathway = pathwayString.toLowerCase();
+                                for (BeyonderClass beyonderClass : BeyonderClassInit.getRegistry()) {
+                                    for (String sequenceName : beyonderClass.sequenceNames()) {
+                                        if (lowerPathway.contains(sequenceName.toLowerCase())) {
+                                            return beyonderClass;
+                                        }
+                                    }
+                                }
                             }
+                        } catch (Exception e) {
+                            LOTM.LOGGER.info("Error accessing Pathway for entity: " + living.getType());
                         }
                     }
                 }
+            } catch (Exception e) {
+                System.err.println("Unexpected error in getPathway for entity: " + (living != null ? living.getType() : "null"));
             }
         }
         return null;
@@ -1469,58 +1480,75 @@ public class BeyonderUtil {
     }
 
 
-    public static int getSequence(LivingEntity living) { //marked
-        if (living != null) {
-            if (living instanceof Player player) {
-                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-                return holder.getSequence();
-            } else if (living instanceof PlayerMobEntity playerMobEntity) {
-                return playerMobEntity.getCurrentSequence();
-            } else {
-                if (living.level() instanceof ServerLevel serverLevel) {
-                    BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
-                    String pathwayString = mappingData.getStringForEntity(living.getType());
-                    if (pathwayString != null) {
-                        String lowerPathway = pathwayString.toLowerCase();
-                        BeyonderClass beyonderClass = getPathway(living);
-                        if (beyonderClass != null) {
-                            List<String> sequenceNames = beyonderClass.sequenceNames();
-                            for (int i = 0; i < sequenceNames.size(); i++) {
-                                if (lowerPathway.contains(sequenceNames.get(i).toLowerCase())) {
-                                    return i;
+    public static int getSequence(LivingEntity living) {
+        if (living == null) {
+            return -1;
+        }
+        if (!living.level().isClientSide()) {
+            try {
+                if (living instanceof Player player) {
+                    BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+                    return holder.getSequence();
+                } else if (living instanceof PlayerMobEntity playerMobEntity) {
+                    return playerMobEntity.getCurrentSequence();
+                } else {
+                    if (living.level() instanceof ServerLevel serverLevel) {
+                        try {
+                            BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
+                            if (mappingData != null) {
+                                String pathwayString = mappingData.getStringForEntity(living.getType());
+                                if (pathwayString != null) {
+                                    String lowerPathway = pathwayString.toLowerCase();
+                                    BeyonderClass beyonderClass = getPathway(living);
+                                    if (beyonderClass != null) {
+                                        List<String> sequenceNames = beyonderClass.sequenceNames();
+                                        if (sequenceNames != null) {
+                                            for (int i = 0; i < sequenceNames.size(); i++) {
+                                                String sequenceName = sequenceNames.get(i);
+                                                if (sequenceName != null && lowerPathway.contains(sequenceName.toLowerCase())) {
+                                                    return i;
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                        } catch (Exception e) {
+                            LOTM.LOGGER.info("Error accessing Sequence for entity: " + living.getType());
                         }
                     }
+                    float maxHp = living.getMaxHealth();
+                    if (maxHp <= 20) {
+                        return 9;
+                    } else if (maxHp <= 35) {
+                        return 8;
+                    } else if (maxHp <= 70) {
+                        return 7;
+                    } else if (maxHp <= 120) {
+                        return 6;
+                    } else if (maxHp <= 190) {
+                        return 5;
+                    } else if (maxHp <= 300) {
+                        return 4;
+                    } else if (maxHp <= 450) {
+                        return 3;
+                    } else if (maxHp <= 700) {
+                        return 2;
+                    } else if (maxHp <= 999) {
+                        return 1;
+                    } else if (maxHp >= 1000) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
                 }
-                float maxHp = living.getMaxHealth();
-                if (maxHp <= 20) {
-                    return 9;
-                } else if (maxHp <= 35) {
-                    return 8;
-                } else if (maxHp <= 70) {
-                    return 7;
-                } else if (maxHp <= 120) {
-                    return 6;
-                } else if (maxHp <= 190) {
-                    return 5;
-                } else if (maxHp <= 300) {
-                    return 4;
-                } else if (maxHp <= 450) {
-                    return 3;
-                } else if (maxHp <= 700) {
-                    return 2;
-                } else if (maxHp <= 999) {
-                    return 1;
-                } else if (maxHp >= 1000) {
-                    return 0;
-                } else {
-                    return -1;
-                }
+            } catch (Exception e) {
+                System.err.println("Unexpected error in getSequence for entity: " + (living != null ? living.getType() : "null"));
+                e.printStackTrace();
+                return -1;
             }
-        } else {
-            return 10;
         }
+        return -1;
     }
 
     public static int getCooldownsForAbility(LivingEntity livingEntity, Item ability) {
@@ -1716,9 +1744,11 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), -abilityStrengthened));
         damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
-
+        damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, -abilityStrengthened));
         return damageMap;
     }
+
+
 
     public static float applyAbilityStrengthened(float damage, float abilityStrengthened) {
         if (abilityStrengthened > 1) {
@@ -2522,7 +2552,7 @@ public class BeyonderUtil {
         }
     }
 
-    public static List<LivingEntity> checkEntitiesInLocation(LivingEntity livingEntity, float inflation, int X, int Y, int Z) {
+    public static List<LivingEntity> checkEntitiesInLocation(LivingEntity livingEntity, float inflation, float X, float Y, float Z) {
         AABB box = new AABB(X - inflation, Y - inflation, Z - inflation, X + inflation, Y + inflation, Z + inflation);
         return livingEntity.level().getEntitiesOfClass(LivingEntity.class, box);
     }
@@ -3178,7 +3208,7 @@ public class BeyonderUtil {
                 hitPos.offset((int) -radius, (int) -radius, (int) -radius),
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
-                if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0) {
+                if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
                     entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                 }
             }
@@ -3459,7 +3489,7 @@ public class BeyonderUtil {
     }
 
     public static boolean isEntityAlly(LivingEntity living, Entity possibleAlly) {
-        return (possibleAlly instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, living)) || (possibleAlly instanceof LivingEntity livingAlly && !BeyonderUtil.areAllies(livingAlly, living));
+        return (possibleAlly instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && (BeyonderUtil.areAllies(livingOwner, living) || livingOwner == living)) || (possibleAlly instanceof LivingEntity livingAlly && BeyonderUtil.areAllies(livingAlly, living));
     }
 
     public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
@@ -3473,6 +3503,16 @@ public class BeyonderUtil {
             Entity entity = serverLevel.getEntity(uuid);
             if (entity instanceof LivingEntity livingEntity) {
                 return livingEntity;
+            }
+            for (Entity loadedEntity : serverLevel.getAllEntities()) {
+                if (loadedEntity.getUUID().equals(uuid) && loadedEntity instanceof LivingEntity livingEntity) {
+                    return livingEntity;
+                }
+            }
+            for (Player player : serverLevel.players()) {
+                if (player.getUUID().equals(uuid)) {
+                    return player;
+                }
             }
         }
         return null;
@@ -3651,5 +3691,27 @@ public class BeyonderUtil {
             tag.remove("spatialCageY");
             tag.remove("spatialCageZ");
         }
+    }
+    private static final Set<String> EXCLUDED_METHODS = Set.of(
+            "matterAccelerationSelfAbility",
+            "envisionLocationBlink",
+            "exileTickEvent",
+            "cycleOfFateTickEvent",
+            "cycleOfFateDeath",
+            "stormSealTick",
+            "envisionLocationTeleport",
+            "dreamWalk"
+    );
+
+    public static boolean shouldBypassSeal() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        for (int i = 2; i < Math.min(stackTrace.length, 10); i++) {
+            String methodName = stackTrace[i].getMethodName();
+            if (EXCLUDED_METHODS.contains(methodName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

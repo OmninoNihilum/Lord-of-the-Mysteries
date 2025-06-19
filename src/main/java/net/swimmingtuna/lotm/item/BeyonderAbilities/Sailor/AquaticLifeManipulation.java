@@ -58,9 +58,9 @@ public class AquaticLifeManipulation extends SimpleAbilityItem {
             if (player instanceof Player) {
                 if (BeyonderUtil.getPathway(nearestPlayer) != null) {
                     if (sequence >= 2) {
-                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer).toString()).withStyle(BeyonderUtil.getStyle(player)));
+                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer).sequenceNames().get(9)).withStyle(BeyonderUtil.getStyle(player)));
                     } else {
-                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer).toString() + ". Sequence is" + BeyonderUtil.getSequence(nearestPlayer)).withStyle(BeyonderUtil.getStyle(player)));
+                        player.sendSystemMessage(Component.literal("Nearest Player is " + nearestPlayer.getName().getString() + ". Pathway is " + BeyonderUtil.getPathway(nearestPlayer).sequenceNames().get(9) + ". Sequence is" + BeyonderUtil.getSequence(nearestPlayer)).withStyle(BeyonderUtil.getStyle(player)));
                     }
                 } else {
                     if (sequence >= 2) {

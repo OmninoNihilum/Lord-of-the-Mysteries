@@ -106,7 +106,7 @@ public class WindManipulationFlight extends SimpleAbilityItem {
         //WIND MANIPULATION GLIDE
         CompoundTag tag = livingEntity.getPersistentData();
         boolean enhancedFlight = tag.getBoolean("sailorFlight1");
-        if (BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.SAILOR.get(), 6) && livingEntity.isShiftKeyDown() && livingEntity.fallDistance >= 3 && !(livingEntity instanceof Player player && player.getAbilities().instabuild) && !enhancedFlight) {
+        if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(livingEntity, BeyonderClassInit.SAILOR.get(), 6) && livingEntity.isShiftKeyDown() && livingEntity.fallDistance >= 3 && !(livingEntity instanceof Player player && player.getAbilities().instabuild) && !enhancedFlight) {
             Vec3 movement = livingEntity.getDeltaMovement();
             double deltaX = Math.cos(Math.toRadians(livingEntity.getYRot() + 90)) * 0.06;
             double deltaZ = Math.sin(Math.toRadians(livingEntity.getYRot() + 90)) * 0.06;

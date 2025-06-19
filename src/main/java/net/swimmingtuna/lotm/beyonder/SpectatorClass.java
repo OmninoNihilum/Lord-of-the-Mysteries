@@ -152,8 +152,8 @@ public class SpectatorClass implements BeyonderClass {
         items.put(2, ItemInit.DISCERN.get());
         items.put(2, ItemInit.DREAM_INTO_REALITY.get());
         items.put(1, ItemInit.PROPHECY.get());
-        items.put(1, ItemInit.METEOR_SHOWER.get());
-        items.put(1, ItemInit.METEOR_NO_LEVEL_SHOWER.get());
+        //items.put(1, ItemInit.METEOR_SHOWER.get());
+        //items.put(1, ItemInit.METEOR_NO_LEVEL_SHOWER.get());
         items.put(0, ItemInit.ENVISION_BARRIER.get());
         items.put(0, ItemInit.ENVISION_LIFE.get());
         items.put(0, ItemInit.ENVISION_DEATH.get());

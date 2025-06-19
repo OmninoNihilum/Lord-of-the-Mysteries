@@ -136,7 +136,7 @@ public class LOTM {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(EntityInit.AQUEOUS_LIGHT_ENTITY.get(), AqueousLightEntityRenderer::new);
+        event.registerEntityRenderer(EntityInit.AQUEOUS_LIGHT_ENTITY_DROWN.get(), AqueousLightEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.SPEAR_OF_DAWN_ENTITY.get(), SpearOfDawnRenderer::new);
         event.registerEntityRenderer(EntityInit.AQUEOUS_LIGHT_ENTITY_PUSH.get(), AqueousLightEntityPushRenderer::new);
         event.registerEntityRenderer(EntityInit.AQUEOUS_LIGHT_ENTITY_PULL.get(), AqueousLightEntityPullRenderer::new);

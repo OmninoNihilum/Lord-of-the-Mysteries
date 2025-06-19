@@ -8,7 +8,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
@@ -26,17 +25,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BlockEntityInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.DimensionalSightCompleteDataPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class DimensionalSightTileEntity extends MahoujinTileEntity implements BlockEntityTicker<DimensionalSightTileEntity> {
+public class DimensionalSightTileEntity extends DimensionalTileEntity implements BlockEntityTicker<DimensionalSightTileEntity> {
     public CompoundTag scryNBT = null;
     public float yaw = 0.0F;
     public float headYaw = 0.0F;
@@ -223,8 +220,6 @@ public class DimensionalSightTileEntity extends MahoujinTileEntity implements Bl
         if (compound.hasUUID(this.SCRY_UNIQ)) {
             this.scryUniqueID = compound.getUUID(this.SCRY_UNIQ);
         }
-
-        // Load block information for rendering
         this.blockList = new ArrayList<>();
         int index = 0;
         while (compound.contains(this.SCRY_BLOCK + index)) {
@@ -249,14 +244,23 @@ public class DimensionalSightTileEntity extends MahoujinTileEntity implements Bl
     @Override
     public void tick(Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState, @NotNull DimensionalSightTileEntity blockEntity) {
         if (!level.isClientSide) {
-            int maxLife = 100;
+            int maxLife = 250;
             if (this.getCasterUUID() != null) {
                 LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(level, this.getCasterUUID());
+                AABB detectionBox = new AABB(blockPos.getX() - 1, blockPos.getY() + 1, blockPos.getZ() - 1, blockPos.getX() + 2, blockPos.getY() + 4, blockPos.getZ() + 2);
+                List<Entity> entitiesInBox = level.getEntitiesOfClass(Entity.class, detectionBox);
+                for (Entity entity : entitiesInBox) {
+                    if (entity == livingEntity || BeyonderUtil.isEntityAlly(livingEntity, entity)) {
+                        if (this.getScryTarget() != null && tickCounter >= 50) {
+                            BeyonderUtil.teleportEntity(livingEntity, this.getScryTarget().level().dimension().location(), this.getScryTarget().getX(), this.getScryTarget().getY(), this.getScryTarget().getZ());
+                        }
+                    }
+                }
                 int sequence = BeyonderUtil.getSequence(livingEntity);
                 if (sequence != -1 && sequence != 0) {
-                    maxLife = 1000 / (sequence);
+                    maxLife = 2500 / (sequence);
                 } else if (sequence == 0) {
-                    maxLife = 1500;
+                    maxLife = 4000;
                 }
             }
             if (this.tickCounter >= 5) {
@@ -277,62 +281,60 @@ public class DimensionalSightTileEntity extends MahoujinTileEntity implements Bl
                 }
             }
             if (this.tickCounter % 4 == 0) {
-                if (ActiveCircleConfig.tryToOperate(this, this.getCasterUUID())) {
-                    Player caster;
-                    if (this.getScryTarget() == null || !this.getScryTarget().isAlive() || this.doRead) {
-                        if (this.viewTarget != null && !this.viewTarget.isEmpty()) {
-                            caster = getPlayerByName(this.viewTarget, level);
-                            if (caster == null) {
-                                HashSet<Entity> loaded = getAllEntities((ServerLevel) level);
-                                this.scryUniqueID = null;
+                Player caster;
+                if (this.getScryTarget() == null || !this.getScryTarget().isAlive() || this.doRead) {
+                    if (this.viewTarget != null && !this.viewTarget.isEmpty()) {
+                        caster = getPlayerByName(this.viewTarget, level);
+                        if (caster == null) {
+                            HashSet<Entity> loaded = getAllEntities((ServerLevel) level);
+                            this.scryUniqueID = null;
+                            for (Entity entity : loaded) {
+                                if (entity.getCustomName() != null && entity.getCustomName().getString().equals(this.viewTarget) && entity instanceof LivingEntity livingEntity) {
+                                    this.sendUpdates();
+                                    break;
+                                }
+                            }
+                            if (this.getScryTarget() == null) {
                                 for (Entity entity : loaded) {
-                                    if (entity.getCustomName() != null && entity.getCustomName().getString().equals(this.viewTarget) && entity instanceof LivingEntity livingEntity) {
+                                    if (entity.getDisplayName().getString().equals(this.viewTarget) && entity instanceof LivingEntity livingEntity) {
                                         this.sendUpdates();
                                         break;
                                     }
                                 }
-                                if (this.getScryTarget() == null) {
-                                    for (Entity entity : loaded) {
-                                        if (entity.getDisplayName().getString().equals(this.viewTarget) && entity instanceof LivingEntity livingEntity) {
-                                            this.sendUpdates();
-                                            break;
-                                        }
-                                    }
-                                }
-                            } else {
-                                this.sendUpdates();
                             }
-                        }
-
-                        if (this.getScryTarget() != null && !this.getScryTarget().isAlive()) {
+                        } else {
                             this.sendUpdates();
                         }
-
-                        this.doRead = false;
                     }
 
-                    // Sync entity data
-                    if (this.getScryTarget() != null && this.getScryTarget().isAlive()) {
-                        boolean checkDirty = this.scryDataManager != null;
-                        List<SynchedEntityData.DataValue<?>> entries = this.getAll(this.getScryTarget().getEntityData(), checkDirty);
-                        if (entries != null) {
-                            List<SynchedEntityData.DataValue<?>> entriesCopy = new ArrayList<>(entries);
-                            List<SynchedEntityData.DataValue<?>> toSend = new ArrayList<>(entriesCopy);
-                            this.scryDataManager = entriesCopy;
-                            if (!toSend.isEmpty()) {
-                                int radius = 32;
-                                AABB aabb = new AABB(this.worldPosition.getX() - radius, this.worldPosition.getY() - radius, this.worldPosition.getZ() - radius, this.worldPosition.getX() + radius, this.worldPosition.getY() + radius, this.worldPosition.getZ() + radius);
-                                List<ServerPlayer> players = level.getEntitiesOfClass(ServerPlayer.class, aabb);
-                                for (ServerPlayer player : players) {
-                                    LOTMNetworkHandler.sendToPlayer(new DimensionalSightPacketS2C(this.worldPosition, toSend), player);
-                                }
-                            }
-                        }
-
-                        this.scryNBT = new CompoundTag();
-                        this.getScryTarget().saveWithoutId(this.scryNBT);
+                    if (this.getScryTarget() != null && !this.getScryTarget().isAlive()) {
                         this.sendUpdates();
                     }
+
+                    this.doRead = false;
+                }
+
+                // Sync entity data
+                if (this.getScryTarget() != null && this.getScryTarget().isAlive()) {
+                    boolean checkDirty = this.scryDataManager != null;
+                    List<SynchedEntityData.DataValue<?>> entries = this.getAll(this.getScryTarget().getEntityData(), checkDirty);
+                    if (entries != null) {
+                        List<SynchedEntityData.DataValue<?>> entriesCopy = new ArrayList<>(entries);
+                        List<SynchedEntityData.DataValue<?>> toSend = new ArrayList<>(entriesCopy);
+                        this.scryDataManager = entriesCopy;
+                        if (!toSend.isEmpty()) {
+                            int radius = 32;
+                            AABB aabb = new AABB(this.worldPosition.getX() - radius, this.worldPosition.getY() - radius, this.worldPosition.getZ() - radius, this.worldPosition.getX() + radius, this.worldPosition.getY() + radius, this.worldPosition.getZ() + radius);
+                            List<ServerPlayer> players = level.getEntitiesOfClass(ServerPlayer.class, aabb);
+                            for (ServerPlayer player : players) {
+                                LOTMNetworkHandler.sendToPlayer(new DimensionalSightPacketS2C(this.worldPosition, toSend), player);
+                            }
+                        }
+                    }
+
+                    this.scryNBT = new CompoundTag();
+                    this.getScryTarget().saveWithoutId(this.scryNBT);
+                    this.sendUpdates();
                 }
             }
             if (this.tickCounter % 15 == 0 && this.getScryTarget() != null && this.getScryTarget().isAlive()) {
@@ -648,5 +650,13 @@ public class DimensionalSightTileEntity extends MahoujinTileEntity implements Bl
 
     public List<SynchedEntityData.DataValue<?>> getScryDataManager() {
         return this.scryDataManager;
+    }
+
+    public void setScryTarget(LivingEntity target) {
+        if (target != null) {
+            this.scryUniqueID = target.getUUID();
+            this.viewTarget = target.getName().getString();
+            this.targetPos = target.position();
+        }
     }
 }

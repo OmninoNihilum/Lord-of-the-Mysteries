@@ -13,6 +13,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -223,7 +224,7 @@ public class ServerEvents {
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
 
-                player.teleportTo(x, y, z);
+                EnvisionLocation.envisionLocationTeleport(player, x, y, z);
                 event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
                 event.setCanceled(true);
@@ -412,25 +413,21 @@ public class ServerEvents {
                 System.out.println(onlinePlayer.getName().getString());
                 if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
                     BlockPos playerPos = player.blockPosition();
-                    BlockPos targetPos = findSuitableBlockPos(level, playerPos);
-                    if (targetPos != null) {
-                        BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
-                        level.setBlock(targetPos, dimensionalSightState, 3);
-                        level.getServer().execute(() -> {
-                            BlockEntity blockEntity = level.getBlockEntity(targetPos);
-                            if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
-                                sightEntity.setCaster(player.getUUID());
-                                sightEntity.viewTarget = onlinePlayer.getName().getString();
-                                sightEntity.scryUniqueID = onlinePlayer.getUUID();
-                                sightEntity.setChanged();
-                                sightEntity.sendUpdates();
-                                player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
-                            }
-                        });
-                    } else {
-                        SimpleAbilityItem.removeCooldown(player, ItemInit.DIMENSIONAL_SIGHT.get(), 0);
-                        player.sendSystemMessage(Component.literal("Could not find a suitable location to place Dimensional Sight.").withStyle(ChatFormatting.RED));
-                    }
+                    Vec3 lookPos = player.getLookAngle().scale(5);
+                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y(), (int) lookPos.z()));
+                    BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
+                    level.setBlock(targetPos, dimensionalSightState, 3);
+                    level.getServer().execute(() -> {
+                        BlockEntity blockEntity = level.getBlockEntity(targetPos);
+                        if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
+                            sightEntity.setCaster(player.getUUID());
+                            sightEntity.viewTarget = onlinePlayer.getName().getString();
+                            sightEntity.scryUniqueID = onlinePlayer.getUUID();
+                            sightEntity.setChanged();
+                            sightEntity.sendUpdates();
+                            player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
+                        }
+                    });
                 }
             }
             event.setCanceled(true);

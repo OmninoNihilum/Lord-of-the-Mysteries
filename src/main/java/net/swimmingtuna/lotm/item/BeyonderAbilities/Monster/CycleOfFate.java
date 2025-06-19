@@ -182,8 +182,6 @@ public class CycleOfFate extends SimpleAbilityItem {
 
                         // Mark as temporarily dead for visual effects
                         tag.putBoolean("monsterCycleOfFateIsDead", true);
-
-                        // Schedule restoration for next tick to avoid timing issues
                         entity.level().getServer().execute(() -> {
                             entity.teleportTo(cycleX, cycleY + 400, cycleZ);
                             entity.setHealth(Math.max(1.0f, cycleHealth)); // Ensure health is at least 1
@@ -331,7 +329,7 @@ public class CycleOfFate extends SimpleAbilityItem {
         }
     }
 
-    public static void tickEvent(LivingEvent.LivingTickEvent event) {
+    public static void cycleOfFateTickEvent(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (!entity.level().isClientSide()) {
             CompoundTag tag = entity.getPersistentData();

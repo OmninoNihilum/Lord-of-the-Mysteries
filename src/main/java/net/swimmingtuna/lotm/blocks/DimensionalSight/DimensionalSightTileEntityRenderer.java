@@ -77,7 +77,7 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
             poseStack.translate(scaledPos.x, scaledPos.y, scaledPos.z);
             long gameTime = tileEntity.getLevel() != null ? tileEntity.getLevel().getGameTime() : 0;
             float glowIntensity = (float) (0.7 + 0.3 * Math.sin((gameTime + partialTicks) * 0.05));
-            int magicalLight = Math.max(combinedLight, (int) (240 * glowIntensity)); // Ensure minimum brightness
+            int magicalLight = Math.max(combinedLight, (int) (240 * glowIntensity));
             float originalYaw = scryTarget.getYRot();
             float originalPitch = scryTarget.getXRot();
             float originalHeadYaw = scryTarget.yHeadRot;
@@ -92,6 +92,7 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
                 scryTarget.setXRot(tileEntity.getPitch());
                 scryTarget.yHeadRot = tileEntity.getHeadYaw();
                 scryTarget.yBodyRot = tileEntity.getRenderYaw();
+                scryTarget.setOldPosAndRot();
                 scryTarget.setDeltaMovement(tileEntity.getVelX(), tileEntity.getVelY(), tileEntity.getVelZ());
                 scryTarget.attackAnim = tileEntity.swingProgress;
                 scryTarget.setOnGround(true);
@@ -110,7 +111,6 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
                 scryTarget.setOnGround(originalOnGround);
                 scryTarget.fallDistance = originalFallDistance;
             }
-
         } catch (Exception ignored) {
         } finally {
             poseStack.popPose();

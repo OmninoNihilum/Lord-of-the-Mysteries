@@ -3,7 +3,7 @@ package net.swimmingtuna.lotm.blocks.DimensionalSight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.swimmingtuna.lotm.init.BlockEntityInit;
@@ -11,7 +11,7 @@ import net.swimmingtuna.lotm.init.BlockEntityInit;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class MahoujinTileEntity extends UpdatingTileEntity {
+public class DimensionalTileEntity extends UpdatingTileEntity {
     private UUID casterUUID;
     private boolean cloth;
     private boolean fay;
@@ -23,11 +23,11 @@ public class MahoujinTileEntity extends UpdatingTileEntity {
 
     private UnorderedList catalysts;
 
-    public MahoujinTileEntity(BlockPos pos, BlockState blockState) {
+    public DimensionalTileEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityInit.MAHOUJIN.get(), pos, blockState);
     }
 
-    public MahoujinTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+    public DimensionalTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
     }
 
@@ -88,5 +88,11 @@ public class MahoujinTileEntity extends UpdatingTileEntity {
     public void setCaster(LivingEntity caster) {
         this.casterUUID = caster.getUUID();
         this.sendUpdates();
+    }
+
+    public void removeThis() {
+        if (this.level != null) {
+            this.level.setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState(), 3);
+        }
     }
 }

@@ -30,10 +30,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -201,14 +198,15 @@ public class ModEvents {
     public static void mobEffectEvent(MobEffectEvent.Added event) {
         LivingEntity entity = event.getEntity();
         if (entity.level() instanceof ServerLevel serverLevel) {
-            if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 3) && event.getEffectInstance().getEffect().getCategory() == MobEffectCategory.HARMFUL) {
-                MobEffectInstance currentEffect = event.getEffectInstance();
-                int originalDuration = currentEffect.getDuration();
-                int newDuration = (int) (originalDuration * 0.7);
-                MobEffectInstance reducedEffect = new MobEffectInstance(currentEffect.getEffect(), newDuration, currentEffect.getAmplifier(), currentEffect.isAmbient(), currentEffect.isVisible(), currentEffect.showIcon());
-                entity.removeEffect(currentEffect.getEffect());
-                entity.addEffect(reducedEffect);
-            }
+            //
+            //if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 3) && event.getEffectInstance().getEffect().getCategory() == MobEffectCategory.HARMFUL) {
+            //    MobEffectInstance currentEffect = event.getEffectInstance();
+            //    int originalDuration = currentEffect.getDuration();
+            //    int newDuration = (int) (originalDuration * 0.7);
+            //    MobEffectInstance reducedEffect = new MobEffectInstance(currentEffect.getEffect(), newDuration, currentEffect.getAmplifier(), currentEffect.isAmbient(), currentEffect.isVisible(), currentEffect.showIcon());
+            //    entity.removeEffect(currentEffect.getEffect());
+            //    entity.addEffect(reducedEffect);
+            //}
             CalamityEnhancementData data = CalamityEnhancementData.getInstance(serverLevel);
             int chaosLevel = data.getCalamityEnhancement();
             if (chaosLevel != 1) {
@@ -382,6 +380,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                DimensionalSightSealEntity.dimensionalSightSealTick(livingEntity);
                 SpatialCageEntity.cageTick(livingEntity);
                 ApprenticeClass.enableWaterWalking(event);
                 BlinkState.secretsSorcererBlinkState(event);
@@ -460,7 +459,7 @@ public class ModEvents {
                 BattleHypnotism.untargetMobs(event);
                 ProbabilityManipulationInfiniteMisfortune.testEvent(event);
                 probabilityManipulationWorld(livingEntity);
-                CycleOfFate.tickEvent(event);
+                CycleOfFate.cycleOfFateTickEvent(event);
                 DreamWalking.dreamWalkingTick(event);
                 MonsterClass.dodgeProjectiles(livingEntity);
                 MisfortuneManipulation.livingTickMisfortuneManipulation(event);
@@ -483,7 +482,7 @@ public class ModEvents {
                 matterAccelerationEntities(livingEntity);
                 ExtremeColdness.extremeColdnessTick(event);
                 mentalPlague(livingEntity);
-                StormSeal.sealTick(event);
+                StormSeal.stormSealTick(event);
                 AqueousLightDrown.lightTickEvent(livingEntity);
                 TsunamiSeal.sealTick(event);
             }

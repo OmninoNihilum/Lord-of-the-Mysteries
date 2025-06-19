@@ -6,7 +6,7 @@
   "mixins": [
     "ClientUpdateStructureBlockUnlimit",
     "EntityCollisionMixin",
-    "EntityTickMixin",
+    "EntityMixin",
     "ExplosionNoKnockback",
     "IELevelEntityGetterAdapter",
     "ItemStackMixin",
@@ -15,6 +15,7 @@
     "MixinPotionItem",
     "MixinSplashPotionItem",
     "MobAttackMixin",
+    "ServerPlayerMixin",
     "ServerPlayNetworkDesyncFixMixin",
     "SlotMixin",
     "StructureBlockRenderMixin",

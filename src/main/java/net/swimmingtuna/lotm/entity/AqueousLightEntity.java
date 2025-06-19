@@ -33,7 +33,7 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
     }
 
     public AqueousLightEntity(Level level, LivingEntity shooter, double offsetX, double offsetY, double offsetZ) {
-        super(EntityInit.AQUEOUS_LIGHT_ENTITY.get(), shooter, offsetX, offsetY, offsetZ, level);
+        super(EntityInit.AQUEOUS_LIGHT_ENTITY_DROWN.get(), shooter, offsetX, offsetY, offsetZ, level);
     }
 
     @Override
