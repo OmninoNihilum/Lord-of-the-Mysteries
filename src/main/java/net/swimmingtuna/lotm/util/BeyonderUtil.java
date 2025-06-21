@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -68,6 +69,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
@@ -3713,5 +3715,45 @@ public class BeyonderUtil {
             }
         }
         return false;
+    }
+
+    public static DimensionalSightTileEntity findNearbyDimensionalSight(LivingEntity entity) {
+        Level level = entity.level();
+        if (!level.isClientSide()) {
+            BlockPos entityPos = entity.blockPosition();
+            int searchRadius = 15;
+            Vec3 entityLookVec = entity.getLookAngle();
+            Vec3 entityEyePos = entity.getEyePosition();
+            for (int x = -searchRadius; x <= searchRadius; x++) {
+                for (int y = -searchRadius; y <= searchRadius; y++) {
+                    for (int z = -searchRadius; z <= searchRadius; z++) {
+                        BlockPos checkPos = entityPos.offset(x, y, z);
+                        BlockEntity blockEntity = level.getBlockEntity(checkPos);
+                        if (blockEntity instanceof DimensionalSightTileEntity dimensionalSight) {
+                            if (dimensionalSight.getCasterUUID() != null && dimensionalSight.getCasterUUID().equals(entity.getUUID()) && dimensionalSight.getScryUniqueID() != null) {
+                                if (isBlockVisibleToEntity(entity, checkPos, entityEyePos, entityLookVec)) {
+                                    return dimensionalSight;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean isBlockVisibleToEntity(LivingEntity entity, BlockPos blockPos, Vec3 entityEyePos, Vec3 entityLookVec) {
+        Vec3 blockCenter = Vec3.atCenterOf(blockPos);
+        Vec3 toBlock = blockCenter.subtract(entityEyePos).normalize();
+        double dotProduct = entityLookVec.dot(toBlock);
+        double fovThreshold = 0.0;
+        if (dotProduct < fovThreshold) {
+            return false;
+        }
+        Level level = entity.level();
+        ClipContext clipContext = new ClipContext(entityEyePos, blockCenter, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity);
+        BlockHitResult hitResult = level.clip(clipContext);
+        return hitResult.getBlockPos().equals(blockPos) || hitResult.getType() == HitResult.Type.MISS;
     }
 }

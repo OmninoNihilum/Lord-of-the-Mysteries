@@ -11,6 +11,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -40,7 +41,13 @@ public class CreateConcealedBundle extends SimpleAbilityItem {
         if(entity.level().isClientSide()) return;
         if(checkBundle(entity)){
             ItemStack stack = new ItemStack(ItemInit.CONCEALED_BUNDLE.get());
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(entity);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null && dimensionalSightTileEntity.getScryTarget() instanceof Player player) {
+                entity.sendSystemMessage(Component.literal("You gave your Concealed Bundle to your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                player.setItemInHand(InteractionHand.OFF_HAND, stack);
+            } else {
             entity.setItemInHand(InteractionHand.OFF_HAND, stack);
+            }
             stack.getOrCreateTag().putInt("concealedBundleRows",  9 - BeyonderUtil.getSequence(entity));
             if(BeyonderUtil.getSequence(entity) > 4) stack.getOrCreateTag().putInt("concealedBundleMaxDurability",  (9 - BeyonderUtil.getSequence(entity)) * 5);
             else stack.getOrCreateTag().putInt("concealedBundleMaxDurability",  (9 - BeyonderUtil.getSequence(entity) - 4) * 50);
@@ -66,5 +73,10 @@ public class CreateConcealedBundle extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        return 0;
     }
 }

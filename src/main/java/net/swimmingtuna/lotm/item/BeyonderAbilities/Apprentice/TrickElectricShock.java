@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -53,11 +54,18 @@ public class TrickElectricShock extends SimpleAbilityItem {
 
     public static void enableDisableElectricShock(LivingEntity player) {
         if (!player.level().isClientSide()) {
-            CompoundTag tag = player.getPersistentData();
-            boolean electricShock = tag.getBoolean("trickmasterElectricShock");
-            tag.putBoolean("trickmasterElectricShock", !electricShock);
-            if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("Electric Shock Turned " + (electricShock ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                int amountToStun = (int) (float) BeyonderUtil.getDamage(dimensionalSightTileEntity.getScryTarget()).get(ItemInit.TRICKELECTRICSHOCK.get());
+                player.sendSystemMessage(Component.literal("You shocked and stunned your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                BeyonderUtil.applyMobEffect(dimensionalSightTileEntity.getScryTarget(), ModEffects.STUN.get(), amountToStun * 4, 1, false, false);
+            } else {
+                CompoundTag tag = player.getPersistentData();
+                boolean electricShock = tag.getBoolean("trickmasterElectricShock");
+                tag.putBoolean("trickmasterElectricShock", !electricShock);
+                if (player instanceof Player pPlayer) {
+                    pPlayer.displayClientMessage(Component.literal("Electric Shock Turned " + (electricShock ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
+                }
             }
         }
     }
@@ -128,5 +136,13 @@ public class TrickElectricShock extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (!livingEntity.getPersistentData().getBoolean("trickmasterElectricShock")) {
+            return 100;
+        }
+        return 0;
     }
 }

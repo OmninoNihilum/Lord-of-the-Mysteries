@@ -15,6 +15,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -47,33 +48,46 @@ public class TrickBurning extends SimpleAbilityItem {
 
     public static void burn(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
-            for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(200 - (BeyonderUtil.getSequence(livingEntity) * 20)))) {
-                if (projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity) {
-                    float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
-                    int minDistanceToAlly = Integer.MAX_VALUE;
-                    for (LivingEntity living : projectile.level().getEntitiesOfClass(LivingEntity.class, projectile.getBoundingBox().inflate(100))) {
-                        if (living == livingEntity || BeyonderUtil.areAllies(livingEntity, living)) {
-                            int currentDistance = (int) projectile.distanceTo(living);
-                            minDistanceToAlly = Math.min(minDistanceToAlly, currentDistance);
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                if (BeyonderUtil.getSequence(livingEntity) >= 2) {
+                    livingEntity.sendSystemMessage(Component.literal("You burned your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                    dimensionalSightTileEntity.getScryTarget().setSecondsOnFire(20);
+                } else {
+                    livingEntity.sendSystemMessage(Component.literal("You exploded your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                    Explosion explosion = new Explosion(dimensionalSightTileEntity.getScryTarget().level(), null, dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ(), (float) (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKBURNING.get()) / 12, true, Explosion.BlockInteraction.DESTROY);
+                    explosion.explode();
+                    explosion.finalizeExplosion(true);
+                }
+            } else {
+                for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(200 - (BeyonderUtil.getSequence(livingEntity) * 20)))) {
+                    if (projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity) {
+                        float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
+                        int minDistanceToAlly = Integer.MAX_VALUE;
+                        for (LivingEntity living : projectile.level().getEntitiesOfClass(LivingEntity.class, projectile.getBoundingBox().inflate(100))) {
+                            if (living == livingEntity || BeyonderUtil.areAllies(livingEntity, living)) {
+                                int currentDistance = (int) projectile.distanceTo(living);
+                                minDistanceToAlly = Math.min(minDistanceToAlly, currentDistance);
+                            }
                         }
-                    }
-                    int sequence = BeyonderUtil.getSequence(livingEntity);
-                    double projectileSize = projectile.getBoundingBox().getSize();
-                    double chanceToExplode = livingEntity.getBoundingBox().getSize() * (9 - sequence);
-                    double particleAmount = (int) projectileSize * 5;
-                    double randomAmount = (Math.random() * projectileSize) - ((Math.random() * projectileSize) * 2);
-                    for (int i = 0 ; i <= particleAmount; i++) {
-                        if (livingEntity instanceof ServerPlayer player) {
-                            LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleTypes.EXPLOSION, projectile.getX() - randomAmount, projectile.getY() - randomAmount, projectile.getZ() - randomAmount, 0,0,0), player);
+                        int sequence = BeyonderUtil.getSequence(livingEntity);
+                        double projectileSize = projectile.getBoundingBox().getSize();
+                        double chanceToExplode = livingEntity.getBoundingBox().getSize() * (9 - sequence);
+                        double particleAmount = (int) projectileSize * 5;
+                        double randomAmount = (Math.random() * projectileSize) - ((Math.random() * projectileSize) * 2);
+                        for (int i = 0; i <= particleAmount; i++) {
+                            if (livingEntity instanceof ServerPlayer player) {
+                                LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleTypes.EXPLOSION, projectile.getX() - randomAmount, projectile.getY() - randomAmount, projectile.getZ() - randomAmount, 0, 0, 0), player);
+                            }
                         }
-                    }
-                    if (chanceToExplode * Math.max(0.5,Math.random()) > projectileSize) {
-                        Explosion explosion = new Explosion(livingEntity.level(), null, projectile.getX(), projectile.getY(), projectile.getZ(), (float) (int) Math.max(1, projectileSize / 2), true, Explosion.BlockInteraction.DESTROY);
-                        explosion.explode();
-                        explosion.finalizeExplosion(true);
-                        projectile.discard();
-                    } else {
-                        projectile.setSecondsOnFire(10);
+                        if (chanceToExplode * Math.max(0.5, Math.random()) > projectileSize) {
+                            Explosion explosion = new Explosion(livingEntity.level(), null, projectile.getX(), projectile.getY(), projectile.getZ(), (float) (int) Math.max(1, projectileSize / 2), true, Explosion.BlockInteraction.DESTROY);
+                            explosion.explode();
+                            explosion.finalizeExplosion(true);
+                            projectile.discard();
+                        } else {
+                            projectile.setSecondsOnFire(10);
+                        }
                     }
                 }
             }
@@ -128,5 +142,14 @@ public class TrickBurning extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        int projectileSize = 0;
+        for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(this)))) {
+            projectileSize += 10;
+        }
+        return projectileSize;
     }
 }

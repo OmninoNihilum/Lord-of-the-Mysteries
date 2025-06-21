@@ -61,7 +61,7 @@ public class ScribeRecord extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("WIP"));
+        tooltipComponents.add(Component.literal("Use in order to open up a menu with all your saved abilities. Left click in order to attempt to copy an ability after viewing it, the difficulty of copying an ability will increase the higher sequence it is compared to your own."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

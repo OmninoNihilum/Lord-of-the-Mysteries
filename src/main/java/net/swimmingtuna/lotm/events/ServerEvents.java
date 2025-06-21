@@ -399,10 +399,20 @@ public class ServerEvents {
             }
             tag.putInt("wormOfStar", wormOfStarAmount - wormOfStarSeparationAmount);
             LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), player);
-            ItemStack wormStack = new ItemStack(ItemInit.WORM_OF_STAR.get(), wormOfStarSeparationAmount);
-            player.getInventory().add(wormStack);
-            if (!wormStack.isEmpty()) {
-                player.drop(wormStack, false);
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null && dimensionalSightTileEntity.getScryTarget() instanceof Player pPlayer) {
+                ItemStack wormStack = new ItemStack(ItemInit.WORM_OF_STAR.get(), wormOfStarSeparationAmount);
+                pPlayer.getInventory().add(wormStack);
+                player.sendSystemMessage(Component.literal("You gave " + wormOfStarSeparationAmount +  "Worm of Stars to your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                if (!wormStack.isEmpty()) {
+                    player.drop(wormStack, false);
+                }
+            } else {
+                ItemStack wormStack = new ItemStack(ItemInit.WORM_OF_STAR.get(), wormOfStarSeparationAmount);
+                player.getInventory().add(wormStack);
+                if (!wormStack.isEmpty()) {
+                    player.drop(wormStack, false);
+                }
             }
 
             player.displayClientMessage(Component.literal("Successfully separated " + wormOfStarSeparationAmount + " Worms of Star!").withStyle(ChatFormatting.BLUE), true);

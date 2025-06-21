@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -94,7 +95,7 @@ public class DimensionalSight extends SimpleAbilityItem {
 
     public void dimensionalSight(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
-            DimensionalSightTileEntity dimensionalSightTileEntity = SimpleAbilityItem.findNearbyDimensionalSight(livingEntity.level(), livingEntity);
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.scryUniqueID != null && dimensionalSightTileEntity.getCasterUUID() != null && dimensionalSightTileEntity.getCasterUUID().equals(livingEntity.getUUID())) {
                 DimensionalSightSealEntity sightSealEntity = new DimensionalSightSealEntity(EntityInit.DIMENSIONAL_SIGHT_SEAL_ENTITY.get(), livingEntity.level());
                 sightSealEntity.setSealX((float) dimensionalSightTileEntity.getScryTarget().getX());
@@ -114,13 +115,30 @@ public class DimensionalSight extends SimpleAbilityItem {
                     for (DimensionalSightSealEntity dimensionalSightSealEntity : livingEntity.level().getEntitiesOfClass(DimensionalSightSealEntity.class, livingEntity.getBoundingBox().inflate(10))) {
                         if (dimensionalSightSealEntity.getOwner() == livingEntity) {
                             amount++;
-                            for (Entity entity : BeyonderUtil.checkEntitiesInLocation(livingEntity, 20, dimensionalSightSealEntity.getSealX(), dimensionalSightSealEntity.getSealY(), dimensionalSightSealEntity.getSealZ())) {
-                                EnvisionLocation.envisionLocationTeleport(entity,dimensionalSightSealEntity.getX(), dimensionalSightSealEntity.getY(), dimensionalSightSealEntity.getZ());
-
-                                livingEntity.sendSystemMessage(Component.literal("ENTITY FOUND " + entity.getName().getString()));
-                            }
+                            livingEntity.getPersistentData().putInt("dimensionalSightSealBackX", (int) livingEntity.getX());
+                            livingEntity.getPersistentData().putInt("dimensionalSightSealBackY", (int) livingEntity.getY());
+                            livingEntity.getPersistentData().putInt("dimensionalSightSealBackZ", (int) livingEntity.getZ());
+                            livingEntity.getPersistentData().putInt("dimensionalSightSealX", (int) dimensionalSightSealEntity.getSealX());
+                            livingEntity.getPersistentData().putInt("dimensionalSightSealY", (int) dimensionalSightSealEntity.getSealY());
+                            livingEntity.getPersistentData().putInt("dimensionalSightSealZ", (int) dimensionalSightSealEntity.getSealZ());
+                            livingEntity.getPersistentData().putInt("dimensionalSightSealTeleportTimer", 1);
                             dimensionalSightSealEntity.setShouldMessage(false);
-                            dimensionalSightSealEntity.setMaxLife(dimensionalSightSealEntity.tickCount - 1);
+                            dimensionalSightSealEntity.tickCount = dimensionalSightSealEntity.getMaxLife() - 1;
+                            BlockPos sealPos = new BlockPos((int) dimensionalSightSealEntity.getSealX(), (int) dimensionalSightSealEntity.getSealY(), (int) dimensionalSightSealEntity.getSealZ());
+                            int radius = 20;
+                            for (int x = -radius; x <= radius; x++) {
+                                for (int y = -radius; y <= radius; y++) {
+                                    for (int z = -radius; z <= radius; z++) {
+                                        double distance = Math.sqrt(x * x + y * y + z * z);
+                                        if (distance >= radius - 0.5 && distance <= radius + 0.5) {
+                                            BlockPos blockPos = sealPos.offset(x, y, z);
+                                            if (livingEntity.level().getBlockState(blockPos) == BlockInit.VOID_BLOCK.get().defaultBlockState()) {
+                                                livingEntity.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     if (amount >= 1) {
@@ -189,6 +207,6 @@ public class DimensionalSight extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return super.getPriority(livingEntity, target);
+        return 0;
     }
 }

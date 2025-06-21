@@ -14,6 +14,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.SoundInit;
@@ -31,8 +32,8 @@ public class TrickLoudNoise extends SimpleAbilityItem {
     }
 
     @Override
-    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand){
-        if(!checkAll(livingEntity)){
+    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
+        if (!checkAll(livingEntity)) {
             return InteractionResult.FAIL;
         }
         bang(livingEntity);
@@ -41,11 +42,18 @@ public class TrickLoudNoise extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
-    public static void bang(LivingEntity entity){
-        if(!entity.level().isClientSide) {
+    public static void bang(LivingEntity entity) {
+        if (!entity.level().isClientSide) {
             int damage = (int) (float) BeyonderUtil.getDamage(entity).get(ItemInit.TRICKFOG.get());
             int duration = (int) damage * 20;
-            AABB area = entity.getBoundingBox().inflate(damage);
+            AABB area;
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(entity);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                entity.sendSystemMessage(Component.literal("You made a loud noise around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                area = dimensionalSightTileEntity.getScryTarget().getBoundingBox().inflate(damage);
+            } else {
+                area = entity.getBoundingBox().inflate(damage);
+            }
             List<Entity> players = entity.level().getEntities(entity, area, e -> e instanceof Player && e != entity);
             for (Entity list : players) {
                 if (list instanceof Player player && !BeyonderUtil.areAllies(entity, player)) {
@@ -65,8 +73,21 @@ public class TrickLoudNoise extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null) {
+            int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get());
+            if (target.distanceTo(livingEntity) < damage) {
+                return 60;
+            }
+            return 0;
+        }
+        return 0;
     }
 }

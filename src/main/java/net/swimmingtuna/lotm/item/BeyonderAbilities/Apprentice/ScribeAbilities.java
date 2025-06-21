@@ -126,4 +126,12 @@ public class ScribeAbilities extends SimpleAbilityItem {
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
     }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (BeyonderUtil.pendingAbilityCopies.containsKey(livingEntity.getUUID())) {
+            livingEntity.getPersistentData().putBoolean("acceptCopiedAbility", true);
+        }
+        return 0;
+    }
 }

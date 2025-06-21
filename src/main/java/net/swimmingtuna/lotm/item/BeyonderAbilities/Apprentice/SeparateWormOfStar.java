@@ -25,6 +25,7 @@ public class SeparateWormOfStar extends SimpleAbilityItem {
     public SeparateWormOfStar(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 4, 0, 20);
     }
+
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
         if (!checkAll(player)) {
@@ -52,12 +53,15 @@ public class SeparateWormOfStar extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, separate worms of star from your body into your inventory."));
+        tooltipComponents.add(Component.literal("Type a number in chat in order to separate that amount of worm of stars from you"));
+        tooltipComponents.add(Component.literal("Don't take away too many, as if you don't have enough, you will suffer consequences").withStyle(ChatFormatting.RED));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.DARK_BLUE);
@@ -65,6 +69,30 @@ public class SeparateWormOfStar extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        boolean x = livingEntity.getPersistentData().getBoolean("wormOfStarChoice");
+        int wormCount = livingEntity.getPersistentData().getInt("wormOfStar");
+        int maxWormCount = 100;
+        int sequenceLevel = BeyonderUtil.getSequence(livingEntity);
+        if (sequenceLevel == 4) {
+            maxWormCount = 200;
+        }
+        if (sequenceLevel == 3) {
+            maxWormCount = 800;
+        }
+        if (sequenceLevel == 2) {
+            maxWormCount = 4000;
+        }
+        if (sequenceLevel == 1) {
+            maxWormCount = 16000;
+        }
+        if (sequenceLevel == 0) {
+            maxWormCount = 80000;
+        }
+        if (wormCount > maxWormCount * 0.75 && !x) {
+            return 100;
+        } else if (wormCount < maxWormCount * 0.75 && x && target == null) {
+            return 100;
+        }
         return 0;
     }
 }

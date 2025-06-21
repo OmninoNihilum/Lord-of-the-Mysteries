@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -50,25 +51,48 @@ public class TrickTumble extends SimpleAbilityItem {
 
     public static void tumble(LivingEntity living) {
         if (!living.level().isClientSide()) {
-            for (LivingEntity livingEntity : BeyonderUtil.getNonAlliesNearby(living, 25)) {
-                Vec3 movement = livingEntity.getDeltaMovement();
-                if (BeyonderUtil.getSequence(living) >= 5) {
-                    if (livingEntity.onGround()) {
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(living);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                LivingEntity scry = dimensionalSightTileEntity.getScryTarget();
+                living.sendSystemMessage(Component.literal("You created a slippery area around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                for (LivingEntity livingEntity : BeyonderUtil.checkEntitiesInLocation(scry, 25F, (float) scry.getX(), (float) scry.getY(), (float) scry.getZ())) {
+                    if (livingEntity != living && !BeyonderUtil.areAllies(livingEntity, living)) {
+                        Vec3 movement = livingEntity.getDeltaMovement();
+                        if (BeyonderUtil.getSequence(living) >= 5) {
+                            if (livingEntity.onGround()) {
+                                BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                                BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                                livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
+                                livingEntity.hurtMarked = true;
+                            }
+                        } else {
+                            BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                            livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
+                            livingEntity.hurtMarked = true;
+                        }
+                    }
+                }
+            } else {
+                for (LivingEntity livingEntity : BeyonderUtil.getNonAlliesNearby(living, 25)) {
+                    Vec3 movement = livingEntity.getDeltaMovement();
+                    if (BeyonderUtil.getSequence(living) >= 5) {
+                        if (livingEntity.onGround()) {
+                            BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                            livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
+                            livingEntity.hurtMarked = true;
+                        }
+                    } else {
                         BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
                         BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
                         livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
                         livingEntity.hurtMarked = true;
                     }
-                } else {
-                    BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
-                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
-                    livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
-                    livingEntity.hurtMarked = true;
                 }
             }
         }
     }
-
 
 
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
@@ -101,8 +125,19 @@ public class TrickTumble extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null) {
+            if (target.distanceTo(livingEntity) < 25) {
+                return 70;
+            }
+        }
+        return 0;
     }
 }

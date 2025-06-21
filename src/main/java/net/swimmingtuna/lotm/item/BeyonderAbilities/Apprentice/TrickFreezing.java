@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -23,9 +24,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientFogDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -42,8 +47,8 @@ public class TrickFreezing extends SimpleAbilityItem {
     }
 
     @Override
-    public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand hand){
-        if(!livingEntity.level().isClientSide && !interactionTarget.level().isClientSide){
+    public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand hand) {
+        if (!livingEntity.level().isClientSide && !interactionTarget.level().isClientSide) {
             if (!checkAll(livingEntity)) {
                 return InteractionResult.FAIL;
             }
@@ -63,7 +68,7 @@ public class TrickFreezing extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
-    public static void freezeEntity(LivingEntity livingEntity, LivingEntity target){
+    public static void freezeEntity(LivingEntity livingEntity, LivingEntity target) {
         target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()), 2, false, false));
         if (target.level() instanceof ServerLevel serverLevel) {
             Vec3 sourcePos = livingEntity.position().add(0, livingEntity.getBbHeight() * 0.5, 0);
@@ -83,20 +88,41 @@ public class TrickFreezing extends SimpleAbilityItem {
     }
 
     public static void freezeAura(LivingEntity livingEntity) {
-        int damage =(int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get());
-        for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(damage))) {
-            if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
-                living.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()) / 3, 2, false, false));
+        if (!livingEntity.level().isClientSide()) {
+            int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get());
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                for (LivingEntity living : BeyonderUtil.checkEntitiesInLocation(livingEntity, (float) (damage ), (float) dimensionalSightTileEntity.getScryTarget().getX(), (float) dimensionalSightTileEntity.getScryTarget().getY(), (float) dimensionalSightTileEntity.getScryTarget().getZ())) {
+                    living.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) damage / 3, 2, false, false));
+                }
+                Level level = dimensionalSightTileEntity.getScryTarget().level();
+                BlockPos centerPos = dimensionalSightTileEntity.getScryTarget().blockPosition();
+                for (int x = -damage; x <= damage; x++) {
+                    for (int z = -damage; z <= damage; z++) {
+                        for (int y = -damage; y <= damage; y++) {
+                            BlockPos pos = centerPos.offset(x, y, z);
+                            if (isOnSurface(level, pos) && livingEntity.level().getBlockState(pos) != BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState()) {
+                                freezeBlock(level, pos);
+                            }
+                        }
+                    }
+                }
+                livingEntity.sendSystemMessage(Component.literal("You froze your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
             }
-        }
-        Level level = livingEntity.level();
-        BlockPos centerPos = livingEntity.blockPosition();
-        for (int x = -damage; x <= damage; x++) {
-            for (int z = -damage; z <= damage; z++) {
-                for (int y = -damage; y <= damage; y++) {
-                    BlockPos pos = centerPos.offset(x, y, z);
-                    if (isOnSurface(level, pos)) {
-                        freezeBlock(level, pos);
+            for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(damage))) {
+                if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
+                    living.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()) / 3, 2, false, false));
+                }
+            }
+            Level level = livingEntity.level();
+            BlockPos centerPos = livingEntity.blockPosition();
+            for (int x = -damage; x <= damage; x++) {
+                for (int z = -damage; z <= damage; z++) {
+                    for (int y = -damage; y <= damage; y++) {
+                        BlockPos pos = centerPos.offset(x, y, z);
+                        if (isOnSurface(level, pos)) {
+                            freezeBlock(level, pos);
+                        }
                     }
                 }
             }
@@ -106,7 +132,7 @@ public class TrickFreezing extends SimpleAbilityItem {
     public static void freezeBlock(Level level, BlockPos pos) {
         BlockState currentState = level.getBlockState(pos);
         if (isOnSurface(level, pos)) {
-             if (!currentState.isAir()) {
+            if (!currentState.isAir()) {
                 level.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
             }
         }
@@ -144,5 +170,13 @@ public class TrickFreezing extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null) {
+            return 60;
+        }
+        return 0;
     }
 }

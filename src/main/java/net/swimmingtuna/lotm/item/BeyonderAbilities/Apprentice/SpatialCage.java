@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.SpatialCageEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -21,14 +22,29 @@ import java.util.List;
 
 public class SpatialCage extends SimpleAbilityItem {
     public SpatialCage(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 3, 0, 0);
+        super(properties, BeyonderClassInit.APPRENTICE, 3, 0, 1000);
     }
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand hand) {
         if (!livingEntity.level().isClientSide && !interactionTarget.level().isClientSide) {
-            if(!checkAll(livingEntity)) return InteractionResult.FAIL;
+            if (!checkAll(livingEntity)) {
+                return InteractionResult.FAIL;
+            }
             SpatialCageEntity.setSealed(interactionTarget, livingEntity, BeyonderUtil.getSequence(livingEntity) - 1, 200);
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+        if (!checkAll(player)) {
+            return InteractionResult.FAIL;
+        }
+        DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+        if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+            player.sendSystemMessage(Component.literal("You created a Spatial Cage around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+            SpatialCageEntity.setSealed(dimensionalSightTileEntity.getScryTarget(), player, BeyonderUtil.getSequence(player) - 1, 200);
         }
         return InteractionResult.SUCCESS;
     }
@@ -46,5 +62,13 @@ public class SpatialCage extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null && target.getHealth() > livingEntity.getHealth()) {
+            return 100;
+        }
+        return 0;
     }
 }

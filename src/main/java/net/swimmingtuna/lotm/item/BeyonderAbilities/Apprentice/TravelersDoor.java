@@ -185,4 +185,13 @@ public class TravelersDoor extends SimpleAbilityItem {
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
     }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null && target.getHealth() < livingEntity.getHealth()) {
+            livingEntity.teleportTo(target.getX(), target.getY(), target.getZ());
+            return 0;
+        }
+        return 0;
+    }
 }

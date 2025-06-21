@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedUtils;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
@@ -51,29 +52,41 @@ public class ConcealedSpace extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
-    private static void concealedSpace(LivingEntity entity){
-        if(entity.level().isClientSide()) return;
-        if(!ConcealedUtils.hasConcealedSpace(entity)) createConcealedSpace(entity);
+    private static void concealedSpace(LivingEntity entity) {
+        if (entity.level().isClientSide()) return;
+        if (!ConcealedUtils.hasConcealedSpace(entity)) createConcealedSpace(entity);
         else {
-            if(IsConcealedUtils.getIsConcealed(entity)){
-                if(entity.isShiftKeyDown()) changeConcealedSpaceSpawn(entity);
-                else createDoorLeaveConcealedSpace(entity);
-            }else{
-                if(entity.isShiftKeyDown()) createDoorItem(entity);
-                else createDoorEnterConcealedSpace(entity);
+            if (IsConcealedUtils.getIsConcealed(entity)) {
+                if (entity.isShiftKeyDown()) {
+                    changeConcealedSpaceSpawn(entity);
+                }
+                else {
+                    createDoorLeaveConcealedSpace(entity);
+                }
+            } else {
+                if (entity.isShiftKeyDown()) {
+                    createDoorItem(entity);
+                } else {
+                    DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(entity);
+                    if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                        entity.sendSystemMessage(Component.literal("You brought your Dimensional Sight Target to your concealed space").withStyle(ChatFormatting.AQUA));
+                        dimensionalSightTileEntity.getScryTarget().teleportTo(entity.getX(), entity.getY(), entity.getZ());
+                    }
+                    createDoorEnterConcealedSpace(entity);
+                }
                 upgradeConcealedSpace(entity);
             }
         }
     }
 
-    private static void upgradeConcealedSpace(LivingEntity entity){
+    private static void upgradeConcealedSpace(LivingEntity entity) {
         int sequence = BeyonderUtil.getSequence(entity);
         MinecraftServer server = entity.getServer();
-        if(server == null) return;
+        if (server == null) return;
         ResourceKey<Level> dimensionKey = DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
         ServerLevel level = server.getLevel(dimensionKey);
 
-        if(sequence == ConcealedUtils.getConcealedSpaceSequence(entity)) return;
+        if (sequence == ConcealedUtils.getConcealedSpaceSequence(entity)) return;
 
         int diameter = 43 - 4 * sequence;
         int radius = (diameter - 1) / 2;
@@ -88,22 +101,23 @@ public class ConcealedSpace extends SimpleAbilityItem {
                     int y = destination.getY() + dy;
                     int z = destination.getZ() + dz;
                     mutablePos.set(x, y, z);
-                    if(level.getBlockState(mutablePos).is(BlockInit.VOID_BLOCK.get())) level.destroyBlock(mutablePos, false);
+                    if (level.getBlockState(mutablePos).is(BlockInit.VOID_BLOCK.get()))
+                        level.destroyBlock(mutablePos, false);
                 }
             }
         }
         ConcealedUtils.setConcealedSpaceSequence(entity, sequence);
     }
 
-    private static void changeConcealedSpaceSpawn(LivingEntity entity){
+    private static void changeConcealedSpaceSpawn(LivingEntity entity) {
         ConcealedUtils.setConcealedSpaceSpawn(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
-        if(entity instanceof Player player){
+        if (entity instanceof Player player) {
             player.displayClientMessage(Component.literal("Spawn changed").withStyle(BeyonderUtil.getStyle(player)), true);
         }
     }
 
-    private static void createDoorItem(LivingEntity entity){
-        if(entity.getOffhandItem().isEmpty()){
+    private static void createDoorItem(LivingEntity entity) {
+        if (entity.getOffhandItem().isEmpty()) {
             ItemStack stack = new ItemStack(ItemInit.CONCEALED_DOOR.get());
             CompoundTag tag = stack.getOrCreateTag();
             entity.setItemInHand(InteractionHand.OFF_HAND, stack);
@@ -113,10 +127,10 @@ public class ConcealedSpace extends SimpleAbilityItem {
         }
     }
 
-    private static void createConcealedSpace(LivingEntity entity){
+    private static void createConcealedSpace(LivingEntity entity) {
         int sequence = BeyonderUtil.getSequence(entity);
         MinecraftServer server = entity.getServer();
-        if(server == null) return;
+        if (server == null) return;
         ResourceKey<Level> dimensionKey = DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
         ServerLevel level = server.getLevel(dimensionKey);
 
@@ -135,9 +149,9 @@ public class ConcealedSpace extends SimpleAbilityItem {
                     ThreadLocalRandom.current().nextInt(-100000, 100001)
             );
 
-            for (int dx = -radius*2; dx <= radius*2; dx++) {
-                for (int dz = -radius*2; dz <= radius*2; dz++) {
-                    for (int dy = 0; dy <= diameter*2; dy++) {
+            for (int dx = -radius * 2; dx <= radius * 2; dx++) {
+                for (int dz = -radius * 2; dz <= radius * 2; dz++) {
+                    for (int dy = 0; dy <= diameter * 2; dy++) {
                         int x = center.getX() + dx;
                         int y = center.getY() + dy;
                         int z = center.getZ() + dz;
@@ -150,8 +164,9 @@ public class ConcealedSpace extends SimpleAbilityItem {
 
                         if (!state.is(BlockInit.VOID_BLOCK.get())) {
                             attempts++;
-                            if(attempts >= 1000) {
-                                if(entity instanceof Player player) player.displayClientMessage(Component.literal("It was`nt possible to find any safe space to build your concealed space"), false);
+                            if (attempts >= 1000) {
+                                if (entity instanceof Player player)
+                                    player.displayClientMessage(Component.literal("It was`nt possible to find any safe space to build your concealed space"), false);
                                 LOTM.LOGGER.error("somehow this shit didnt find any place to build");
                                 return;
                             }
@@ -184,9 +199,9 @@ public class ConcealedSpace extends SimpleAbilityItem {
         createDoorEnterConcealedSpace(entity);
     }
 
-    private static void createDoorEnterConcealedSpace(LivingEntity entity){
+    private static void createDoorEnterConcealedSpace(LivingEntity entity) {
         MinecraftServer server = entity.getServer();
-        if(server == null) return;
+        if (server == null) return;
         ResourceKey<Level> dimensionKey = DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
         ServerLevel concealedDimension = server.getLevel(dimensionKey);
 
@@ -199,9 +214,9 @@ public class ConcealedSpace extends SimpleAbilityItem {
 
         float yaw = -entity.getYRot() + 180;
         ApprenticeDoorEntity.DoorAnimationKind animationKind = ApprenticeDoorEntity.DoorAnimationKind.BELLOW;
-        if(entity.level().getBlockState(new BlockPos((int) Math.floor(getHorizontalLookCoordinates(entity, 2)[0]),
+        if (entity.level().getBlockState(new BlockPos((int) Math.floor(getHorizontalLookCoordinates(entity, 2)[0]),
                 (int) Math.floor(entity.getY() - 1),
-                (int) Math.floor(getHorizontalLookCoordinates(entity, 2)[1]))).isAir()){
+                (int) Math.floor(getHorizontalLookCoordinates(entity, 2)[1]))).isAir()) {
             animationKind = ApprenticeDoorEntity.DoorAnimationKind.FADE_IN;
         }
         ApprenticeDoorEntity enterDoor = new ApprenticeDoorEntity(entity.level(), entity.getUUID(), BeyonderUtil.getSequence(entity), 150, yaw, x, y, z, true, concealedDimension, animationKind);
@@ -209,23 +224,23 @@ public class ConcealedSpace extends SimpleAbilityItem {
         entity.level().addFreshEntity(enterDoor);
     }
 
-    public static double[] getHorizontalLookCoordinates(LivingEntity player, double distance){
+    public static double[] getHorizontalLookCoordinates(LivingEntity player, double distance) {
         float yaw = player.getYRot();
         double angleRadians = Math.toRadians(-yaw);
         double x = player.getX() + distance * Math.sin(angleRadians);
         double z = player.getZ() + distance * Math.cos(angleRadians);
-        return new double[] {x, z};
+        return new double[]{x, z};
     }
 
-    private static void createDoorLeaveConcealedSpace(LivingEntity entity){
+    private static void createDoorLeaveConcealedSpace(LivingEntity entity) {
         Level level = ConcealedUtils.getConcealedSpaceExitDimension(entity);
         if (level == null) return;
 
         float yaw = -entity.getYRot() + 180;
         ApprenticeDoorEntity.DoorAnimationKind animationKind = ApprenticeDoorEntity.DoorAnimationKind.BELLOW;
-        if(entity.level().getBlockState(new BlockPos((int) Math.floor(getHorizontalLookCoordinates(entity, 2)[0]),
+        if (entity.level().getBlockState(new BlockPos((int) Math.floor(getHorizontalLookCoordinates(entity, 2)[0]),
                 (int) Math.floor(entity.getY() - 1),
-                (int) Math.floor(getHorizontalLookCoordinates(entity, 2)[1]))).isAir()){
+                (int) Math.floor(getHorizontalLookCoordinates(entity, 2)[1]))).isAir()) {
             animationKind = ApprenticeDoorEntity.DoorAnimationKind.FADE_IN;
         }
 
@@ -248,6 +263,7 @@ public class ConcealedSpace extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
@@ -255,6 +271,11 @@ public class ConcealedSpace extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return super.getPriority(livingEntity, target);
+        if (livingEntity.getHealth() < livingEntity.getMaxHealth() / 8 && !IsConcealedUtils.getIsConcealed(livingEntity)) {
+            return 80;
+        } else if (IsConcealedUtils.getIsConcealed(livingEntity) && livingEntity.getHealth() > livingEntity.getMaxHealth() - 5) {
+            return 100;
+        }
+        return 0;
     }
 }

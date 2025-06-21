@@ -10,10 +10,12 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.FlashEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -43,7 +45,13 @@ public class TrickFlash extends SimpleAbilityItem {
             flash.setDeltaMovement(lookVec.scale(1.5));
             flash.setOwner(livingEntity);
             flash.hurtMarked = true;
-            flash.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                livingEntity.sendSystemMessage(Component.literal("You created a flash around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                flash.teleportTo(dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ());
+            } else {
+                flash.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            }
             livingEntity.level().addFreshEntity(flash);
         }
     }
@@ -64,6 +72,9 @@ public class TrickFlash extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return super.getPriority(livingEntity, target);
+        if (target != null) {
+            return (int) (100 - (target.distanceTo(livingEntity) * 10));
+        }
+        return 0;
     }
 }

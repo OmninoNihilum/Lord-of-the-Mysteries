@@ -29,6 +29,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.*;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BiomeInit;
@@ -65,7 +66,13 @@ public class Exile extends SimpleAbilityItem {
             Vec3 spawnPos = player.position().add(lookVec);
             float yaw = -player.getYRot() + 180;
             ApprenticeDoorEntity apprenticeDoor = new ApprenticeDoorEntity(player.level(), player, yaw, 100);
-            apprenticeDoor.teleportTo(spawnPos.x(), spawnPos.y(), spawnPos.z());
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                player.sendSystemMessage(Component.literal("You created a door to exile at your Dimensional Sight Target's location").withStyle(ChatFormatting.AQUA));
+                apprenticeDoor.teleportTo(dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ());
+            } else {
+                apprenticeDoor.teleportTo(spawnPos.x(), spawnPos.y(), spawnPos.z());
+            }
             player.level().addFreshEntity(apprenticeDoor);
         }
     }
@@ -222,6 +229,9 @@ public class Exile extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null) {
+            return 70;
+        }
         return 0;
     }
 }

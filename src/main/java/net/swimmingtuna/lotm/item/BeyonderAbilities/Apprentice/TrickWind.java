@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -50,24 +51,46 @@ public class TrickWind extends SimpleAbilityItem {
     }
 
 
-
-
     public static void pull(LivingEntity player) {
         if (!player.level().isClientSide()) {
             Vec3 playerLookVector = player.getViewVector(1.0F);
             double fovAngle = Math.toRadians(70.0);
-            for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
-                Vec3 playerPos = player.position();
-                Vec3 entityPos = entity.position();
-                Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
-                double dotProduct = playerLookVector.dot(toEntityVector);
-                double angle = Math.acos(dotProduct);
-                if (angle <= fovAngle) {
-                    Vec3 direction = playerPos.subtract(entityPos).normalize();
-                    double distance = playerPos.distanceTo(entityPos);
-                    double force = 0.5 * distance;
-                    direction = new Vec3(direction.x, 0, direction.z).normalize();
-                    entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(force)));
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                player.sendSystemMessage(Component.literal("You created a suction force around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                LivingEntity scry = dimensionalSightTileEntity.getScryTarget();
+                for (LivingEntity livingEntity : BeyonderUtil.checkEntitiesInLocation(scry, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()), (float) scry.getX(), (float) scry.getY(), (float) scry.getZ())) {
+                    if (livingEntity != player && !BeyonderUtil.areAllies(livingEntity, player)) {
+                        Vec3 playerPos = dimensionalSightTileEntity.getScryTarget().position();
+                        Vec3 entityPos = livingEntity.position();
+                        Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
+                        double dotProduct = playerLookVector.dot(toEntityVector);
+                        double angle = Math.acos(dotProduct);
+                        if (angle <= fovAngle) {
+                            Vec3 direction = playerPos.subtract(entityPos).normalize();
+                            double distance = playerPos.distanceTo(entityPos);
+                            double force = 0.5 * distance;
+                            direction = new Vec3(direction.x, 0, direction.z).normalize();
+                            livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().add(direction.scale(force)));
+                            livingEntity.hurtMarked = true;
+                        }
+                    }
+                }
+            } else {
+                for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
+                    Vec3 playerPos = player.position();
+                    Vec3 entityPos = entity.position();
+                    Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
+                    double dotProduct = playerLookVector.dot(toEntityVector);
+                    double angle = Math.acos(dotProduct);
+                    if (angle <= fovAngle) {
+                        Vec3 direction = playerPos.subtract(entityPos).normalize();
+                        double distance = playerPos.distanceTo(entityPos);
+                        double force = 0.5 * distance;
+                        direction = new Vec3(direction.x, 0, direction.z).normalize();
+                        entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(force)));
+                        entity.hurtMarked = true;
+                    }
                 }
             }
         }
@@ -77,17 +100,39 @@ public class TrickWind extends SimpleAbilityItem {
         if (!player.level().isClientSide()) {
             Vec3 playerLookVector = player.getViewVector(1.0F);
             double fovAngle = Math.toRadians(70.0);
-            for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
-                Vec3 playerPos = player.position();
-                Vec3 entityPos = entity.position();
-                Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
-                double dotProduct = playerLookVector.dot(toEntityVector);
-                double angle = Math.acos(dotProduct);
-                if (angle <= fovAngle) {
-                    Vec3 direction = playerPos.subtract(entityPos).normalize();
-                    int factor = 10 - BeyonderUtil.getSequence(player);
-                    entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-factor)));
-                    entity.hurtMarked = true;
+
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                player.sendSystemMessage(Component.literal("You created a pushing force around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                LivingEntity scry = dimensionalSightTileEntity.getScryTarget();
+                for (LivingEntity entity : BeyonderUtil.checkEntitiesInLocation(scry, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()), (float) scry.getX(), (float) scry.getY(), (float) scry.getZ())) {
+                    if (entity != player && !BeyonderUtil.areAllies(entity, player)) {
+                        Vec3 playerPos = dimensionalSightTileEntity.getScryTarget().position();
+                        Vec3 entityPos = entity.position();
+                        Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
+                        double dotProduct = playerLookVector.dot(toEntityVector);
+                        double angle = Math.acos(dotProduct);
+                        if (angle <= fovAngle) {
+                            Vec3 direction = playerPos.subtract(entityPos).normalize();
+                            int factor = 10 - BeyonderUtil.getSequence(player);
+                            entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-factor)));
+                            entity.hurtMarked = true;
+                        }
+                    }
+                }
+            } else {
+                for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
+                    Vec3 playerPos = player.position();
+                    Vec3 entityPos = entity.position();
+                    Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
+                    double dotProduct = playerLookVector.dot(toEntityVector);
+                    double angle = Math.acos(dotProduct);
+                    if (angle <= fovAngle) {
+                        Vec3 direction = playerPos.subtract(entityPos).normalize();
+                        int factor = 10 - BeyonderUtil.getSequence(player);
+                        entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-factor)));
+                        entity.hurtMarked = true;
+                    }
                 }
             }
         }
@@ -123,8 +168,22 @@ public class TrickWind extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null) {
+            if (livingEntity.getHealth() > target.getHealth()) {
+                livingEntity.setShiftKeyDown(true);
+                return 60;
+            } else if (livingEntity.getHealth() < target.getHealth()) {
+                return 60;
+            }
+        }
+        return 0;
     }
 }

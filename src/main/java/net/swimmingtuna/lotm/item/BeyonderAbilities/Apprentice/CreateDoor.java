@@ -14,6 +14,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -196,19 +197,24 @@ public class CreateDoor extends SimpleAbilityItem {
                     targetX = x + loop * cordModifier;
                     found = true;
                 }
-
-                if (found) {
-                    double offsetX = targetX + (0.5 * cordModifier - 0.2) * cordModifier;
-                    spawnDoor(
-                            level,
-                            adjustedRelativePos,
-                            offsetX,
-                            targetY,
-                            z + 0.5,
-                            direction,
-                            120,
-                            player
-                    );
+                DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+                if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                    player.sendSystemMessage(Component.literal("You created a door to your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                    spawnDoor(level, adjustedRelativePos, dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ(), direction, 120, player);
+                } else {
+                    if (found) {
+                        double offsetX = targetX + (0.5 * cordModifier - 0.2) * cordModifier;
+                        spawnDoor(
+                                level,
+                                adjustedRelativePos,
+                                offsetX,
+                                targetY,
+                                z + 0.5,
+                                direction,
+                                120,
+                                player
+                        );
+                    }
                 }
             }
         }
@@ -245,10 +251,7 @@ public class CreateDoor extends SimpleAbilityItem {
                 break;
         }
 
-        ApprenticeDoorEntity door = new ApprenticeDoorEntity(
-                level, user, sequence, life, yaw, (float)X, (float)Y, (float)Z,
-                level, ApprenticeDoorEntity.DoorAnimationKind.BEHIND
-        );
+        ApprenticeDoorEntity door = new ApprenticeDoorEntity(level, user, sequence, life, yaw, (float)X, (float)Y, (float)Z, level, ApprenticeDoorEntity.DoorAnimationKind.BEHIND);
         door.setPos(x, y, z);
         level.addFreshEntity(door);
     }
@@ -273,5 +276,10 @@ public class CreateDoor extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        return 0;
     }
 }

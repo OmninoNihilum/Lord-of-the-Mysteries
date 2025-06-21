@@ -17,6 +17,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -50,10 +51,22 @@ public class TrickFog extends SimpleAbilityItem {
     public static void createFog(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get());
-            for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(damage  * 2))) {
-                if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living) ) {
-                    if (living instanceof ServerPlayer serverPlayer) {
-                        LOTMNetworkHandler.sendToPlayer(new ClientFogDataS2C(damage * 6), serverPlayer);
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                livingEntity.sendSystemMessage(Component.literal("You created fog around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                for (LivingEntity living : BeyonderUtil.checkEntitiesInLocation(livingEntity, (float) (damage * 2), (float) dimensionalSightTileEntity.getScryTarget().getX(), (float) dimensionalSightTileEntity.getScryTarget().getY(), (float) dimensionalSightTileEntity.getScryTarget().getZ())) {
+                    if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
+                        if (living instanceof ServerPlayer serverPlayer) {
+                            LOTMNetworkHandler.sendToPlayer(new ClientFogDataS2C(damage * 6), serverPlayer);
+                        }
+                    }
+                }
+            } else {
+                for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(damage * 2))) {
+                    if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
+                        if (living instanceof ServerPlayer serverPlayer) {
+                            LOTMNetworkHandler.sendToPlayer(new ClientFogDataS2C(damage * 6), serverPlayer);
+                        }
                     }
                 }
             }
@@ -95,5 +108,17 @@ public class TrickFog extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null) {
+            int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get());
+            if (target.distanceTo(livingEntity) < damage) {
+                return 80;
+            }
+            return 0;
+        }
+        return 0;
     }
 }

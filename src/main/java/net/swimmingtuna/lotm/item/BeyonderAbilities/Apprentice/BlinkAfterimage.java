@@ -92,7 +92,6 @@ public class BlinkAfterimage extends SimpleAbilityItem {
     }
 
 
-
     private static boolean tryTeleportToSafeLocation(Entity entity, Level level, int distance) {
         distance = Math.max(1, distance);
         List<Vec3> directions = new ArrayList<>();
@@ -194,6 +193,20 @@ public class BlinkAfterimage extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 10 && livingEntity.getPersistentData().getBoolean("travelerAfterimage")) {
+            return 80;
+        } else if (!livingEntity.getPersistentData().getBoolean("travelerAfterimage")) {
+            return 80;
+        } else if (target == null) {
+            return 100;
+        }
+        return 0;
+    }
+
+
 
     @Override
     public Rarity getRarity(ItemStack pStack) {

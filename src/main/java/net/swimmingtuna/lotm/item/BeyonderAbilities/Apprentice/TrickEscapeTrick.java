@@ -41,7 +41,7 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
             return InteractionResult.FAIL;
         }
         escape(livingEntity);
-        if(livingEntity instanceof Player player){
+        if( livingEntity instanceof Player player) {
             if (!player.isShiftKeyDown()) {
                 addCooldown(player);
                 useSpirituality(player);
@@ -62,10 +62,9 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
                     player.displayClientMessage(Component.literal("Escape Tricks prepared: ").withStyle(BeyonderUtil.getStyle(player)).append(Component.literal("" + tag.getInt("escapeTrickCount")).withStyle(ChatFormatting.WHITE)), true);
                     return;
                 }
-            }
-            if(tag.getInt("escapeTrickCount") < maxEscapes) {
+            } if (tag.getInt("escapeTrickCount") < maxEscapes) {
                 tag.putInt("escapeTrickCount", tag.getInt("escapeTrickCount") + 1);
-                if(entity instanceof Player player) {
+                if (entity instanceof Player player ) {
                     player.displayClientMessage(Component.literal("Trick prepared!").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
             } else {
@@ -213,5 +212,17 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        int maxEscapes = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKESCAPETRICK.get());
+        int escapeTrickCount = livingEntity.getPersistentData().getInt("escapeTrickCount");
+        if (target == null && escapeTrickCount < maxEscapes) {
+            return 100;
+        } else if (escapeTrickCount >= maxEscapes) {
+            return 0;
+        }
+        return 0;
     }
 }

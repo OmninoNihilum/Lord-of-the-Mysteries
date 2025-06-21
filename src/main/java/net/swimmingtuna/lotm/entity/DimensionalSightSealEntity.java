@@ -23,6 +23,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -193,7 +194,9 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
                         }
                     }
                     for (LivingEntity livingEntity : BeyonderUtil.checkEntitiesInLocation(owner, 20.0f, this.getSealX(), this.getSealY(), this.getSealZ())) {
-                        livingEntity.getPersistentData().putInt("dimensionalSightSeal", 20);
+                        if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity)) {
+                            livingEntity.getPersistentData().putInt("dimensionalSightSeal", 20);
+                        }
                     }
                 }
             }
@@ -203,6 +206,41 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
     public static void dimensionalSightSealTick(LivingEntity livingEntity) {
         if (livingEntity.getPersistentData().getInt("dimensionalSightSeal") >= 1) {
             livingEntity.getPersistentData().putInt("dimensionalSightSeal", livingEntity.getPersistentData().getInt("dimensionalSightSeal") - 1);
+        }
+        if (livingEntity.getPersistentData().getInt("dimensionalSightSealTeleportTimer") >= 1) {
+            livingEntity.getPersistentData().putInt("dimensionalSightSealTeleportTimer", 0);
+            int x = livingEntity.getPersistentData().getInt("dimensionalSightSealX");
+            int y = livingEntity.getPersistentData().getInt("dimensionalSightSealY");
+            int z = livingEntity.getPersistentData().getInt("dimensionalSightSealZ");
+            livingEntity.getPersistentData().putInt("dimensionalSightSealTeleportBackTimer", 1);
+            EnvisionLocation.envisionLocationTeleport(livingEntity,x, y, z);
+        }
+        if (livingEntity.getPersistentData().getInt("dimensionalSightSealTeleportBackTimer") >= 1) {
+            int x1 = livingEntity.getPersistentData().getInt("dimensionalSightSealX");
+            int y1 = livingEntity.getPersistentData().getInt("dimensionalSightSealY");
+            int z1 = livingEntity.getPersistentData().getInt("dimensionalSightSealZ");
+            BlockPos sealPos = new BlockPos(x1,y1,z1);
+            int x2 = livingEntity.getPersistentData().getInt("dimensionalSightSealBackX");
+            int y2 = livingEntity.getPersistentData().getInt("dimensionalSightSealBackY");
+            int z2 = livingEntity.getPersistentData().getInt("dimensionalSightSealBackZ");
+            for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(20))) {
+                EnvisionLocation.envisionLocationTeleport(living,x2, y2, z2);
+            }
+            int radius = 20;
+            for (int x = -radius; x <= radius; x++) {
+                for (int y = -radius; y <= radius; y++) {
+                    for (int z = -radius; z <= radius; z++) {
+                        double distance = Math.sqrt(x * x + y * y + z * z);
+                        if (distance >= radius - 0.5 && distance <= radius + 0.5) {
+                            BlockPos blockPos = sealPos.offset(x, y, z);
+                            if (livingEntity.level().getBlockState(blockPos) == BlockInit.VOID_BLOCK.get().defaultBlockState()) {
+                                livingEntity.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                            }
+                        }
+                    }
+                }
+            }
+            livingEntity.getPersistentData().putInt("dimensionalSightSealTeleportBackTimer", 0);
         }
     }
 
@@ -237,9 +275,11 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
     public void setMaxLife(int maxLife) {
         this.entityData.set(MAX_LIFE, maxLife);
     }
+
     public boolean getShouldMessage() {
         return this.entityData.get(SHOULD_MESSAGE);
     }
+
     public void setShouldMessage(boolean shouldMessage) {
         this.entityData.set(SHOULD_MESSAGE, shouldMessage);
     }

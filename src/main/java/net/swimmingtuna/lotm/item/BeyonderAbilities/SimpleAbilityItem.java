@@ -218,7 +218,37 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                     player.getCooldowns().addCooldown(item, cooldown);
                 }
             } else {
-                livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
+                if (livingEntity.getPersistentData().getBoolean("doorBlinkState")) {
+                    int distance = livingEntity.getPersistentData().getInt("doorBlinkStateDistance");
+                    int wormsToBeUsed = distance / 10;
+                    if (distance > 0) {
+                        if (distance >= cooldown) {
+                            livingEntity.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0,distance - cooldown * 1.5f));
+                            cooldown = 0;
+                        } else {
+                            livingEntity.getPersistentData().putInt("doorBlinkStateDistance", 0);
+                            cooldown = cooldown - distance;
+                        }
+                        CompoundTag tag = livingEntity.getPersistentData();
+                        int currentWormOfStar = tag.getInt("wormOfStar");
+                        tag.putInt("wormOfStar", Math.max(0, currentWormOfStar - wormsToBeUsed));
+                    }
+                }
+                if (livingEntity.getPersistentData().getBoolean("wormOfStarChoice")) {
+                    CompoundTag tag = livingEntity.getPersistentData();
+                    int wormOfStarAmount = tag.getInt("wormOfStar");
+                    if (wormOfStarAmount == 0) {
+                        livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
+                    } else {
+                        int maxReduction = cooldown / 2;
+                        int actualReduction = Math.min(maxReduction, wormOfStarAmount);
+                        int newCooldown = cooldown - actualReduction;
+                        tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
+                        livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), newCooldown);
+                    }
+                } else {
+                    livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
+                }
             }
         }
     }
@@ -396,34 +426,6 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
         return true;
     }
 
-    public static DimensionalSightTileEntity findNearbyDimensionalSight(Level level, LivingEntity entity) {
-        if (level == null || entity == null) return null;
-        if (!level.isClientSide()) {
-            BlockPos entityPos = entity.blockPosition();
-            int searchRadius = 15;
-            for (int x = -searchRadius; x <= searchRadius; x++) {
-                for (int y = -searchRadius; y <= searchRadius; y++) {
-                    for (int z = -searchRadius; z <= searchRadius; z++) {
-                        BlockPos checkPos = entityPos.offset(x, y, z);
-                        BlockEntity blockEntity = level.getBlockEntity(checkPos);
-                        if (blockEntity instanceof DimensionalSightTileEntity dimensionalSight) {
-                            entity.sendSystemMessage(Component.literal("DIMENSIONAL SIGHT FOUND"));
-                            if (dimensionalSight.getCasterUUID() != null && dimensionalSight.getCasterUUID().equals(entity.getUUID()) && dimensionalSight.getScryUniqueID() != null) {
-                                return dimensionalSight;
-                            } else if (dimensionalSight.getCasterUUID() == null) {
-                                entity.sendSystemMessage(Component.literal("CASTED UUID NULL"));
-                            } else if (!dimensionalSight.getCasterUUID().equals(entity.getUUID())) {
-                                entity.sendSystemMessage(Component.literal("CASTED UUID NOT ENTITY UUID"));
-                            } else if (dimensionalSight.getScryTarget() == null) {
-                                entity.sendSystemMessage(Component.literal("SCRY TARGET NULL"));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
     public interface scribeAbilitiesStorage {
         Map<Item, Integer> getScribedAbilities();

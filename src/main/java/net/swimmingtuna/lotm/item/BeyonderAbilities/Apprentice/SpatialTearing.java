@@ -10,6 +10,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.SpaceRiftEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -41,13 +42,25 @@ public class SpatialTearing extends SimpleAbilityItem {
     public static void tearSpace(LivingEntity livingEntity){
         Level level = livingEntity.level();
         if(level.isClientSide) return;
-        SpaceRiftEntity rift = new SpaceRiftEntity(EntityInit.SPACE_RIFT_ENTITY.get(), livingEntity.level());
-        rift.setOwner(livingEntity);
-        Vec3 scale = livingEntity.getLookAngle().scale(20);
-        rift.teleportTo(livingEntity.getX() + scale.x(), livingEntity.getY() + scale.y(), livingEntity.getZ() + scale.z());
-        BeyonderUtil.setScale(rift, 6 - BeyonderUtil.getSequence(livingEntity));
-        rift.setMaxLife((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_TEARING.get()));
-        level.addFreshEntity(rift);
+        DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
+        if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+            livingEntity.sendSystemMessage(Component.literal("You tore the space around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+            SpaceRiftEntity rift = new SpaceRiftEntity(EntityInit.SPACE_RIFT_ENTITY.get(), livingEntity.level());
+            rift.setOwner(livingEntity);
+            LivingEntity scryEntity = dimensionalSightTileEntity.getScryTarget();
+            rift.teleportTo(scryEntity.getX(), scryEntity.getY(), scryEntity.getZ());
+            BeyonderUtil.setScale(rift, 6 - BeyonderUtil.getSequence(livingEntity));
+            rift.setMaxLife((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_TEARING.get()));
+            level.addFreshEntity(rift);
+        } else {
+            SpaceRiftEntity rift = new SpaceRiftEntity(EntityInit.SPACE_RIFT_ENTITY.get(), livingEntity.level());
+            rift.setOwner(livingEntity);
+            Vec3 scale = livingEntity.getLookAngle().scale(20);
+            rift.teleportTo(livingEntity.getX() + scale.x(), livingEntity.getY() + scale.y(), livingEntity.getZ() + scale.z());
+            BeyonderUtil.setScale(rift, 6 - BeyonderUtil.getSequence(livingEntity));
+            rift.setMaxLife((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_TEARING.get()));
+            level.addFreshEntity(rift);
+        }
     }
 
     @Override
@@ -67,6 +80,9 @@ public class SpatialTearing extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return super.getPriority(livingEntity, target);
+        if (target != null) {
+            return 90;
+        }
+        return 0;
     }
 }

@@ -132,4 +132,16 @@ public class TrickTelekenisis extends SimpleAbilityItem {
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
     }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (livingEntity.getPersistentData().getBoolean("trickmasterTelekenisis")) {
+            if (BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 10) {
+                return 100;
+            }
+        } else if (!livingEntity.getPersistentData().getBoolean("trickmasterTelekenisis") && target != null && BeyonderUtil.getSpirituality(livingEntity) * 10 > BeyonderUtil.getMaxSpirituality(livingEntity)) {
+            return 80;
+        }
+        return 0;
+    }
 }

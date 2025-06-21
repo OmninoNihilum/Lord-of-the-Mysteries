@@ -12,9 +12,11 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -26,8 +28,8 @@ public class TrickBlackCurtain extends SimpleAbilityItem {
     }
 
     @Override
-    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand){
-        if(!checkAll(livingEntity)){
+    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
+        if (!checkAll(livingEntity)) {
             return InteractionResult.FAIL;
         }
         spawnParticles(livingEntity);
@@ -36,7 +38,7 @@ public class TrickBlackCurtain extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
-    public static void spawnParticles(LivingEntity entity){
+    public static void spawnParticles(LivingEntity entity) {
         int height = 3;
         int width = 5;
         ServerLevel level = (ServerLevel) entity.level();
@@ -46,10 +48,16 @@ public class TrickBlackCurtain extends SimpleAbilityItem {
         Vec3 right = look.cross(new Vec3(0, 1, 0)).normalize();
 
         BlockPos basePos = entity.blockPosition().offset((int) Math.round(look.x), 0, (int) Math.round(look.z));
-        for(int y = 0; y < height; y++){
-            for(int x = (int) -(Math.floor(width/2)); x <= (int) (Math.floor(width/2)); x++){
+        for (int y = 0; y < height; y++) {
+            for (int x = (int) -(Math.floor(width / 2)); x <= (int) (Math.floor(width / 2)); x++) {
                 Vec3 offset = right.scale(x).add(0, y, 0);
-                Vec3 spawnPos = Vec3.atCenterOf(basePos).add(offset);
+                Vec3 spawnPos;
+                DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(entity);
+                if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                    entity.sendSystemMessage(Component.literal("You created a curtain in front of your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                    basePos = dimensionalSightTileEntity.getScryTarget().blockPosition().offset((int) Math.round(look.x), 0, (int) Math.round(look.z));
+                }
+                spawnPos = Vec3.atCenterOf(basePos).add(offset);
                 level.sendParticles(ParticleInit.BLACK_CURTAIN.get(), spawnPos.x, spawnPos.y, spawnPos.z, 100, 0.3, 0.3, 0.3, 0.01);
             }
         }
@@ -64,8 +72,17 @@ public class TrickBlackCurtain extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null) {
+            return 50;
+        }
+        return 0;
     }
 }

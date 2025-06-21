@@ -185,4 +185,16 @@ public class DoorMirage extends SimpleAbilityItem {
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
     }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 10 && livingEntity.getPersistentData().getBoolean("doorMirageIsActive")) {
+            return 80;
+        } else if (!livingEntity.getPersistentData().getBoolean("doorMirageIsActive")) {
+            return 80;
+        } else if (target == null) {
+            return 100;
+        }
+        return 0;
+    }
 }

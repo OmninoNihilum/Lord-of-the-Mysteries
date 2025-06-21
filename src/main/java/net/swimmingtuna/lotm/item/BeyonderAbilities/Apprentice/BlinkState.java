@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -84,6 +85,8 @@ public class BlinkState extends SimpleAbilityItem {
                     tag.putInt("doorBlinkStateZ2", (int) livingEntity.getZ());
                 }
                 if (livingEntity.onGround()) {
+                    BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SPEED, 20, 5, false, false);
+                } else if (livingEntity instanceof Mob) {
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SPEED, 20, 5, false, false);
                 }
                 if (tag.getInt("doorBlinkStateX1") != 0 && tag.getInt("doorBlinkStateX2") != 0) {
@@ -175,5 +178,17 @@ public class BlinkState extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 6 && livingEntity.getPersistentData().getBoolean("doorBlinkState")) {
+            return 80;
+        } else if (!livingEntity.getPersistentData().getBoolean("doorBlinkState")) {
+            return 80;
+        } else if (target == null) {
+            return 100;
+        }
+        return 0;
     }
 }
