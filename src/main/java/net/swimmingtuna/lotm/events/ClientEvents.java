@@ -82,9 +82,9 @@ public class ClientEvents {
 
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
-    public static void onPlaySound(PlaySoundEvent event){
+    public static void onPlaySound(PlaySoundEvent event) {
         Player player = Minecraft.getInstance().player;
-        if(player != null && player.hasEffect(ModEffects.DEAFNESS.get()) && event.isCancelable()){
+        if (player != null && player.hasEffect(ModEffects.DEAFNESS.get()) && event.isCancelable()) {
             event.setCanceled(true);
         }
     }

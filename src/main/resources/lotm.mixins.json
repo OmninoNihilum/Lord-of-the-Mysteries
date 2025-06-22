@@ -22,6 +22,7 @@
     "StructureBlockUnlimit"
   ],
   "client": [
+    "EntityRenderDispatcherMixin",
     "ItemInHandRendererMixin",
     "ItemRendererMixin",
     "StructureBlockRenderMixin"

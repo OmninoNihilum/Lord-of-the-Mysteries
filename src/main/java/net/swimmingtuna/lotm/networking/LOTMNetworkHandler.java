@@ -293,6 +293,11 @@ public class LOTMNetworkHandler {
                 .encoder(ScryingEntityPacketS2C::encode)
                 .consumerMainThread(ScryingEntityPacketS2C::handle)
                 .add();
+        INSTANCE.messageBuilder(ClientShouldntRenderS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientShouldntRenderS2C::decode)
+                .encoder(ClientShouldntRenderS2C::encode)
+                .consumerMainThread(ClientShouldntRenderS2C::handle)
+                .add();
     }
 
 

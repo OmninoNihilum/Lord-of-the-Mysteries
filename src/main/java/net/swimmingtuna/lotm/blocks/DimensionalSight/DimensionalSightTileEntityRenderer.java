@@ -19,7 +19,6 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
 
     private final BlockRenderDispatcher blockRenderer;
     private final EntityRenderDispatcher entityRenderer;
-    private static final boolean DEBUG = true; // Set to false in production
 
     public DimensionalSightTileEntityRenderer(BlockEntityRendererProvider.Context context) {
         this.blockRenderer = Minecraft.getInstance().getBlockRenderer();
@@ -115,5 +114,15 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
         } finally {
             poseStack.popPose();
         }
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen(DimensionalSightTileEntity blockEntity) {
+        return true;
+    }
+
+    @Override
+    public int getViewDistance() {
+        return 502;
     }
 }

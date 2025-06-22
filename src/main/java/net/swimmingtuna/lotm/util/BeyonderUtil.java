@@ -1211,7 +1211,8 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
             } else if (heldItem.getItem() instanceof ScribeAbilities) {
                 LOTMNetworkHandler.sendToServer(new ScribeCopyAbilityC2S());
-            } if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
+            }
+            if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
                 LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
             }
         }
@@ -1749,7 +1750,6 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, -abilityStrengthened));
         return damageMap;
     }
-
 
 
     public static float applyAbilityStrengthened(float damage, float abilityStrengthened) {
@@ -3520,6 +3520,7 @@ public class BeyonderUtil {
         return null;
     }
 
+
     public static LivingEntity getClientLivingEntityFromUUID(Level level, UUID uuid) {
         if (level instanceof ClientLevel clientLevel) {
             for (Entity entity : clientLevel.entitiesForRendering()) {
@@ -3694,6 +3695,7 @@ public class BeyonderUtil {
             tag.remove("spatialCageZ");
         }
     }
+
     private static final Set<String> EXCLUDED_METHODS = Set.of(
             "matterAccelerationSelfAbility",
             "envisionLocationBlink",

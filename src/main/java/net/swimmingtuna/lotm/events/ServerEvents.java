@@ -424,7 +424,7 @@ public class ServerEvents {
                 if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
                     BlockPos playerPos = player.blockPosition();
                     Vec3 lookPos = player.getLookAngle().scale(5);
-                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y(), (int) lookPos.z()));
+                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y() - 2, (int) lookPos.z()));
                     BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
                     level.setBlock(targetPos, dimensionalSightState, 3);
                     level.getServer().execute(() -> {

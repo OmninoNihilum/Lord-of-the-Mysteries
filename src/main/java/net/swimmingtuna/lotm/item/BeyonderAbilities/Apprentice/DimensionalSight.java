@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -60,6 +61,7 @@ public class DimensionalSight extends SimpleAbilityItem {
         if (!checkAll(player)) {
             return InteractionResult.FAIL;
         }
+        addCooldown(player);
         useSpirituality(player);
         dimensionalSight(player);
         return InteractionResult.SUCCESS;
@@ -67,34 +69,80 @@ public class DimensionalSight extends SimpleAbilityItem {
 
 
     public static void dimensionalSight(LivingEntity livingEntity, LivingEntity interactionTarget) {
+        dimensionalSightDelayed(livingEntity, interactionTarget, 2);
+        if (livingEntity instanceof Player player && player.isCreative()) {
+            player.getCooldowns().addCooldown(ItemInit.DIMENSIONAL_SIGHT.get(), 10);
+        }
+    }
+
+    private static void dimensionalSightDelayed(LivingEntity livingEntity, LivingEntity interactionTarget, int ticksToWait) {
         Level level = livingEntity.level();
         if (!level.isClientSide()) {
             MinecraftServer server = level.getServer();
             if (server != null) {
-                server.execute(() -> {
-                    BlockPos playerPos = livingEntity.blockPosition();
-                    Vec3 lookPos = livingEntity.getLookAngle().scale(5);
-                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y(), (int) lookPos.z()));
-                    BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
-                    level.setBlock(targetPos, dimensionalSightState, 3);
-                    BlockEntity blockEntity = level.getBlockEntity(targetPos);
-                    if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
-                        sightEntity.setCaster(livingEntity);
-                        if (interactionTarget != null) {
-                            sightEntity.viewTarget = interactionTarget.getName().getString();
-                            sightEntity.scryUniqueID = interactionTarget.getUUID();
+                if (ticksToWait <= 0) {
+                    server.execute(() -> {
+                        BlockPos playerPos = livingEntity.blockPosition();
+                        Vec3 lookPos = livingEntity.getLookAngle().scale(5);
+                        BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y() - 2, (int) lookPos.z()));
+                        BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
+                        level.setBlock(targetPos, dimensionalSightState, 3);
+                        BlockEntity blockEntity = level.getBlockEntity(targetPos);
+                        if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
                             sightEntity.setCaster(livingEntity);
-                            sightEntity.setChanged();
-                            sightEntity.sendUpdates();
+                            if (interactionTarget != null) {
+                                sightEntity.viewTarget = interactionTarget.getName().getString();
+                                sightEntity.scryUniqueID = interactionTarget.getUUID();
+                                sightEntity.setCaster(livingEntity);
+                                sightEntity.setChanged();
+                                sightEntity.sendUpdates();
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    server.execute(() -> dimensionalSightDelayed(livingEntity, interactionTarget, ticksToWait - 1));
+                }
             }
         }
     }
 
     public void dimensionalSight(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            if (livingEntity.isShiftKeyDown()) {
+                int amount = 0;
+                for (DimensionalSightSealEntity dimensionalSightSealEntity : livingEntity.level().getEntitiesOfClass(DimensionalSightSealEntity.class, livingEntity.getBoundingBox().inflate(10))) {
+                    if (dimensionalSightSealEntity.getOwner() == livingEntity) {
+                        amount++;
+                        livingEntity.getPersistentData().putInt("dimensionalSightSealBackX", (int) livingEntity.getX());
+                        livingEntity.getPersistentData().putInt("dimensionalSightSealBackY", (int) livingEntity.getY());
+                        livingEntity.getPersistentData().putInt("dimensionalSightSealBackZ", (int) livingEntity.getZ());
+                        livingEntity.getPersistentData().putInt("dimensionalSightSealX", (int) dimensionalSightSealEntity.getSealX());
+                        livingEntity.getPersistentData().putInt("dimensionalSightSealY", (int) dimensionalSightSealEntity.getSealY());
+                        livingEntity.getPersistentData().putInt("dimensionalSightSealZ", (int) dimensionalSightSealEntity.getSealZ());
+                        livingEntity.getPersistentData().putInt("dimensionalSightSealTeleportTimer", 1);
+                        dimensionalSightSealEntity.setShouldMessage(false);
+                        dimensionalSightSealEntity.tickCount = dimensionalSightSealEntity.getMaxLife() - 1;
+                        BlockPos sealPos = new BlockPos((int) dimensionalSightSealEntity.getSealX(), (int) dimensionalSightSealEntity.getSealY(), (int) dimensionalSightSealEntity.getSealZ());
+                        int radius = 20;
+                        for (int x = -radius; x <= radius; x++) {
+                            for (int y = -radius; y <= radius; y++) {
+                                for (int z = -radius; z <= radius; z++) {
+                                    double distance = Math.sqrt(x * x + y * y + z * z);
+                                    if (distance >= radius - 0.5 && distance <= radius + 0.5) {
+                                        BlockPos blockPos = sealPos.offset(x, y, z);
+                                        if (livingEntity.level().getBlockState(blockPos) == BlockInit.VOID_BLOCK.get().defaultBlockState()) {
+                                            livingEntity.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (amount >= 1) {
+                    this.addCooldown(livingEntity);
+                }
+            }
             DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.scryUniqueID != null && dimensionalSightTileEntity.getCasterUUID() != null && dimensionalSightTileEntity.getCasterUUID().equals(livingEntity.getUUID())) {
                 DimensionalSightSealEntity sightSealEntity = new DimensionalSightSealEntity(EntityInit.DIMENSIONAL_SIGHT_SEAL_ENTITY.get(), livingEntity.level());
@@ -109,43 +157,8 @@ public class DimensionalSight extends SimpleAbilityItem {
                 livingEntity.level().addFreshEntity(sightSealEntity);
                 dimensionalSightTileEntity.removeThis();
                 this.addCooldown(livingEntity);
-            } else {
-                if (livingEntity.isShiftKeyDown()) {
-                    int amount = 0;
-                    for (DimensionalSightSealEntity dimensionalSightSealEntity : livingEntity.level().getEntitiesOfClass(DimensionalSightSealEntity.class, livingEntity.getBoundingBox().inflate(10))) {
-                        if (dimensionalSightSealEntity.getOwner() == livingEntity) {
-                            amount++;
-                            livingEntity.getPersistentData().putInt("dimensionalSightSealBackX", (int) livingEntity.getX());
-                            livingEntity.getPersistentData().putInt("dimensionalSightSealBackY", (int) livingEntity.getY());
-                            livingEntity.getPersistentData().putInt("dimensionalSightSealBackZ", (int) livingEntity.getZ());
-                            livingEntity.getPersistentData().putInt("dimensionalSightSealX", (int) dimensionalSightSealEntity.getSealX());
-                            livingEntity.getPersistentData().putInt("dimensionalSightSealY", (int) dimensionalSightSealEntity.getSealY());
-                            livingEntity.getPersistentData().putInt("dimensionalSightSealZ", (int) dimensionalSightSealEntity.getSealZ());
-                            livingEntity.getPersistentData().putInt("dimensionalSightSealTeleportTimer", 1);
-                            dimensionalSightSealEntity.setShouldMessage(false);
-                            dimensionalSightSealEntity.tickCount = dimensionalSightSealEntity.getMaxLife() - 1;
-                            BlockPos sealPos = new BlockPos((int) dimensionalSightSealEntity.getSealX(), (int) dimensionalSightSealEntity.getSealY(), (int) dimensionalSightSealEntity.getSealZ());
-                            int radius = 20;
-                            for (int x = -radius; x <= radius; x++) {
-                                for (int y = -radius; y <= radius; y++) {
-                                    for (int z = -radius; z <= radius; z++) {
-                                        double distance = Math.sqrt(x * x + y * y + z * z);
-                                        if (distance >= radius - 0.5 && distance <= radius + 0.5) {
-                                            BlockPos blockPos = sealPos.offset(x, y, z);
-                                            if (livingEntity.level().getBlockState(blockPos) == BlockInit.VOID_BLOCK.get().defaultBlockState()) {
-                                                livingEntity.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (amount >= 1) {
-                        this.addCooldown(livingEntity);
-                    }
-                }
             }
+
         }
     }
 

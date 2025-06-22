@@ -101,7 +101,7 @@ public class TrickFreezing extends SimpleAbilityItem {
                     for (int z = -damage; z <= damage; z++) {
                         for (int y = -damage; y <= damage; y++) {
                             BlockPos pos = centerPos.offset(x, y, z);
-                            if (isOnSurface(level, pos) && livingEntity.level().getBlockState(pos) != BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState()) {
+                            if (isOnSurface(level, pos) && level.getBlockEntity(pos) == null) {
                                 freezeBlock(level, pos);
                             }
                         }

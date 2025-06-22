@@ -13,10 +13,12 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -116,6 +118,14 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
                 center.z + (relativeZ * RENDER_SCALE)
         );
     }
+
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        return INFINITE_EXTENT_AABB;
+    }
+
+
 
     public Vec3 getEntityDisplayPos() {
         if (this.targetPos == null) return getDisplayCenter();
@@ -247,7 +257,7 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             int maxLife = 250;
             if (this.getCasterUUID() != null) {
                 LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(level, this.getCasterUUID());
-                AABB detectionBox = new AABB(blockPos.getX() - 1, blockPos.getY() + 1, blockPos.getZ() - 1, blockPos.getX() + 2, blockPos.getY() + 4, blockPos.getZ() + 2);
+                AABB detectionBox = new AABB(blockPos.getX() - 1, blockPos.getY() - 1, blockPos.getZ() - 1, blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1);
                 List<Entity> entitiesInBox = level.getEntitiesOfClass(Entity.class, detectionBox);
                 for (Entity entity : entitiesInBox) {
                     if (entity == livingEntity || BeyonderUtil.isEntityAlly(livingEntity, entity)) {
@@ -261,6 +271,26 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
                     maxLife = 2500 / (sequence);
                 } else if (sequence == 0) {
                     maxLife = 4000;
+                }
+                if (this.getScryTarget() != null) {
+                    if (this.level instanceof ServerLevel serverLevel) {
+                        int chunkRadius = 5;
+                        ChunkPos centerChunk = new ChunkPos(new BlockPos((int) this.getScryTarget().getX(), (int) this.getScryTarget().getY(), (int) this.getScryTarget().getX()));
+                        for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
+                            for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
+                                ChunkPos chunkPos = new ChunkPos(centerChunk.x + dx, centerChunk.z + dz);
+                                serverLevel.getChunkSource().addRegionTicket(TicketType.PLAYER, chunkPos, 3, chunkPos);
+                            }
+                        }
+                        ChunkPos newCenterChunk = new ChunkPos(this.getBlockPos());
+                        for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
+                            for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
+                                ChunkPos chunkPos = new ChunkPos(newCenterChunk.x + dx, newCenterChunk.z + dz);
+                                serverLevel.getChunkSource().addRegionTicket(TicketType.PLAYER, chunkPos, 3, chunkPos);
+                            }
+                        }
+                    }
+                    this.getScryTarget().getPersistentData().putInt("ignoreShouldntRender", 10);
                 }
             }
             if (this.tickCounter >= 5) {
@@ -480,9 +510,6 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
         return result;
     }
 
-    public AABB getRenderBoundingBox() {
-        return INFINITE_EXTENT_AABB;
-    }
 
     @Nullable
     @Override
