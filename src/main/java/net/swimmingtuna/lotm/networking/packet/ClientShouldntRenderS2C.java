@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -41,15 +42,7 @@ public class ClientShouldntRenderS2C {
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
-            Level level = Minecraft.getInstance().level;
-            if (level != null) {
-                LOTM.LOGGER.info("LEVEL NOT NULL");
-                LivingEntity living = BeyonderUtil.getClientLivingEntityFromUUID(level, this.uuid);
-                if (living != null) {
-                    System.out.println("PACKET HANDLER SEND WITH VALUE OF " + this.ignoreShouldntRender);
-                    living.getPersistentData().putInt("ignoreShouldntRender", this.ignoreShouldntRender);
-                }
-            }
+            ClientIgnoreShouldntRenderData.setIgnoreData(ignoreShouldntRender, uuid);
         });
         context.setPacketHandled(true);
     }

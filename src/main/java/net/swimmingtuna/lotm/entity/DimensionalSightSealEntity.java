@@ -21,13 +21,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 import org.jetbrains.annotations.NotNull;
 
 public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
@@ -207,14 +207,9 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
     }
 
     public static void dimensionalSightSealTick(LivingEntity livingEntity) {
-        if (livingEntity.getPersistentData().getInt("ignoreShouldntRender") >= 1) {
-            if (livingEntity.getPersistentData().getInt("ignoreShouldntRender") == 1) {
-                livingEntity.getPersistentData().putInt("ignoreShouldntRender", 0);
-                LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(livingEntity.getUUID(), 0));
-            } else {
-                livingEntity.getPersistentData().putInt("ignoreShouldntRender", livingEntity.getPersistentData().getInt("ignoreShouldntRender") - 1);
-                LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(livingEntity.getUUID(), livingEntity.getPersistentData().getInt("ignoreShouldntRender")));
-            }
+        int value = ClientIgnoreShouldntRenderData.getIgnoreData(livingEntity.getUUID());
+        if (value >= 1) {
+            LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(livingEntity.getUUID(), value - 1));
         }
         if (livingEntity.getPersistentData().getInt("dimensionalSightSeal") >= 1) {
             livingEntity.getPersistentData().putInt("dimensionalSightSeal", livingEntity.getPersistentData().getInt("dimensionalSightSeal") - 1);

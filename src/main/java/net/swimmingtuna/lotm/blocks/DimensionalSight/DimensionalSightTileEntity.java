@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.init.BlockEntityInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -290,7 +291,7 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
                             }
                         }
                     }
-                    this.getScryTarget().getPersistentData().putInt("ignoreShouldntRender", 10);
+                    LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.getScryTarget().getUUID(), 10));
                 }
             }
             if (this.tickCounter >= 5) {
@@ -686,4 +687,6 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             this.targetPos = target.position();
         }
     }
+
+
 }

@@ -8,13 +8,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
-import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
-import net.swimmingtuna.lotm.util.ClientData.ClientAbilityKeyResetData;
-import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
-import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
+import net.swimmingtuna.lotm.util.ClientData.*;
 import net.swimmingtuna.lotm.util.KeyBinding;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
@@ -31,6 +29,13 @@ public class KeyClientEvents {
                 event.getInput().leftImpulse = 0;
                 event.getInput().jumping = false;
                 event.getInput().shiftKeyDown = false;
+            }
+        }
+
+        @SubscribeEvent
+        public static void onClientTick(TickEvent.ClientTickEvent event) {
+            if (event.phase == TickEvent.Phase.END) {
+                ClientIgnoreShouldntRenderData.decrementAll();
             }
         }
 
