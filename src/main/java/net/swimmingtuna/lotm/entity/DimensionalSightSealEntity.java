@@ -10,10 +10,12 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -26,6 +28,7 @@ import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
+import net.swimmingtuna.lotm.networking.packet.SendPlayerRenderDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 import org.jetbrains.annotations.NotNull;
@@ -210,6 +213,35 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
         int value = ClientIgnoreShouldntRenderData.getIgnoreData(livingEntity.getUUID());
         if (value >= 1) {
             LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(livingEntity.getUUID(), value - 1));
+        }
+        if (livingEntity.getPersistentData().getInt("ignoreShouldntRender") >= 1) {
+            if (livingEntity.getPersistentData().contains("dimensionalSightPlayerUUID") && livingEntity instanceof ServerPlayer) {
+                LivingEntity living = BeyonderUtil.getLivingEntityFromUUID(livingEntity.level(), livingEntity.getPersistentData().getUUID("dimensionalSightPlayerUUID"));
+
+                if (living instanceof ServerPlayer serverPlayer) {
+                    Vec3 displayCenter = new Vec3(0, 0, 0);
+
+                    SendPlayerRenderDataS2C packet = new SendPlayerRenderDataS2C(
+                            livingEntity.getUUID(),
+                            livingEntity.getYRot(),
+                            livingEntity.getXRot(),
+                            livingEntity.yHeadRot,
+                            livingEntity.yBodyRot,
+                            livingEntity.getDeltaMovement().x,
+                            livingEntity.getDeltaMovement().y,
+                            livingEntity.getDeltaMovement().z,
+                            livingEntity.attackAnim,
+                            livingEntity.getX(),
+                            livingEntity.getY(),
+                            livingEntity.getZ(),
+                            livingEntity.onGround(),
+                            livingEntity.fallDistance,
+                            displayCenter
+                    );
+                    LOTMNetworkHandler.sendToPlayer(packet, serverPlayer);
+                }
+            }
+            livingEntity.getPersistentData().putInt("ignoreShouldntRender", livingEntity.getPersistentData().getInt("ignoreShouldntRender") - 1);
         }
         if (livingEntity.getPersistentData().getInt("dimensionalSightSeal") >= 1) {
             livingEntity.getPersistentData().putInt("dimensionalSightSeal", livingEntity.getPersistentData().getInt("dimensionalSightSeal") - 1);

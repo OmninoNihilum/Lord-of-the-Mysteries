@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BlockEntityInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
@@ -257,6 +258,9 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
         if (!level.isClientSide) {
             int maxLife = 250;
             if (this.getCasterUUID() != null) {
+                if (this.getScryTarget() != null) {
+                    this.getScryTarget().getPersistentData().putUUID("dimensionalSightPlayerUUID", this.getCasterUUID());
+                }
                 LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(level, this.getCasterUUID());
                 AABB detectionBox = new AABB(blockPos.getX() - 1, blockPos.getY() - 1, blockPos.getZ() - 1, blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1);
                 List<Entity> entitiesInBox = level.getEntitiesOfClass(Entity.class, detectionBox);
@@ -292,6 +296,7 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
                         }
                     }
                     LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.getScryTarget().getUUID(), 10));
+                    this.getScryTarget().getPersistentData().putInt("ignoreShouldntRender", 10);
                 }
             }
             if (this.tickCounter >= 5) {

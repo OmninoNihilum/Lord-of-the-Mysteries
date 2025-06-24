@@ -102,7 +102,7 @@ public class BeyonderHolder extends PlayerCapability {
         updateMaxHealthModifier(this.player, this.currentClass.maxHealth().get(sequence));
         this.player.setHealth(this.player.getMaxHealth());
         if (newClass == BeyonderClassInit.APPRENTICE.get() && sequence <= 4) {
-            this.player.getPersistentData().putInt("wormOfStar", BeyonderUtil.maxWormAmount(livingEntity));
+            this.player.getPersistentData().putInt("wormOfStar", BeyonderUtil.maxWormAmount(this.player));
         }
         updateTracking();
 

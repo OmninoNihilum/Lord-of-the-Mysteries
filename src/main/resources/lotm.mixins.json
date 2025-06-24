@@ -15,6 +15,7 @@
     "MixinPotionItem",
     "MixinSplashPotionItem",
     "MobAttackMixin",
+    "ServerLevelMixin",
     "ServerPlayerMixin",
     "ServerPlayNetworkDesyncFixMixin",
     "SlotMixin",

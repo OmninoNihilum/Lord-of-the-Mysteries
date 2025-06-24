@@ -29,6 +29,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
@@ -364,11 +365,22 @@ public class ModEvents {
     }
 
 
+    @OnlyIn(Dist.DEDICATED_SERVER)
     @SubscribeEvent
     public static void handleLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
+        if (livingEntity.level().isClientSide()) {
+            LOTM.LOGGER.info("STARTED CLIENT TICK FOR " + livingEntity.getName().getString());
+            int sequence = BeyonderUtil.getSequence(livingEntity);
+        }
+        LOTM.LOGGER.info("NO LEVEL CHECK FOR " + livingEntity.getName().getString());
+        int sequence2 = BeyonderUtil.getSequence(livingEntity);
         CompoundTag tag = livingEntity.getPersistentData();
         Level level = livingEntity.level();
+        if (!level.isClientSide()) {
+            LOTM.LOGGER.info("STARTED TICK FOR " + livingEntity.getName().getString());
+            int sequence = BeyonderUtil.getSequence(livingEntity);
+        }
         if (level instanceof ServerLevel serverLevel) {
             CorruptionAndLuckHandler.corruptionAndLuckManagers(serverLevel, livingEntity);
             twilightTick(event);

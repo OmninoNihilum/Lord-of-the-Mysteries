@@ -435,6 +435,8 @@ public class ServerEvents {
                             sightEntity.scryUniqueID = onlinePlayer.getUUID();
                             sightEntity.setChanged();
                             sightEntity.sendUpdates();
+                            onlinePlayer.getPersistentData().putUUID("dimensionalSightPlayerUUID", player.getUUID());
+                            onlinePlayer.getPersistentData().putInt("ignoreShouldntRender", 10);
                             player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
                         }
                     });

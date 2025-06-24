@@ -1440,7 +1440,6 @@ public class BeyonderUtil {
     public static @Nullable BeyonderClass getPathway(LivingEntity living) { //marked
         if (!living.level().isClientSide()) {
             try {
-
                 if (living instanceof Player player) {
                     BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
                     return holder.getCurrentClass();
@@ -1483,75 +1482,57 @@ public class BeyonderUtil {
     }
 
 
-    public static int getSequence(LivingEntity living) {
-        if (living == null) {
-            return -1;
-        }
-        if (!living.level().isClientSide()) {
-            try {
-                if (living instanceof Player player) {
-                    BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-                    return holder.getSequence();
-                } else if (living instanceof PlayerMobEntity playerMobEntity) {
-                    return playerMobEntity.getCurrentSequence();
-                } else {
-                    if (living.level() instanceof ServerLevel serverLevel) {
-                        try {
-                            BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
-                            if (mappingData != null) {
-                                String pathwayString = mappingData.getStringForEntity(living.getType());
-                                if (pathwayString != null) {
-                                    String lowerPathway = pathwayString.toLowerCase();
-                                    BeyonderClass beyonderClass = getPathway(living);
-                                    if (beyonderClass != null) {
-                                        List<String> sequenceNames = beyonderClass.sequenceNames();
-                                        if (sequenceNames != null) {
-                                            for (int i = 0; i < sequenceNames.size(); i++) {
-                                                String sequenceName = sequenceNames.get(i);
-                                                if (sequenceName != null && lowerPathway.contains(sequenceName.toLowerCase())) {
-                                                    return i;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+    public static int getSequence(LivingEntity living) { //marked
+        LOTM.LOGGER.info("METHOD CALLED FOR " + living.getName().getString());
+        if (living != null) {
+            if (living instanceof PlayerMobEntity playerMobEntity) {
+                return playerMobEntity.getCurrentSequence();
+            } else if (living.level() instanceof ServerLevel serverLevel && !(living instanceof Player)) {
+                BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
+                String pathwayString = mappingData.getStringForEntity(living.getType());
+                if (pathwayString != null) {
+                    String lowerPathway = pathwayString.toLowerCase();
+                    BeyonderClass beyonderClass = getPathway(living);
+                    if (beyonderClass != null) {
+                        List<String> sequenceNames = beyonderClass.sequenceNames();
+                        for (int i = 0; i < sequenceNames.size(); i++) {
+                            if (lowerPathway.contains(sequenceNames.get(i).toLowerCase())) {
+                                return i;
                             }
-                        } catch (Exception e) {
-                            LOTM.LOGGER.info("Error accessing Sequence for entity: " + living.getType());
                         }
                     }
-                    float maxHp = living.getMaxHealth();
-                    if (maxHp <= 20) {
-                        return 9;
-                    } else if (maxHp <= 35) {
-                        return 8;
-                    } else if (maxHp <= 70) {
-                        return 7;
-                    } else if (maxHp <= 120) {
-                        return 6;
-                    } else if (maxHp <= 190) {
-                        return 5;
-                    } else if (maxHp <= 300) {
-                        return 4;
-                    } else if (maxHp <= 450) {
-                        return 3;
-                    } else if (maxHp <= 700) {
-                        return 2;
-                    } else if (maxHp <= 999) {
-                        return 1;
-                    } else if (maxHp >= 1000) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
                 }
-            } catch (Exception e) {
-                System.err.println("Unexpected error in getSequence for entity: " + (living != null ? living.getType() : "null"));
-                e.printStackTrace();
+            } else if (living instanceof Player player) {
+                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+                return holder.getSequence();
+            }
+            float maxHp = living.getMaxHealth();
+            if (maxHp <= 20) {
+                return 9;
+            } else if (maxHp <= 35) {
+                return 8;
+            } else if (maxHp <= 70) {
+                return 7;
+            } else if (maxHp <= 120) {
+                return 6;
+            } else if (maxHp <= 190) {
+                return 5;
+            } else if (maxHp <= 300) {
+                return 4;
+            } else if (maxHp <= 450) {
+                return 3;
+            } else if (maxHp <= 700) {
+                return 2;
+            } else if (maxHp <= 999) {
+                return 1;
+            } else if (maxHp >= 1000) {
+                return 0;
+            } else {
                 return -1;
             }
+        } else {
+            return 10;
         }
-        return -1;
     }
 
     public static int getCooldownsForAbility(LivingEntity livingEntity, Item ability) {

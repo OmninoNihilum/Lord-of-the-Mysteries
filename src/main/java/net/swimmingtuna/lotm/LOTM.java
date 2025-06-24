@@ -70,11 +70,11 @@ public class LOTM {
     public LOTM() {
         Set<String> classNames = new HashSet<>();
         List<ModFileScanData> modFileScanData = ModList.get().getAllScanData();
+        BeyonderHolderAttacher.register();
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        BeyonderClassInit.BEYONDER_CLASS.register(modEventBus);
         DamageTypeInit.DAMAGE_TYPES.register(modEventBus);
         MinecraftForge.EVENT_BUS.addListener(this::serverAboutToStart);
-        BeyonderClassInit.BEYONDER_CLASS.register(modEventBus);
-        BeyonderHolderAttacher.register();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Configs.commonSpec);
         EnchantmentInit.register(modEventBus);
         CreativeTabInit.register(modEventBus);

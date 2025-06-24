@@ -9,10 +9,13 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<DimensionalSightTileEntity> {
@@ -77,6 +80,8 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
             long gameTime = tileEntity.getLevel() != null ? tileEntity.getLevel().getGameTime() : 0;
             float glowIntensity = (float) (0.7 + 0.3 * Math.sin((gameTime + partialTicks) * 0.05));
             int magicalLight = Math.max(combinedLight, (int) (240 * glowIntensity));
+
+            // Store original values
             float originalYaw = scryTarget.getYRot();
             float originalPitch = scryTarget.getXRot();
             float originalHeadYaw = scryTarget.yHeadRot;
@@ -86,20 +91,67 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
             float originalSwingProgress = scryTarget.attackAnim;
             boolean originalOnGround = scryTarget.onGround();
             float originalFallDistance = scryTarget.fallDistance;
+
             try {
-                scryTarget.setYRot(tileEntity.getYaw());
-                scryTarget.setXRot(tileEntity.getPitch());
-                scryTarget.yHeadRot = tileEntity.getHeadYaw();
-                scryTarget.yBodyRot = tileEntity.getRenderYaw();
-                scryTarget.setOldPosAndRot();
-                scryTarget.setDeltaMovement(tileEntity.getVelX(), tileEntity.getVelY(), tileEntity.getVelZ());
-                scryTarget.attackAnim = tileEntity.swingProgress;
-                scryTarget.setOnGround(true);
-                scryTarget.fallDistance = 0.0f;
+                // Check if target is a player and has packet render data
+                if (scryTarget instanceof Player && scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
+                    LOTM.LOGGER.info("USING NEW THING");
+                    CompoundTag renderData = scryTarget.getPersistentData().getCompound("dimensionalSightRenderData");
+
+                    // Use packet data for rendering
+                    scryTarget.setYRot(renderData.getFloat("displaYaw"));
+                    scryTarget.setXRot(renderData.getFloat("displayPitch"));
+                    scryTarget.yHeadRot = renderData.getFloat("displayHeadYaw");
+                    scryTarget.yBodyRot = renderData.getFloat("displayRenderYaw");
+                    scryTarget.setOldPosAndRot();
+                    scryTarget.setDeltaMovement(
+                            renderData.getDouble("displayVelX"),
+                            renderData.getDouble("displayVelY"),
+                            renderData.getDouble("displayVelZ")
+                    );
+                    scryTarget.attackAnim = renderData.getFloat("displaySwingProgress");
+                    scryTarget.setOnGround(renderData.getBoolean("displayOnGround"));
+                    scryTarget.fallDistance = renderData.getFloat("displayFallDistance");
+
+                    // Optionally adjust position based on packet data
+                    Vec3 packetDisplayCenter = new Vec3(
+                            renderData.getDouble("displayCenterX"),
+                            renderData.getDouble("displayCenterY"),
+                            renderData.getDouble("displayCenterZ")
+                    );
+                    Vec3 packetEntityPos = new Vec3(
+                            renderData.getDouble("displayEntityDisplayPosX"),
+                            renderData.getDouble("displayEntityDisplayPosY"),
+                            renderData.getDouble("displayEntityDisplayPosZ")
+                    );
+
+                     Vec3 packetRelativePos = packetEntityPos.subtract(packetDisplayCenter);
+                     Vec3 packetScaledPos = new Vec3(packetRelativePos.x / DimensionalSightTileEntity.RENDER_SCALE, packetRelativePos.y / DimensionalSightTileEntity.RENDER_SCALE, packetRelativePos.z / DimensionalSightTileEntity.RENDER_SCALE);
+                     poseStack.translate(packetScaledPos.x - scaledPos.x, packetScaledPos.y - scaledPos.y, packetScaledPos.z - scaledPos.z);
+
+                } else {
+                    scryTarget.setYRot(tileEntity.getYaw());
+                    scryTarget.setXRot(tileEntity.getPitch());
+                    scryTarget.yHeadRot = tileEntity.getHeadYaw();
+                    scryTarget.yBodyRot = tileEntity.getRenderYaw();
+                    scryTarget.setOldPosAndRot();
+                    scryTarget.setDeltaMovement(tileEntity.getVelX(), tileEntity.getVelY(), tileEntity.getVelZ());
+                    scryTarget.attackAnim = tileEntity.swingProgress;
+                    scryTarget.setOnGround(true);
+                    scryTarget.fallDistance = 0.0f;
+                    if (!(scryTarget instanceof Player)) {
+                        LOTM.LOGGER.info("SCRY TARGET NOT PLAYER");
+                    } else if (scryTarget instanceof  Player && !scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
+                        LOTM.LOGGER.info("DATA NOT FOUND");
+                    }
+                }
+
                 EntityRenderer<? super LivingEntity> renderer = this.entityRenderer.getRenderer(scryTarget);
                 renderer.render(scryTarget, 0.0F, partialTicks, poseStack, bufferSource, magicalLight);
+
             } catch (Exception ignored) {
             } finally {
+                // Restore original values
                 scryTarget.setYRot(originalYaw);
                 scryTarget.setXRot(originalPitch);
                 scryTarget.yHeadRot = originalHeadYaw;

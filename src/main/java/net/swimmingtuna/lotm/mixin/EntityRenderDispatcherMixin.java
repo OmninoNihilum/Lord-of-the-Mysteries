@@ -15,7 +15,6 @@ public class EntityRenderDispatcherMixin {
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
     private void onShouldRender(Entity entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
         if (ClientIgnoreShouldntRenderData.getIgnoreData(entity.getUUID()) >= 1) {
-            System.out.println("SHOULDNT RENDER MIXIN WORKING FOR MAP WITH VALUE OF " + ClientIgnoreShouldntRenderData.getIgnoreData(entity.getUUID()) + " FOR " + entity.getName().getString());
             cir.setReturnValue(true);
         }
     }

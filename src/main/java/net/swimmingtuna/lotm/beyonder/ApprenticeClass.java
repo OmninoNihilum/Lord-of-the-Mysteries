@@ -325,7 +325,7 @@ public class ApprenticeClass implements BeyonderClass {
 
     public static void apprenticeAttackEvent(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntity();
-        if (!attacked.level().isClientSide()) {
+        if (!attacked.level().isClientSide() && BeyonderUtil.currentPathwayAndSequenceMatchesNoException(attacked, BeyonderClassInit.APPRENTICE.get(), 3)) {
             if (event.getSource().is(DamageTypes.FALL)) {
                 event.setCanceled(true);
             } else if (event.getSource().is(DamageTypes.ON_FIRE)) {
