@@ -259,6 +259,9 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             int maxLife = 250;
             if (this.getCasterUUID() != null) {
                 if (this.getScryTarget() != null) {
+                    if (!this.getScryTarget().isAlive() || this.getScryTarget().isRemoved()) {
+                        this.removeThis();
+                    }
                     this.getScryTarget().getPersistentData().putUUID("dimensionalSightPlayerUUID", this.getCasterUUID());
                 }
                 LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(level, this.getCasterUUID());
@@ -441,13 +444,11 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             this.getScryTarget().walkAnimation.setSpeed(this.limbSwingAmount);
             this.getScryTarget().attackAnim = this.swingProgress;
             this.getScryTarget().oAttackAnim = this.prevSwingProgress;
-
             this.prevSwingProgress = this.getScryTarget().attackAnim;
             this.prevYaw = this.getScryTarget().getYRot();
             this.prevRenderYaw = this.getScryTarget().yBodyRot;
             this.prevPitch = this.getScryTarget().getXRot();
             this.prevHeadYaw = this.getScryTarget().yHeadRot;
-
             if (this.scryDataManager != null) {
                 try {
                     this.getScryTarget().getEntityData().assignValues(this.scryDataManager);

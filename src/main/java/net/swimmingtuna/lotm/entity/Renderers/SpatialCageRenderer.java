@@ -22,7 +22,7 @@ public class SpatialCageRenderer extends EntityRenderer<SpatialCageEntity> {
 
         poseStack.translate(-0.5, 0, -0.5);
 
-        poseStack.scale(entity.getBBWidth(), entity.getBBHeight(), entity.getBBWidth());
+        poseStack.scale(entity.getBBWidth() * 1.25f, entity.getBBHeight() * 1.25f, entity.getBBWidth() * 1.25f);
 
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.endPortal());
         Matrix4f matrix = poseStack.last().pose();
@@ -59,6 +59,11 @@ public class SpatialCageRenderer extends EntityRenderer<SpatialCageEntity> {
         buffer.vertex(matrix, x2, y2, z2).color(1f, 1f, 1f, 1f).uv(1, 0).endVertex();
         buffer.vertex(matrix, x3, y3, z3).color(1f, 1f, 1f, 1f).uv(1, 1).endVertex();
         buffer.vertex(matrix, x4, y4, z4).color(1f, 1f, 1f, 1f).uv(0, 1).endVertex();
+
+        buffer.vertex(matrix, x4, y4, z4).color(1f, 1f, 1f, 1f).uv(0, 0).endVertex();
+        buffer.vertex(matrix, x3, y3, z3).color(1f, 1f, 1f, 1f).uv(1, 0).endVertex();
+        buffer.vertex(matrix, x2, y2, z2).color(1f, 1f, 1f, 1f).uv(1, 1).endVertex();
+        buffer.vertex(matrix, x1, y1, z1).color(1f, 1f, 1f, 1f).uv(0, 1).endVertex();
     }
 
     @Override

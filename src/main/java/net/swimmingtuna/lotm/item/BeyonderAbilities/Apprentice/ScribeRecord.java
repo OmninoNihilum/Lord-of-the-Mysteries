@@ -70,6 +70,6 @@ public class ScribeRecord extends SimpleAbilityItem {
     }
     @Override
     public Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("APPRENTICES_ABILITY", ChatFormatting.BLUE);
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 }

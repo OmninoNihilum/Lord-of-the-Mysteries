@@ -4,6 +4,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -52,6 +54,7 @@ public class SpatialCageEntity extends Entity{
             double z = tag.getDouble("spatialCageZ");
             entity.teleportTo(x, y, z);
             entity.setInvisible(true);
+            entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 10, 1 ,false ,false));
             SpatialCageEntity cage = new SpatialCageEntity(level, entity);
             cage.moveTo(x, y, z);
             level.addFreshEntity(cage);

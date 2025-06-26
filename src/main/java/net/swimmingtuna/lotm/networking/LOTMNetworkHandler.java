@@ -113,6 +113,11 @@ public class LOTMNetworkHandler {
                 .encoder(SyncShouldntRenderHandPacketS2C::encode)
                 .consumerMainThread(SyncShouldntRenderHandPacketS2C::handle)
                 .add();
+        INSTANCE.messageBuilder(SendPlayerRenderDataS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(SendPlayerRenderDataS2C::new)
+                .encoder(SendPlayerRenderDataS2C::toBytes)
+                .consumerMainThread(SendPlayerRenderDataS2C::handle)
+                .add();
         INSTANCE.messageBuilder(SyncAntiConcealmentPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(SyncAntiConcealmentPacketS2C::new)
                 .encoder(SyncAntiConcealmentPacketS2C::encode)
@@ -277,11 +282,6 @@ public class LOTMNetworkHandler {
                 .decoder(TravelerWaypointC2S::new)
                 .encoder(TravelerWaypointC2S::toByte)
                 .consumerMainThread(TravelerWaypointC2S::handle)
-                .add();
-        INSTANCE.messageBuilder(DimensionalSightPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(DimensionalSightPacketS2C::decode)
-                .encoder(DimensionalSightPacketS2C::encode)
-                .consumerMainThread(DimensionalSightPacketS2C::handle)
                 .add();
         INSTANCE.messageBuilder(DimensionalSightPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(DimensionalSightPacketS2C::decode)

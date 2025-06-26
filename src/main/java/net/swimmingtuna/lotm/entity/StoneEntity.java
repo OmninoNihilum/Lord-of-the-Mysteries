@@ -96,8 +96,11 @@ public class StoneEntity extends AbstractArrow {
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
             this.level().explode(this, hitPos.x, hitPos.y, hitPos.z, (5.0f * scaleData.getScale() / 3), Level.ExplosionInteraction.TNT);
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 5.0F, 5.0F);
-            if (result.getEntity() instanceof LivingEntity entity) {
-                entity.hurt(BeyonderUtil.explosionSource(this), getDamage() * scaleData.getScale());
+
+            if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
+                if (result.getEntity() instanceof LivingEntity entity && entity != owner) {
+                    entity.hurt(BeyonderUtil.explosionSource(this), getDamage() * scaleData.getScale());
+                }
             }
             this.discard();
         }
@@ -159,9 +162,6 @@ public class StoneEntity extends AbstractArrow {
                             float bedrockStrength = Blocks.BEDROCK.defaultDestroyTime();
                             if (blockStrength <= bedrockStrength) {
                                 this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                            }
-                            if (blockStrength >= bedrockStrength) {
-                                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 8, Level.ExplosionInteraction.TNT);
                             }
                         }
                     }

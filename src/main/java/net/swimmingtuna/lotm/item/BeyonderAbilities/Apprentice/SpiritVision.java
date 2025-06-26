@@ -50,7 +50,7 @@ public class SpiritVision extends SimpleAbilityItem {
     }
     @Override
     public Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.DARK_BLUE);
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 
     @Override

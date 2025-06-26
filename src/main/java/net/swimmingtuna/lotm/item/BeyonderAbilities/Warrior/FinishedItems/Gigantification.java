@@ -177,28 +177,26 @@ public class Gigantification extends SimpleAbilityItem {
                 } else if (isGiant) {
                     tag.putBoolean("twilightGiant", false);
                     tag.putBoolean("handOfGodGiant", false);
-
                 }
             }
         }
     }
+
     public static void warriorGiant(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 20 == 0) {
             boolean isGiant = livingEntity.getPersistentData().getBoolean("warriorGiant");
             boolean isHoGGiant = livingEntity.getPersistentData().getBoolean("handOfGodGiant");
             boolean isTwilightGiant = livingEntity.getPersistentData().getBoolean("twilightGiant");
             if (isGiant || isHoGGiant || isTwilightGiant) {
-                int amp = 0;
-                if (livingEntity.hasEffect(MobEffects.DAMAGE_RESISTANCE)) {
-                    amp = livingEntity.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier();
-                }
                 BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DAMAGE_RESISTANCE, 40, WarriorClass.resistance + 1, true, true);
             }
         }
     }
+
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, transform into a giant, in this form, you take less damage, have small amounts negated. In addition, if your sequence is less than four, you can break the blocks around you by shifting. At both sequence 1 and 0, this ability will get a qualitative change, getting much stronger."));
+        tooltipComponents.add(Component.literal("Use while shifting in order to revert to your normal size"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(getPathwayText(this.requiredClass.get()));
@@ -218,7 +216,7 @@ public class Gigantification extends SimpleAbilityItem {
         boolean isHoGGiant = tag.getBoolean("handOfGodGiant");
         boolean isTwilightGiant = tag.getBoolean("twilightGiant");
         if (isGiant || isHoGGiant || isTwilightGiant) {
-            if ((float) BeyonderUtil.getMaxSpirituality(livingEntity) / BeyonderUtil.getSpirituality(livingEntity) < 0.2f || livingEntity.getMaxHealth() / livingEntity.getHealth() > 0.9  || target == null) {
+            if ((float) BeyonderUtil.getMaxSpirituality(livingEntity) / BeyonderUtil.getSpirituality(livingEntity) < 0.2f || livingEntity.getMaxHealth() / livingEntity.getHealth() > 0.9 || target == null) {
                 return 100;
             } else if (target != null) {
                 return 85;

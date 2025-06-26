@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
@@ -123,6 +124,7 @@ public class Exile extends SimpleAbilityItem {
                             }
                         }
                     }
+                    mob.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20, 1, false, false));
                     int randomChoice = mob.getPersistentData().getInt("exileDoorMob");
                     if (randomChoice == 1) {
                         if (mob.getHealth() > 17) {
@@ -176,7 +178,7 @@ public class Exile extends SimpleAbilityItem {
                             TornadoEntity.summonTornado(livingEntity);
                         } else if (nextInt > 75) {
                             LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, livingEntity.level());
-                            lightningBolt.teleportTo(lightningBolt.getX(), livingEntity.getY(), livingEntity.getZ());
+                            lightningBolt.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
                             lightningBolt.setDamage(20);
                             livingEntity.level().addFreshEntity(lightningBolt);
                         } else if (nextInt > 60) {
@@ -199,7 +201,7 @@ public class Exile extends SimpleAbilityItem {
                         } else {
                             tag.putInt("luckDoubleDamage", tag.getInt("luckDoubleDamage") + 1);
                             if (livingEntity instanceof Player player) {
-                                player.displayClientMessage(Component.literal("You were cursed with taking double damage the next time you get hurt due to the nature of this biome").withStyle(ChatFormatting.RED), true);
+                                player.displayClientMessage(Component.literal("Your next damage instance will be doubled").withStyle(ChatFormatting.RED), true);
                             }
                         }
                     } else if (currentBiome.is(BiomeInit.GLACIAL_LANDSCAPE)) {
@@ -224,7 +226,7 @@ public class Exile extends SimpleAbilityItem {
     }
     @Override
     public Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.DARK_BLUE);
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 
     @Override

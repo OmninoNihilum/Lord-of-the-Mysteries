@@ -183,7 +183,7 @@ public class TravelersDoor extends SimpleAbilityItem {
 
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 
     @Override

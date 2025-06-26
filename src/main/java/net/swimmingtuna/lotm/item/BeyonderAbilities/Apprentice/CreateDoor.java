@@ -56,7 +56,7 @@ public class CreateDoor extends SimpleAbilityItem {
             BlockPos posRelativeTo = context.getClickedPos().relative(context.getClickedFace());
             Direction direction = context.getClickedFace().getOpposite();
 
-            if (!checkAll(player, BeyonderClassInit.APOTHECARY.get(), 9, 70 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CREATEDOOR.get()), false)) {
+            if (!checkAll(player, BeyonderClassInit.APPRENTICE.get(), 9, 70 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CREATEDOOR.get()), false)) {
                 return InteractionResult.FAIL;
             }
             if (!canCreateDoor(player, targetPos, posRelativeTo)) {
@@ -100,7 +100,6 @@ public class CreateDoor extends SimpleAbilityItem {
 
     public static void createDoor(LivingEntity player, Level level, BlockPos pos, BlockPos posRelativeTo, Direction direction) {
         if (level.isClientSide) return;
-
         int sequence = BeyonderUtil.getSequence(player);
         int maxBlocks = 100 - (97 * sequence / 9);
 
@@ -198,9 +197,11 @@ public class CreateDoor extends SimpleAbilityItem {
                     found = true;
                 }
                 DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
-                if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
-                    player.sendSystemMessage(Component.literal("You created a door to your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
-                    spawnDoor(level, adjustedRelativePos, dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ(), direction, 120, player);
+                if (dimensionalSightTileEntity != null) {
+                    if (dimensionalSightTileEntity.getScryTarget() != null) {
+                        player.sendSystemMessage(Component.literal("You created a door to your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+                        spawnDoor(level, adjustedRelativePos, dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ(), direction, 120, player);
+                    }
                 } else {
                     if (found) {
                         double offsetX = targetX + (0.5 * cordModifier - 0.2) * cordModifier;
@@ -275,7 +276,7 @@ public class CreateDoor extends SimpleAbilityItem {
     }
     @Override
     public Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 
     @Override

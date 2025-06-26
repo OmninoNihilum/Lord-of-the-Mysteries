@@ -202,7 +202,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         tag.putString("exileDoorDimension", livingEntity.level().dimension().location().toString());
                         if (livingEntity instanceof Player player) {
                             if (surfaceY != -1) {
-                                BeyonderUtil.teleportEntity(player, DimensionInit.CONCEALED_SPACE_LEVEL_KEY.location(), x, surfaceY, z);                            }
+                                BeyonderUtil.teleportEntity(player, DimensionInit.EXILED_DIMENSION_LEVEL_KEY.location(), x, surfaceY, z);                            }
                         } else {
                             Random random = new Random();
                             livingEntity.getPersistentData().putInt("exileDoorMob", random.nextInt(3));

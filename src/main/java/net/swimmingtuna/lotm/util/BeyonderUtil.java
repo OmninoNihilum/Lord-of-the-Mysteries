@@ -3,7 +3,6 @@ package net.swimmingtuna.lotm.util;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -1439,34 +1438,26 @@ public class BeyonderUtil {
 
     public static @Nullable BeyonderClass getPathway(LivingEntity living) { //marked
         if (!living.level().isClientSide()) {
-            try {
-                if (living instanceof Player player) {
-                    BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-                    return holder.getCurrentClass();
-                } else if (living instanceof PlayerMobEntity playerMobEntity) {
-                    return playerMobEntity.getCurrentPathway();
-                } else {
-                    if (living.level() instanceof ServerLevel serverLevel) {
-                        try {
-                            BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
-                            String pathwayString = mappingData.getStringForEntity(living.getType());
-                            if (pathwayString != null) {
-                                String lowerPathway = pathwayString.toLowerCase();
-                                for (BeyonderClass beyonderClass : BeyonderClassInit.getRegistry()) {
-                                    for (String sequenceName : beyonderClass.sequenceNames()) {
-                                        if (lowerPathway.contains(sequenceName.toLowerCase())) {
-                                            return beyonderClass;
-                                        }
-                                    }
+            if (living instanceof Player player) {
+                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+                return holder.getCurrentClass();
+            } else if (living instanceof PlayerMobEntity playerMobEntity) {
+                return playerMobEntity.getCurrentPathway();
+            } else {
+                if (living.level() instanceof ServerLevel serverLevel) {
+                    BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
+                    String pathwayString = mappingData.getStringForEntity(living.getType());
+                    if (pathwayString != null) {
+                        String lowerPathway = pathwayString.toLowerCase();
+                        for (BeyonderClass beyonderClass : BeyonderClassInit.getRegistry()) {
+                            for (String sequenceName : beyonderClass.sequenceNames()) {
+                                if (lowerPathway.contains(sequenceName.toLowerCase())) {
+                                    return beyonderClass;
                                 }
                             }
-                        } catch (Exception e) {
-                            LOTM.LOGGER.info("Error accessing Pathway for entity: " + living.getType());
                         }
                     }
                 }
-            } catch (Exception e) {
-                System.err.println("Unexpected error in getPathway for entity: " + (living != null ? living.getType() : "null"));
             }
         }
         return null;
@@ -1483,7 +1474,6 @@ public class BeyonderUtil {
 
 
     public static int getSequence(LivingEntity living) { //marked
-        LOTM.LOGGER.info("METHOD CALLED FOR " + living.getName().getString());
         if (living != null) {
             if (living instanceof PlayerMobEntity playerMobEntity) {
                 return playerMobEntity.getCurrentSequence();
@@ -3495,30 +3485,6 @@ public class BeyonderUtil {
             for (Player player : serverLevel.players()) {
                 if (player.getUUID().equals(uuid)) {
                     return player;
-                }
-            }
-        }
-        return null;
-    }
-
-
-    public static LivingEntity getClientLivingEntityFromUUID(Level level, UUID uuid) {
-        if (level instanceof ClientLevel clientLevel) {
-            for (Entity entity : clientLevel.entitiesForRendering()) {
-                if (entity instanceof LivingEntity livingEntity && uuid.equals(entity.getUUID())) {
-                    return livingEntity;
-                }
-            }
-
-            if (level.isClientSide() && Minecraft.getInstance().player != null) {
-                Player player = Minecraft.getInstance().player;
-                int renderDistance = Minecraft.getInstance().options.renderDistance().get() * 16;
-                AABB searchArea = new AABB(player.getX() - renderDistance, player.getY() - 128, player.getZ() - renderDistance, player.getX() + renderDistance, player.getY() + 128, player.getZ() + renderDistance);
-                List<Entity> nearbyEntities = level.getEntities((Entity) null, searchArea, entity -> true);
-                for (Entity entity : nearbyEntities) {
-                    if (entity instanceof LivingEntity livingEntity && uuid.equals(entity.getUUID())) {
-                        return livingEntity;
-                    }
                 }
             }
         }

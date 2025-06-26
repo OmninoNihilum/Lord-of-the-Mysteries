@@ -116,12 +116,19 @@ public class SpaceRiftEntity extends AbstractHurtingProjectile implements GeoEnt
             float scale = BeyonderUtil.getScale(this) * lifePercentage;
             for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(radius * lifePercentage))) {
                 if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity)) {
+                    if (livingEntity.distanceTo(this) < 5) {
+                        livingEntity.teleportTo(this.getX(), this.getY(), this.getZ());
+                        if (this.tickCount % 15 == 0) {
+                            float damage = (float) Math.max((double) scale, (scale * 10 - (livingEntity.distanceTo(this) * 1.5f)));
+                            livingEntity.hurt(BeyonderUtil.genericSource(owner), damage * 0.8f);
+                        }
+                    }
                     Vec3 direction = this.position().subtract(livingEntity.position());
                     double distance = direction.length();
                     if (distance < 0.1) continue;
                     if (this.tickCount % 20 == 0) {
                         float damage = (float) Math.max((double) scale, (scale * 10 - (livingEntity.distanceTo(this) * 1.5f)));
-                        livingEntity.hurt(BeyonderUtil.magicSource(owner), damage);
+                        livingEntity.hurt(BeyonderUtil.genericSource(owner), damage);
                     }
                     Vec3 pullDirection = direction.normalize();
                     double pullStrength = Math.max(0.1, 3.5 / distance);

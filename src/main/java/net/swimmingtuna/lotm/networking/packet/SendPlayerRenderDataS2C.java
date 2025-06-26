@@ -26,11 +26,13 @@ public class SendPlayerRenderDataS2C {
     private final boolean onGround;
     private final float fallDistance;
     private final Vec3 displayCenter;
+    private final boolean onFire;
 
-    public SendPlayerRenderDataS2C(UUID entityUUID, float yaw, float pitch, float headYaw, float bodyYaw, double velX, double velY, double velZ, float swingProgress, double posX, double posY, double posZ, boolean onGround, float fallDistance, Vec3 displayCenter) {
+    public SendPlayerRenderDataS2C(UUID entityUUID, float yaw, float pitch, float headYaw, float bodyYaw, double velX, double velY, double velZ, float swingProgress, double posX, double posY, double posZ, boolean onGround, float fallDistance, Vec3 displayCenter, boolean onFire) {
         this.entityUUID = entityUUID;
         this.yaw = yaw;
         this.pitch = pitch;
+        this.onFire = onFire;
         this.headYaw = headYaw;
         this.bodyYaw = bodyYaw;
         this.velX = velX;
@@ -61,6 +63,7 @@ public class SendPlayerRenderDataS2C {
         this.onGround = buf.readBoolean();
         this.fallDistance = buf.readFloat();
         this.displayCenter = new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble());
+        this.onFire = buf.readBoolean();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
@@ -81,6 +84,7 @@ public class SendPlayerRenderDataS2C {
         buf.writeDouble(this.displayCenter.x);
         buf.writeDouble(this.displayCenter.y);
         buf.writeDouble(this.displayCenter.z);
+        buf.writeBoolean(this.onFire);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
@@ -91,7 +95,7 @@ public class SendPlayerRenderDataS2C {
                 // Store the render data in the player's persistent data
                 CompoundTag renderData = new CompoundTag();
                 renderData.putUUID("displayEntityUUID", this.entityUUID);
-                renderData.putFloat("displaYaw", this.yaw);
+                renderData.putFloat("displayYaw", this.yaw);
                 renderData.putFloat("displayPitch", this.pitch);
                 renderData.putFloat("displayHeadYaw", this.headYaw);
                 renderData.putFloat("displayRenderYaw", this.bodyYaw);
@@ -107,7 +111,7 @@ public class SendPlayerRenderDataS2C {
                 renderData.putDouble("displayCenterZ", this.displayCenter.z);
                 renderData.putBoolean("displayOnGround", this.onGround);
                 renderData.putFloat("displayFallDistance", this.fallDistance);
-
+                renderData.putBoolean("displayOnFire", this.onFire);
                 player.getPersistentData().put("dimensionalSightRenderData", renderData);
             }
         });

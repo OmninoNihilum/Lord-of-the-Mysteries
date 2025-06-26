@@ -63,7 +63,6 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
                 (int) (player.getY() + 1 + blinkDistance * lookVector.y()),
                 (int) (player.getZ() + blinkDistance * lookVector.z())
         );
-
         BlockPos blockPos = new BlockPos(endPos.getX(), endPos.getY(), endPos.getZ());
         double distance = startPos.getCenter().distanceTo(blockPos.getCenter());
         Vec3 direction = new Vec3(
@@ -74,17 +73,14 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
 
         Set<BlockPos> visitedPositions = new HashSet<>();
 
-        for (double i = 0; i <= distance; i += 0.5) { // Adjust step size for smoother or coarser destruction
+        for (double i = 0; i <= distance; i += 0.5) {
             BlockPos pos = new BlockPos(
                     (int) (startPos.getX() + i * direction.x),
                     (int) (startPos.getY() + i * direction.y),
                     (int) (startPos.getZ() + i * direction.z)
             );
-
-            // Destroy blocks in a 5-block radius around the current position
             List<BlockPos> blockPositions = new ArrayList<>();
-            float damage = BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get());
-            for (BlockPos offsetedPos : BlockPos.betweenClosed(pos.offset(-((int) damage / 2), -((int) damage / 2), -((int) damage / 2)), pos.offset(((int) damage / 2), ((int) damage / 2), ((int) damage / 2)))) {
+            for (BlockPos offsetedPos : BlockPos.betweenClosed(pos.offset(-5, -5, -5), pos.offset(5, 5, 5))) {
                 if (visitedPositions.contains(offsetedPos)) continue;
                 visitedPositions.add(offsetedPos);
                 BlockState blockState = level.getBlockState(offsetedPos);
@@ -104,7 +100,11 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, boundingBox);
             for (LivingEntity entity : entities) {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
-                    entity.hurt(level.damageSources().lightningBolt(), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get()) * 1.5f); // Adjust damage amount as needed
+                    if (!(entity instanceof Player)) {
+                        entity.hurt(level.damageSources().lightningBolt(), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get()) * 2.5f); // Adjust damage amount as needed
+                    } else {
+                        entity.hurt(level.damageSources().lightningBolt(), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get())); // Adjust damage amount as needed
+                    }
                 }
             }
         }

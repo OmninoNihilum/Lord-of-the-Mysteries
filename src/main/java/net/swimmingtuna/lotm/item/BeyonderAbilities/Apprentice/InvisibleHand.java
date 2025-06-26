@@ -82,7 +82,11 @@ public class InvisibleHand extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
         if (!level.isClientSide()) {
-            if (isGrabbingSomething(livingEntity)) throwEntity(livingEntity);
+            if (isGrabbingSomething(livingEntity)) {
+                throwEntity(livingEntity);
+            } else {
+                tryToThrowDimensionalSight(livingEntity);
+            }
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.FAIL;
@@ -93,8 +97,9 @@ public class InvisibleHand extends SimpleAbilityItem {
         if (!livingEntity.level().isClientSide && !interactionTarget.level().isClientSide) {
             if (!checkAll(livingEntity)) return InteractionResult.FAIL;
             if (BeyonderUtil.getSequence(livingEntity) > 4 || (BeyonderUtil.isBeyonder(interactionTarget) && BeyonderUtil.getSequence(interactionTarget) < BeyonderUtil.getSequence(livingEntity))) {
-                if (livingEntity instanceof Player player)
+                if (livingEntity instanceof Player player) {
                     player.displayClientMessage(Component.literal("Target is too strong to be picked up").withStyle(BeyonderUtil.getStyle(player)), true);
+                }
                 return InteractionResult.FAIL;
             }
             if (isGrabbingSomething(livingEntity)) {
@@ -123,6 +128,22 @@ public class InvisibleHand extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
+    public static void tryToThrowDimensionalSight(LivingEntity livingEntity) {
+        DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
+        if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+            livingEntity.sendSystemMessage(Component.literal("You grabbed your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+            livingEntity.getPersistentData().putUUID("invisibleHandUUID", dimensionalSightTileEntity.getScryTarget().getUUID());
+            if (!livingEntity.getPersistentData().contains("invisibleHandDistance")) {
+                livingEntity.getPersistentData().putDouble("invisibleHandDistance", 5);
+            }
+            dimensionalSightTileEntity.removeThis();
+            livingEntity.getPersistentData().putInt("invisibleHandCounter", 100);
+            int amount = livingEntity.getPersistentData().getInt("invisibleHandDistance");
+            Vec3 lookVec = livingEntity.getLookAngle().scale(amount);
+            dimensionalSightTileEntity.getScryTarget().teleportTo(lookVec.x(), lookVec.y(), lookVec.z());
+        }
+    }
+
     public static void grabBlock(LivingEntity livingEntity, Level level, BlockState target, BlockPos targetPos) {
         level.removeBlock(targetPos, false);
         CustomFallingBlockEntity fallingBlock = CustomFallingBlockEntity.fall(level, targetPos, target);
@@ -138,7 +159,6 @@ public class InvisibleHand extends SimpleAbilityItem {
     public static void grabEntity(LivingEntity livingEntity, Entity target, int time) {
         livingEntity.getPersistentData().putUUID("invisibleHandUUID", target.getUUID());
         livingEntity.getPersistentData().putInt("invisibleHandCounter", time);
-
         if (!livingEntity.getPersistentData().contains("invisibleHandDistance")) {
             livingEntity.getPersistentData().putDouble("invisibleHandDistance", 5);
         }
@@ -157,39 +177,33 @@ public class InvisibleHand extends SimpleAbilityItem {
     }
 
     public static void throwEntity(LivingEntity livingEntity) {
-        DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
-        if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
-            livingEntity.sendSystemMessage(Component.literal("You grabbed your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
-            grabEntity(livingEntity, dimensionalSightTileEntity.getScryTarget(), 100);
-        } else {
-            if (!livingEntity.getPersistentData().contains("invisibleHandUUID")) {
-                return;
+        if (!livingEntity.getPersistentData().contains("invisibleHandUUID")) {
+            return;
+        }
+
+        CompoundTag tag = livingEntity.getPersistentData();
+        UUID targetUUID = tag.getUUID("invisibleHandUUID");
+        Entity target = getLivingEntityFromUUID(livingEntity.level(), targetUUID);
+        if (target == null) target = getCustomFallingBlockFromUUID(livingEntity.level(), targetUUID);
+
+        if (target != null) {
+            double throwStrength = 5 - (3.5 * BeyonderUtil.getSequence(livingEntity) / 5);
+            Vec3 lookAngle = livingEntity.getLookAngle().normalize();
+
+            target.setDeltaMovement(lookAngle.scale(throwStrength));
+
+            if (target instanceof CustomFallingBlockEntity fallingBlock) {
+                fallingBlock.setNoGravity(false);
+                fallingBlock.getPersistentData().putUUID("blockThrowerUUID", livingEntity.getUUID());
+                fallingBlock.getPersistentData().putBoolean("hasBeenThrow", true);
+                fallingBlock.getPersistentData().putInt("sequenceThrower", BeyonderUtil.getSequence(livingEntity));
             }
 
-            CompoundTag tag = livingEntity.getPersistentData();
-            UUID targetUUID = tag.getUUID("invisibleHandUUID");
-            Entity target = getLivingEntityFromUUID(livingEntity.level(), targetUUID);
-            if (target == null) target = getCustomFallingBlockFromUUID(livingEntity.level(), targetUUID);
+            tag.putUUID("invisibleHandUUID", new UUID(0, 0));
+            tag.putInt("invisibleHandCounter", 0);
 
-            if (target != null) {
-                double throwStrength = 5 - (3.5 * BeyonderUtil.getSequence(livingEntity) / 5);
-                Vec3 lookAngle = livingEntity.getLookAngle().normalize();
-
-                target.setDeltaMovement(lookAngle.scale(throwStrength));
-
-                if (target instanceof CustomFallingBlockEntity fallingBlock) {
-                    fallingBlock.setNoGravity(false);
-                    fallingBlock.getPersistentData().putUUID("blockThrowerUUID", livingEntity.getUUID());
-                    fallingBlock.getPersistentData().putBoolean("hasBeenThrow", true);
-                    fallingBlock.getPersistentData().putInt("sequenceThrower", BeyonderUtil.getSequence(livingEntity));
-                }
-
-                tag.putUUID("invisibleHandUUID", new UUID(0, 0));
-                tag.putInt("invisibleHandCounter", 0);
-
-                if (target instanceof LivingEntity livingTarget) {
-                    livingTarget.fallDistance = 0;
-                }
+            if (target instanceof LivingEntity livingTarget) {
+                livingTarget.fallDistance = 0;
             }
         }
     }
@@ -289,7 +303,7 @@ public class InvisibleHand extends SimpleAbilityItem {
 
     @Override
     public Rarity getRarity(ItemStack pStack) {
-        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.BLUE);
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 
     @Override
