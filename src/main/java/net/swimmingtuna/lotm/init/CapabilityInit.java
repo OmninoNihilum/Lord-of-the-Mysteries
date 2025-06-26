@@ -16,6 +16,9 @@ import net.swimmingtuna.lotm.capabilities.concealed_data.IConcealedDataCapabilit
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IIsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedProvider;
+import net.swimmingtuna.lotm.capabilities.scribed_abilities.IScribedAbilitiesCapability;
+import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedAbilitiesCapability;
+import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedAbilitiesProvider;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataCapability;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataProvider;
 
@@ -28,6 +31,7 @@ public class CapabilityInit {
         event.register(IConcealedDataCapability.class);
         event.register(IIsConcealedCapability.class);
         event.register(IsConcealedCapability.class);
+        event.register(IScribedAbilitiesCapability.class);
     }
 
     @SubscribeEvent
@@ -55,6 +59,12 @@ public class CapabilityInit {
                     new SealedDataProvider()
             );
         }
+        if (!entity.getCapability(ScribedAbilitiesProvider.SCRIBED_ABILITIES).isPresent()) {
+            event.addCapability(
+                    new ResourceLocation(MOD_ID, "scribed_abilities"),
+                    new ScribedAbilitiesProvider()
+            );
+        }
     }
 
     @SubscribeEvent
@@ -76,6 +86,11 @@ public class CapabilityInit {
         original.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(oldData -> {
             clone.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(newData -> {
                 ((SealedDataCapability) newData).copyFrom((SealedDataCapability) oldData);
+            });
+        });
+        original.getCapability(ScribedAbilitiesProvider.SCRIBED_ABILITIES).ifPresent(oldData -> {
+            clone.getCapability(ScribedAbilitiesProvider.SCRIBED_ABILITIES).ifPresent(newData -> {
+                ((ScribedAbilitiesCapability) newData).copyFrom((ScribedAbilitiesCapability) oldData);
             });
         });
     }

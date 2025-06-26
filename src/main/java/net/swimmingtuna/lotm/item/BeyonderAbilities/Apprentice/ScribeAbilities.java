@@ -14,10 +14,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.ScribeRecording.CapabilityScribeAbilities;
 import net.swimmingtuna.lotm.util.ScribeRecording.ScribeMenu;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,35 +56,27 @@ public class ScribeAbilities extends SimpleAbilityItem {
     public static void checkRemainingUses(LivingEntity livingEntity) {
         Item offHand = livingEntity.getOffhandItem().getItem();
         if (offHand instanceof SimpleAbilityItem ability) {
-            livingEntity.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).ifPresent(storage -> {
-                if (storage.hasScribedAbility(ability)) {
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Scribed copies: ").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN).append(Component.literal(String.valueOf(storage.getRemainUses(ability))).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
-                    }
-                } else {
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Haven`t scribed this ability yet.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), true);
-                    }
+            if(livingEntity instanceof Player player){
+                if(ScribedUtils.hasAbility(player, ability)){
+                    player.displayClientMessage(Component.literal("Scribed copies: ").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN).append(Component.literal(String.valueOf(ScribedUtils.getRemainingUses(player, ability))).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                }else{
+                    player.displayClientMessage(Component.literal("Haven`t scribed this ability yet.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), true);
                 }
-            });
+            }
         }
     }
 
     public static void deleteAbility(LivingEntity livingEntity) {
         Item offHand = livingEntity.getOffhandItem().getItem();
         if (offHand instanceof SimpleAbilityItem ability) {
-            livingEntity.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).ifPresent(storage -> {
-                if (storage.hasScribedAbility(ability)) {
-                    storage.useScribeAbility(ability);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("1 copy deleted.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
-                    }
-                } else {
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("All copies have been deleted, or haven`t scribed this ability yet.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), true);
-                    }
+            if(ScribedUtils.hasAbility(livingEntity, ability)){
+                ScribedUtils.useScribedAbility(livingEntity, ability);
+                if (livingEntity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("1 copy deleted.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                 }
-            });
+            }else if(livingEntity instanceof Player player){
+                player.displayClientMessage(Component.literal("All copies have been deleted, or haven`t scribed this ability yet.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), true);
+            }
         }
     }
 
@@ -94,13 +86,13 @@ public class ScribeAbilities extends SimpleAbilityItem {
                 @Override
                 public Component getDisplayName() {
                     int max = player.getPersistentData().getInt("maxScribedAbilities");
-                    int amount = player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).map(storage -> storage.getScribedAbilitiesCount()).orElse(0);
+                    int amount = ScribedUtils.getAbilitiesCount(player);
                     return Component.literal(amount + "/" + max).withStyle(ChatFormatting.BOLD);
                 }
 
                 @Override
                 public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-                    return new ScribeMenu(containerId, playerInventory, player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).map(storage -> storage.getScribedAbilities()).orElse(new HashMap<>()));
+                    return new ScribeMenu(containerId, playerInventory, ScribedUtils.getScribedAbilities(player));
                 }
             });
         }

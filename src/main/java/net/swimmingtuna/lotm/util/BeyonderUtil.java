@@ -69,6 +69,7 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedUtils;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
@@ -95,7 +96,6 @@ import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.*;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.ClientData.ClientLeftclickCooldownData;
-import net.swimmingtuna.lotm.util.ScribeRecording.CapabilityScribeAbilities;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
@@ -2997,7 +2997,7 @@ public class BeyonderUtil {
                 if (currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 6)) {
                     if (BeyonderUtil.scribeLookingAtYou(living, entity)) {
                         if (checkValidAbilityCopy(new ItemStack(ability))) {
-                            if (entity.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).map(storage -> storage.getScribedAbilitiesCount()).orElse(0) < entity.getPersistentData().getInt("maxScribedAbilities")) {
+                            if (ScribedUtils.getAbilitiesCount(living) < entity.getPersistentData().getInt("maxScribedAbilities")) {
                                 if (copyAbilityTest(getSequence(entity), abilitySequence)) {
                                     if (!pendingAbilityCopies.containsKey(entity.getUUID())) {
                                         pendingAbilityCopies.put(entity.getUUID(), ability);
@@ -3018,9 +3018,10 @@ public class BeyonderUtil {
             } else {
                 player.getPersistentData().putBoolean("deleteCopiedAbility", true);
             }
-
         }
     }
+
+
 
     public static void copyAbilityTick(Player player) {
         Iterator<Map.Entry<UUID, SimpleAbilityItem>> iterator = pendingAbilityCopies.entrySet().iterator();
@@ -3029,17 +3030,23 @@ public class BeyonderUtil {
             SimpleAbilityItem ability = entry.getValue();
             UUID uuid = entry.getKey();
             if (player.getUUID().equals(uuid)) {
-                player.displayClientMessage(Component.literal("Trying to copy: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
-                if (player.getPersistentData().getBoolean("acceptCopiedAbility")) {
-                    player.getPersistentData().putBoolean("acceptCopiedAbility", false);
-                    player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).ifPresent(storage -> {
-                        storage.copyScribeAbility(ability);
-                        player.displayClientMessage(Component.literal("Successfully copied: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
-                    });
-                    iterator.remove();
-                } else if (player.getPersistentData().getBoolean("deleteCopiedAbility")) {
-                    player.getPersistentData().putBoolean("deleteCopiedAbility", false);
-                    player.displayClientMessage(Component.literal("You have given up on copying: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                if(!player.getPersistentData().contains("timerCopiedAbility")) player.getPersistentData().putInt("timerCopiedAbility", 200);
+                if(player.getPersistentData().getInt("timerCopiedAbility") > 0) {
+                    player.getPersistentData().putInt("timerCopiedAbility", player.getPersistentData().getInt("timerCopiedAbility"));
+                    player.displayClientMessage(Component.literal("Trying to copy: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                    if (player.getPersistentData().getBoolean("acceptCopiedAbility")) {
+                        player.getPersistentData().putBoolean("acceptCopiedAbility", false);
+                        player.displayClientMessage(Component.literal("You have copied: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                        ScribedUtils.copyAbility(player, ability);
+                        iterator.remove();
+                    } else if (player.getPersistentData().getBoolean("deleteCopiedAbility")) {
+                        player.getPersistentData().putBoolean("deleteCopiedAbility", false);
+                        player.displayClientMessage(Component.literal("You have given up on copying: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                        iterator.remove();
+                    }
+                } else {
+                    player.getPersistentData().remove("timerCopiedAbility");
+                    player.displayClientMessage(Component.literal("You have not copied the ability: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
                     iterator.remove();
                 }
             }
@@ -3049,26 +3056,18 @@ public class BeyonderUtil {
     public static void useCopiedAbility(LivingEntity living, Item ability) { //marked
         if (living instanceof Player player) {
             if (currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 6)) {
-                player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null).ifPresent(storage -> {
-                    storage.useScribeAbility(ability);
-                    if (storage.getRemainUses(ability) == 0) {
-                        if (living.getMainHandItem().getItem() == ability) {
-                            living.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                        }
+                ScribedUtils.useScribedAbility(player, ability);
+                if(ScribedUtils.getRemainingUses(player, ability) == 0){
+                    if(player.getMainHandItem().getItem() == ability){
+                        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                     }
-                });
+                }
             }
         }
     }
 
     public static boolean checkAbilityIsCopied(LivingEntity living, Item ability) { //marked
-        if (living instanceof Player player) {
-            if (currentPathwayAndSequenceMatchesNoException(living, BeyonderClassInit.APPRENTICE.get(), 6))
-                return player.getCapability(CapabilityScribeAbilities.SCRIBE_CAPABILITY, null)
-                        .map(storage -> storage.hasScribedAbility(ability))
-                        .orElse(false);
-        }
-        return false;
+        return ScribedUtils.hasAbility(living, ability);
     }
 
 
