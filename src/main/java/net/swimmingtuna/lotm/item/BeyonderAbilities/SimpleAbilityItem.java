@@ -15,10 +15,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.phys.BlockHitResult;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
-import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
@@ -88,7 +86,6 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                     living.getItemInHand(InteractionHand.MAIN_HAND).is(ItemInit.BEYONDER_ABILITY_USER.get()) ||
                     living.getItemInHand(InteractionHand.OFF_HAND).is(this);
         }
-
         if (itemCheckPassed) {
             boolean checkAllResult = checkAll(living, this.requiredClass.get(), this.requiredSequence, this.requiredSpirituality, false);
             if (!checkAllResult) {
@@ -111,13 +108,25 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
 
+    public boolean abilitiesArentSealed(LivingEntity living) {
+        if (!living.level().isClientSide()) {
+            if (living.getPersistentData().getInt("abilitySealed" + this.requiredSequence) >= 1) {
+                if (living instanceof Player player) {
+                    player.displayClientMessage(Component.literal("Your abilities for sequence " + this.requiredSequence + " are sealed for " + (int) living.getPersistentData().getInt("abilitySealed" + this.requiredSequence) / 20 + " seconds").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
     public int getSpirituality() {
         return this.requiredSpirituality;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        if (!level.isClientSide() && checkIfCanUseAbility(player)) {
+        if (!level.isClientSide() && checkIfCanUseAbility(player) && abilitiesArentSealed(player)) {
             InteractionResult interactionResult = useAbility(level, player, hand);
             return new InteractionResultHolder<>(interactionResult, player.getItemInHand(hand));
         }
@@ -128,7 +137,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         boolean x = true;
-        if (context.getPlayer() != null && !checkIfCanUseAbility(context.getPlayer())) {
+        if (context.getPlayer() != null && !checkIfCanUseAbility(context.getPlayer()) && abilitiesArentSealed(context.getPlayer())) {
             x = false;
         }
         if (!level.isClientSide() && x) {
@@ -140,7 +149,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand usedHand) {
-        if (!livingEntity.level().isClientSide() && checkIfCanUseAbility(livingEntity)) {
+        if (!livingEntity.level().isClientSide() && checkIfCanUseAbility(livingEntity) && abilitiesArentSealed(livingEntity)) {
             return interactLivingEntityLivingEntity(stack, livingEntity, interactionTarget, usedHand);
         }
         return InteractionResult.PASS;
@@ -185,7 +194,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                     int wormsToBeUsed = distance / 10;
                     if (distance > 0) {
                         if (distance >= cooldown) {
-                            player.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0,distance - cooldown * 1.5f));
+                            player.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0, distance - cooldown * 1.5f));
                             cooldown = 0;
                         } else {
                             player.getPersistentData().putInt("doorBlinkStateDistance", 0);
@@ -206,7 +215,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                         player.getCooldowns().addCooldown(item, cooldown);
                     } else {
                         int maxReduction = cooldown / 2;
-                        int actualReduction = Math.min(maxReduction, wormOfStarAmount);
+                        int actualReduction = Math.min(maxReduction * (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEPARATE_WORM_OF_STAR.get()), wormOfStarAmount);
                         int newCooldown = cooldown - actualReduction;
                         tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
                         if (player instanceof ServerPlayer serverPlayer) {
@@ -223,7 +232,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                     int wormsToBeUsed = distance / 10;
                     if (distance > 0) {
                         if (distance >= cooldown) {
-                            livingEntity.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0,distance - cooldown * 1.5f));
+                            livingEntity.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0, distance - cooldown * 1.5f));
                             cooldown = 0;
                         } else {
                             livingEntity.getPersistentData().putInt("doorBlinkStateDistance", 0);
@@ -315,11 +324,12 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public static boolean checkRequiredClass(LivingEntity living, BeyonderClass requiredClass, boolean message) {
         if (!BeyonderUtil.currentPathwayMatchesNoException(living, requiredClass)) {
             String name = requiredClass.sequenceNames().get(9);
-            if (message && living instanceof Player player)
+            if (message && living instanceof Player player) {
                 player.displayClientMessage(
                         Component.literal("You are not of the ").withStyle(ChatFormatting.AQUA).append(
                                 Component.literal(name).withStyle(requiredClass.getColorFormatting())).append(
                                 Component.literal(" Pathway").withStyle(ChatFormatting.AQUA)), true);
+                }
             return false;
         }
         return true;

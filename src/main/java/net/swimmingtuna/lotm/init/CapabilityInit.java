@@ -13,6 +13,9 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedDataCapability;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedDataProvider;
 import net.swimmingtuna.lotm.capabilities.concealed_data.IConcealedDataCapability;
+import net.swimmingtuna.lotm.capabilities.doll_data.DollDataCapability;
+import net.swimmingtuna.lotm.capabilities.doll_data.DollDataProvider;
+import net.swimmingtuna.lotm.capabilities.doll_data.IDollDataCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IIsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedProvider;
@@ -32,38 +35,47 @@ public class CapabilityInit {
         event.register(IIsConcealedCapability.class);
         event.register(IsConcealedCapability.class);
         event.register(IScribedAbilitiesCapability.class);
+        event.register(IDollDataCapability.class);
     }
 
     @SubscribeEvent
     public static void attachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if (!(event.getObject() instanceof LivingEntity entity)) {
-            return;
+        // All entities
+        if (event.getObject() instanceof LivingEntity entity) {
+            if (!entity.getCapability(ConcealedDataProvider.CONCEALED_DATA).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "concealed_data"),
+                        new ConcealedDataProvider()
+                );
+            }
+            if (!entity.getCapability(IsConcealedProvider.IS_CONCEALED).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "is_concealed"),
+                        new IsConcealedProvider()
+                );
+            }
+            if (!entity.getCapability(SealedDataProvider.SEALED_DATA).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "sealed_data"),
+                        new SealedDataProvider()
+                );
+            }
+            if (!entity.getCapability(ScribedAbilitiesProvider.SCRIBED_ABILITIES).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "scribed_abilities"),
+                        new ScribedAbilitiesProvider()
+                );
+            }
         }
 
-        if (!entity.getCapability(ConcealedDataProvider.CONCEALED_DATA).isPresent()) {
-            event.addCapability(
-                    new ResourceLocation(MOD_ID, "concealed_data"),
-                    new ConcealedDataProvider()
-            );
-        }
-
-        if (!entity.getCapability(IsConcealedProvider.IS_CONCEALED).isPresent()) {
-            event.addCapability(
-                    new ResourceLocation(MOD_ID, "is_concealed"),
-                    new IsConcealedProvider()
-            );
-        }
-        if (!entity.getCapability(SealedDataProvider.SEALED_DATA).isPresent()) {
-            event.addCapability(
-                    new ResourceLocation(MOD_ID, "sealed_data"),
-                    new SealedDataProvider()
-            );
-        }
-        if (!entity.getCapability(ScribedAbilitiesProvider.SCRIBED_ABILITIES).isPresent()) {
-            event.addCapability(
-                    new ResourceLocation(MOD_ID, "scribed_abilities"),
-                    new ScribedAbilitiesProvider()
-            );
+        // Player only
+        if (event.getObject() instanceof Player player){
+            if (!player.getCapability(DollDataProvider.DOLL_DATA).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "doll_data"),
+                        new DollDataProvider()
+                );
+            }
         }
     }
 
@@ -77,7 +89,6 @@ public class CapabilityInit {
                 ((ConcealedDataCapability) newData).copyFrom((ConcealedDataCapability) oldData);
             });
         });
-
         original.getCapability(IsConcealedProvider.IS_CONCEALED).ifPresent(oldData -> {
             clone.getCapability(IsConcealedProvider.IS_CONCEALED).ifPresent(newData -> {
                 ((IsConcealedCapability) newData).copyFrom((IsConcealedCapability) oldData);
@@ -91,6 +102,11 @@ public class CapabilityInit {
         original.getCapability(ScribedAbilitiesProvider.SCRIBED_ABILITIES).ifPresent(oldData -> {
             clone.getCapability(ScribedAbilitiesProvider.SCRIBED_ABILITIES).ifPresent(newData -> {
                 ((ScribedAbilitiesCapability) newData).copyFrom((ScribedAbilitiesCapability) oldData);
+            });
+        });
+        original.getCapability(DollDataProvider.DOLL_DATA).ifPresent(oldData -> {
+            clone.getCapability(DollDataProvider.DOLL_DATA).ifPresent(newData -> {
+                ((DollDataCapability) newData).copyFrom((DollDataCapability) oldData);
             });
         });
     }

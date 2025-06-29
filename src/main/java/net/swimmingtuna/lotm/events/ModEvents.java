@@ -48,6 +48,7 @@ import net.swimmingtuna.lotm.beyonder.MonsterClass;
 import net.swimmingtuna.lotm.beyonder.SailorClass;
 import net.swimmingtuna.lotm.beyonder.SpectatorClass;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.client.Configs;
@@ -86,6 +87,7 @@ import net.swimmingtuna.lotm.util.effect.NoRegenerationEffect;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
+import org.openjdk.nashorn.internal.ir.Symbol;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -322,6 +324,8 @@ public class ModEvents {
         }
         BeyonderUtil.copyAbilityTick(player);
         BeyonderUtil.abilityCooldownsServerTick(event);
+        DollUtils.dollPlayerTick(player);
+
 
     }
 
@@ -371,6 +375,9 @@ public class ModEvents {
         CompoundTag tag = livingEntity.getPersistentData();
         Level level = livingEntity.level();
         if (level instanceof ServerLevel serverLevel) {
+            if (tag.getInt("inCombat") >= 1) {
+                tag.putInt("inCombat", tag.getInt("inCombat") - 1);
+            }
             CorruptionAndLuckHandler.corruptionAndLuckManagers(serverLevel, livingEntity);
             twilightTick(event);
             envisionKingdom(livingEntity, level);
@@ -381,6 +388,8 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                Sealing.sealingTick(event);
+                Symbolization.symbolizationTick(event);
                 DimensionalSightSealEntity.dimensionalSightSealTick(livingEntity);
                 SpatialCageEntity.cageTick(livingEntity);
                 ApprenticeClass.enableWaterWalking(event);
@@ -519,10 +528,13 @@ public class ModEvents {
         LivingEntity attacked = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (!attacked.level().isClientSide()) {
+            Symbolization.symbolizationAttack(event);
             ApprenticeClass.apprenticeAttackEvent(event);
         }
         if (attacker != null) {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
+                attacked.getPersistentData().putInt("inCombat", 300);
+                attacker.getPersistentData().putInt("inCombat", 300);
                 PsychologicalInvisibility.psychologicalInvisibilityAttack(event);
                 DoorMirage.doorMirageAttackEvent(event);
                 BlinkAfterimage.travelerBlinkPassive(event);
@@ -640,6 +652,7 @@ public class ModEvents {
         DamageSource source = event.getSource();
         Entity entitySource = source.getEntity();
         if (!event.getEntity().level().isClientSide()) {
+            Teleportation.teleportationHurtEvent(event);
             BeyonderUtil.ageHandlerHurt(event);
             GuardianBoxEntity.guardianHurtEvent(event);
             newWarriorDamageNegation(event);

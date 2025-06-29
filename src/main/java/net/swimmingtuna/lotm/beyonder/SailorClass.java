@@ -353,16 +353,17 @@ public class SailorClass implements BeyonderClass {
     }
 
     public static void sailorLightningPassive(AttackEntityEvent event) {
-        Player player = event.getEntity();
+        LivingEntity player = event.getEntity();
         if (event.getTarget() instanceof LivingEntity livingEntity) {
-            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
             boolean sailorLightning = player.getPersistentData().getBoolean("SailorLightning");
             if (BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.SAILOR.get()) && BeyonderUtil.getSequence(livingEntity) <= 7 && event.getTarget() instanceof LivingEntity livingTarget && sailorLightning && livingTarget != player) {
-                double chanceOfDamage = (100.0 - (holder.getSequence() * 12.5)); // Decrease chance by 12.5% for each level below 9
+                int sequence = BeyonderUtil.getSequence(livingEntity);
+                double chanceOfDamage = (100.0 - (sequence * 12.5)); // Decrease chance by 12.5% for each level below 9
                 if (Math.random() * 100 < chanceOfDamage) {
                     LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, livingTarget.level());
                     lightningBolt.moveTo(livingTarget.getX(), livingTarget.getY(), livingTarget.getZ());
-                    lightningBolt.setDamage(Math.max(3,15 - (holder.getSequence() * 2)));
+                    lightningBolt.setVisualOnly(true);
+                    lightningBolt.setDamage(Math.max(3,15 - (sequence * 2)));
                     if (BeyonderUtil.getSequence(livingEntity) <= 1) {
                         float amount = 3;
                         if (BeyonderUtil.getSequence(player) == 1) {

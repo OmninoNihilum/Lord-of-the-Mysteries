@@ -17,6 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedUtils;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -138,78 +139,82 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-
-        if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
-            if (!this.level().isClientSide) {
-                handleLife();
-                if (BeyonderUtil.isEntityColliding(this, this.level(), 1.0)) {
-                    LivingEntity entity = BeyonderUtil.checkLivingEntityCollision(this, this.level(), 1.0);
-                    if (entity != null && entity.isShiftKeyDown()) teleport(entity);
-                }
-            }
-        }
-        if(getDoorMode() == DoorMode.CONCEALED_SPACE){
-            if(!this.level().isClientSide){
-                handleLife();
-                if(BeyonderUtil.isEntityColliding(this, this.level(), 1.0)){
-                    LivingEntity entity = BeyonderUtil.checkLivingEntityCollision(this, this.level(), 1.0);
-                    if(entity != null && entity.isShiftKeyDown()) teleport(entity);
-                }
-            }
-        }
-
-        if (getDoorMode() == DoorMode.DOOR_MIRAGE) {
-            if (!this.level().isClientSide) {
-                handleLife();
-                LivingEntity target = getCreator();
-                target.getPersistentData().putDouble("xDoorMirageStuck", this.getX());
-                target.getPersistentData().putDouble("yDoorMirageStuck", this.getY());
-                target.getPersistentData().putDouble("zDoorMirageStuck", this.getZ());
-                teleport(target);
-            }
-        }
         if (!this.level().isClientSide()) {
-            if (getDoorMode() == DoorMode.EXILE && getCreator() != null) {
-                handleLife();
-                int chunkRadius = 5;
-                ChunkPos centerChunk = new ChunkPos(this.blockPosition());
-                if (this.level() instanceof ServerLevel serverLevel) {
-                    for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
-                        for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
-                            ChunkPos chunkPos = new ChunkPos(centerChunk.x + dx, centerChunk.z + dz);
-                            serverLevel.getChunkSource().addRegionTicket(TicketType.PLAYER, chunkPos, 3, chunkPos);
-                        }
+            if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
+                if (!this.level().isClientSide) {
+                    handleLife();
+                    if (BeyonderUtil.isEntityColliding(this, this.level(), 1.0)) {
+                        LivingEntity entity = BeyonderUtil.checkLivingEntityCollision(this, this.level(), 1.0);
+                        if (entity != null && entity.isShiftKeyDown()) teleport(entity);
                     }
                 }
-                for (LivingEntity livingEntity : BeyonderUtil.getNonAlliesNearby(getCreator(), BeyonderUtil.getDamage(getCreator()).get(ItemInit.EXILE.get()))) {
-                    double x = this.getX() - livingEntity.getX();
-                    double y = this.getY() - livingEntity.getY();
-                    double z = this.getZ() - livingEntity.getZ();
-                    double magnitude = Math.sqrt(x * x + y * y + z * z);
-                    livingEntity.setDeltaMovement(x / magnitude * 2, y / magnitude * 2, z / magnitude * 2);
-                    livingEntity.hurtMarked = true;
+            }
+            if (getDoorMode() == DoorMode.CONCEALED_SPACE) {
+                if (!this.level().isClientSide) {
+                    handleLife();
+                    if (BeyonderUtil.isEntityColliding(this, this.level(), 1.0)) {
+                        LivingEntity entity = BeyonderUtil.checkLivingEntityCollision(this, this.level(), 1.0);
+                        if (entity != null && entity.isShiftKeyDown()) teleport(entity);
+                    }
                 }
-                for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(2))) {
-                    if (livingEntity.getPersistentData().getInt("shouldntExileWithDoor") == 0) {
-                        double x = livingEntity.getX();
-                        double z = livingEntity.getZ();
-                        double surfaceY = BeyonderUtil.findSurfaceY(livingEntity, x, z, DimensionInit.EXILED_DIMENSION_LEVEL_KEY);
-                        CompoundTag tag = livingEntity.getPersistentData();
-                        tag.putInt("exileDoorX", (int) x);
-                        tag.putInt("exileDoorY", (int) livingEntity.getY());
-                        tag.putInt("exileDoorZ", (int) z);
-                        tag.putInt("exileDoorTimer", 400);
-                        tag.putString("exileDoorDimension", livingEntity.level().dimension().location().toString());
-                        if (livingEntity instanceof Player player) {
-                            if (surfaceY != -1) {
-                                BeyonderUtil.teleportEntity(player, DimensionInit.EXILED_DIMENSION_LEVEL_KEY.location(), x, surfaceY, z);                            }
-                        } else {
-                            Random random = new Random();
-                            livingEntity.getPersistentData().putInt("exileDoorMob", random.nextInt(3));
-                            livingEntity.teleportTo(0, livingEntity.getY() + 110, 0);
-                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.STUN.get(), 400, 1, false, false);
+            }
+
+            if (getDoorMode() == DoorMode.DOOR_MIRAGE) {
+                if (!this.level().isClientSide) {
+                    handleLife();
+                    LivingEntity target = getCreator();
+                    target.getPersistentData().putDouble("xDoorMirageStuck", this.getX());
+                    target.getPersistentData().putDouble("yDoorMirageStuck", this.getY());
+                    target.getPersistentData().putDouble("zDoorMirageStuck", this.getZ());
+                    teleport(target);
+                }
+            }
+            if (!this.level().isClientSide()) {
+                if (getDoorMode() == DoorMode.EXILE && getCreator() != null) {
+                    handleLife();
+                    int chunkRadius = 5;
+                    ChunkPos centerChunk = new ChunkPos(this.blockPosition());
+                    if (this.level() instanceof ServerLevel serverLevel) {
+                        for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
+                            for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
+                                ChunkPos chunkPos = new ChunkPos(centerChunk.x + dx, centerChunk.z + dz);
+                                serverLevel.getChunkSource().addRegionTicket(TicketType.PLAYER, chunkPos, 3, chunkPos);
+                            }
                         }
                     }
+                    for (LivingEntity livingEntity : BeyonderUtil.getNonAlliesNearby(getCreator(), BeyonderUtil.getDamage(getCreator()).get(ItemInit.EXILE.get()))) {
+                        double x = this.getX() - livingEntity.getX();
+                        double y = this.getY() - livingEntity.getY();
+                        double z = this.getZ() - livingEntity.getZ();
+                        double magnitude = Math.sqrt(x * x + y * y + z * z);
+                        livingEntity.setDeltaMovement(x / magnitude * 2, y / magnitude * 2, z / magnitude * 2);
+                        livingEntity.hurtMarked = true;
+                    }
+                    for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(2))) {
+                        if (livingEntity.getPersistentData().getInt("shouldntExileWithDoor") == 0) {
+                            double x = livingEntity.getX();
+                            double z = livingEntity.getZ();
+                            double surfaceY = BeyonderUtil.findSurfaceY(livingEntity, x, z, DimensionInit.EXILED_DIMENSION_LEVEL_KEY);
+                            CompoundTag tag = livingEntity.getPersistentData();
+                            tag.putInt("exileDoorX", (int) x);
+                            tag.putInt("exileDoorY", (int) livingEntity.getY());
+                            tag.putInt("exileDoorZ", (int) z);
+                            tag.putInt("exileDoorTimer", 400);
+                            tag.putString("exileDoorDimension", livingEntity.level().dimension().location().toString());
+                            if (livingEntity instanceof Player player) {
+                                if (surfaceY != -1) {
+                                    BeyonderUtil.teleportEntity(player, DimensionInit.EXILED_DIMENSION_LEVEL_KEY.location(), x, surfaceY, z);
+                                }
+                            } else {
+                                Random random = new Random();
+                                livingEntity.getPersistentData().putInt("exileDoorMob", random.nextInt(3));
+                                livingEntity.teleportTo(0, livingEntity.getY() + 110, 0);
+                                BeyonderUtil.applyMobEffect(livingEntity, ModEffects.STUN.get(), 400, 1, false, false);
+                            }
+                        }
+                    }
+                } else if (getCreator() == null && getDoorMode() == DoorMode.EXILE) {
+                    this.discard();
                 }
             }
         }
@@ -246,7 +251,14 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     }
 
     public LivingEntity getCreator() {
-        return BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
+        if (this.creator == null) return null;
+
+        // Try to get the entity, but don't fail if it's not loaded yet
+        LivingEntity entity = BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
+        if (entity == null && !this.level().isClientSide()) {
+            LOTM.LOGGER.warn("Creator with UUID {} not found in level {}", this.creator, this.level().dimension().location());
+        }
+        return entity;
     }
 
     public int getSequence() {
@@ -282,7 +294,6 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
 
     private void handleLife() {
         int life = getLife();
-
         if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
             if (life < getFullLife() - 30) {
                 this.entityData.set(HAS_PLAYED_ANIMATION, true);

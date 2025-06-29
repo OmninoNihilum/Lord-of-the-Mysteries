@@ -149,7 +149,7 @@ public class EntityInit {
     public static final RegistryObject<EntityType<PlayerMobEntity>> PLAYER_MOB_ENTITY = ENTITIES.register("player_mob", () ->
             EntityType.Builder.<PlayerMobEntity>of(PlayerMobEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 1.8F)
-                    .clientTrackingRange(8)
+                    .clientTrackingRange(300)
                     .build(new ResourceLocation(LOTM.MOD_ID, "player_mob").toString())
     );
     public static void registerEntityAttributes(EntityAttributeCreationEvent event) {

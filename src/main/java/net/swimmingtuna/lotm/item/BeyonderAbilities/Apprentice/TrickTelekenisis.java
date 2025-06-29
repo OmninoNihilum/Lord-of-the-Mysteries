@@ -70,7 +70,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
                     if (entity == livingEntity) {
                         continue;
                     }
-                    if ((entity instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity)) || (entity instanceof LivingEntity living && !BeyonderUtil.areAllies(livingEntity, living))) {
+                    if (!BeyonderUtil.isEntityAlly(livingEntity, entity)) {
                         double x = entity.getX() - livingEntity.getX();
                         double y = entity.getY() - livingEntity.getY();
                         double z = entity.getZ() - livingEntity.getZ();
@@ -135,12 +135,11 @@ public class TrickTelekenisis extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (livingEntity.getPersistentData().getBoolean("trickmasterTelekenisis")) {
-            if (BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 10) {
-                return 100;
+        if (target != null) {
+            if (livingEntity.getHealth() < target.getHealth()) {
+                return (int) (50 * livingEntity.getHealth() / livingEntity.getMaxHealth());
             }
-        } else if (!livingEntity.getPersistentData().getBoolean("trickmasterTelekenisis") && target != null && BeyonderUtil.getSpirituality(livingEntity) * 10 > BeyonderUtil.getMaxSpirituality(livingEntity)) {
-            return 80;
+            return 0;
         }
         return 0;
     }

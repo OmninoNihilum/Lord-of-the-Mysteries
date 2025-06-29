@@ -3,6 +3,7 @@ package net.swimmingtuna.lotm.item.OtherItems;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
@@ -77,6 +79,12 @@ public class TestItem extends SimpleAbilityItem {
                         pPlayer.getCooldowns().removeCooldown(stack.getItem());
                     }
                 }
+            }
+            for (PlayerMobEntity playerMobEntity : player.level().getEntitiesOfClass(PlayerMobEntity.class, player.getBoundingBox().inflate(20))) {
+                playerMobEntity.setIsFlying(true);
+                playerMobEntity.setFlySpeed(0.2f);
+                player.sendSystemMessage(Component.literal(playerMobEntity.getUsername().getDisplayName() + "IS NOW FLYING"));
+                playerMobEntity.setIdealDistanceFromTarget(5);
             }
         }
         return InteractionResult.SUCCESS;

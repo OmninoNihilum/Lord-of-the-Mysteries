@@ -188,6 +188,11 @@ public class LOTMNetworkHandler {
                 .encoder(DawnWeaponryLeftClickC2S::toByte)
                 .consumerMainThread(DawnWeaponryLeftClickC2S::handle)
                 .add();
+        INSTANCE.messageBuilder(SealingLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(SealingLeftClickC2S::new)
+                .encoder(SealingLeftClickC2S::toByte)
+                .consumerMainThread(SealingLeftClickC2S::handle)
+                .add();
         INSTANCE.messageBuilder(MonsterCalamityIncarnationLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(MonsterCalamityIncarnationLeftClickC2S::new)
                 .encoder(MonsterCalamityIncarnationLeftClickC2S::toByte)
@@ -288,6 +293,11 @@ public class LOTMNetworkHandler {
                 .encoder(DimensionalSightPacketS2C::encode)
                 .consumerMainThread(DimensionalSightPacketS2C::handle)
                 .add();
+        INSTANCE.messageBuilder(SyncPlayerMobTrackerPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(SyncPlayerMobTrackerPacketS2C::new)
+                .encoder(SyncPlayerMobTrackerPacketS2C::toBytes)
+                .consumerMainThread(SyncPlayerMobTrackerPacketS2C::handle)
+                .add();
         INSTANCE.messageBuilder(ScryingEntityPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(ScryingEntityPacketS2C::decode)
                 .encoder(ScryingEntityPacketS2C::encode)
@@ -298,6 +308,7 @@ public class LOTMNetworkHandler {
                 .encoder(ClientShouldntRenderS2C::encode)
                 .consumerMainThread(ClientShouldntRenderS2C::handle)
                 .add();
+
     }
 
 

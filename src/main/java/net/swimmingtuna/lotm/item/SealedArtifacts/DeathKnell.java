@@ -26,6 +26,7 @@ import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.DeathKnellBulletEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -88,11 +89,7 @@ public class DeathKnell extends Item {
             if (x <= 1) {
                 particleCount = 20;
                 soundPitch = 1.0F;
-                if (livingEntity instanceof Player pPlayer) {
-                    BeyonderHolderAttacher.getHolderUnwrap(pPlayer).useSpirituality(100);
-                } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
-                    playerMobEntity.useSpirituality(100);
-                }
+                BeyonderUtil.useSpirituality(livingEntity, 100);
                 deathKnellBulletEntity.setDamage(15);
                 deathKnellBulletEntity.setWeakness(true);
             } else if (x == 2) {
@@ -100,19 +97,11 @@ public class DeathKnell extends Item {
                 soundPitch = 0.8F;
                 deathKnellBulletEntity.setDamage(30);
                 deathKnellBulletEntity.setLethal(true);
-                if (livingEntity instanceof Player pPlayer) {
-                    BeyonderHolderAttacher.getHolderUnwrap(pPlayer).useSpirituality(200);
-                } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
-                    playerMobEntity.useSpirituality(200);
-                }
+                BeyonderUtil.useSpirituality(livingEntity, 200);
             } else {
                 particleCount = 50;
                 soundPitch = 0.6F;
-                if (livingEntity instanceof Player pPlayer) {
-                    BeyonderHolderAttacher.getHolderUnwrap(pPlayer).useSpirituality(300);
-                } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
-                    playerMobEntity.useSpirituality(300);
-                }
+                BeyonderUtil.useSpirituality(livingEntity, 300);
                 deathKnellBulletEntity.setDamage(35);
                 deathKnellBulletEntity.setLethal(true);
             }

@@ -32,19 +32,22 @@ import java.util.List;
 public class MindStorm extends SimpleAbilityItem {
 
     public MindStorm(Properties properties) {
-        super(properties, BeyonderClassInit.SPECTATOR, 4, 250, 200,60,60 );
+        super(properties, BeyonderClassInit.SPECTATOR, 4, 250, 200, 60, 60);
     }
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player);
+            useSpirituality(player);
+            mindStorm(player, interactionTarget);
         }
-        addCooldown(player);
-        useSpirituality(player);
-        mindStorm(player, interactionTarget);
         return InteractionResult.SUCCESS;
     }
+
 
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
@@ -78,10 +81,10 @@ public class MindStorm extends SimpleAbilityItem {
 
     public void mindStorm(LivingEntity player, LivingEntity interactionTarget) {
         if (!player.level().isClientSide()) {
-            int damage =  (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MIND_STORM.get());
+            int damage = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MIND_STORM.get());
             int duration = damage * 10;
             if (BeyonderUtil.getDreamIntoReality(player) == 2) {
-                damage = (int) ((int) (float)1.5 * BeyonderUtil.getDamage(player).get(ItemInit.MIND_STORM.get()));
+                damage = (int) ((int) (float) 1.5 * BeyonderUtil.getDamage(player).get(ItemInit.MIND_STORM.get()));
             }
             interactionTarget.addEffect(new MobEffectInstance(ModEffects.AWE.get(), (int) (duration * 0.5), 1, false, false));
             interactionTarget.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
@@ -89,6 +92,7 @@ public class MindStorm extends SimpleAbilityItem {
             BeyonderUtil.applyMentalDamage(player, interactionTarget, damage);
         }
     }
+
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);

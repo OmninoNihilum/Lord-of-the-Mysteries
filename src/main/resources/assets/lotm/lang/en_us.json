@@ -333,7 +333,9 @@
   "item.lotm.spatialcage": "Spatial Cage",
   "item.lotm.spatialtearing": "Spatial Tearing",
   "item.lotm.symbolization": "Symbolization",
+  "item.lotm.teleportation": "Teleportation",
   "item.lotm.dimensionalsight": "Dimensional Sight",
+  "item.lotm.miniaturize": "Miniaturize",
   "item.lotm.replicate": "Replicate",
   "item.lotm.sealing": "Sealing",
   "item.lotm.teleportationafterimage": "Teleportation Afterimage",
@@ -471,6 +473,7 @@
   "enchantment.lotm.wither": "Withering",
   "enchantment.lotm.confusion": "Confusion",
   "enchantment.lotm.freeze": "Freeze",
+  "item.lotm.doll": "Doll",
 
   "entity.lotm.aqueous_light": "Aqueous Light",
   "entity.lotm.mercury_entity": "Mercury",

@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Random;
 
 public class TrickEscapeTrick extends SimpleAbilityItem {
+    private static final int MIN_TELEPORT_Y = -60; // Minimum Y level to prevent void teleportation
+
     public TrickEscapeTrick(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 150, 200);
     }
@@ -95,6 +97,87 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
     }
 
     private static boolean tryTeleportToSafeLocation(LivingEntity entity, Level level, int range) {
+        Vec3 currentPos = entity.position();
+        int currentY = (int) currentPos.y;
+        int worldSurface = level.getHeight();
+        int distanceFromSurface = worldSurface - currentY;
+
+        // If within 10 blocks of surface, try to teleport to surface first
+        if (distanceFromSurface <= 10 && distanceFromSurface >= 0) {
+            if (tryTeleportToSurface(entity, level, range)) {
+                return true;
+            }
+        }
+
+        // If more than 10 blocks above surface or underground (more than 10 blocks below surface),
+        // use random air teleportation
+        if (currentY > worldSurface + 10 || currentY < worldSurface - 10) {
+            return tryRandomAirTeleportation(entity, level, range);
+        }
+
+        // Fallback to original directional teleportation for edge cases
+        return tryDirectionalTeleportation(entity, level, range);
+    }
+
+    private static boolean tryTeleportToSurface(LivingEntity entity, Level level, int range) {
+        Vec3 currentPos = entity.position();
+        Random random = new Random();
+
+        // Try multiple surface locations
+        for (int attempts = 0; attempts < 20; attempts++) {
+            int xOffset = random.nextInt(range * 2) - range;
+            int zOffset = random.nextInt(range * 2) - range;
+
+            BlockPos surfacePos = new BlockPos((int) currentPos.x + xOffset, level.getHeight(), (int) currentPos.z + zOffset);
+
+            // Find the actual surface (highest solid block)
+            for (int y = level.getHeight(); y >= Math.max(level.getMinBuildHeight(), MIN_TELEPORT_Y); y--) {
+                BlockPos checkPos = new BlockPos(surfacePos.getX(), y, surfacePos.getZ());
+                if (!level.getBlockState(checkPos).isAir() && level.getBlockState(checkPos.above()).isAir()) {
+                    BlockPos teleportPos = checkPos.above();
+                    if (teleportPos.getY() >= MIN_TELEPORT_Y && isSafeLocation(teleportPos, level, entity)) {
+                        performTeleport(entity, new Vec3(teleportPos.getX() + 0.5, teleportPos.getY(), teleportPos.getZ() + 0.5));
+                        return true;
+                    }
+                    break;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean tryRandomAirTeleportation(LivingEntity entity, Level level, int range) {
+        Vec3 currentPos = entity.position();
+        Random random = new Random();
+        int maxAttempts = range * 3;
+
+        for (int i = 0; i < maxAttempts; i++) {
+            int xOffset = random.nextInt(range * 2) - range;
+            int yOffset = random.nextInt(range) - range/2; // Allow both up and down movement
+            int zOffset = random.nextInt(range * 2) - range;
+
+            double distanceSq = xOffset*xOffset + yOffset*yOffset + zOffset*zOffset;
+            if (distanceSq <= range*range) {
+                Vec3 targetVec = currentPos.add(xOffset, yOffset, zOffset);
+
+                // Ensure the target Y position is not below the minimum teleport level
+                if (targetVec.y < MIN_TELEPORT_Y) {
+                    targetVec = new Vec3(targetVec.x, MIN_TELEPORT_Y, targetVec.z);
+                }
+
+                BlockPos targetPos = new BlockPos((int) Math.floor(targetVec.x), (int) Math.floor(targetVec.y), (int) Math.floor(targetVec.z));
+
+                // For air teleportation, we don't need a solid ground, just clear space
+                if (isAirSafeLocation(targetPos, level, entity)) {
+                    performTeleport(entity, targetVec);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean tryDirectionalTeleportation(LivingEntity entity, Level level, int range) {
         List<Vec3> directions = new ArrayList<>();
         directions.add(new Vec3(1, 0, 0));   // East
         directions.add(new Vec3(-1, 0, 0));  // West
@@ -115,51 +198,46 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
         directions.add(new Vec3(0, -1, 1));  // Down + South
         directions.add(new Vec3(0, -1, -1)); // Down + North
         Collections.shuffle(directions);
+
         Vec3 currentPos = entity.position();
         for (Vec3 dir : directions) {
             for (int distance = range; distance > range / 2; distance -= 5) {
                 Vec3 normalizedDir = dir.normalize().scale(distance);
                 Vec3 targetVec = currentPos.add(normalizedDir);
+
+                // Ensure the target Y position is not below the minimum teleport level
+                if (targetVec.y < MIN_TELEPORT_Y) {
+                    targetVec = new Vec3(targetVec.x, MIN_TELEPORT_Y, targetVec.z);
+                }
+
                 BlockPos targetPos = new BlockPos((int) Math.floor(targetVec.x), (int) Math.floor(targetVec.y), (int) Math.floor(targetVec.z));
 
                 if (isSafeLocation(targetPos, level, entity)) {
-                    if (entity.level() instanceof ServerLevel serverLevel) {
-                        for (int p = 0; p < 10 * BeyonderUtil.getScale(entity); p++) {
-                            float randomInt = BeyonderUtil.getRandomInRange(BeyonderUtil.getScale(entity));
-                            serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX() + randomInt, entity.getY() + randomInt, entity.getZ() + randomInt, 0, 0, 0, 0, 0f);
-                        }
-                        float randomInt = BeyonderUtil.getRandomInRange(BeyonderUtil.getScale(entity));
-                        serverLevel.sendParticles(ParticleTypes.FLASH, entity.getX() + randomInt, entity.getY() + randomInt, entity.getZ() + randomInt, 0, 0, 0, 0, 0f);
-                    }
-                    entity.teleportTo(targetVec.x, targetVec.y, targetVec.z);
+                    performTeleport(entity, targetVec);
                     return true;
                 }
             }
         }
-        Random random = new Random();
-        int maxAttempts = range * 3;
-
-        for (int i = 0; i < maxAttempts; i++) {
-            int xOffset = random.nextInt(range * 2) - range;
-            int yOffset = random.nextInt(range) - range/4;
-            int zOffset = random.nextInt(range * 2) - range;
-
-            double distanceSq = xOffset*xOffset + yOffset*yOffset + zOffset*zOffset;
-            if (distanceSq <= range*range) {
-                BlockPos pos = entity.blockPosition().offset(xOffset, yOffset, zOffset);
-                Vec3 targetVec = new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-
-                if (isSafeLocation(pos, level, entity)) {
-                    entity.teleportTo(targetVec.x, targetVec.y, targetVec.z);
-                    return true;
-                }
-            }
-        }
-
         return false;
     }
 
+    private static void performTeleport(LivingEntity entity, Vec3 targetVec) {
+        if (entity.level() instanceof ServerLevel serverLevel) {
+            for (int p = 0; p < 10 * BeyonderUtil.getScale(entity); p++) {
+                float randomInt = BeyonderUtil.getRandomInRange(BeyonderUtil.getScale(entity));
+                serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX() + randomInt, entity.getY() + randomInt, entity.getZ() + randomInt, 0, 0, 0, 0, 0f);
+            }
+            float randomInt = BeyonderUtil.getRandomInRange(BeyonderUtil.getScale(entity));
+            serverLevel.sendParticles(ParticleTypes.FLASH, entity.getX() + randomInt, entity.getY() + randomInt, entity.getZ() + randomInt, 0, 0, 0, 0, 0f);
+        }
+        entity.teleportTo(targetVec.x, targetVec.y, targetVec.z);
+    }
+
     private static boolean isSafeLocation(BlockPos pos, Level level, LivingEntity entity) {
+        if (pos.getY() < MIN_TELEPORT_Y) {
+            return false;
+        }
+
         float scale = BeyonderUtil.getScale(entity);
         int requiredSpace = Math.max(1, (int) Math.ceil(scale));
         for (int x = -requiredSpace; x <= requiredSpace; x++) {
@@ -175,11 +253,32 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
         return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
     }
 
+    private static boolean isAirSafeLocation(BlockPos pos, Level level, LivingEntity entity) {
+        // Check if the position is above the minimum teleport level
+        if (pos.getY() < MIN_TELEPORT_Y) {
+            return false;
+        }
+
+        float scale = BeyonderUtil.getScale(entity);
+        int requiredSpace = Math.max(1, (int) Math.ceil(scale));
+        for (int x = -requiredSpace; x <= requiredSpace; x++) {
+            for (int y = 0; y <= requiredSpace * 2; y++) {
+                for (int z = -requiredSpace; z <= requiredSpace; z++) {
+                    BlockPos checkPos = pos.offset(x, y, z);
+                    if (!level.getBlockState(checkPos).isAir()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     public static void escapeTrickHurtEvent(LivingHurtEvent event) {
         LivingEntity attacked = event.getEntity();
         if(attacked.getPersistentData().getInt("escapeTrickCount") > 0) {
             if (BeyonderUtil.currentPathwayMatches(attacked, BeyonderClassInit.APPRENTICE.get()) && BeyonderUtil.getSequence(attacked) > 4) {
-                int range = (int) (float) BeyonderUtil.getDamage(attacked).get(ItemInit.TRICKESCAPETRICK.get()) * 5;
+                int range = (int) (float) BeyonderUtil.getDamage(attacked).get(ItemInit.TRICKESCAPETRICK.get()) * 2;
                 boolean teleported = tryTeleportToSafeLocation(attacked, attacked.level(), range);
 
                 if (teleported) {
@@ -219,7 +318,7 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
         int maxEscapes = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKESCAPETRICK.get());
         int escapeTrickCount = livingEntity.getPersistentData().getInt("escapeTrickCount");
         if (target == null && escapeTrickCount < maxEscapes) {
-            return 100;
+            return 30;
         } else if (escapeTrickCount >= maxEscapes) {
             return 0;
         }

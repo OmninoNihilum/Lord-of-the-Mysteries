@@ -55,7 +55,6 @@ public class RagingBlows extends SimpleAbilityItem {
     }
 
     public static void ragingBlowsTick(LivingEntity livingEntity) {
-        //RAGING BLOWS
         CompoundTag tag = livingEntity.getPersistentData();
         int sequence = BeyonderUtil.getSequence(livingEntity);
         boolean sailorLightning = tag.getBoolean("SailorLightning");
@@ -88,7 +87,6 @@ public class RagingBlows extends SimpleAbilityItem {
             }
         }
         if (ragingBlows >= 100) {
-            ragingBlows = 0;
             tag.putInt("ragingBlows", 0);
         }
     }

@@ -1,10 +1,13 @@
 package net.swimmingtuna.lotm.networking.packet;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
+import net.swimmingtuna.lotm.LOTM;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -12,6 +15,7 @@ import java.util.function.Supplier;
 // SendPlayerRenderDataS2C.java
 public class SendPlayerRenderDataS2C {
     private final UUID entityUUID;
+    private final UUID senderUUID;
     private final float yaw;
     private final float pitch;
     private final float headYaw;
@@ -28,7 +32,7 @@ public class SendPlayerRenderDataS2C {
     private final Vec3 displayCenter;
     private final boolean onFire;
 
-    public SendPlayerRenderDataS2C(UUID entityUUID, float yaw, float pitch, float headYaw, float bodyYaw, double velX, double velY, double velZ, float swingProgress, double posX, double posY, double posZ, boolean onGround, float fallDistance, Vec3 displayCenter, boolean onFire) {
+    public SendPlayerRenderDataS2C(UUID entityUUID, float yaw, float pitch, float headYaw, float bodyYaw, double velX, double velY, double velZ, float swingProgress, double posX, double posY, double posZ, boolean onGround, float fallDistance, Vec3 displayCenter, boolean onFire, UUID senderUUID) {
         this.entityUUID = entityUUID;
         this.yaw = yaw;
         this.pitch = pitch;
@@ -45,6 +49,7 @@ public class SendPlayerRenderDataS2C {
         this.onGround = onGround;
         this.fallDistance = fallDistance;
         this.displayCenter = displayCenter;
+        this.senderUUID = senderUUID;
     }
 
     public SendPlayerRenderDataS2C(FriendlyByteBuf buf) {
@@ -64,6 +69,7 @@ public class SendPlayerRenderDataS2C {
         this.fallDistance = buf.readFloat();
         this.displayCenter = new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.onFire = buf.readBoolean();
+        this.senderUUID = buf.readUUID();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
@@ -85,14 +91,14 @@ public class SendPlayerRenderDataS2C {
         buf.writeDouble(this.displayCenter.y);
         buf.writeDouble(this.displayCenter.z);
         buf.writeBoolean(this.onFire);
+        buf.writeUUID(this.senderUUID);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
-            ServerPlayer player = context.getSender();
-            if (player != null) {
-                // Store the render data in the player's persistent data
+            LocalPlayer clientPlayer = Minecraft.getInstance().player;
+            if (clientPlayer != null) {
                 CompoundTag renderData = new CompoundTag();
                 renderData.putUUID("displayEntityUUID", this.entityUUID);
                 renderData.putFloat("displayYaw", this.yaw);
@@ -112,26 +118,69 @@ public class SendPlayerRenderDataS2C {
                 renderData.putBoolean("displayOnGround", this.onGround);
                 renderData.putFloat("displayFallDistance", this.fallDistance);
                 renderData.putBoolean("displayOnFire", this.onFire);
-                player.getPersistentData().put("dimensionalSightRenderData", renderData);
+                clientPlayer.getPersistentData().put("dimensionalSightRenderData", renderData);
             }
         });
         return true;
     }
-
     // Getters
-    public UUID getEntityUUID() { return entityUUID; }
-    public float getYaw() { return yaw; }
-    public float getPitch() { return pitch; }
-    public float getHeadYaw() { return headYaw; }
-    public float getBodyYaw() { return bodyYaw; }
-    public double getVelX() { return velX; }
-    public double getVelY() { return velY; }
-    public double getVelZ() { return velZ; }
-    public float getSwingProgress() { return swingProgress; }
-    public double getPosX() { return posX; }
-    public double getPosY() { return posY; }
-    public double getPosZ() { return posZ; }
-    public boolean isOnGround() { return onGround; }
-    public float getFallDistance() { return fallDistance; }
-    public Vec3 getDisplayCenter() { return displayCenter; }
+    public UUID getEntityUUID() {
+        return entityUUID;
+    }
+
+    public float getYaw() {
+        return yaw;
+    }
+
+    public float getPitch() {
+        return pitch;
+    }
+
+    public float getHeadYaw() {
+        return headYaw;
+    }
+
+    public float getBodyYaw() {
+        return bodyYaw;
+    }
+
+    public double getVelX() {
+        return velX;
+    }
+
+    public double getVelY() {
+        return velY;
+    }
+
+    public double getVelZ() {
+        return velZ;
+    }
+
+    public float getSwingProgress() {
+        return swingProgress;
+    }
+
+    public double getPosX() {
+        return posX;
+    }
+
+    public double getPosY() {
+        return posY;
+    }
+
+    public double getPosZ() {
+        return posZ;
+    }
+
+    public boolean isOnGround() {
+        return onGround;
+    }
+
+    public float getFallDistance() {
+        return fallDistance;
+    }
+
+    public Vec3 getDisplayCenter() {
+        return displayCenter;
+    }
 }

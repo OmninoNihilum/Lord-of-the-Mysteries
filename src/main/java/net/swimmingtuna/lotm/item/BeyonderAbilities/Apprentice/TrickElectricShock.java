@@ -141,7 +141,7 @@ public class TrickElectricShock extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (!livingEntity.getPersistentData().getBoolean("trickmasterElectricShock")) {
-            return 100;
+            return 30;
         }
         return 0;
     }

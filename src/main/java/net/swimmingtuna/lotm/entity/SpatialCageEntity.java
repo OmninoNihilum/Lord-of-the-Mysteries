@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.UUID;
 
@@ -54,6 +55,7 @@ public class SpatialCageEntity extends Entity{
             double z = tag.getDouble("spatialCageZ");
             entity.teleportTo(x, y, z);
             entity.setInvisible(true);
+            BeyonderUtil.setInvisible(entity, true, 5);
             entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 10, 1 ,false ,false));
             SpatialCageEntity cage = new SpatialCageEntity(level, entity);
             cage.moveTo(x, y, z);

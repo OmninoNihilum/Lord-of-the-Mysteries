@@ -48,7 +48,7 @@ public class TravelersDoorWaypoint extends SimpleAbilityItem {
         if (player.isShiftKeyDown()) {
             setWaypoint(player, tag);
         } else {
-            useSpirituality(player);
+            useSpirituality(player, 300 *  (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TRAVELERSDOORHOME.get()));
             teleportToWaypoint(player, tag);
         }
         addCooldown(player);

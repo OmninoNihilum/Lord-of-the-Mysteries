@@ -35,9 +35,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ConcealedSpace extends SimpleAbilityItem {
+public class CreateConcealedSpace extends SimpleAbilityItem {
 
-    public ConcealedSpace(Properties properties) {
+    public CreateConcealedSpace(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 4, 35, 300);
     }
 
@@ -47,7 +47,7 @@ public class ConcealedSpace extends SimpleAbilityItem {
             return InteractionResult.FAIL;
         }
         useSpirituality(player);
-        addCooldown(player);
+        addCooldown(player, this, 300 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CREATE_CONCEALED_SPACE.get()));
         concealedSpace(player);
         return InteractionResult.SUCCESS;
     }
@@ -258,7 +258,7 @@ public class ConcealedSpace extends SimpleAbilityItem {
         tooltipComponents.add(Component.literal("Upon use, Conceal a part of the Spirit World, to be used as you will."));
         tooltipComponents.add(Component.literal("If used while sneaking, will create in the off hand a special door that leads to the users Concealed Space."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("35").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Second").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

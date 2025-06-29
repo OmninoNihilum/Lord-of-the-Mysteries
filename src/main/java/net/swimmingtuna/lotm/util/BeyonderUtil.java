@@ -99,6 +99,7 @@ import net.swimmingtuna.lotm.util.ClientData.ClientLeftclickCooldownData;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
+import net.swimmingtuna.lotm.world.worlddata.PlayerMobTracker;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import org.jetbrains.annotations.Nullable;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -584,6 +585,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.DIMENSIONAL_SIGHT.get());
                 abilityNames.add(ItemInit.REPLICATE.get());
                 abilityNames.add(ItemInit.SEALING.get());
+                abilityNames.add(ItemInit.TELEPORTATION.get());
             }
             if (sequence <= 1) {
                 abilityNames.add(ItemInit.SPACE_FRAGMENTATION.get());
@@ -1213,6 +1215,8 @@ public class BeyonderUtil {
             }
             if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
                 LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
+            } else if (heldItem.getItem() instanceof Sealing) {
+                LOTMNetworkHandler.sendToServer(new SealingLeftClickC2S());
             }
         }
     }
@@ -1397,6 +1401,8 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINKAFTERIMAGE.get())));
             } else if (heldItem.getItem() instanceof BlinkAfterimage) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
+            }  else if (heldItem.getItem() instanceof Sealing) {
+                LOTMNetworkHandler.sendToServer(new SealingLeftClickC2S());
             }
         }
     }
@@ -1554,6 +1560,9 @@ public class BeyonderUtil {
         if (livingEntity.hasEffect(ModEffects.ABILITY_WEAKNESS.get())) {
             abilityWeakness = Math.max(1, (livingEntity.getEffect(ModEffects.ABILITY_WEAKNESS.get())).getAmplifier());
         }
+        if (livingEntity.getPersistentData().getBoolean("planeswalkerSymbolization")) {
+            abilityWeakness *= 2;
+        }
         int sequence = BeyonderUtil.getSequence(livingEntity);
         //SAILOR
         damageMap.put(ItemInit.ACIDIC_RAIN.get(), applyAbilityStrengthened((75.0f - (sequence * 10.5f)) / abilityWeakness, abilityStrengthened));
@@ -1698,34 +1707,43 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TWILIGHTLIGHT.get(), applyAbilityStrengthened((450.0f - (sequence * 90)) / abilityWeakness, abilityStrengthened));
 
         // APPRENTICE
-        damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.RECORDSCRIBE.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
-        damageMap.put(ItemInit.BLINK.get(), applyAbilityStrengthened(1200 - (sequence * 180) + abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRAVELERSDOOR.get(), applyAbilityStrengthened(0.0f, abilityStrengthened));
+        damageMap.put(ItemInit.BLINK.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
+        damageMap.put(ItemInit.BLINKAFTERIMAGE.get(), applyAbilityStrengthened(2.5f - (sequence * 0.15f) - abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(0.1f + (sequence * 0.2f) + abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.CREATE_CONCEALED_BUNDLE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
+        damageMap.put(ItemInit.CREATE_CONCEALED_SPACE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
+        damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.05f), -abilityStrengthened));
+        damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), abilityStrengthened));
         damageMap.put(ItemInit.INVISIBLEHAND.get(), applyAbilityStrengthened((float) (75 - (sequence * 12)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.BLINKAFTERIMAGE.get(), applyAbilityStrengthened(1.5f + abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKESCAPETRICK.get(), applyAbilityStrengthened(15.0f - (sequence + abilityWeakness), abilityStrengthened));
-        damageMap.put(ItemInit.TRICKWIND.get(), applyAbilityStrengthened((150 - (sequence * 15.0f)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKBURNING.get(), applyAbilityStrengthened((300.0f - sequence * 30) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.MINIATURIZE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), abilityStrengthened));
+        damageMap.put(ItemInit.RECORDSCRIBE.get(), applyAbilityStrengthened(1.0f * abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((400.0f - sequence * 100) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.SEPARATE_WORM_OF_STAR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.SYMBOLIZATION.get(), applyAbilityStrengthened((160.0f - sequence * 30) / abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.TELEPORTATION.get(), applyAbilityStrengthened((1.0f - (sequence * 0.015f)) * abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.TRAVELERSDOOR.get(), applyAbilityStrengthened(1.0f + (sequence * 0.1f) * abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRAVELERSDOORHOME.get(), applyAbilityStrengthened(1.0f * abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKBURNING.get(), applyAbilityStrengthened((200.0f - sequence * 20) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKELECTRICSHOCK.get(), applyAbilityStrengthened((15.0f - sequence) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKESCAPETRICK.get(), applyAbilityStrengthened(15.0f - (sequence + abilityWeakness), abilityStrengthened));
         damageMap.put(ItemInit.TRICKFLASH.get(), applyAbilityStrengthened(200.0f - (sequence * 20.0f * abilityWeakness), abilityStrengthened));
         damageMap.put(ItemInit.TRICKFOG.get(), applyAbilityStrengthened((30.0f - sequence * 3) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((70.0f - (sequence * 10f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKLOUDNOISE.get(), applyAbilityStrengthened((300.0f - (270.0f * (8.0f / sequence))) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTELEKENISIS.get(), applyAbilityStrengthened((75.0f - (sequence * 9.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((120.0f - (sequence * 13.5f)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.TRICKFREEZING.get(), applyAbilityStrengthened((70.0f - (sequence * 10f)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, -abilityStrengthened));
-        damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), -abilityStrengthened));
-        damageMap.put(ItemInit.BLINK_STATE.get(), applyAbilityStrengthened(1 + abilityWeakness, -abilityStrengthened));
-        damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
-        damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.TRICKWIND.get(), applyAbilityStrengthened((150 - (sequence * 15.0f)) / abilityWeakness, abilityStrengthened));
         return damageMap;
     }
 
 
     public static float applyAbilityStrengthened(float damage, float abilityStrengthened) {
         if (abilityStrengthened > 1) {
-            return damage * 1.5f * Configs.COMMON.damageMultiplier.get();
+            damage *= (1.5f * Configs.COMMON.damageMultiplier.get());
         }
         return damage;
     }
@@ -2357,10 +2375,11 @@ public class BeyonderUtil {
     }
 
 
-    public static void makeAlly(LivingEntity user, LivingEntity allyToBe) {
+    public static void forceAlly(LivingEntity user, LivingEntity allyToBe) {
         if (user.level() instanceof ServerLevel serverLevel) {
             PlayerAllyData allyData = serverLevel.getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
             allyData.addAlly(user.getUUID(), allyToBe.getUUID());
+            allyData.addAlly(allyToBe.getUUID(), user.getUUID());
         }
     }
 
@@ -2761,12 +2780,12 @@ public class BeyonderUtil {
 
                 } else if (fortyPercent) {
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WITHER, 20, 0, true, true);
-                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 20, 0, true, true);
+                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 20, 1, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, 20, 1, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 20, 2, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DIG_SLOWDOWN, 20, 0, true, true);
                 } else if (thirtyPercent) {
-                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 20, 0, true, true);
+                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 20, 1, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, 20, 1, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 20, 1, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DIG_SLOWDOWN, 20, 0, true, true);
@@ -2998,8 +3017,9 @@ public class BeyonderUtil {
                     if (BeyonderUtil.scribeLookingAtYou(living, entity)) {
                         if (checkValidAbilityCopy(new ItemStack(ability))) {
                             if (ScribedUtils.getAbilitiesCount(living) < entity.getPersistentData().getInt("maxScribedAbilities")) {
-                                if (copyAbilityTest(getSequence(entity), abilitySequence)) {
+                                if (copyAbilityTest(entity, getSequence(entity), abilitySequence)) {
                                     if (!pendingAbilityCopies.containsKey(entity.getUUID())) {
+                                        entity.getPersistentData().putInt("timerCopiedAbility", 200);
                                         pendingAbilityCopies.put(entity.getUUID(), ability);
                                     }
                                 }
@@ -3030,9 +3050,8 @@ public class BeyonderUtil {
             SimpleAbilityItem ability = entry.getValue();
             UUID uuid = entry.getKey();
             if (player.getUUID().equals(uuid)) {
-                if(!player.getPersistentData().contains("timerCopiedAbility")) player.getPersistentData().putInt("timerCopiedAbility", 200);
                 if(player.getPersistentData().getInt("timerCopiedAbility") > 0) {
-                    player.getPersistentData().putInt("timerCopiedAbility", player.getPersistentData().getInt("timerCopiedAbility"));
+                    player.getPersistentData().putInt("timerCopiedAbility", player.getPersistentData().getInt("timerCopiedAbility") - 1);
                     player.displayClientMessage(Component.literal("Trying to copy: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
                     if (player.getPersistentData().getBoolean("acceptCopiedAbility")) {
                         player.getPersistentData().putBoolean("acceptCopiedAbility", false);
@@ -3041,12 +3060,12 @@ public class BeyonderUtil {
                         iterator.remove();
                     } else if (player.getPersistentData().getBoolean("deleteCopiedAbility")) {
                         player.getPersistentData().putBoolean("deleteCopiedAbility", false);
-                        player.displayClientMessage(Component.literal("You have given up on copying: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                        player.displayClientMessage(Component.literal("You have given up on copying: ").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
                         iterator.remove();
                     }
                 } else {
                     player.getPersistentData().remove("timerCopiedAbility");
-                    player.displayClientMessage(Component.literal("You have not copied the ability: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                    player.displayClientMessage(Component.literal("You have run out of time to copy: ").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
                     iterator.remove();
                 }
             }
@@ -3071,8 +3090,9 @@ public class BeyonderUtil {
     }
 
 
-    public static boolean copyAbilityTest(int copierSequence, int targetAbilitySequence) {
-        double chance = 0.3 + (0.7 / 9) * (targetAbilitySequence - copierSequence);
+    public static boolean copyAbilityTest(LivingEntity living,int copierSequence, int targetAbilitySequence) {
+        float damage = BeyonderUtil.getDamage(living).get(ItemInit.RECORDSCRIBE.get());
+        double chance = (0.3 + (0.7 / 9) * (targetAbilitySequence - copierSequence)) * damage;
         chance = Math.max(0.05, Math.min(chance, 1));
         if (copierSequence < targetAbilitySequence - 2) {
             chance = 1.01;
@@ -3443,6 +3463,7 @@ public class BeyonderUtil {
             tag.putBoolean("wormOfStarChoice", false);
             tag.putBoolean("doorBlinkState", false);
             tag.putInt("doorBlinkStateDistance", 0);
+            tag.putBoolean("planeswalkerSymbolization", false);
         }
     }
 
@@ -3461,7 +3482,14 @@ public class BeyonderUtil {
     }
 
     public static boolean isEntityAlly(LivingEntity living, Entity possibleAlly) {
-        return (possibleAlly instanceof Projectile projectile && projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity livingOwner && (BeyonderUtil.areAllies(livingOwner, living) || livingOwner == living)) || (possibleAlly instanceof LivingEntity livingAlly && BeyonderUtil.areAllies(livingAlly, living));
+        if (possibleAlly instanceof LivingEntity livingAlly) {
+            return BeyonderUtil.areAllies(living, livingAlly);
+        } else if (possibleAlly instanceof Projectile projectile) {
+            if (projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity owner) {
+                return BeyonderUtil.areAllies(living, owner);
+            }
+        }
+        return false;
     }
 
     public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
@@ -3488,6 +3516,10 @@ public class BeyonderUtil {
             }
         }
         return null;
+    }
+
+    public static Player getPlayerFromUUID(MinecraftServer server, UUID uuid) {
+        return server.getPlayerList().getPlayer(uuid);
     }
 
 
@@ -3567,8 +3599,9 @@ public class BeyonderUtil {
             if (livingEntity instanceof ServerPlayer serverPlayer) {
                 serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
             }
-        } else {
-            //stuff
+        } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+            playerMobEntity.setIsFlying(true);
+            playerMobEntity.setFlySpeed(flySpeed);
         }
     }
 
@@ -3584,7 +3617,21 @@ public class BeyonderUtil {
             if (livingEntity instanceof ServerPlayer serverPlayer) {
                 serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
             }
+        }  else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+            playerMobEntity.setIsFlying(false);
+            playerMobEntity.setFlySpeed(1.0f);
         }
+    }
+
+    public static boolean canFly(LivingEntity livingEntity) {
+        if (livingEntity instanceof Player player) {
+            if (player.getAbilities().mayfly = true) {
+                return true;
+            }
+        } else if (livingEntity instanceof PlayerMobEntity playerMobEntity && playerMobEntity.getIsFlying()) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean canSeal(LivingEntity owner, LivingEntity target) {
@@ -3703,5 +3750,23 @@ public class BeyonderUtil {
         ClipContext clipContext = new ClipContext(entityEyePos, blockCenter, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity);
         BlockHitResult hitResult = level.clip(clipContext);
         return hitResult.getBlockPos().equals(blockPos) || hitResult.getType() == HitResult.Type.MISS;
+    }
+
+    public static List<PlayerMobEntity> getAllPlayerMobEntities(Level level) {
+        if (!(level instanceof ServerLevel serverLevel)) return Collections.emptyList();
+
+        PlayerMobTracker tracker = PlayerMobTracker.get(serverLevel);
+        Map<String, List<PlayerMobEntity>> mobsAcrossDimensions = tracker.getAllPlayerMobsAcrossDimensions(serverLevel);
+
+        List<PlayerMobEntity> allMobs = new ArrayList<>();
+        for (List<PlayerMobEntity> mobs : mobsAcrossDimensions.values()) {
+            allMobs.addAll(mobs);
+        }
+
+        return allMobs;
+    }
+
+    public static void setInvisible(LivingEntity living, boolean choice, int time) {
+        LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(choice, living.getUUID(), time));
     }
 }

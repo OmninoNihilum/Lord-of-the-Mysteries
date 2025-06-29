@@ -13,6 +13,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -23,12 +24,10 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -46,11 +45,14 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.init.*;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderInvisibilityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupBeyondersBehaviour;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupTargetBehaviour;
@@ -61,6 +63,7 @@ import net.swimmingtuna.lotm.util.PlayerMobs.NameManager;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerName;
 import net.swimmingtuna.lotm.util.PlayerMobs.ProfileUpdater;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
+import net.swimmingtuna.lotm.world.worlddata.PlayerMobTracker;
 import net.tslat.smartbrainlib.api.SmartBrainOwner;
 import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
 import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
@@ -106,6 +109,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<String> PATHWAY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> MENTAL_STRENGTH = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_CHILD = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> REGEN_SPIRITUALITY = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Optional<UUID>> CREATOR_UUID = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<String> NAME = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
@@ -117,6 +121,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_CLONE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> ATTACK_CHANCE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DISTANCE_FROM_TARGET = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> FLY_SPEED = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.FLOAT);
 
 
     private boolean canBreakDoors;
@@ -137,7 +143,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     public PlayerMobEntity(EntityType<PlayerMobEntity> playerMobEntityEntityType, Level level) {
-        super(playerMobEntityEntityType,level);
+        super(playerMobEntityEntityType, level);
     }
 
     public boolean shouldIgnoreGamerule() {
@@ -181,7 +187,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
         goalSelector.addGoal(3, new BeyonderMeleeAttackGoal(this, 1.2D, false));
         goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-
         targetSelector.addGoal(1, new BeyonderAwareHurtByTargetGoal(this, ZombifiedPiglin.class));
         //targetSelector.addGoal(2, new BeyonderNearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::targetTwin));
         //targetSelector.addGoal(3, new BeyonderNearestAttackableTargetGoal<>(this, IronGolem.class, true));
@@ -194,7 +199,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(PATHWAY, "");
         getEntityData().define(IS_CHILD, false);
         getEntityData().define(IS_CHARGING_CROSSBOW, false);
+        getEntityData().define(FLYING, false);
         getEntityData().define(SEQUENCE, -1);
+        getEntityData().define(DISTANCE_FROM_TARGET, 0);
         getEntityData().define(MENTAL_STRENGTH, 10);
         getEntityData().define(MAXSPIRITUALITY, 100);
         getEntityData().define(SPIRITUALITY, 0);
@@ -203,9 +210,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(IS_CLONE, false);
         getEntityData().define(REGEN_SPIRITUALITY, false);
         getEntityData().define(ATTACK_CHANCE, 0);
+        getEntityData().define(FLY_SPEED, 1.0f);
         getEntityData().define(CREATOR_UUID, Optional.empty());
     }
-
 
 
     @Override
@@ -263,7 +270,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
 
-
     @Override
     public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
         super.setItemSlot(equipmentSlot, itemStack);
@@ -316,6 +322,58 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public void tick() {
         CompoundTag tag = this.getPersistentData();
         if (!this.level().isClientSide()) {
+            if (this.tickCount % 59 == 0) {
+                if (this.getIsClone() && this.getCreator() != null && this.getCreator().isAlive() && !BeyonderUtil.areAllies(this, this.getCreator())) {
+                    BeyonderUtil.forceAlly(this, this.getCreator());
+                }
+            }
+            if (this.tickCount % 5 == 0) {
+                if (this.getPersistentData().getBoolean("shouldFlicker")) {
+                    if (this.getCreator() != null) {
+                        LivingEntity player = this.getCreator();
+                        for (EquipmentSlot slot : EquipmentSlot.values()) {
+                            this.setItemSlot(slot, player.getItemBySlot(slot).copy());
+                        }
+                        CompoundTag playerData = player.getPersistentData();
+                        CompoundTag cloneData = this.getPersistentData();
+                        cloneData.merge(playerData.copy());
+                        for (Attribute attribute : ForgeRegistries.ATTRIBUTES.getValues()) {
+                            AttributeInstance playerAttribute = player.getAttribute(attribute);
+                            AttributeInstance cloneAttribute = this.getAttribute(attribute);
+                            if (playerAttribute != null && cloneAttribute != null) {
+                                cloneAttribute.setBaseValue(playerAttribute.getBaseValue());
+                                for (AttributeModifier modifier : playerAttribute.getModifiers()) {
+                                    if (!cloneAttribute.hasModifier(modifier)) {
+                                        cloneAttribute.addPermanentModifier(modifier);
+                                    }
+                                }
+                            }
+                        }
+                        BeyonderUtil.setScale(this, BeyonderUtil.getScale(player));
+                        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(player.getMaxHealth());
+                        this.setHealth(player.getHealth());
+                        for (MobEffectInstance effect : player.getActiveEffects()) {
+                            this.addEffect(new MobEffectInstance(effect));
+                        }
+
+                        Set<String> playerTags = player.getTags();
+                        for (String tag2 : playerTags) {
+                            this.addTag(tag2);
+                        }
+                        if (BeyonderUtil.canFly(player)) {
+                            BeyonderUtil.startFlying(this, 0.12f);
+                        }
+                        this.getCreator().getPersistentData().putInt("ignoreShouldntRender", 10);
+                    }
+                    LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, this.getUUID(), 1));
+                }
+            }
+            if (this.tickCount % 200 == 0) {
+                if (this.level() instanceof ServerLevel serverLevel) {
+                    PlayerMobTracker tracker = PlayerMobTracker.get(serverLevel);
+                    tracker.updatePlayerMobPosition(this);
+                }
+            }
             if (this.tickCount == 10 && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
                 BeyonderHolder.updateMaxHealthModifier(this, this.getCurrentPathway().maxHealth().get(getCurrentSequence()));
             }
@@ -324,10 +382,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             }
             if (this.getRegenSpirituality() && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
                 this.setSpirituality(this.getSpirituality() + this.getCurrentPathway().spiritualityRegen().get(this.getCurrentSequence()));
-            } else {
-                if (this.getSpirituality() < this.getMaxSpirituality() / 10 && this.tickCount >= 10) {
-                    this.kill();
-                }
+            }
+            if (this.getSpirituality() < this.getMaxSpirituality() / 10 && this.tickCount >= 10 && !this.getRegenSpirituality()) {
+                this.kill();
             }
         }
         super.tick();
@@ -343,6 +400,39 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
                         this.level().addFreshEntity(wormOfStarEntity);
                     }
                     this.discard();
+                }
+            }
+            if (this.getIsFlying()) {
+                this.fallDistance = 0.0F;
+                LivingEntity target = this.getTarget();
+                if (target != null) {
+                    double idealDistance = this.getIdealDistanceFromTarget();
+                    double currentDistance = this.distanceTo(target);
+                    double deltaX = this.getX() - target.getX();
+                    double deltaY = this.getY() - target.getY();
+                    double deltaZ = this.getZ() - target.getZ();
+                    double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+                    if (distance > 0.1) {
+                        deltaX /= distance;
+                        deltaY /= distance;
+                        deltaZ /= distance;
+                        double targetX = target.getX() + deltaX * idealDistance;
+                        double targetY = target.getY() + deltaY * idealDistance + 3.0;
+                        double targetZ = target.getZ() + deltaZ * idealDistance;
+                        double moveStrength = this.getFlySpeed();
+                        if (Math.abs(currentDistance - idealDistance) > 1.0) {
+                            double moveX = (targetX - this.getX()) * moveStrength;
+                            double moveY = (targetY - this.getY()) * moveStrength;
+                            double moveZ = (targetZ - this.getZ()) * moveStrength;
+                            this.setDeltaMovement(this.getDeltaMovement().add(moveX, moveY, moveZ));
+                            this.hurtMarked = true;
+                        }
+                    }
+                } else {
+                    if (this.getDeltaMovement().y < 0) {
+                        this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.5, 1.0));
+                        this.hurtMarked = true;
+                    }
                 }
             }
         }
@@ -570,13 +660,12 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
 
-
-
     @Override
     @NotNull
     public HumanoidArm getMainArm() {
         return HumanoidArm.RIGHT;
     }
+
     @Override
     public void setChargingCrossbow(boolean isCharging) {
         entityData.set(IS_CHARGING_CROSSBOW, isCharging);
@@ -630,6 +719,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         compound.putBoolean("Clone", this.getIsClone());
         compound.putBoolean("RegenSpirituality", this.getRegenSpirituality());
         compound.putInt("AttackChance", this.getAttackChance());
+        compound.putFloat("FlySpeed", this.getFlySpeed());
+        compound.putInt("DistanceFromTarget", this.getIdealDistanceFromTarget());
+        compound.putBoolean("Flying", this.getIsFlying());
         Optional<UUID> creatorUUID = this.entityData.get(CREATOR_UUID);
         if (creatorUUID.isPresent()) {
             compound.putUUID("Creator", creatorUUID.get());
@@ -683,6 +775,15 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (compound.contains("AttackChance")) {
             this.setAttackChance(compound.getInt("AttackChance"));
         }
+        if (compound.contains("Flying")) {
+            this.setIsFlying(compound.getBoolean("Flying"));
+        }
+        if (compound.contains("DistanceFromTarget")) {
+            this.setIdealDistanceFromTarget(compound.getInt("DistanceFromTarget"));
+        }
+        if (compound.contains("FlySpeed")) {
+            this.setFlySpeed(compound.getFloat("FlySpeed"));
+        }
     }
 
 
@@ -701,22 +802,57 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public void setSpirituality(int spirituality) {
         this.entityData.set(SPIRITUALITY, spirituality);
     }
+
     public void setSpiritualityRegen(int spiritualityRegen) {
         this.entityData.set(SPIRITUALITY_REGEN, spiritualityRegen);
     }
+
     public int getSpirituality() {
+        if (this.getCreator() != null) {
+            if (this.getPersistentData().getBoolean("shouldFlicker") && this.getCreator().isAlive()) {
+                return BeyonderUtil.getSpirituality(this.getCreator());
+            }
+        }
         return this.entityData.get(SPIRITUALITY);
     }
 
     public void setIsClone(boolean isClone) {
         this.entityData.set(IS_CLONE, isClone);
     }
+
     public boolean getIsClone() {
         return this.entityData.get(IS_CLONE);
     }
+
+    public void setIsFlying(boolean flying) {
+        this.entityData.set(FLYING, flying);
+    }
+
+    public boolean getIsFlying() {
+        return this.entityData.get(FLYING);
+    }
+
+    public void setIdealDistanceFromTarget(int distanceFromTarget) {
+        this.entityData.set(DISTANCE_FROM_TARGET, distanceFromTarget);
+    }
+
+    public int getIdealDistanceFromTarget() {
+        return this.entityData.get(DISTANCE_FROM_TARGET);
+    }
+
+    public void setFlySpeed(float flySpeed) {
+        this.entityData.set(FLY_SPEED, flySpeed);
+    }
+
+    public float getFlySpeed() {
+        return this.entityData.get(FLY_SPEED);
+    }
+
+
     public void setRegenSpirituality(boolean regenSpirituality) {
         this.entityData.set(REGEN_SPIRITUALITY, regenSpirituality);
     }
+
     public boolean getRegenSpirituality() {
         return this.entityData.get(REGEN_SPIRITUALITY);
     }
@@ -728,59 +864,63 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public void setMaxSpirituality(int maxSpirituality) {
         this.entityData.set(MAXSPIRITUALITY, maxSpirituality);
     }
+
     public int getMaxSpirituality() {
         return this.entityData.get(MAXSPIRITUALITY);
     }
+
     public void setMaxLife(int maxLife) {
         this.entityData.set(MAX_LIFE, maxLife);
     }
+
     public int getMaxlife() {
         return this.entityData.get(MAX_LIFE);
     }
+
     public BeyonderClass getCurrentPathway() {
-        if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SpectatorClass) {
+        if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SpectatorClass) {
             return BeyonderClassInit.SPECTATOR.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SailorClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SailorClass) {
             return BeyonderClassInit.SAILOR.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SeerClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SeerClass) {
             return BeyonderClassInit.SEER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ApprenticeClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ApprenticeClass) {
             return BeyonderClassInit.APPRENTICE.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MarauderClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MarauderClass) {
             return BeyonderClassInit.MARAUDER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SecretsSupplicantClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SecretsSupplicantClass) {
             return BeyonderClassInit.SECRETSSUPPLICANT.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof BardClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof BardClass) {
             return BeyonderClassInit.BARD.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ReaderClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ReaderClass) {
             return BeyonderClassInit.READER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SleeplessClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SleeplessClass) {
             return BeyonderClassInit.SLEEPLESS.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof WarriorClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof WarriorClass) {
             return BeyonderClassInit.WARRIOR.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof HunterClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof HunterClass) {
             return BeyonderClassInit.HUNTER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof AssassinClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof AssassinClass) {
             return BeyonderClassInit.ASSASSIN.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SavantClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SavantClass) {
             return BeyonderClassInit.SAVANT.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MysteryPryerClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MysteryPryerClass) {
             return BeyonderClassInit.MYSTERYPRYER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof CorpseCollectorClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof CorpseCollectorClass) {
             return BeyonderClassInit.CORPSECOLLECTOR.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof LawyerClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof LawyerClass) {
             return BeyonderClassInit.LAWYER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MonsterClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof MonsterClass) {
             return BeyonderClassInit.MONSTER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ApothecaryClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ApothecaryClass) {
             return BeyonderClassInit.APOTHECARY.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof PlanterClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof PlanterClass) {
             return BeyonderClassInit.PLANTER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ArbiterClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof ArbiterClass) {
             return BeyonderClassInit.ARBITER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof PrisonerClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof PrisonerClass) {
             return BeyonderClassInit.PRISONER.get();
-        } else if(BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof CriminalClass) {
+        } else if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof CriminalClass) {
             return BeyonderClassInit.CRIMINAL.get();
         }
         return null;
@@ -841,9 +981,11 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
         return new PlayerName(getEntityData().get(NAME));
     }
+
     public int getCurrentSequence() {
         return this.entityData.get(SEQUENCE);
     }
+
     public void setSequence(int sequence) {
         this.entityData.set(SEQUENCE, sequence);
     }
@@ -851,6 +993,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public int getMentalStrength() {
         return this.entityData.get(MENTAL_STRENGTH);
     }
+
     public void setMentalStrength(int mentalStrength) {
         this.entityData.set(MENTAL_STRENGTH, mentalStrength);
     }
@@ -868,7 +1011,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     public void setUsername(PlayerName name) {
-        PlayerName oldName = hasUsername() ? getUsername(): null;
+        PlayerName oldName = hasUsername() ? getUsername() : null;
         getEntityData().set(NAME, name.getCombinedNames());
 
         if ("Herobrine".equals(name.getDisplayName())) {
@@ -886,7 +1029,14 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (this.getSpirituality() - amount < 0) {
             return false;
         }
-        this.setSpirituality(Mth.clamp(this.getSpirituality() - amount, 0, getMaxSpirituality()));
+        if (this.getCreator() != null) {
+            if (this.getPersistentData().getBoolean("shouldFlicker") && this.getCreator().isAlive()) {
+                BeyonderUtil.useSpirituality(this.getCreator(), amount);
+                return true;
+            }
+        } else {
+            this.setSpirituality(Mth.clamp(this.getSpirituality() - amount, 0, getMaxSpirituality()));
+        }
         return true;
     }
 
@@ -919,6 +1069,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             return skin;
         return cape;
     }
+
     public LivingEntity getCreator() {
         Optional<UUID> creatorUUID = this.entityData.get(CREATOR_UUID);
         if (creatorUUID.isPresent()) {
@@ -970,6 +1121,51 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
         return ItemStack.EMPTY;
     }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+
+        if (this.level() instanceof ServerLevel serverLevel) {
+            PlayerMobTracker tracker = PlayerMobTracker.get(serverLevel);
+            tracker.addPlayerMob(this);
+        }
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        if (!level().isClientSide() && shouldRemoveFromTracker(reason)) {
+            PlayerMobTracker tracker = PlayerMobTracker.get((ServerLevel) level());
+            tracker.removePlayerMob(this.getUUID(), (ServerLevel) level());
+        }
+
+        super.remove(reason);
+    }
+
+    @Override
+    public void die(DamageSource damageSource) {
+        if (!level().isClientSide()) {
+            PlayerMobTracker tracker = PlayerMobTracker.get((ServerLevel) level());
+            tracker.removePlayerMob(this.getUUID(), (ServerLevel) level());
+        }
+
+        super.die(damageSource);
+    }
+
+    private boolean shouldRemoveFromTracker(RemovalReason reason) {
+        switch (reason) {
+            case KILLED:
+            case DISCARDED:
+            case CHANGED_DIMENSION:
+                return true;
+            case UNLOADED_TO_CHUNK:
+            case UNLOADED_WITH_PLAYER:
+                return false;
+            default:
+                return true;
+        }
+    }
+
 
     private static boolean poweredCreeper(DamageSource source) {
         return source.is(DamageTypeTags.IS_EXPLOSION) && source.getEntity() instanceof Creeper creeper && creeper.isPowered();

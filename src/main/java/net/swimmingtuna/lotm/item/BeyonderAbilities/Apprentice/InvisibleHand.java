@@ -95,7 +95,9 @@ public class InvisibleHand extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand hand) {
         if (!livingEntity.level().isClientSide && !interactionTarget.level().isClientSide) {
-            if (!checkAll(livingEntity)) return InteractionResult.FAIL;
+            if (!checkAll(livingEntity)) {
+                return InteractionResult.FAIL;
+            }
             if (BeyonderUtil.getSequence(livingEntity) > 4 || (BeyonderUtil.isBeyonder(interactionTarget) && BeyonderUtil.getSequence(interactionTarget) < BeyonderUtil.getSequence(livingEntity))) {
                 if (livingEntity instanceof Player player) {
                     player.displayClientMessage(Component.literal("Target is too strong to be picked up").withStyle(BeyonderUtil.getStyle(player)), true);

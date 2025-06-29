@@ -36,6 +36,7 @@ public class KeyClientEvents {
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END) {
                 ClientIgnoreShouldntRenderData.decrementAll();
+                ClientShouldntRenderInvisibilityData.tick();
             }
         }
 
@@ -94,21 +95,6 @@ public class KeyClientEvents {
             }
         }
 
-        @SubscribeEvent
-        public static void onClientChatReceived(ClientChatReceivedEvent event) {
-            Component message = event.getMessage();
-            String rawMessage = message.getString();
-
-        }
-        @SubscribeEvent
-        @OnlyIn(Dist.CLIENT)
-        public static void livingRender(RenderLivingEvent.Pre<?,?> event) {
-            LivingEntity entity = event.getEntity();
-            if (entity.getPersistentData().getBoolean("shouldntRender")) {
-                event.setCanceled(true);
-            }
-        }
-
         @OnlyIn(Dist.CLIENT)
         @SubscribeEvent
         public static void onFogDensityEvent(ViewportEvent.RenderFog event) {
@@ -139,6 +125,7 @@ public class KeyClientEvents {
 
         }
     }
+
     @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModBusEvents {
         @SubscribeEvent

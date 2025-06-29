@@ -74,20 +74,38 @@ public class PassiveAttackBehavior<E extends LivingEntity> extends ExtendedBehav
                         BrainUtils.addMemories(entity.getBrain(), MemoryModuleType.ATTACK_TARGET);
                     }
                     E target = getTarget(entity);
-                    if (target != null) {
+                    if (target != null && !isSameOwner(beyonderEntity, target)) {
                         BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
                     }
                 }
                 if (beyonderEntity.getCreator() != null) {
                     LivingEntity livingEntity = beyonderEntity.getCreator();
                     LivingEntity target = livingEntity.getLastHurtMob();
-                    if (!BeyonderUtil.areAllies(livingEntity, target)) {
+
+                    // Check if target is a clone with the same owner
+                    if (target instanceof PlayerMobEntity playerMobEntity &&
+                            playerMobEntity.getCreator() != null &&
+                            playerMobEntity.getCreator().equals(beyonderEntity.getCreator())) {
+                        return; // Don't attack clones with same owner
+                    }
+
+                    if (target != null && !BeyonderUtil.areAllies(livingEntity, target)) {
                         BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
                     }
                 }
             } catch (NullPointerException e) {
-                LogUtils.getLogger().warn("LOTMC: Attack Chance of Entity was not present ");
+                LogUtils.getLogger().warn("LOTMC: Attack Chance of Entity was not present");
             }
         }
+    }
+
+    private static boolean isSameOwner(PlayerMobEntity entity1, LivingEntity entity2) {
+        if (!(entity2 instanceof PlayerMobEntity playerMob2)) {
+            return false;
+        }
+        LivingEntity owner1 = entity1.getCreator();
+        LivingEntity owner2 = playerMob2.getCreator();
+
+        return owner1 != null && owner2 != null && owner1.equals(owner2);
     }
 }

@@ -131,20 +131,6 @@ public class ClientEvents {
         }
     }
 
-    /*
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
-        LivingEntity entity = event.getEntity();
-        //APPRENTICE DOOR MIRAGE
-        if(DoorMirage.isActive(entity)){
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.disableBlend();
-        }
-    }
-
-     */
-
 
 
 }

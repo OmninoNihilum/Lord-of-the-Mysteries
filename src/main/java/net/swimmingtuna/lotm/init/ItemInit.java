@@ -325,8 +325,6 @@ public class ItemInit {
     //9
     public static final RegistryObject<Item> CREATEDOOR = ITEMS.register("createdoor",
             () -> new CreateDoor(new Item.Properties().stacksTo(1)));
-
-    //8
     public static final RegistryObject<Item> TRICKBURNING = ITEMS.register("trickburning",
             () -> new TrickBurning(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKFREEZING = ITEMS.register("trickfreezing",
@@ -349,17 +347,12 @@ public class ItemInit {
             () -> new TrickLoudNoise(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKBLACKCURTAIN = ITEMS.register("trickblackcurtain",
             () -> new TrickBlackCurtain(new Item.Properties().stacksTo(1)));
-
-    //7
     public static final RegistryObject<Item> ASTROLOGER_SPIRIT_VISION = ITEMS.register("astrologerspiritvision",
             () -> new net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SpiritVision(new Item.Properties().stacksTo(1)));
-    //6
     public static final RegistryObject<Item> RECORDSCRIBE = ITEMS.register("recordscribe",
             () -> new ScribeRecord(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SCRIBEABILITIES = ITEMS.register("scribeabilities",
             () -> new ScribeAbilities(new Item.Properties().stacksTo(1)));
-
-    //5
     public static final RegistryObject<Item> TRAVELERSDOOR = ITEMS.register("travelersdoor",
             () -> new TravelersDoor(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRAVELERSDOORHOME = ITEMS.register("travelersdoorwaypoint",
@@ -370,11 +363,6 @@ public class ItemInit {
             () -> new Blink(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> BLINKAFTERIMAGE = ITEMS.register("blinkautomatic",
             () -> new BlinkAfterimage(new Item.Properties().stacksTo(1)));
-
-
-
-
-    //4
     public static final RegistryObject<Item> BLINK_STATE = ITEMS.register("blinkstate",
             () -> new BlinkState(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SEPARATE_WORM_OF_STAR = ITEMS.register("separatewormofstar",
@@ -386,8 +374,7 @@ public class ItemInit {
     public static final RegistryObject<Item> CREATE_CONCEALED_BUNDLE = ITEMS.register("createconcealedbundle",
             () -> new CreateConcealedBundle(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CREATE_CONCEALED_SPACE = ITEMS.register("createconcealedspace",
-            () -> new ConcealedSpace(new Item.Properties().stacksTo(1)));
-    //3
+            () -> new CreateConcealedSpace(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_CAGE = ITEMS.register("spatialcage",
             () -> new SpatialCage(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_TEARING = ITEMS.register("spatialtearing",
@@ -395,13 +382,17 @@ public class ItemInit {
 
     //2
     public static final RegistryObject<Item> SYMBOLIZATION = ITEMS.register("symbolization",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new Symbolization(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DIMENSIONAL_SIGHT = ITEMS.register("dimensionalsight",
             () -> new DimensionalSight(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> REPLICATE = ITEMS.register("replicate",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SEALING = ITEMS.register("sealing",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new Sealing(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> TELEPORTATION = ITEMS.register("teleportation",
+            () -> new Teleportation(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> MINIATURIZE = ITEMS.register("miniaturize",
+            () -> new Miniaturize(new Item.Properties().stacksTo(1)));
 
     //1
     public static final RegistryObject<Item> SPACE_FRAGMENTATION = ITEMS.register("space_fragmentation",
@@ -615,6 +606,8 @@ public class ItemInit {
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM_3 = ITEMS.register("forced_update_item_5",
             () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOLL = ITEMS.register("doll",
+            () -> new Doll());
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

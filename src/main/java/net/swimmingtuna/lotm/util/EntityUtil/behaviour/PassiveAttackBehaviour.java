@@ -61,9 +61,25 @@ public class PassiveAttackBehaviour<E extends LivingEntity> extends ExtendedBeha
         List<Entity> entities = nearbyEntities.stream().map(entity1 -> (Entity) entity1).toList();
         for (UUID uuid : alliesUUID) {
             Entity entityFromUUID = ((ServerLevel) entity.level()).getEntity(uuid);
-            if (!entities.contains(entityFromUUID)) return (E) entityFromUUID;
+            if (!entities.contains(entityFromUUID)) {
+                // Check if the potential target is a clone with the same owner
+                if (entity instanceof PlayerMobEntity beyonderEntity &&
+                        entityFromUUID instanceof PlayerMobEntity targetPlayerMob) {
+                    if (isSameOwner(beyonderEntity, targetPlayerMob)) {
+                        continue; // Skip this target, look for another
+                    }
+                }
+                return (E) entityFromUUID;
+            }
         }
         return null;
+    }
+
+    private boolean isSameOwner(PlayerMobEntity entity1, PlayerMobEntity entity2) {
+        LivingEntity owner1 = entity1.getCreator();
+        LivingEntity owner2 = entity2.getCreator();
+
+        return owner1 != null && owner2 != null && owner1.equals(owner2);
     }
 
     @Override

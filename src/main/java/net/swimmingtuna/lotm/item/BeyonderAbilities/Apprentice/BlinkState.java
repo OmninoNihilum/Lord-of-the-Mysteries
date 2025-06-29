@@ -182,11 +182,13 @@ public class BlinkState extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 6 && livingEntity.getPersistentData().getBoolean("doorBlinkState")) {
+        if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 3 && livingEntity.getPersistentData().getBoolean("blinkStateTimer")) {
             return 80;
-        } else if (!livingEntity.getPersistentData().getBoolean("doorBlinkState")) {
+        }
+        if (target != null && !livingEntity.getPersistentData().getBoolean("blinkStateTimer") && BeyonderUtil.getSpirituality(livingEntity) > BeyonderUtil.getMaxSpirituality(livingEntity) / 3) {
             return 80;
-        } else if (target == null) {
+        }
+        if (target == null && livingEntity.getPersistentData().getBoolean("blinkStateTimer")) {
             return 100;
         }
         return 0;

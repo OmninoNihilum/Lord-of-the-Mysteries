@@ -2,7 +2,8 @@ package net.swimmingtuna.lotm.util.ClientData;
 
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 
-public class ClientSequenceData {
+public class
+ClientSequenceData {
     private static int currentSequence;
     private static BeyonderClass pathway;
 

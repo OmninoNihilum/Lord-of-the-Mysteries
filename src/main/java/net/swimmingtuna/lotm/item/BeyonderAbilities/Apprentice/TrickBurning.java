@@ -60,7 +60,7 @@ public class TrickBurning extends SimpleAbilityItem {
                     explosion.finalizeExplosion(true);
                 }
             } else {
-                for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(200 - (BeyonderUtil.getSequence(livingEntity) * 20)))) {
+                for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKBURNING.get())))) {
                     if (projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity) {
                         float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
                         int minDistanceToAlly = Integer.MAX_VALUE;

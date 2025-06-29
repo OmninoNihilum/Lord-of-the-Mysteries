@@ -224,10 +224,12 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(3, ItemInit.SPATIAL_CAGE.get());
         items.put(3, ItemInit.SPATIAL_TEARING.get());
 
-        //items.put(2, ItemInit.SYMBOLIZATION.get());
+        items.put(2, ItemInit.SYMBOLIZATION.get());
         items.put(2, ItemInit.DIMENSIONAL_SIGHT.get());
+        items.put(2, ItemInit.MINIATURIZE.get());
         //items.put(2, ItemInit.REPLICATE.get());
-        //items.put(2, ItemInit.SEALING.get());
+        items.put(2, ItemInit.SEALING.get());
+        items.put(2, ItemInit.TELEPORTATION.get());
 
         //items.put(1, ItemInit.SPACE_FRAGMENTATION.get());
         //items.put(1, ItemInit.GRAVITY_MANIPULATION.get());

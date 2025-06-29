@@ -9,8 +9,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -58,6 +60,10 @@ public class TrickFog extends SimpleAbilityItem {
                     if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
                         if (living instanceof ServerPlayer serverPlayer) {
                             LOTMNetworkHandler.sendToPlayer(new ClientFogDataS2C(damage * 6), serverPlayer);
+                        } else if (living instanceof Mob mob && mob.getTarget() != null) {
+                            if (mob.distanceTo(mob.getTarget()) > 10) {
+                                mob.setTarget(null);
+                            }
                         }
                     }
                 }
@@ -66,6 +72,10 @@ public class TrickFog extends SimpleAbilityItem {
                     if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
                         if (living instanceof ServerPlayer serverPlayer) {
                             LOTMNetworkHandler.sendToPlayer(new ClientFogDataS2C(damage * 6), serverPlayer);
+                        } else if (living instanceof Mob mob && mob.getTarget() != null) {
+                            if (mob.distanceTo(mob.getTarget()) > 10) {
+                                mob.setTarget(null);
+                            }
                         }
                     }
                 }
@@ -97,7 +107,7 @@ public class TrickFog extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, all non-allies will be affected by a fog that will reduce their vision greatly."));
+        tooltipComponents.add(Component.literal("Upon use, all non-allies will be affected by a fog that will reduce their vision greatly, also causing mobs to lose their target if they're far away."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -112,10 +122,10 @@ public class TrickFog extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null) {
+        if (target instanceof Player) {
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get());
             if (target.distanceTo(livingEntity) < damage) {
-                return 80;
+                return 40;
             }
             return 0;
         }

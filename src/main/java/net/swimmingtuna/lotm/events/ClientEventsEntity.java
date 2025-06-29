@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,6 +24,7 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.particle.*;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClassModelLoader;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientEventsEntity {
@@ -101,6 +103,7 @@ public class ClientEventsEntity {
         event.registerSpriteSet(ParticleInit.METEOR_PARTICLE.get(), MeteorParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.TORNADO_PARTICLE.get(), NullParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.SONIC_BOOM_PARTICLE.get(), SonicBoomParticle.Provider::new);
+        event.registerSpriteSet(ParticleInit.SYMBOLIZATION_PARTICLE.get(), SonicBoomParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.HURRICANE_OF_LIGHT_PARTICLE_1.get(), HurricaneOfLightParticle1.Provider::new);
         event.registerSpriteSet(ParticleInit.HURRICANE_OF_LIGHT_PARTICLE_2.get(), HurricaneOfLightParticle2.Provider::new);
         event.registerSpriteSet(ParticleInit.HURRICANE_OF_LIGHT_PARTICLE_3.get(), HurricaneOfLightParticle3.Provider::new);
@@ -150,8 +153,11 @@ public class ClientEventsEntity {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        ItemProperties.register(ItemInit.BEYONDER_CHARACTERISTIC.get(),
-                new ResourceLocation("random_beyonder"),
-                (stack, level, entity, seed) -> stack.hasTag() ? (float) stack.getTag().getInt("texture") : 0.0F);
+        ItemProperties.register(ItemInit.BEYONDER_CHARACTERISTIC.get(), new ResourceLocation("random_beyonder"), (stack, level, entity, seed) -> stack.hasTag() ? (float) stack.getTag().getInt("texture") : 0.0F);
+    }
+
+    @SubscribeEvent
+    public static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
+        event.register("class", new ClassModelLoader());
     }
 }

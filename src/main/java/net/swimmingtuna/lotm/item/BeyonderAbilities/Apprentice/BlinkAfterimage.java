@@ -70,9 +70,9 @@ public class BlinkAfterimage extends SimpleAbilityItem {
         Level level = livingEntity.level();
         if (!level.isClientSide() && !event.isCanceled()) {
             if (tag.getBoolean("travelerAfterimage")) {
-                float amount = 50 + (event.getAmount() * BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINKAFTERIMAGE.get()));
+                float amount = 40 + (event.getAmount() * BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINKAFTERIMAGE.get()));
                 if (BeyonderUtil.getSpirituality(livingEntity) >= amount) {
-                    BeyonderUtil.useSpirituality(livingEntity, (int) amount);
+                    BeyonderUtil.useSpirituality(livingEntity, (int) ((int) amount * 1.3f));
                     int teleportDistance = (int) Math.ceil(event.getAmount());
                     boolean teleported = tryTeleportToSafeLocation(livingEntity, level, teleportDistance);
                     event.setCanceled(true);
@@ -196,11 +196,12 @@ public class BlinkAfterimage extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 10 && livingEntity.getPersistentData().getBoolean("travelerAfterimage")) {
+        if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 3 && livingEntity.getPersistentData().getBoolean("travelerAfterimage")) {
             return 80;
-        } else if (!livingEntity.getPersistentData().getBoolean("travelerAfterimage")) {
+        }
+        if (!livingEntity.getPersistentData().getBoolean("travelerAfterimage") && target != null && BeyonderUtil.getSpirituality(livingEntity) > BeyonderUtil.getMaxSpirituality(livingEntity) / 2) {
             return 80;
-        } else if (target == null) {
+        } else if (target == null && livingEntity.getPersistentData().getBoolean("travelerAfterimage")) {
             return 100;
         }
         return 0;

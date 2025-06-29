@@ -23,7 +23,7 @@ import java.util.List;
 
 public class CreateConcealedBundle extends SimpleAbilityItem {
     public CreateConcealedBundle(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 4, 0, 0);
+        super(properties, BeyonderClassInit.APPRENTICE, 4, 100, 200);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class CreateConcealedBundle extends SimpleAbilityItem {
             return InteractionResult.FAIL;
         }
         createBundle(livingEntity);
-        addCooldown(livingEntity);
+        addCooldown(livingEntity, this, 300 * (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.CREATE_CONCEALED_BUNDLE.get()));
         useSpirituality(livingEntity);
         return InteractionResult.SUCCESS;
     }
@@ -64,8 +64,8 @@ public class CreateConcealedBundle extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, transform a bundle in your off-hand in a special mystical item, that contains a very big space."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("10 Second").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("100").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("10 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

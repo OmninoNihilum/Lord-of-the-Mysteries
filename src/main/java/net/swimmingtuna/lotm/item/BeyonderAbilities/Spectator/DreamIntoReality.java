@@ -70,18 +70,7 @@ public class DreamIntoReality extends SimpleAbilityItem {
                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(player);
                 scaleData.setTargetScale(scaleData.getBaseScale() * 12);
                 scaleData.markForSync(true);
-                if (player instanceof Player pPlayer) {
-                    Abilities playerAbilities = pPlayer.getAbilities();
-                    if (!pPlayer.isCreative()) {
-                        playerAbilities.mayfly = true;
-                        playerAbilities.flying = true;
-                        playerAbilities.setFlyingSpeed(0.1F);
-                    }
-                    pPlayer.onUpdateAbilities();
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
-                    }
-                }
+                BeyonderUtil.startFlying(player, 0.1f);
             }
         }
     }

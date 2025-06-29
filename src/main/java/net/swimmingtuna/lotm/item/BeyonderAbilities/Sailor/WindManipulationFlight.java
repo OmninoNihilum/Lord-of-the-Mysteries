@@ -60,17 +60,9 @@ public class WindManipulationFlight extends SimpleAbilityItem {
     }
 
     public static void startFlying(LivingEntity player) { //marked
-        if (!player.level().isClientSide() && player instanceof Player pPlayer) {
+        if (!player.level().isClientSide() && player instanceof Player) {
             player.getPersistentData().putBoolean("sailorFlight1", true);
-            Abilities playerAbilities = pPlayer.getAbilities();
-            if (!playerAbilities.instabuild) {
-                playerAbilities.mayfly = true;
-                playerAbilities.setFlyingSpeed(0.1F);
-            }
-            pPlayer.onUpdateAbilities();
-            if (player instanceof ServerPlayer serverPlayer) {
-                serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
-            }
+            BeyonderUtil.startFlying(player, 0.1f);
         }
     }
     public static void toggleFlying(LivingEntity player) {
@@ -89,16 +81,7 @@ public class WindManipulationFlight extends SimpleAbilityItem {
     public static void stopFlying(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide() && livingEntity instanceof Player player) { //marked
             player.getPersistentData().putBoolean("sailorFlight1", false);
-            Abilities playerAbilities = player.getAbilities();
-            if (!player.isCreative() && !player.isSpectator()) {
-                playerAbilities.mayfly = false;
-                playerAbilities.flying = false;
-            }
-            playerAbilities.setFlyingSpeed(0.05F);
-            player.onUpdateAbilities();
-            if (player instanceof ServerPlayer serverPlayer) {
-                serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
-            }
+            BeyonderUtil.stopFlying(livingEntity);
         }
     }
 

@@ -191,6 +191,7 @@ public class CreativeTabInit {
                         event.accept(ItemInit.DIMENSIONAL_SIGHT.get());
                         event.accept(ItemInit.REPLICATE.get());
                         event.accept(ItemInit.SEALING.get());
+                        event.accept(ItemInit.TELEPORTATION.get());
                         event.accept(ItemInit.SPACE_FRAGMENTATION.get());
                         event.accept(ItemInit.GRAVITY_MANIPULATION.get());
                         event.accept(ItemInit.SPATIAL_LOCK_ON.get());

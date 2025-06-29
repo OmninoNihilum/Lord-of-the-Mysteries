@@ -56,8 +56,7 @@ public class BeyonderRangedAttackGoal<T extends PlayerMobEntity & RangedAttackMo
     @Override
     public boolean canContinueToUse() {
         LivingEntity target = BrainUtils.getMemory(entity, MemoryModuleType.ATTACK_TARGET);
-        return target != null && target.isAlive() && entity.canAttack(target) &&
-                (this.canUse() || !this.entity.getNavigation().isDone()) && this.isHoldingBow();
+        return target != null && target.isAlive() && entity.canAttack(target) && (this.canUse() || !this.entity.getNavigation().isDone()) && this.isHoldingBow();
     }
 
     @Override

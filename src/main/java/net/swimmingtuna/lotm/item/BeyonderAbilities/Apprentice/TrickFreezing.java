@@ -69,20 +69,22 @@ public class TrickFreezing extends SimpleAbilityItem {
     }
 
     public static void freezeEntity(LivingEntity livingEntity, LivingEntity target) {
-        target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()), 2, false, false));
-        if (target.level() instanceof ServerLevel serverLevel) {
-            Vec3 sourcePos = livingEntity.position().add(0, livingEntity.getBbHeight() * 0.5, 0);
-            Vec3 targetPos = target.position().add(0, target.getBbHeight() * 0.5, 0);
-            double distance = sourcePos.distanceTo(targetPos);
-            Vec3 direction = targetPos.subtract(sourcePos).normalize();
-            int particleCount = (int) (distance * 5);
-            for (int i = 0; i < particleCount; i++) {
-                double progress = i / (double) particleCount;
-                Vec3 pos = sourcePos.add(direction.scale(distance * progress));
-                double offsetX = livingEntity.getRandom().nextGaussian() * 0.02;
-                double offsetY = livingEntity.getRandom().nextGaussian() * 0.02;
-                double offsetZ = livingEntity.getRandom().nextGaussian() * 0.02;
-                serverLevel.sendParticles(ParticleTypes.SNOWFLAKE, pos.x, pos.y, pos.z, 1, offsetX, offsetY, offsetZ, 0.01);
+        if (!livingEntity.level().isClientSide() && !target.level().isClientSide()) {
+            target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()), 2, false, false));
+            if (target.level() instanceof ServerLevel serverLevel) {
+                Vec3 sourcePos = livingEntity.position().add(0, livingEntity.getBbHeight() * 0.5, 0);
+                Vec3 targetPos = target.position().add(0, target.getBbHeight() * 0.5, 0);
+                double distance = sourcePos.distanceTo(targetPos);
+                Vec3 direction = targetPos.subtract(sourcePos).normalize();
+                int particleCount = (int) (distance * 5);
+                for (int i = 0; i < particleCount; i++) {
+                    double progress = i / (double) particleCount;
+                    Vec3 pos = sourcePos.add(direction.scale(distance * progress));
+                    double offsetX = livingEntity.getRandom().nextGaussian() * 0.02;
+                    double offsetY = livingEntity.getRandom().nextGaussian() * 0.02;
+                    double offsetZ = livingEntity.getRandom().nextGaussian() * 0.02;
+                    serverLevel.sendParticles(ParticleTypes.SNOWFLAKE, pos.x, pos.y, pos.z, 1, offsetX, offsetY, offsetZ, 0.01);
+                }
             }
         }
     }

@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.SpatialCageEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public class SpatialCage extends SimpleAbilityItem {
             if (!checkAll(livingEntity)) {
                 return InteractionResult.FAIL;
             }
-            SpatialCageEntity.setSealed(interactionTarget, livingEntity, BeyonderUtil.getSequence(livingEntity) - 1, 200);
+            SpatialCageEntity.setSealed(interactionTarget, livingEntity, BeyonderUtil.getSequence(livingEntity) - 1, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_CAGE.get()));
         }
         return InteractionResult.SUCCESS;
     }
@@ -44,7 +45,7 @@ public class SpatialCage extends SimpleAbilityItem {
         DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
         if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
             player.sendSystemMessage(Component.literal("You created a Spatial Cage around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
-            SpatialCageEntity.setSealed(dimensionalSightTileEntity.getScryTarget(), player, BeyonderUtil.getSequence(player) - 1, 200);
+            SpatialCageEntity.setSealed(dimensionalSightTileEntity.getScryTarget(), player, BeyonderUtil.getSequence(player) - 1, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.SPATIAL_CAGE.get()));
         }
         return InteractionResult.SUCCESS;
     }

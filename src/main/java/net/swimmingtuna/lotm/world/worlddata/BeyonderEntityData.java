@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -131,10 +132,8 @@ public class BeyonderEntityData extends SavedData {
         for (Map.Entry<String, List<EntityType<?>>> entry : stringToEntitiesMap.entrySet()) {
             String value = entry.getKey();
             List<String> entityNames = entry.getValue().stream().map(entityType -> ForgeRegistries.ENTITY_TYPES.getKey(entityType).toString()).collect(Collectors.toList());
-            StringBuilder message = new StringBuilder();
-            message.append("String '").append(value).append("' is associated with: ");
-            message.append(String.join(", ", entityNames));
-            player.sendSystemMessage(Component.literal(message.toString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD));
+            String message = "String '" + value + "' is associated with: " + String.join(", ", entityNames);
+            player.sendSystemMessage(Component.literal(message).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD));
         }
     }
 
@@ -276,65 +275,13 @@ public class BeyonderEntityData extends SavedData {
                         break;
                     }
                 }
-                LOTM.LOGGER.info("{} chose ability {} with a {}/{} probability",
-                        entityName, abilityName, abilityPriority, totalPriority);
+                LOTM.LOGGER.info("{} chose ability {} with a {}/{} probability. Current spirituality is {}/{}", entityName, abilityName, abilityPriority, totalPriority, BeyonderUtil.getSpirituality(mob), BeyonderUtil.getMaxSpirituality(mob));
             }
+            ItemStack originalItem = mob.getMainHandItem().copy();
             mob.setItemInHand(InteractionHand.MAIN_HAND, selectedAbility.getDefaultInstance());
             useAvailableAbilityAsMob(mob);
-        }
-    }
-
-    public static void selectAndUseAbility(Mob mob, LivingEntity target) {
-        List<Item> availableAbilities = getAbilities(mob);
-        if (availableAbilities.isEmpty()) {
-            return;
-        }
-
-        if (mob.level().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ONLY_USE_ABILITIES_ON_PLAYERS) && !(target instanceof Player)) {
-            return;
-        }
-
-        List<WeightedAbility> weightedAbilities = new ArrayList<>();
-        int currentSpirituality = BeyonderUtil.getSpirituality(mob);
-        for (Item item : availableAbilities) {
-            if (item instanceof SimpleAbilityItem abilityItem) {
-                String cooldownKey = "abilityCooldownFor" + abilityItem.getDescription().getString();
-                int currentCooldown = mob.getPersistentData().getInt(cooldownKey);
-                if (currentCooldown == 0 && currentSpirituality >= abilityItem.getRequiredSpirituality()) {
-                    int priority = abilityItem.getPriority(mob, target);
-                    if (priority > 0) {
-                        weightedAbilities.add(new WeightedAbility(abilityItem, priority));
-                    }
-                }
-            }
-        }
-
-        if (weightedAbilities.isEmpty()) {
-            return;
-        }
-
-        SimpleAbilityItem selectedAbility = selectWeightedAbility(weightedAbilities);
-        if (selectedAbility != null) {
-            int totalPriority = 0;
-            for (WeightedAbility ability : weightedAbilities) {
-                totalPriority += ability.weight;
-            }
-
-            Level level = mob.level();
-            if (level instanceof ServerLevel) {
-                String entityName = mob.getName().getString();
-                String abilityName = selectedAbility.getDescription().getString();
-                int abilityPriority = 0;
-                for (WeightedAbility ability : weightedAbilities) {
-                    if (ability.abilityItem == selectedAbility) {
-                        abilityPriority = ability.weight;
-                        break;
-                    }
-                }
-                LOTM.LOGGER.info("{} chose ability {} with a {}/{} probability", entityName, abilityName, abilityPriority, totalPriority);
-            }
-            mob.setItemInHand(InteractionHand.MAIN_HAND, selectedAbility.getDefaultInstance());
-            useAvailableAbilityAsMob(mob);
+            BeyonderUtil.useSpirituality(mob,selectedAbility.getSpirituality());
+            mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);
         }
     }
 

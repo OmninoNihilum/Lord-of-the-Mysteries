@@ -383,6 +383,7 @@ public class LOTM {
             event.accept(ItemInit.DIMENSIONAL_SIGHT);
             event.accept(ItemInit.REPLICATE);
             event.accept(ItemInit.SEALING);
+            event.accept(ItemInit.TELEPORTATION);
             event.accept(ItemInit.SPACE_FRAGMENTATION);
             event.accept(ItemInit.GRAVITY_MANIPULATION);
             event.accept(ItemInit.SPATIAL_LOCK_ON);

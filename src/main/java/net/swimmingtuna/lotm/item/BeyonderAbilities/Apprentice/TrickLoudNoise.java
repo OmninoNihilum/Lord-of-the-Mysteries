@@ -45,7 +45,7 @@ public class TrickLoudNoise extends SimpleAbilityItem {
     public static void bang(LivingEntity entity) {
         if (!entity.level().isClientSide) {
             int damage = (int) (float) BeyonderUtil.getDamage(entity).get(ItemInit.TRICKFOG.get());
-            int duration = (int) damage * 20;
+            int duration = damage * 20;
             AABB area;
             DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(entity);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
@@ -81,10 +81,10 @@ public class TrickLoudNoise extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null) {
+        if (target instanceof Player) {
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get());
             if (target.distanceTo(livingEntity) < damage) {
-                return 60;
+                return 30;
             }
             return 0;
         }

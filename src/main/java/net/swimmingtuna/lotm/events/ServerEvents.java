@@ -5,30 +5,36 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.SpectatorClass;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DimensionalSight;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SeparateWormOfStar;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationFortune;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationInfiniteFortune;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationInfiniteMisfortune;
@@ -39,6 +45,7 @@ import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.world.worlddata.PlayerMobTracker;
 
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +54,7 @@ import java.util.regex.Matcher;
 
 import static net.swimmingtuna.lotm.beyonder.SpectatorClass.EVENT_TO_TAG;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DimensionalSight.findSuitableBlockPos;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Teleportation.flickeringCopy;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor.*;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLife.spawnMob;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation.isThreeIntegers;
@@ -182,7 +190,6 @@ public class ServerEvents {
                             player.changeDimension(targetDimension);
                             player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
                         } else {
-                            // Same dimension, just teleport to coordinates
                             player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
                         }
 
@@ -214,7 +221,7 @@ public class ServerEvents {
                 return;
             }
             if (BeyonderUtil.getSpirituality(player) < BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get())) {
-                player.displayClientMessage(Component.literal("You need " + (int) (BeyonderUtil.getDreamIntoReality(player)) + " spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
+                player.displayClientMessage(Component.literal("You need " + BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()) + " spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
                 event.setCanceled(true);
                 return;
             }
@@ -254,8 +261,8 @@ public class ServerEvents {
                 event.setCanceled(true);
                 return;
             }
-            if (BeyonderUtil.getSpirituality(player) < 300) {
-                player.displayClientMessage(Component.literal("You need 300 spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
+            if (BeyonderUtil.getSpirituality(player) < 300 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TRAVELERSDOOR.get())) {
+                player.displayClientMessage(Component.literal("You need " + 300 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TRAVELERSDOOR.get()) + " spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 event.setCanceled(true);
                 return;
             }
@@ -286,7 +293,7 @@ public class ServerEvents {
                     BeyonderUtil.teleportEntity(player, destination, x, y, z);
                     event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z + ", in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                 }
-                BeyonderUtil.useSpirituality(player, 300);
+                BeyonderUtil.useSpirituality(player, 300 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TRAVELERSDOOR.get()));
                 event.setCanceled(true);
                 return;
             }
@@ -320,7 +327,7 @@ public class ServerEvents {
                         BeyonderUtil.teleportEntity(player, targetPlayer.level(), x, y, z);
                         event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName() + " in The " + dimensionName + " Dimension").withStyle(BeyonderUtil.getStyle(player)), true);
                     }
-                    BeyonderUtil.useSpirituality(player, 300);
+                    BeyonderUtil.useSpirituality(player, 300 * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TRAVELERSDOOR.get()));
                     event.getPlayer().displayClientMessage(Component.literal("Teleported to " + targetPlayer.getName().getString()).withStyle(BeyonderUtil.getStyle(player)), true);
                 } else {
                     event.getPlayer().displayClientMessage(Component.literal("Player is not your ally").withStyle(BeyonderUtil.getStyle(player)), true);
@@ -420,7 +427,6 @@ public class ServerEvents {
         }
         if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof DimensionalSight && !player.getCooldowns().isOnCooldown(ItemInit.DIMENSIONAL_SIGHT.get()) && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 3)) {
             for (ServerPlayer onlinePlayer : player.getServer().getPlayerList().getPlayers()) {
-                System.out.println(onlinePlayer.getName().getString());
                 if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
                     BlockPos playerPos = player.blockPosition();
                     Vec3 lookPos = player.getLookAngle().scale(5);
@@ -443,6 +449,159 @@ public class ServerEvents {
                 }
             }
             event.setCanceled(true);
+        }
+        if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof DimensionalSight && !player.getCooldowns().isOnCooldown(ItemInit.DIMENSIONAL_SIGHT.get()) && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 3)) {
+            for (ServerPlayer onlinePlayer : player.getServer().getPlayerList().getPlayers()) {
+                if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
+                    BlockPos playerPos = player.blockPosition();
+                    Vec3 lookPos = player.getLookAngle().scale(5);
+                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y() - 2, (int) lookPos.z()));
+                    BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
+                    level.setBlock(targetPos, dimensionalSightState, 3);
+                    level.getServer().execute(() -> {
+                        BlockEntity blockEntity = level.getBlockEntity(targetPos);
+                        if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
+                            sightEntity.setCaster(player.getUUID());
+                            sightEntity.viewTarget = onlinePlayer.getName().getString();
+                            sightEntity.scryUniqueID = onlinePlayer.getUUID();
+                            sightEntity.setChanged();
+                            sightEntity.sendUpdates();
+                            onlinePlayer.getPersistentData().putUUID("dimensionalSightPlayerUUID", player.getUUID());
+                            onlinePlayer.getPersistentData().putInt("ignoreShouldntRender", 10);
+                            player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
+                        }
+                    });
+                }
+            }
+            event.setCanceled(true);
+        }
+        if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof Teleportation && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 2)) {
+            if (!BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.APPRENTICE.get())) {
+                player.displayClientMessage(Component.literal("You are not of the Apprentice pathway").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
+                event.setCanceled(true);
+                return;
+            }
+            if (BeyonderUtil.getSpirituality(player) < BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get())) {
+                player.displayClientMessage(Component.literal("You need " + BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()) + " spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
+                event.setCanceled(true);
+                return;
+            }
+            if (isThreeIntegers(message)) {
+                String[] coordinates = message.replace(",", " ").trim().split("\\s+");
+                int x = Integer.parseInt(coordinates[0]);
+                int y = Integer.parseInt(coordinates[1]);
+                int z = Integer.parseInt(coordinates[2]);
+
+                PlayerMobEntity playerMobEntity = flickeringCopy(player);
+                DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+                if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                    playerMobEntity.teleportTo(dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ());
+                } else {
+                    playerMobEntity.teleportTo(x,y,z);
+                }
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    playerMobEntity.setItemSlot(slot, player.getItemBySlot(slot).copy());
+                }
+                if (player.getPersistentData().getInt("inCombat") >= 1) {
+                    playerMobEntity.setTarget(player.getLastHurtMob());
+                }
+                playerMobEntity.setCreator(player);
+                playerMobEntity.setUsername(player.getScoreboardName());
+                playerMobEntity.setIsClone(true);
+                playerMobEntity.setMaxSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setRegenSpirituality(false);
+                playerMobEntity.setAttackChance(100);
+                if (playerMobEntity.distanceTo(player) < 50 && player.getPersistentData().getInt("inCombat") >= 1) {
+                    playerMobEntity.setTarget(player.getLastHurtMob());
+                } else {
+                    for (LivingEntity living : playerMobEntity.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(30))) {
+                        if (BeyonderUtil.areAllies(living, player) && living.getPersistentData().getInt("inCombat") >= 1) {
+                            playerMobEntity.setTarget(player.getLastHurtMob());
+                        }
+                    }
+                }
+                player.level().addFreshEntity(playerMobEntity);
+                event.getPlayer().displayClientMessage(Component.literal("You're currently flickering at " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
+                BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()));
+                event.setCanceled(true);
+                return;
+            }
+            Player targetPlayer = null;
+            for (Player serverPlayer : level.players()) {
+                if (serverPlayer.getName().getString().toLowerCase().equals(message.toLowerCase())) {
+                    targetPlayer = serverPlayer;
+                    break;
+                }
+            }
+            if (targetPlayer != null) {
+                int x = (int) targetPlayer.getX();
+                int y = (int) targetPlayer.getY();
+                int z = (int) targetPlayer.getZ();
+                PlayerMobEntity playerMobEntity = flickeringCopy(player);
+                DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+                if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                    playerMobEntity.teleportTo(dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ());
+                } else {
+                    playerMobEntity.teleportTo(x,y,z);
+                }
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    playerMobEntity.setItemSlot(slot, player.getItemBySlot(slot).copy());
+                }
+                if (player.getPersistentData().getInt("inCombat") >= 1) {
+                    playerMobEntity.setTarget(player.getLastHurtMob());
+                }
+                playerMobEntity.setCreator(player);
+                playerMobEntity.setUsername(player.getScoreboardName());
+                playerMobEntity.setIsClone(true);
+                playerMobEntity.setMaxSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setRegenSpirituality(false);
+                playerMobEntity.setAttackChance(100);
+                player.level().addFreshEntity(playerMobEntity);
+                event.getPlayer().displayClientMessage(Component.literal("You're currently flickering at " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
+                BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()));
+            } else {
+                event.getPlayer().displayClientMessage(Component.literal("Invalid coordinates or player name: " + message).withStyle(BeyonderUtil.getStyle(player)), true);
+            }
+            event.setCanceled(true);
+        }
+    }
+    private static int tickCounter = 0;
+    private static final int CLEANUP_INTERVAL = 2400;
+
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            tickCounter++;
+            if (tickCounter >= CLEANUP_INTERVAL) {
+                tickCounter = 0;
+                MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+                if (server != null) {
+                    for (ServerLevel level : server.getAllLevels()) {
+                        PlayerMobTracker tracker = PlayerMobTracker.get(level);
+                        tracker.cleanupMissingEntities(level);
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof PlayerMobEntity playerMob) {
+            PlayerMobTracker tracker = PlayerMobTracker.get((ServerLevel) event.getLevel());
+            tracker.addPlayerMob(playerMob);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof PlayerMobEntity playerMob) {
+            if (!playerMob.isAlive() || playerMob.isRemoved()) {
+                PlayerMobTracker tracker = PlayerMobTracker.get((ServerLevel) event.getLevel());
+                tracker.removePlayerMob(playerMob.getUUID(), (ServerLevel) event.getLevel());
+            }
         }
     }
 }

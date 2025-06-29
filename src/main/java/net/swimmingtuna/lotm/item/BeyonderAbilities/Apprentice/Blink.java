@@ -21,6 +21,7 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,7 @@ public class Blink extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        int blinkDistance = player.getPersistentData().getInt("trickmasterBlinkDistance");
+        int blinkDistance = player.getPersistentData().getInt("trickmasterBlinkDistance") * (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.BLINK.get());
         if (!checkAll(player, BeyonderClassInit.APPRENTICE.get(), 5, blinkDistance, true)) {
             return InteractionResult.FAIL;
         }
@@ -104,71 +105,6 @@ public class Blink extends SimpleAbilityItem {
         }
     }
 
-    // This method should be called in your LivingTickEvent handler
-    public static void handleAfterimageSpawning(LivingEntity player) {
-        if (player.level().isClientSide()) return;
-        CompoundTag tag = player.getPersistentData();
-        if (!tag.contains("blinkAfterimageTimer")) return;
-        int timer = tag.getInt("blinkAfterimageTimer");
-        int remainingAfterimages = tag.getInt("secretsSorcererBlinkAfterimages");
-        int currentIndex = tag.getInt("blinkAfterimageIndex");
-        int totalAfterimages = tag.getInt("blinkTotalAfterimages");
-        if (currentIndex >= totalAfterimages || remainingAfterimages <= 0) {
-            tag.remove("blinkAfterimageTimer");
-            tag.remove("blinkAfterimageIndex");
-            tag.remove("blinkTotalAfterimages");
-            tag.remove("blinkStartX");
-            tag.remove("blinkStartY");
-            tag.remove("blinkStartZ");
-            tag.remove("blinkEndX");
-            tag.remove("blinkEndY");
-            tag.remove("blinkEndZ");
-            return;
-        }
-        timer++;
-        tag.putInt("blinkAfterimageTimer", timer);
-        if (timer % 2 == 0) {
-            Level level = player.level();
-            double startX = tag.getDouble("blinkStartX");
-            double startY = tag.getDouble("blinkStartY");
-            double startZ = tag.getDouble("blinkStartZ");
-            double endX = tag.getDouble("blinkEndX");
-            double endY = tag.getDouble("blinkEndY");
-            double endZ = tag.getDouble("blinkEndZ");
-            double progress = (double) (currentIndex + 1) / (totalAfterimages + 1);
-            double mobX = startX + (endX - startX) * progress;
-            double mobY = startY + (endY - startY) * progress;
-            double mobZ = startZ + (endZ - startZ) * progress;
-            if (player instanceof Player || player instanceof PlayerMobEntity) {
-                PlayerMobEntity playerMob = new PlayerMobEntity(EntityInit.PLAYER_MOB_ENTITY.get(), level);
-                playerMob.setMaxLife(2);
-                playerMob.setPos(mobX, mobY, mobZ);
-                playerMob.setYHeadRot(player.getYHeadRot());
-                playerMob.setXRot(player.getXRot());
-                if (BeyonderUtil.getSequence(player) <= 4) {
-                    playerMob.getPersistentData().putBoolean("shouldDropWormOfStar", true);
-                }
-                if (player instanceof Player pPlayer) {
-                    playerMob.setUsername(pPlayer.getScoreboardName());
-                } else if (player instanceof PlayerMobEntity playerMobEntity) {
-                    playerMob.setUsername(playerMobEntity.getUsername());
-                }
-                level.addFreshEntity(playerMob);
-            } else {
-                LivingEntity afterimageEntity = (LivingEntity) player.getType().create(level);
-                if (afterimageEntity != null) {
-                    afterimageEntity.setPos(mobX, mobY, mobZ);
-                    afterimageEntity.setYHeadRot(player.getYHeadRot());
-                    afterimageEntity.setXRot(player.getXRot());
-                    afterimageEntity.setYRot(player.getYRot());
-                    afterimageEntity.getPersistentData().putInt("dreamWeavingDeathTimer", 2);
-                    level.addFreshEntity(afterimageEntity);
-                }
-            }
-        }
-        tag.putInt("secretsSorcererBlinkAfterimages", remainingAfterimages - 1);
-        tag.putInt("blinkAfterimageIndex", currentIndex + 1);
-    }
 
 
     @Override
@@ -197,6 +133,9 @@ public class Blink extends SimpleAbilityItem {
             livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", 100);
             return 80;
         }
-        return 10;
+        if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") == 0 && target == null) {
+            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", 5);
+        }
+        return 0;
     }
 }

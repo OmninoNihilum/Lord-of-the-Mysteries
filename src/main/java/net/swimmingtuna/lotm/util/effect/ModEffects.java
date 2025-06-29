@@ -37,8 +37,7 @@ public class ModEffects {
             () -> new NoBeneficialEffectsEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> FLASH = MOB_EFFECTS.register("flash",
             () -> new FlashEffect(MobEffectCategory.HARMFUL, 3124687));
-    public static final RegistryObject<MobEffect> ARMOR_WEAKNESS = MOB_EFFECTS.register("armor_weakness",
-            ArmorWeaknessEffect::new);
+    public static final RegistryObject<MobEffect> ARMOR_WEAKNESS = MOB_EFFECTS.register("armor_weakness", ArmorWeaknessEffect::new);
     public static final RegistryObject<MobEffect> TUMBLE = MOB_EFFECTS.register("tumble",
             () -> new TumbleEffect(MobEffectCategory.HARMFUL, 3124687));
     public static final RegistryObject<MobEffect> DEAFNESS = MOB_EFFECTS.register("deafness",

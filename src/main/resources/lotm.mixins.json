@@ -15,6 +15,9 @@
     "MixinPotionItem",
     "MixinSplashPotionItem",
     "MobAttackMixin",
+    "DollSlotMixin",
+    "StructureBlockUnlimit",
+    "HopperBlockEntityMixin",
     "ServerLevelMixin",
     "ServerPlayerMixin",
     "ServerPlayNetworkDesyncFixMixin",
@@ -26,6 +29,7 @@
     "ClientLevelMixin",
     "EntityRenderDispatcherMixin",
     "ItemInHandRendererMixin",
+    "IItemRendererMixin",
     "ItemRendererMixin",
     "StructureBlockRenderMixin"
   ],

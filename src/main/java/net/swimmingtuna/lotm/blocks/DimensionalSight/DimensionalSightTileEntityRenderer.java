@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -21,7 +22,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import net.swimmingtuna.lotm.LOTM;
-import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.List;
 import java.util.UUID;
@@ -78,73 +78,113 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
 
     private void renderScryEntity(DimensionalSightTileEntity tileEntity, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight) {
         LivingEntity scryTarget = getClientLivingEntityFromUUID(tileEntity.getLevel(), tileEntity.scryUniqueID);
-        poseStack.pushPose();
         if (scryTarget == null || !scryTarget.isAlive() || scryTarget.isRemoved()) {
             return;
         }
+
+        poseStack.pushPose();
         try {
-            Vec3 entityDisplayPos = tileEntity.getEntityDisplayPos();
-            Vec3 displayCenter = tileEntity.getDisplayCenter();
-            Vec3 relativePos = entityDisplayPos.subtract(displayCenter);
-            Vec3 scaledPos = new Vec3(relativePos.x / DimensionalSightTileEntity.RENDER_SCALE, relativePos.y / DimensionalSightTileEntity.RENDER_SCALE, relativePos.z / DimensionalSightTileEntity.RENDER_SCALE);
-            poseStack.translate(scaledPos.x, scaledPos.y, scaledPos.z);
             long gameTime = tileEntity.getLevel() != null ? tileEntity.getLevel().getGameTime() : 0;
             float glowIntensity = (float) (0.7 + 0.3 * Math.sin((gameTime + partialTicks) * 0.05));
             int magicalLight = Math.max(combinedLight, (int) (240 * glowIntensity));
-            try {
-                if (scryTarget instanceof Player && scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
-                    EntityType<?> entityType = scryTarget.getType();
-                    Entity newEntity = entityType.create(scryTarget.level());
-                    CompoundTag renderData = scryTarget.getPersistentData().getCompound("dimensionalSightRenderData");
-                    if (newEntity instanceof LivingEntity livingRenderTarget) {
-                        livingRenderTarget.setYRot(renderData.getFloat("displayYaw"));
-                        livingRenderTarget.setXRot(renderData.getFloat("displayPitch"));
-                        livingRenderTarget.setYHeadRot(renderData.getFloat("displayHeadYaw"));
-                        livingRenderTarget.setYBodyRot(renderData.getFloat("displayHeadYaw"));
-                        livingRenderTarget.setOldPosAndRot();
-                        livingRenderTarget.setDeltaMovement(renderData.getDouble("displayVelX"), renderData.getDouble("displayVelY"), renderData.getDouble("displayVelZ"));
-                        livingRenderTarget.attackAnim = renderData.getFloat("displaySwingProgress");
-                        livingRenderTarget.setOnGround(renderData.getBoolean("displayOnGround"));
-                        livingRenderTarget.fallDistance = renderData.getFloat("displayFallDistance");
+            if (scryTarget instanceof Player player && scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
+                CompoundTag renderData = player.getPersistentData().getCompound("dimensionalSightRenderData");
+                float originalYRot = player.getYRot();
+                float originalXRot = player.getXRot();
+                float originalYHeadRot = player.yHeadRot;
+                float originalYBodyRot = player.yBodyRot;
+                float originalAttackAnim = player.attackAnim;
+                Vec3 originalDeltaMovement = player.getDeltaMovement();
+                boolean originalOnGround = player.onGround();
+                float originalFallDistance = player.fallDistance;
+                try {
+                    player.setYRot(renderData.getFloat("displayYaw"));
+                    player.setXRot(renderData.getFloat("displayPitch"));
+                    player.yHeadRot = renderData.getFloat("displayHeadYaw");
+                    player.yBodyRot = renderData.getFloat("displayHeadYaw");
+                    player.yRotO = renderData.getFloat("displayYaw");
+                    player.xRotO = renderData.getFloat("displayPitch");
+                    player.yHeadRotO = renderData.getFloat("displayHeadYaw");
+                    player.yBodyRotO = renderData.getFloat("displayHeadYaw");
+                    player.setDeltaMovement(renderData.getDouble("displayVelX"), renderData.getDouble("displayVelY"), renderData.getDouble("displayVelZ"));
+                    player.attackAnim = renderData.getFloat("displaySwingProgress");
+                    player.setOnGround(renderData.getBoolean("displayOnGround"));
+                    player.fallDistance = renderData.getFloat("displayFallDistance");
+                    Vec3 entityDisplayPos = tileEntity.getEntityDisplayPos();
+                    Vec3 displayCenter = tileEntity.getDisplayCenter();
+                    Vec3 relativePos = entityDisplayPos.subtract(displayCenter);
+                    Vec3 scaledPos = new Vec3(relativePos.x / DimensionalSightTileEntity.RENDER_SCALE, relativePos.y / DimensionalSightTileEntity.RENDER_SCALE, relativePos.z / DimensionalSightTileEntity.RENDER_SCALE);
+                    poseStack.translate(scaledPos.x, scaledPos.y, scaledPos.z);
+                    EntityRenderer<? super Player> renderer = (EntityRenderer<? super Player>) this.entityRenderer.getRenderer(player);
+                    if (renderer != null) {
+                        renderer.render(player, 0.0f, partialTicks, poseStack, bufferSource, magicalLight);
+                    } else {
+                        LOTM.LOGGER.error("Player renderer is null!");
                     }
-                    Vec3 packetDisplayCenter = new Vec3(renderData.getDouble("displayCenterX"), renderData.getDouble("displayCenterY"), renderData.getDouble("displayCenterZ"));
-                    Vec3 packetEntityPos = new Vec3(renderData.getDouble("displayEntityDisplayPosX"), renderData.getDouble("displayEntityDisplayPosY"), renderData.getDouble("displayEntityDisplayPosZ"));
-                    Vec3 packetRelativePos = packetEntityPos.subtract(packetDisplayCenter);
-                    Vec3 packetScaledPos = new Vec3(packetRelativePos.x / DimensionalSightTileEntity.RENDER_SCALE, packetRelativePos.y / DimensionalSightTileEntity.RENDER_SCALE, packetRelativePos.z / DimensionalSightTileEntity.RENDER_SCALE);
-                    poseStack.translate(packetScaledPos.x - scaledPos.x, packetScaledPos.y - scaledPos.y, packetScaledPos.z - scaledPos.z);
-                } else {
-                    EntityType<?> entityType = scryTarget.getType();
-                    Entity newEntity = entityType.create(scryTarget.level());
-                    if (newEntity instanceof LivingEntity living) {
-                        living.setYRot(tileEntity.getYaw());
-                        living.setXRot(tileEntity.getPitch());
-                        living.yHeadRot = tileEntity.getHeadYaw();
-                        living.yBodyRot = tileEntity.getRenderYaw();
-                        living.setPos(0, 0, 0);
-                        living.xo = 0; living.yo = 0; living.zo = 0;
-                        living.setOldPosAndRot();
-                        living.yRotO = living.getYRot();
-                        living.xRotO = living.getXRot();
-                        living.yHeadRotO = living.yHeadRot;
-                        living.yBodyRotO = living.yBodyRot;
-                        living.walkAnimation.setSpeed(scryTarget.walkAnimation.speed());
-                        living.walkAnimation.position = scryTarget.walkAnimation.position();
-                        living.attackAnim = tileEntity.swingProgress;
-                        living.oAttackAnim = scryTarget.oAttackAnim;
-                        living.setDeltaMovement(tileEntity.getVelX(), tileEntity.getVelY(), tileEntity.getVelZ());
-                        living.tickCount = scryTarget.tickCount;
-                        living.setOnGround(true);
-                        living.fallDistance = 0.0f;
-                        living.hurtTime = scryTarget.hurtTime;
-                        living.hurtDuration = scryTarget.hurtDuration;
-                        living.deathTime = scryTarget.deathTime;
-                        EntityRenderer<? super LivingEntity> renderer = this.entityRenderer.getRenderer(scryTarget);
-                        renderer.render(scryTarget, 0.0F, partialTicks, poseStack, bufferSource, magicalLight);
-                    }
+
+                } finally {
+                    player.setYRot(originalYRot);
+                    player.setXRot(originalXRot);
+                    player.yHeadRot = originalYHeadRot;
+                    player.yBodyRot = originalYBodyRot;
+                    player.yRotO = originalYRot;
+                    player.xRotO = originalXRot;
+                    player.yHeadRotO = originalYHeadRot;
+                    player.yBodyRotO = originalYBodyRot;
+                    player.attackAnim = originalAttackAnim;
+                    player.setDeltaMovement(originalDeltaMovement);
+                    player.setOnGround(originalOnGround);
+                    player.fallDistance = originalFallDistance;
                 }
-            } catch (Exception ignored) {
+
+            } else {
+                Vec3 entityDisplayPos = tileEntity.getEntityDisplayPos();
+                Vec3 displayCenter = tileEntity.getDisplayCenter();
+                Vec3 relativePos = entityDisplayPos.subtract(displayCenter);
+                Vec3 scaledPos = new Vec3(
+                        relativePos.x / DimensionalSightTileEntity.RENDER_SCALE,
+                        relativePos.y / DimensionalSightTileEntity.RENDER_SCALE,
+                        relativePos.z / DimensionalSightTileEntity.RENDER_SCALE
+                );
+                poseStack.translate(scaledPos.x, scaledPos.y, scaledPos.z);
+
+                EntityType<?> entityType = scryTarget.getType();
+                Entity newEntity = entityType.create(scryTarget.level());
+                if (newEntity instanceof LivingEntity living) {
+                    living.setYRot(tileEntity.getYaw());
+                    living.setXRot(tileEntity.getPitch());
+                    living.yHeadRot = tileEntity.getHeadYaw();
+                    living.yBodyRot = tileEntity.getRenderYaw();
+                    living.setPos(0, 0, 0);
+                    living.xo = 0;
+                    living.yo = 0;
+                    living.zo = 0;
+                    living.setOldPosAndRot();
+                    living.yRotO = living.getYRot();
+                    living.xRotO = living.getXRot();
+                    living.yHeadRotO = living.yHeadRot;
+                    living.yBodyRotO = living.yBodyRot;
+                    living.walkAnimation.setSpeed(scryTarget.walkAnimation.speed());
+                    living.walkAnimation.position = scryTarget.walkAnimation.position();
+                    living.attackAnim = tileEntity.swingProgress;
+                    living.oAttackAnim = scryTarget.oAttackAnim;
+                    living.setDeltaMovement(tileEntity.getVelX(), tileEntity.getVelY(), tileEntity.getVelZ());
+                    living.tickCount = scryTarget.tickCount;
+                    living.setOnGround(true);
+                    living.fallDistance = 0.0f;
+                    living.hurtTime = scryTarget.hurtTime;
+                    living.hurtDuration = scryTarget.hurtDuration;
+                    living.deathTime = scryTarget.deathTime;
+                    EntityRenderer<? super LivingEntity> renderer = this.entityRenderer.getRenderer(living);
+                    renderer.render(living, 0.0F, partialTicks, poseStack, bufferSource, magicalLight);
+                }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            if (tileEntity.getLevel() != null) {
+                if (tileEntity.getLevel().getGameTime() % 20 == 0) {
+                    LOTM.LOGGER.error("Error rendering scry entity: ", e);
+                }
+            }
         } finally {
             poseStack.popPose();
         }

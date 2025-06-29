@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
@@ -217,10 +218,8 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
         if (livingEntity.getPersistentData().getInt("ignoreShouldntRender") >= 1) {
             if (livingEntity.getPersistentData().contains("dimensionalSightPlayerUUID") && livingEntity instanceof ServerPlayer) {
                 LivingEntity living = BeyonderUtil.getLivingEntityFromUUID(livingEntity.level(), livingEntity.getPersistentData().getUUID("dimensionalSightPlayerUUID"));
-
                 if (living instanceof ServerPlayer serverPlayer) {
                     Vec3 displayCenter = new Vec3(0, 0, 0);
-
                     SendPlayerRenderDataS2C packet = new SendPlayerRenderDataS2C(
                             livingEntity.getUUID(),
                             livingEntity.getYRot(),
@@ -237,7 +236,8 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
                             livingEntity.onGround(),
                             livingEntity.fallDistance,
                             displayCenter,
-                            livingEntity.isOnFire()
+                            livingEntity.isOnFire(),
+                            livingEntity.getUUID()
                     );
                     LOTMNetworkHandler.sendToPlayer(packet, serverPlayer);
                 }

@@ -39,7 +39,10 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DimensionalSight extends SimpleAbilityItem {
+public class
+
+
+DimensionalSight extends SimpleAbilityItem {
 
     public DimensionalSight(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 2, 1000, 6000);
@@ -47,12 +50,14 @@ public class DimensionalSight extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack pStack, LivingEntity player, LivingEntity pInteractionTarget, InteractionHand pUsedHand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player, this, 400);
+            useSpirituality(player);
+            dimensionalSight(player, pInteractionTarget);
         }
-        addCooldown(player, this, 400);
-        useSpirituality(player);
-        dimensionalSight(player, pInteractionTarget);
         return InteractionResult.SUCCESS;
     }
 
@@ -96,6 +101,10 @@ public class DimensionalSight extends SimpleAbilityItem {
                                 sightEntity.setCaster(livingEntity);
                                 sightEntity.setChanged();
                                 sightEntity.sendUpdates();
+                            }
+                            if (interactionTarget instanceof Player player) {
+                                player.getPersistentData().putUUID("dimensionalSightPlayerUUID", livingEntity.getUUID());
+                                player.getPersistentData().putInt("ignoreShouldntRender", 10);
                             }
                         }
                     });

@@ -179,9 +179,9 @@ public class TrickWind extends SimpleAbilityItem {
         if (target != null) {
             if (livingEntity.getHealth() > target.getHealth()) {
                 livingEntity.setShiftKeyDown(true);
-                return 60;
+                return 45;
             } else if (livingEntity.getHealth() < target.getHealth()) {
-                return 60;
+                return 45;
             }
         }
         return 0;

@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
@@ -51,6 +52,16 @@ public class SpaceRiftEntity extends AbstractHurtingProjectile implements GeoEnt
     @Override
     protected ParticleOptions getTrailParticle() {
         return ParticleInit.NULL_PARTICLE.get();
+    }
+
+    @Override
+    public boolean hurt(DamageSource damageSource, float amount) {
+        return false;
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource damageSource) {
+         return true;
     }
 
     @Override

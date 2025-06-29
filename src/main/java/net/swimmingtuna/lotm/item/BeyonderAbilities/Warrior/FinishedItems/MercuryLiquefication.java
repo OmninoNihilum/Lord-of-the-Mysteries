@@ -75,7 +75,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
 
             }
             if (x) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, livingEntity.getUUID()));
+                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, livingEntity.getUUID(), 0));
             }
         }
     }
@@ -98,7 +98,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             UUID playerId = livingEntity.getUUID();
             Boolean lastState = PsychologicalInvisibility.lastSentInvisibilityStates.get(playerId);
             if (lastState == null || lastState != currentState) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(currentState, playerId));
+                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(currentState, playerId, 20));
                 PsychologicalInvisibility.lastSentInvisibilityStates.put(playerId, currentState);
             }
             Vec3 lookVec = livingEntity.getLookAngle();
@@ -122,15 +122,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             if (livingEntity.tickCount % 20 == 0) {
                 livingEntity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 1, false, false));
             }
-            if (livingEntity instanceof Player player) {
-                Abilities playerAbilites = player.getAbilities();
-                playerAbilites.mayfly = true;
-                playerAbilites.setFlyingSpeed(0.1F);
-                player.onUpdateAbilities();
-                if (player instanceof ServerPlayer serverPlayer) {
-                    serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
-                }
-            }
+            BeyonderUtil.startFlying(livingEntity, 0.1f);
         }
         if (!livingEntity.level().isClientSide()) {
             if (tag.getInt("mercuryLiqueficationCooldown") >= 1) {
@@ -140,7 +132,6 @@ public class MercuryLiquefication extends SimpleAbilityItem {
                 Abilities playerAbilites = player.getAbilities();
                 playerAbilites.setFlyingSpeed(0.05F);
                 playerAbilites.mayfly = false;
-                player.sendSystemMessage(Component.literal("MERCURY"));
                 playerAbilites.flying = false;
                 player.onUpdateAbilities();
                 if (player instanceof ServerPlayer serverPlayer) {
