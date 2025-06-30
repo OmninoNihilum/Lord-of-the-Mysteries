@@ -185,9 +185,9 @@ public class BlinkAfterimage extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Use in order to enable or disable your automatic blinking. If enabled, you will automatically dodge any damage."));
+        tooltipComponents.add(Component.literal("Use in order to enable or disable your automatic blinking. If enabled, you will be automatically blink out of the way of any form of damage."));
         tooltipComponents.add(Component.literal("Left Click for Blink"));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50 + Amount of damage").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("While Active: 50 + (Amount of Damage * ~2)").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));

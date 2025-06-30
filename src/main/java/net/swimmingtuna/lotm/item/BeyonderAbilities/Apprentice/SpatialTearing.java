@@ -25,7 +25,7 @@ import java.util.List;
 public class SpatialTearing extends SimpleAbilityItem {
 
     public SpatialTearing(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 3, 35, 300);
+        super(properties, BeyonderClassInit.APPRENTICE, 3, 2500, 900);
     }
 
     @Override
@@ -67,8 +67,8 @@ public class SpatialTearing extends SimpleAbilityItem {
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, Conceal a part of the Spirit World, to be used as you will."));
         tooltipComponents.add(Component.literal("If used while sneaking, will create in the off hand a special door that leads to the users Concealed Space."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("35").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Second").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2500").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("45 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

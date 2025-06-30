@@ -38,7 +38,7 @@ import java.util.List;
 
 public class Sealing extends SimpleAbilityItem {
     public Sealing(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 2, 2000, 1500);
+        super(properties, BeyonderClassInit.APPRENTICE, 2, 3000, 1500);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class Sealing extends SimpleAbilityItem {
             if (!checkAll(player, BeyonderClassInit.APPRENTICE.get(), 2, 4000 - (BeyonderUtil.getSequence(dimensionalSightTileEntity.getScryTarget()) * 250), true)) {
                 return InteractionResult.FAIL;
             }
-            addCooldown(player, this, 2000 - (BeyonderUtil.getSequence(dimensionalSightTileEntity.getScryTarget()) * 100));
+            addCooldown(player, this, 1200 - (BeyonderUtil.getSequence(dimensionalSightTileEntity.getScryTarget()) * 100));
             useSpirituality(player, 4000 - (BeyonderUtil.getSequence(dimensionalSightTileEntity.getScryTarget()) * 250));
             sealAbilities(player, dimensionalSightTileEntity.getScryTarget());
         }
@@ -64,7 +64,7 @@ public class Sealing extends SimpleAbilityItem {
             if (!checkAll(livingEntity, BeyonderClassInit.APPRENTICE.get(), 2, 4000 - (BeyonderUtil.getSequence(interactionTarget) * 250), true)) {
                 return InteractionResult.FAIL;
             }
-            addCooldown(livingEntity, this, 2000 - (BeyonderUtil.getSequence(interactionTarget) * 100));
+            addCooldown(livingEntity, this, 1200 - (BeyonderUtil.getSequence(interactionTarget) * 100));
             useSpirituality(livingEntity, 4000 - (BeyonderUtil.getSequence(interactionTarget) * 250));
             sealAbilities(livingEntity, livingEntity);
         }
@@ -103,9 +103,11 @@ public class Sealing extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        tooltipComponents.add(Component.literal("Upon use, freezes the target for a small amount of time, or if none is selected, freeze all entities/blocks around you."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("70").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Upon use on a target, seal their abilities depending on the sequence you choose for some time."));
+        tooltipComponents.add(Component.literal("Left click in order to switch which sequence abilities you can seal, with the lowest being your own."));
+        tooltipComponents.add(Component.literal("Cooldown and spirituality will vary depending on strength of target."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("~3000").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("~40 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, isAdvanced);

@@ -157,8 +157,10 @@ public class Teleportation extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, enables or disables spirit vision. WORK IN PROGRESS!!!!!"));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Upon use, create a copy of yourself that is flickering in front of you, which will keep any active abilities you choose."));
+        tooltipComponents.add(Component.literal("These flickering copies will try to attach anything nearby, and cause you to take any damage they take, and use your spirituality."));
+        tooltipComponents.add(Component.literal("Type in a player's name or any coordinates in order to cause a copy to appear at that location."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));

@@ -23,7 +23,7 @@ import java.util.List;
 
 public class CreateConcealedBundle extends SimpleAbilityItem {
     public CreateConcealedBundle(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 4, 100, 200);
+        super(properties, BeyonderClassInit.APPRENTICE, 4, 300, 300);
     }
 
     @Override
@@ -63,9 +63,10 @@ public class CreateConcealedBundle extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, transform a bundle in your off-hand in a special mystical item, that contains a very big space."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("100").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("10 Seconds").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Upon use, transform a bundle in your off-hand in a special mystical item, containing a pocket dimension which can start many materials"));
+        tooltipComponents.add(Component.literal("Be careful, as the bag will break and all items will be lost after a certain amount of uses.").withStyle(ChatFormatting.RED));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("300").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

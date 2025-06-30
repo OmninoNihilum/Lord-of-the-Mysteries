@@ -52,7 +52,7 @@ public class SeparateWormOfStar extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, separate worms of star from your body into your inventory."));
+        tooltipComponents.add(Component.literal("Upon use, enable or disable your consumption of Worm of Stars. If enabled, your ability cooldowns will be lowered when they're used in exchange for Worms of Star."));
         tooltipComponents.add(Component.literal("Type a number in chat in order to separate that amount of worm of stars from you"));
         tooltipComponents.add(Component.literal("Don't take away too many, as if you don't have enough, you will suffer consequences").withStyle(ChatFormatting.RED));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));

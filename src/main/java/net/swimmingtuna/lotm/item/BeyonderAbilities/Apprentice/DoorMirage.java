@@ -173,8 +173,8 @@ public class DoorMirage extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, starts to transform in a series of doors, that in each 5 seconds will teleport an attacker away."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("60/s").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Upon use, starts to transform in a series of doors, causing an attacker once every ~3 seconds to be teleported away from you and have their attack nullified"));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("60 per second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));

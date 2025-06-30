@@ -175,7 +175,6 @@ public class PlayerMobTracker extends SavedData {
             if (!(entity instanceof PlayerMobEntity) || !entity.isAlive()) {
                 iterator.remove();
                 removed = true;
-                System.out.println("Cleaned up missing PlayerMob from tracker: " + entry.getValue().name + " (UUID: " + entityUUID + ")");
             }
         }
 

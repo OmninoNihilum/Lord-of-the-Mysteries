@@ -266,7 +266,7 @@ public class CreateDoor extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        tooltipComponents.add(Component.literal("Upon use, creates a conceptual door that can be used to pass trough a few blocks. Shift in order to go through any doors created."));
+        tooltipComponents.add(Component.literal("Upon use on a block, creates a conceptual door that can be used to pass trough a few blocks. Shift in order to go through any doors created."));
         tooltipComponents.add(Component.literal("Use while sneaking to see how many blocks can be passed."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("70").withStyle(ChatFormatting.YELLOW)));
         Component.literal("Cooldown: ").append(Component.literal("10 Seconds").withStyle(ChatFormatting.YELLOW));

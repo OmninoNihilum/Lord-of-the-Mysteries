@@ -446,6 +446,7 @@ public class ServerEvents {
                             player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
                         }
                     });
+                    player.getCooldowns().addCooldown(ItemInit.DIMENSIONAL_SIGHT.get(), 6000);
                 }
             }
             event.setCanceled(true);

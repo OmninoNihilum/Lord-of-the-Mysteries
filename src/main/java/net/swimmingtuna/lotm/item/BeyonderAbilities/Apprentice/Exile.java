@@ -48,7 +48,7 @@ import java.util.Random;
 public class Exile extends SimpleAbilityItem {
 
     public Exile(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 9, 0, 20);
+        super(properties, BeyonderClassInit.APPRENTICE, 4, 700, 800);
     }
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
@@ -218,8 +218,8 @@ public class Exile extends SimpleAbilityItem {
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, summon a door that will pull in and exile all those to a dimension where they will encounter either freezing temperature, a burning hell, an area with constant calamities, or rogue beyonders. They will be in this dimension for 20 seconds before coming back"));
         tooltipComponents.add(Component.literal("Mobs exiled will not have their health drop below 20."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("700").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("40 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

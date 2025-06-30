@@ -32,7 +32,7 @@ import java.util.List;
 public class Blink extends SimpleAbilityItem {
 
     public Blink(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0);
+        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 5);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class Blink extends SimpleAbilityItem {
         if (!checkAll(player, BeyonderClassInit.APPRENTICE.get(), 5, blinkDistance, true)) {
             return InteractionResult.FAIL;
         }
-        addCooldown(player, this, 10);
+        addCooldown(player, this, 5);
         useSpirituality(player, blinkDistance);
         blink(player);
         return InteractionResult.SUCCESS;
@@ -113,7 +113,7 @@ public class Blink extends SimpleAbilityItem {
         tooltipComponents.add(Component.literal("Shift to increase blinking distance"));
         tooltipComponents.add(Component.literal("Left Click for Blink (Afterimage)"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("Blink Distance").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1/4 of a Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

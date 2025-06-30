@@ -91,6 +91,17 @@ public class ClientEvents {
 
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
+    public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
+        LivingEntity entity = event.getEntity();
+        if(DoorMirage.isActive(entity)){
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            RenderSystem.disableBlend();
+        }
+    }
+
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
     public static void livingRender(RenderLivingEvent.Pre<?, ?> event) {
         LivingEntity entity = event.getEntity();
         Player player = Minecraft.getInstance().player;
@@ -123,8 +134,6 @@ public class ClientEvents {
         if(DoorMirage.isActive(entity)){
             float counter = DoorMirage.getCounter(entity);
             float opacity = 1f - (counter / 100f);
-
-            // Force blend state
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.setShaderColor(1f, 1f, 1f, opacity);

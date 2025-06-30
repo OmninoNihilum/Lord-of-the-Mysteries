@@ -166,7 +166,7 @@ public class BlinkState extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Use in order to enable or disable your automatic blinking. If enabled, you will automatically dodge any damage."));
+        tooltipComponents.add(Component.literal("Use in order to enable or disable your blink state. If enabled, you will be able to fly, and for each block you travel, spirituality will be used, but the next ability you use will have it's cooldown reduced depending on the distance traveled since you last used an ability."));
         tooltipComponents.add(Component.literal("Left Click for Blink"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50 + Amount of damage").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));

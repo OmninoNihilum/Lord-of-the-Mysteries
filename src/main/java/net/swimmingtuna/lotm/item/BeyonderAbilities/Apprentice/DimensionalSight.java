@@ -195,7 +195,7 @@ DimensionalSight extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use on an entity, mark it with a dimensional sight in front of you, able to see all their surrounding blocks and themselves. You can also type the name of a player into chat to view them from anywhere."));
-        tooltipComponents.add(Component.literal("If used while sneaking, will create in the off hand a special door that leads to the users Concealed Space."));
+        tooltipComponents.add(Component.literal("You can use MOST Door pathway abilities while near and looking at a dimensional sight in order to have your abilities be cast at it's location."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1000").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("5 Minutes").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

@@ -23,7 +23,7 @@ import java.util.List;
 
 public class SpatialCage extends SimpleAbilityItem {
     public SpatialCage(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 3, 0, 1000);
+        super(properties, BeyonderClassInit.APPRENTICE, 3, 800, 1000);
     }
 
     @Override
@@ -32,7 +32,9 @@ public class SpatialCage extends SimpleAbilityItem {
             if (!checkAll(livingEntity)) {
                 return InteractionResult.FAIL;
             }
+            useSpirituality(livingEntity);
             SpatialCageEntity.setSealed(interactionTarget, livingEntity, BeyonderUtil.getSequence(livingEntity) - 1, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_CAGE.get()));
+            addCooldown(livingEntity);
         }
         return InteractionResult.SUCCESS;
     }
@@ -45,6 +47,8 @@ public class SpatialCage extends SimpleAbilityItem {
         DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
         if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
             player.sendSystemMessage(Component.literal("You created a Spatial Cage around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
+            addCooldown(player);
+            useSpirituality(player);
             SpatialCageEntity.setSealed(dimensionalSightTileEntity.getScryTarget(), player, BeyonderUtil.getSequence(player) - 1, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.SPATIAL_CAGE.get()));
         }
         return InteractionResult.SUCCESS;
@@ -53,8 +57,8 @@ public class SpatialCage extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         tooltipComponents.add(Component.literal("Upon use, creates a powerful seal that can affect beings a full sequence above you."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("800").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("50 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, isAdvanced);
