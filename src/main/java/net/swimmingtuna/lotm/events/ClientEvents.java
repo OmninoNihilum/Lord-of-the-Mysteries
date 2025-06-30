@@ -89,16 +89,6 @@ public class ClientEvents {
         }
     }
 
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
-        LivingEntity entity = event.getEntity();
-        if(DoorMirage.isActive(entity)){
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.disableBlend();
-        }
-    }
-
 
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
@@ -129,14 +119,6 @@ public class ClientEvents {
             }
         } else if (event.getRenderer().shadowRadius == 0.0f) {
             event.getRenderer().shadowRadius = 1.0f;
-        }
-
-        if(DoorMirage.isActive(entity)){
-            float counter = DoorMirage.getCounter(entity);
-            float opacity = 1f - (counter / 100f);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.setShaderColor(1f, 1f, 1f, opacity);
         }
     }
 

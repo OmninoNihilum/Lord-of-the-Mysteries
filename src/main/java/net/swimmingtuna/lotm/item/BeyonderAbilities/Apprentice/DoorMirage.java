@@ -16,12 +16,14 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.network.PacketDistributor;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.networking.packet.DoorMirageDataS2C;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderInvisibilityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,21 +58,26 @@ public class DoorMirage extends SimpleAbilityItem {
         if (entity instanceof Player pPlayer) {
             pPlayer.displayClientMessage(Component.literal("Door Mirage Turned " + (mirage ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
         }
-        resetCounter(entity);
+        entity.getPersistentData().putInt("doorMirageDodgeCounter", 0);
     }
 
     public static void mirageTick(LivingEntity entity) {
         if (entity.level().isClientSide) return;
-        if (isActive(entity)) {
-            if (getCounter(entity) < 100) {
-                setCounter(entity, getCounter(entity) + 1);
+        CompoundTag tag = entity.getPersistentData();
+        boolean doorMirage = tag.getBoolean("doorMirageIsActive");
+        int counter = tag.getInt("doorMirageDodgeCounter");
+        int invincibilityCounter = tag.getInt("doorMirageInvincibilityCounter");
+        if (doorMirage) {
+            if (counter < 100) {
+                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, entity.getUUID(), 20));
+                entity.getPersistentData().putInt("doorMirageDodgeCounter", counter - 1);
             }
             if (entity.level() instanceof ServerLevel level) {
-                level.sendParticles(ParticleInit.DOOR.get(), entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), getCounter(entity) / 10, 0.2, 0.25, 0.2, 0.01);
+                level.sendParticles(ParticleInit.DOOR.get(), entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), counter / 10, 0.2, 0.25, 0.2, 0.01);
             }
         }
-        if (getInvincibilityCounter(entity) > 0) {
-            setInvincibilityCounter(entity, getInvincibilityCounter(entity) - 1);
+        if (invincibilityCounter > 0) {
+            tag.putInt("doorMirageInvincibilityCounter", invincibilityCounter - 1);
         }
 
         if (entity.getPersistentData().contains("xDoorMirageStuck") && entity.getPersistentData().contains("yDoorMirageStuck") && entity.getPersistentData().contains("zDoorMirageStuck")) {
@@ -86,53 +93,32 @@ public class DoorMirage extends SimpleAbilityItem {
         }
     }
 
-    public static void resetCounter(LivingEntity entity) {
-        setCounter(entity, 0);
-    }
-
-    public static boolean isActive(LivingEntity entity) {
-        return entity.getPersistentData().getBoolean("doorMirageIsActive");
-    }
-
-    public static int getCounter(LivingEntity entity) {
-        return entity.getPersistentData().getInt("doorMirageDodgeCounter");
-    }
-
-    public static void setCounter(LivingEntity entity, int counter) {
-        entity.getPersistentData().putInt("doorMirageDodgeCounter", counter);
-        DoorMirageDataS2C packet = new DoorMirageDataS2C(entity.getId(), entity.getPersistentData());
-        INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with((() -> entity)), packet);
-    }
-
-    public static int getInvincibilityCounter(LivingEntity entity) {
-        return entity.getPersistentData().getInt("doorMirageInvincibilityCounter");
-    }
-
-    public static void setInvincibilityCounter(LivingEntity entity, int counter) {
-        entity.getPersistentData().putInt("doorMirageInvincibilityCounter", counter);
-    }
-
     public static void doorMirageAttackEvent(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntity();
+        CompoundTag tag = attacked.getPersistentData();
+        boolean doorMirage = tag.getBoolean("doorMirageIsActive");
+        int invincibilityCounter = tag.getInt("doorMirageInvincibilityCounter");
+        int counter = tag.getInt("doorMirageDodgeCounter");
         Entity attacker = event.getSource().getEntity();
         if (attacker != null) {
-            if (DoorMirage.isActive(attacked)) {
-                if (DoorMirage.getInvincibilityCounter(attacked) > 0) {
+            if (doorMirage) {
+                if (invincibilityCounter > 0) {
                     event.setCanceled(true);
                     return;
                 }
-                if (DoorMirage.getCounter(attacked) >= BeyonderUtil.getDamage(attacked).get(ItemInit.DOOR_MIRAGE.get())) {
+                if (counter >= BeyonderUtil.getDamage(attacked).get(ItemInit.DOOR_MIRAGE.get())) {
                     event.setCanceled(true);
                     if (attacked instanceof Player player) {
                         player.displayClientMessage(Component.literal("Successfully dodged an attack").withStyle(BeyonderUtil.getStyle(player)), true);
                     }
-                    DoorMirage.setInvincibilityCounter(attacked, 15);
-                    if (attacker instanceof LivingEntity livingAttacker)
+                    tag.putInt("doorMirageInvincibilityCounter", 15);
+                    if (attacker instanceof LivingEntity livingAttacker) {
                         DoorMirage.summonDoorOnAttacker(attacked, livingAttacker);
-                    DoorMirage.resetCounter(attacked);
+                    }
+                    attacked.getPersistentData().putInt("doorMirageDodgeCounter", 0);
                 } else {
                     if (attacked instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Dodge not ready yet. Dodge counter ready in: " + (int) (DoorMirage.getCounter(attacked)) / 20 + " seconds").withStyle(BeyonderUtil.getStyle(player)), true);
+                        player.displayClientMessage(Component.literal("Dodge not ready yet. Dodge counter ready in: " + (int) (counter) / 20 + " seconds").withStyle(BeyonderUtil.getStyle(player)), true);
                     }
                 }
             }

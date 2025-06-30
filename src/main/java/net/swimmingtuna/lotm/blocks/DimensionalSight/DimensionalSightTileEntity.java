@@ -424,39 +424,37 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             this.doRead = false;
         }
 
-        // Update client-side entity animation and position for rendering
         if (level.isClientSide && this.getScryTarget() != null) {
-            // Set the entity's display position
-            Vec3 displayPos = getEntityDisplayPos();
-            this.getScryTarget().setPos(displayPos.x, displayPos.y, displayPos.z);
-
-            // Update rotation and animation data
-            this.getScryTarget().yHeadRot = this.headYaw;
-            this.getScryTarget().yHeadRotO = this.prevHeadYaw;
-            this.getScryTarget().setYRot(this.yaw);
-            this.getScryTarget().yRotO = this.prevYaw;
-            this.getScryTarget().setXRot(this.pitch);
-            this.getScryTarget().xRotO = this.prevPitch;
-            this.getScryTarget().yBodyRot = this.renderYaw;
-            this.getScryTarget().yBodyRotO = this.prevRenderYaw;
-            this.getScryTarget().setDeltaMovement(new Vec3(this.velX, this.velY, this.velZ));
-            this.getScryTarget().walkAnimation.position = this.limbSwing;
-            this.getScryTarget().walkAnimation.setSpeed(this.limbSwingAmount);
-            this.getScryTarget().attackAnim = this.swingProgress;
-            this.getScryTarget().oAttackAnim = this.prevSwingProgress;
-            this.prevSwingProgress = this.getScryTarget().attackAnim;
-            this.prevYaw = this.getScryTarget().getYRot();
-            this.prevRenderYaw = this.getScryTarget().yBodyRot;
-            this.prevPitch = this.getScryTarget().getXRot();
-            this.prevHeadYaw = this.getScryTarget().yHeadRot;
+            CompoundTag renderData = new CompoundTag();
+            renderData.putDouble("displayX", getEntityDisplayPos().x);
+            renderData.putDouble("displayY", getEntityDisplayPos().y);
+            renderData.putDouble("displayZ", getEntityDisplayPos().z);
+            renderData.putFloat("displayYaw", this.yaw);
+            renderData.putFloat("displayPitch", this.pitch);
+            renderData.putFloat("displayHeadYaw", this.headYaw);
+            renderData.putFloat("displayBodyYaw", this.renderYaw);
+            renderData.putDouble("displayVelX", this.velX);
+            renderData.putDouble("displayVelY", this.velY);
+            renderData.putDouble("displayVelZ", this.velZ);
+            renderData.putFloat("displayLimbSwing", this.limbSwing);
+            renderData.putFloat("displayLimbSwingAmount", this.limbSwingAmount);
+            renderData.putFloat("displaySwingProgress", this.swingProgress);
+            renderData.putBoolean("displayOnGround", true);
+            renderData.putFloat("displayFallDistance", 0.0f);
+            this.getScryTarget().getPersistentData().put("dimensionalSightRenderData", renderData);
+            this.prevSwingProgress = this.swingProgress;
+            this.prevYaw = this.yaw;
+            this.prevRenderYaw = this.renderYaw;
+            this.prevPitch = this.pitch;
+            this.prevHeadYaw = this.headYaw;
             if (this.scryDataManager != null) {
                 try {
                     this.getScryTarget().getEntityData().assignValues(this.scryDataManager);
-                } catch (Exception e) {
-                    // Handle data assignment failure
+                } catch (Exception ignored) {
                 }
             }
         }
+
     }
 
     public Player getPlayerForScry(Level world, String viewTarget, CompoundTag scryNBT, UUID uuid) {
@@ -551,6 +549,14 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
         }
 
         return super.getUpdatePacket();
+    }
+
+    @Override
+    public void setRemoved() {
+        if (level != null && level.isClientSide && this.getScryTarget() != null) {
+            this.getScryTarget().getPersistentData().remove("dimensionalSightRenderData");
+        }
+        super.setRemoved();
     }
 
     public static class BlockPosInfo {
@@ -693,6 +699,48 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             this.targetPos = target.position();
         }
     }
+    private Map<UUID, EntityRenderData> originalEntityData = new HashMap<>();
 
+    private static class EntityRenderData {
+        public Vec3 originalPos;
+        public float originalYaw, originalPitch, originalHeadYaw, originalBodyYaw;
+        public float originalYawO, originalPitchO, originalHeadYawO, originalBodyYawO;
+        public Vec3 originalDeltaMovement;
+        public float originalLimbSwing, originalLimbSwingAmount, originalAttackAnim, originalOAttackAnim;
+
+        public EntityRenderData(LivingEntity entity) {
+            this.originalPos = entity.position();
+            this.originalYaw = entity.getYRot();
+            this.originalPitch = entity.getXRot();
+            this.originalHeadYaw = entity.yHeadRot;
+            this.originalBodyYaw = entity.yBodyRot;
+            this.originalYawO = entity.yRotO;
+            this.originalPitchO = entity.xRotO;
+            this.originalHeadYawO = entity.yHeadRotO;
+            this.originalBodyYawO = entity.yBodyRotO;
+            this.originalDeltaMovement = entity.getDeltaMovement();
+            this.originalLimbSwing = entity.walkAnimation.position();
+            this.originalLimbSwingAmount = entity.walkAnimation.speed();
+            this.originalAttackAnim = entity.attackAnim;
+            this.originalOAttackAnim = entity.oAttackAnim;
+        }
+
+        public void restore(LivingEntity entity) {
+            entity.setPos(originalPos.x, originalPos.y, originalPos.z);
+            entity.setYRot(originalYaw);
+            entity.setXRot(originalPitch);
+            entity.yHeadRot = originalHeadYaw;
+            entity.yBodyRot = originalBodyYaw;
+            entity.yRotO = originalYawO;
+            entity.xRotO = originalPitchO;
+            entity.yHeadRotO = originalHeadYawO;
+            entity.yBodyRotO = originalBodyYawO;
+            entity.setDeltaMovement(originalDeltaMovement);
+            entity.walkAnimation.position = originalLimbSwing;
+            entity.walkAnimation.setSpeed(originalLimbSwingAmount);
+            entity.attackAnim = originalAttackAnim;
+            entity.oAttackAnim = originalOAttackAnim;
+        }
+    }
 
 }

@@ -45,7 +45,6 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
@@ -1173,5 +1172,48 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
     private static boolean randomDrop(RandomSource rand, double baseChance, int looting) {
         return rand.nextDouble() <= Math.max(0, baseChance * Math.max(looting + 1, 1));
+    }
+
+    public static PlayerMobEntity playerCopy(LivingEntity player) {
+        PlayerMobEntity playerMobEntity = new PlayerMobEntity(EntityInit.PLAYER_MOB_ENTITY.get(), player.level());
+        playerMobEntity.setSequence(BeyonderUtil.getSequence(player));
+        playerMobEntity.setPathway(BeyonderUtil.getPathway(player));
+        CompoundTag playerData = player.getPersistentData();
+        CompoundTag cloneData = playerMobEntity.getPersistentData();
+        cloneData.merge(playerData.copy());
+        for (Attribute attribute : ForgeRegistries.ATTRIBUTES.getValues()) {
+            AttributeInstance playerAttribute = player.getAttribute(attribute);
+            AttributeInstance cloneAttribute = playerMobEntity.getAttribute(attribute);
+            if (playerAttribute != null && cloneAttribute != null) {
+                cloneAttribute.setBaseValue(playerAttribute.getBaseValue());
+                for (AttributeModifier modifier : playerAttribute.getModifiers()) {
+                    if (!cloneAttribute.hasModifier(modifier)) {
+                        cloneAttribute.addPermanentModifier(modifier);
+                    }
+                }
+            }
+        }
+        BeyonderUtil.setScale(playerMobEntity, BeyonderUtil.getScale(player));
+        playerMobEntity.getAttribute(Attributes.MAX_HEALTH).setBaseValue(player.getMaxHealth());
+        playerMobEntity.setHealth(player.getHealth());
+        for (MobEffectInstance effect : player.getActiveEffects()) {
+            playerMobEntity.addEffect(new MobEffectInstance(effect));
+        }
+
+        Set<String> playerTags = player.getTags();
+        for (String tag : playerTags) {
+            playerMobEntity.addTag(tag);
+        }
+
+
+        if (BeyonderUtil.canFly(player)) {
+            BeyonderUtil.startFlying(playerMobEntity, 0.1f);
+        }
+        playerMobEntity.setUsername(player.getScoreboardName());
+        playerMobEntity.setIsClone(true);
+        if (player.hasCustomName()) {
+            playerMobEntity.setCustomName(player.getCustomName());
+        }
+        return playerMobEntity;
     }
 }
