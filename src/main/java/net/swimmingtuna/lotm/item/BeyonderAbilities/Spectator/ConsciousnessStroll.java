@@ -14,6 +14,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +52,9 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
         ResourceKey<Level> targetDimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(originalDimension));
 
         if (strollCounter >= 1) {
+            if (livingEntity.isShiftKeyDown()) {
+                LOTM.LOGGER.info("SHIFT KEY DOWN");
+            }
             tag.putInt("consciousnessStrollActivated", strollCounter - 1);
             serverPlayer.setGameMode(GameType.SPECTATOR);
         }

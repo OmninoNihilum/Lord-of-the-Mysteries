@@ -128,11 +128,6 @@ public class LOTMNetworkHandler {
                 .encoder(ScribeCopyAbilityC2S::toByte)
                 .consumerMainThread(ScribeCopyAbilityC2S::handle)
                 .add();
-        INSTANCE.messageBuilder(DoorMirageDataS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(DoorMirageDataS2C::new)
-                .encoder(DoorMirageDataS2C::toByte)
-                .consumerMainThread(DoorMirageDataS2C::handle)
-                .add();
         INSTANCE.messageBuilder(RemoveInvisibiltyS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(RemoveInvisibiltyS2C::new)
                 .encoder(RemoveInvisibiltyS2C::encode)
