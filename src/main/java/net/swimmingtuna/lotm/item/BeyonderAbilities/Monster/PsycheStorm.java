@@ -85,12 +85,14 @@ public class PsycheStorm extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player);
+            useSpirituality(player);
+            psycheStorm(player, player.level(), BlockPos.containing(interactionTarget.position()));
         }
-        addCooldown(player);
-        useSpirituality(player);
-        psycheStorm(player, player.level(), BlockPos.containing(interactionTarget.position()));
         return InteractionResult.SUCCESS;
     }
 

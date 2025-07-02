@@ -60,12 +60,14 @@ public class DreamWeaving extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player, this, 500 / BeyonderUtil.getDreamIntoReality(player));
+            useSpirituality(player);
+            dreamWeave(player, interactionTarget);
         }
-        addCooldown(player, this, 500 / BeyonderUtil.getDreamIntoReality(player));
-        useSpirituality(player);
-        dreamWeave(player, interactionTarget);
         return InteractionResult.SUCCESS;
     }
 

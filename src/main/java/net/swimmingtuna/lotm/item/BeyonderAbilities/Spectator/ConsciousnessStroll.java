@@ -8,7 +8,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +34,8 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Type a player's name in chat to teleport to their location in the form of your spirit body, not being able to be seen or hurt. Teleporting back after 3 secondse"));
+        tooltipComponents.add(Component.literal("Type a player's name in chat to teleport to their location in the form of your spirit body, not being able to be seen or hurt. Teleporting back after 3 seconds"));
+        tooltipComponents.add(Component.literal("Left click in order to choose whether or not you return to your original location after three seconds."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("20 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -39,10 +43,30 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
-    public static void consciousnessStroll(LivingEntity livingEntity) {
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player player) {
+            if (player.tickCount % 2 == 0 && !level.isClientSide()) {
+                if (player.getMainHandItem().getItem() instanceof MisfortuneManipulation) {
+                    player.displayClientMessage(Component.literal(misfortuneManipulationString(player)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GRAY), true);
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
+    }
+
+    public static String misfortuneManipulationString(Player pPlayer) {
+        CompoundTag tag = pPlayer.getPersistentData();
+        boolean cs = tag.getBoolean("consciousnessStrollChoice");
+        if (cs) {
+            return "Your Consciousness Stroll will move you to the target's location after viewing them";
+        }
+        return "Your Consciousness Stroll will NOT move you to the target's location after viewing them";
+    }
+        public static void consciousnessStroll(LivingEntity livingEntity) {
         //CONSCIOUSNESS STROLL
         if (!(livingEntity instanceof ServerPlayer serverPlayer)) return;
         CompoundTag tag = livingEntity.getPersistentData();
+        boolean cs = tag.getBoolean("consciousnessStrollChoice");
         int strollCounter = tag.getInt("consciousnessStrollActivated");
         int consciousnessStrollActivatedX = tag.getInt("consciousnessStrollActivatedX");
         int consciousnessStrollActivatedY = tag.getInt("consciousnessStrollActivatedY");
@@ -52,18 +76,17 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
         ResourceKey<Level> targetDimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(originalDimension));
 
         if (strollCounter >= 1) {
-            if (livingEntity.isShiftKeyDown()) {
-                LOTM.LOGGER.info("SHIFT KEY DOWN");
-            }
             tag.putInt("consciousnessStrollActivated", strollCounter - 1);
             serverPlayer.setGameMode(GameType.SPECTATOR);
         }
         ServerLevel targetLevel = serverPlayer.getServer().getLevel(targetDimension);
         if (strollCounter == 1) {
-            if (targetLevel != null) {
-                livingEntity.changeDimension(targetLevel);
+            if (cs) {
+                if (targetLevel != null) {
+                    livingEntity.changeDimension(targetLevel);
+                }
+                livingEntity.teleportTo(consciousnessStrollActivatedX, consciousnessStrollActivatedY, consciousnessStrollActivatedZ);
             }
-            livingEntity.teleportTo(consciousnessStrollActivatedX, consciousnessStrollActivatedY, consciousnessStrollActivatedZ);
             serverPlayer.setGameMode(GameType.SURVIVAL);
         }
     }

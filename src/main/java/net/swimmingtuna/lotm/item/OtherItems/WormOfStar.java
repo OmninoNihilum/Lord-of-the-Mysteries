@@ -5,7 +5,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -20,21 +23,19 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class WormOfStar extends SimpleAbilityItem {
+public class WormOfStar extends Item {
 
 
     public WormOfStar(Properties properties) {
-        super(properties, BeyonderClassInit.SEER, 9, 0, 20);
+        super(properties);
+
     }
 
     @Override
-    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        addCooldown(player);
-        wormOfStarCopy(player, hand);
-        return InteractionResult.SUCCESS;
+    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+        wormOfStarCopy(pPlayer, pUsedHand);
+        return super.use(pLevel, pPlayer, pUsedHand);
     }
-
-
 
     @Override
     public int getMaxStackSize(ItemStack stack) {

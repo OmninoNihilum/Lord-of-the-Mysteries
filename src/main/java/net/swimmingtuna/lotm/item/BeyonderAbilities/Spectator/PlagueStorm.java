@@ -36,14 +36,16 @@ public class PlagueStorm extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player);
+            addCooldown(player, ItemInit.MENTAL_PLAGUE.get(), 200);
+            addCooldown(player, ItemInit.MIND_STORM.get(), 200);
+            useSpirituality(player);
+            plagueStorm(player, interactionTarget);
         }
-        addCooldown(player);
-        addCooldown(player, ItemInit.MENTAL_PLAGUE.get(), 200);
-        addCooldown(player, ItemInit.MIND_STORM.get(), 200);
-        useSpirituality(player);
-        plagueStorm(player, interactionTarget);
         return InteractionResult.SUCCESS;
     }
 

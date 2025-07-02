@@ -42,12 +42,14 @@ public class MercuryCage extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack pStack, LivingEntity player, LivingEntity pInteractionTarget, InteractionHand pUsedHand) {
-        if (!checkAll(player, BeyonderClassInit.WARRIOR.get(), 2, (int) ScaleTypes.BASE.getScaleData(pInteractionTarget).getScale() * 100, false)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player, BeyonderClassInit.WARRIOR.get(), 2, (int) ScaleTypes.BASE.getScaleData(pInteractionTarget).getScale() * 100, false)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player);
+            useSpirituality(player, (int) (Math.max(pInteractionTarget.getBbHeight(), pInteractionTarget.getBbWidth()) * 100));
+            mercuryCageTarget(player, pInteractionTarget);
         }
-        addCooldown(player);
-        useSpirituality(player, (int) (Math.max(pInteractionTarget.getBbHeight(), pInteractionTarget.getBbWidth()) * 100));
-        mercuryCageTarget(player, pInteractionTarget);
         return InteractionResult.SUCCESS;
     }
 

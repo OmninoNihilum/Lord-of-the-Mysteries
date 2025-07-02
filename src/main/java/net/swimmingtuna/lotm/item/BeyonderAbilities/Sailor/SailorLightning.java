@@ -85,12 +85,14 @@ public class SailorLightning extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack pStack, LivingEntity player, LivingEntity pInteractionTarget, InteractionHand pUsedHand) {
-        if (!checkAll(player, BeyonderClassInit.SAILOR.get(), 5, 200, true)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player, BeyonderClassInit.SAILOR.get(), 5, 200, true)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player, this, 10 + (BeyonderUtil.getSequence(player) * 2));
+            useSpirituality(player, 200);
+            lightningTargetEntity(pInteractionTarget, player);
         }
-        addCooldown(player, this, 10 + (BeyonderUtil.getSequence(player) * 2));
-        useSpirituality(player, 200);
-        lightningTargetEntity(pInteractionTarget, player);
         return InteractionResult.SUCCESS;
     }
 

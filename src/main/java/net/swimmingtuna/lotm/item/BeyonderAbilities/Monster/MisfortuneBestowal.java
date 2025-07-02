@@ -32,18 +32,18 @@ public class MisfortuneBestowal extends SimpleAbilityItem {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
     public MisfortuneBestowal(Properties properties) {
-        super(properties, BeyonderClassInit.MONSTER, 5, 250,200 ,50,50);
+        super(properties, BeyonderClassInit.MONSTER, 5, 250, 200, 50, 50);
     }
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide() && !interactionTarget.level().isClientSide()) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
-        }
-        useSpirituality(player);
-        addCooldown(player);
-        misfortuneBestowal(interactionTarget, player);
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            useSpirituality(player);
+            addCooldown(player);
+            misfortuneBestowal(interactionTarget, player);
         }
         return InteractionResult.SUCCESS;
     }
@@ -105,10 +105,10 @@ public class MisfortuneBestowal extends SimpleAbilityItem {
             } else if (random <= 260) {
                 player.sendSystemMessage(Component.literal("You randomly bestowed a warden on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckWarden", 2);
-            } else if (random <=  300) {
+            } else if (random <= 300) {
                 player.sendSystemMessage(Component.literal("You randomly bestowed a lightning bolt on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckLightningMC", 2);
-            }  else if (random <= 380) {
+            } else if (random <= 380) {
                 player.sendSystemMessage(Component.literal("You randomly bestowed an illness on " + interactionTarget.getName().getString()).withStyle(style));
                 pTag.putInt("luckPoison", 2);
             } else if (random <= 395) {
@@ -147,6 +147,7 @@ public class MisfortuneBestowal extends SimpleAbilityItem {
             }
         }
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("MONSTER_ABILITY", ChatFormatting.GRAY);

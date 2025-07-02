@@ -63,12 +63,14 @@ public class DreamWalking extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player, this, 40 / BeyonderUtil.getDreamIntoReality(player));
+            useSpirituality(player);
+            dreamWalk(interactionTarget, player);
         }
-        addCooldown(player, this, 40 / BeyonderUtil.getDreamIntoReality(player));
-        useSpirituality(player);
-        dreamWalk(interactionTarget, player);
         return InteractionResult.SUCCESS;
     }
 

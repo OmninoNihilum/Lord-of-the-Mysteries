@@ -69,12 +69,14 @@ public class Nightmare extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack pStack, LivingEntity player, LivingEntity pInteractionTarget, InteractionHand pUsedHand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player);
+            useSpirituality(player);
+            nightmareNew(player, pInteractionTarget.getOnPos());
         }
-        addCooldown(player);
-        useSpirituality(player);
-        nightmareNew(player, pInteractionTarget.getOnPos());
         return InteractionResult.SUCCESS;
     }
 

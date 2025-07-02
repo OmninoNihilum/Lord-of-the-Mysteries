@@ -183,6 +183,11 @@ public class LOTMNetworkHandler {
                 .encoder(DawnWeaponryLeftClickC2S::toByte)
                 .consumerMainThread(DawnWeaponryLeftClickC2S::handle)
                 .add();
+        INSTANCE.messageBuilder(ConsciousnessStrollC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(ConsciousnessStrollC2S::new)
+                .encoder(ConsciousnessStrollC2S::toByte)
+                .consumerMainThread(ConsciousnessStrollC2S::handle)
+                .add();
         INSTANCE.messageBuilder(SealingLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(SealingLeftClickC2S::new)
                 .encoder(SealingLeftClickC2S::toByte)

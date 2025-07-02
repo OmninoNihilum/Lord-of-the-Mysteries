@@ -37,12 +37,14 @@ public class MentalPlague extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            useSpirituality(player);
+            mentalPlauge(interactionTarget);
+            addCooldown(player, this, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MENTAL_PLAGUE.get()));
         }
-        useSpirituality(player);
-        mentalPlauge(interactionTarget);
-        addCooldown(player, this,  (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MENTAL_PLAGUE.get()));
         return InteractionResult.SUCCESS;
     }
 

@@ -1045,7 +1045,10 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof DawnWeaponry) {
                 LOTMNetworkHandler.sendToServer(new DawnWeaponryLeftClickC2S());
-            } else if (heldItem.getItem() instanceof SwordOfTwilight) {
+            } if (heldItem.getItem() instanceof ConsciousnessStroll) {
+                LOTMNetworkHandler.sendToServer(new ConsciousnessStrollC2S());
+            }
+            else if (heldItem.getItem() instanceof SwordOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new SwordOfTwilightC2S());
             } else if (heldItem.getItem() instanceof Gigantification) {
                 LOTMNetworkHandler.sendToServer(new GigantificationC2S());
@@ -1232,6 +1235,8 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
                 LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
+            } if (heldItem.getItem() instanceof ConsciousnessStroll) {
+                LOTMNetworkHandler.sendToServer(new ConsciousnessStrollC2S());
             }
             if (heldItem.getItem() instanceof AqueousLightPush) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_PULL.get())));

@@ -83,12 +83,14 @@ public class ProbabilityManipulationImpulse extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack pStack, LivingEntity player, LivingEntity pInteractionTarget, InteractionHand pUsedHand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            probabilityImpulseEntity(pInteractionTarget);
+            addCooldown(player);
+            useSpirituality(player);
         }
-        probabilityImpulseEntity(pInteractionTarget);
-        addCooldown(player);
-        useSpirituality(player);
         return InteractionResult.SUCCESS;
     }
 

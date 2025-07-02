@@ -36,10 +36,10 @@ public class ApplyManipulation extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
-        }
         if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
             useSpirituality(player);
             addCooldown(player);
             if (!interactionTarget.hasEffect(ModEffects.MANIPULATION.get())) {

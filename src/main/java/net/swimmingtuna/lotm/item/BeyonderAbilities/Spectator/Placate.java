@@ -30,22 +30,25 @@ public class Placate extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
-        if (!checkAll(player, BeyonderClassInit.SPECTATOR.get(), 7, 125, true)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player, BeyonderClassInit.SPECTATOR.get(), 7, 125, true)) {
+                return InteractionResult.FAIL;
+            }
+            if (BeyonderUtil.getSequence(player) >= 4) {
+                removeHarmfulEffects(interactionTarget);
+                addCooldown(player);
+                useSpirituality(player);
+                return InteractionResult.SUCCESS;
+            } else {
+                halfHarmfulEffects(interactionTarget);
+                addCooldown(player);
+                useSpirituality(player);
+                return InteractionResult.SUCCESS;
+            }
         }
-        if (BeyonderUtil.getSequence(player) >= 4) {
-            removeHarmfulEffects(interactionTarget);
-            addCooldown(player);
-            useSpirituality(player);
-            return InteractionResult.SUCCESS;
-        }
-        else {
-            halfHarmfulEffects(interactionTarget);
-            addCooldown(player);
-            useSpirituality(player);
-            return InteractionResult.SUCCESS;
-        }
+        return InteractionResult.SUCCESS;
     }
+
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
         if (!checkAll(player, BeyonderClassInit.SPECTATOR.get(), 7, 125, true)) {
@@ -56,8 +59,7 @@ public class Placate extends SimpleAbilityItem {
             addCooldown(player);
             useSpirituality(player);
             return InteractionResult.SUCCESS;
-        }
-        else {
+        } else {
             halfHarmfulEffects(player);
             addCooldown(player);
             useSpirituality(player);
@@ -111,6 +113,7 @@ public class Placate extends SimpleAbilityItem {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
