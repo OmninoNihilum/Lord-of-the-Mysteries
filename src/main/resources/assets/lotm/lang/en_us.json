@@ -474,6 +474,7 @@
   "enchantment.lotm.confusion": "Confusion",
   "enchantment.lotm.freeze": "Freeze",
   "item.lotm.doll": "Doll",
+  "item.lotm.doll_structure":"Structure Doll",
 
   "entity.lotm.aqueous_light": "Aqueous Light",
   "entity.lotm.mercury_entity": "Mercury",

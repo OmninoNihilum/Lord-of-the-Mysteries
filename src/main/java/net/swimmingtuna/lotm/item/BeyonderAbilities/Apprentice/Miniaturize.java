@@ -1,9 +1,11 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -16,6 +18,7 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.OtherItems.Doll;
+import net.swimmingtuna.lotm.item.OtherItems.DollStructure;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,6 +51,20 @@ public class Miniaturize extends SimpleAbilityItem {
             addCooldown(player, this, 1200 * amount);
             useSpirituality(player, 1500 * amount);
             dimensionalSightTileEntity.removeThis();
+        } else {
+
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            CompoundTag tag = player.getItemInHand(hand).getOrCreateTag();
+            if (!tag.contains("miniaturizeAreaRange")) {
+                tag.putInt("miniaturizeAreaRange", 3);
+            }
+            addCooldown(player);
+            useSpirituality(player);
+            miniaturizeArea(player, tag.getInt("miniaturizeAreaRange"));
+
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS;
     }
@@ -74,6 +91,29 @@ public class Miniaturize extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+        super.inventoryTick(stack, level, entity, slot, selected);
+        if (selected && !level.isClientSide) {
+            if (entity.isShiftKeyDown()) {
+                CompoundTag tag = stack.getOrCreateTag();
+                if (entity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("Range: " + tag.getInt("miniaturizeAreaRange")), true);
+                }
+                if (level.getGameTime() % 4 == 0 && entity.isShiftKeyDown()) {
+                    if (!tag.contains("miniaturizeAreaRange")) {
+                        tag.putInt("miniaturizeAreaRange", 3);
+                    }
+                    if (tag.getInt("miniaturizeAreaRange") < 10) {
+                        tag.putInt("miniaturizeAreaRange", tag.getInt("miniaturizeAreaRange") + 1);
+                    } else {
+                        tag.putInt("miniaturizeAreaRange", 3);
+                    }
+                }
+            }
+        }
+    }
+
     public void miniaturize(LivingEntity user, LivingEntity target) {
         boolean x = BeyonderUtil.getSequence(user) < BeyonderUtil.getSequence(target) - 1;
 
@@ -81,7 +121,7 @@ public class Miniaturize extends SimpleAbilityItem {
             x = true;
         }
         if (x) {
-        ItemStack doll = ((Doll) ItemInit.DOLL.get()).getDollFromEntity(user, target, true);
+            ItemStack doll = ((Doll) ItemInit.DOLL.get()).getDollFromEntity(user, target, true);
             if (user instanceof Player player) {
                 boolean added = player.getInventory().add(doll);
                 if (!added || !doll.isEmpty()) {
@@ -98,9 +138,26 @@ public class Miniaturize extends SimpleAbilityItem {
         }
     }
 
+    public void miniaturizeArea(LivingEntity user, int range) {
+        ItemStack doll = DollStructure.createWithCapturedStructure(user, range);
+
+        if (user instanceof Player player) {
+            boolean added = player.getInventory().add(doll);
+
+            if (!added || !doll.isEmpty()) {
+                ItemEntity itemEntity = player.drop(doll, false);
+                if (itemEntity != null) {
+                    itemEntity.setNoPickUpDelay();
+                }
+            }
+        }
+    }
+
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use on an entity with low health, miniaturize them and get them as an item, causing you to be able to place them back down again at the state they were miniaturized in."));
+        tooltipComponents.add(Component.literal("You can also use this while not looking at an entity to miniaturize the area around you into your inventory."));
+        tooltipComponents.add(Component.literal("Shift to increase miniaturized area."));
         tooltipComponents.add(Component.literal("Cooldown and spirituality will vary depending on strength of target compared to yourself."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("~1500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("~1 Minute").withStyle(ChatFormatting.YELLOW)));
@@ -116,9 +173,6 @@ public class Miniaturize extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null) {
-            return 80;
-        }
         return 0;
     }
 }

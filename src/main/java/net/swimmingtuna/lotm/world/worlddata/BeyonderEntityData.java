@@ -279,6 +279,14 @@ public class BeyonderEntityData extends SavedData {
             }
             ItemStack originalItem = mob.getMainHandItem().copy();
             mob.setItemInHand(InteractionHand.MAIN_HAND, selectedAbility.getDefaultInstance());
+            if(mob instanceof PlayerMobEntity playerMob){
+                if(playerMob.getHasAbilityCap()){
+                    if(playerMob.getMaxAbilitiesUse() == 0){
+                        playerMob.discard();
+                    }
+                    playerMob.setMaxAbilitiesUse(playerMob.getMaxAbilitiesUse()-1);
+                }
+            }
             useAvailableAbilityAsMob(mob);
             BeyonderUtil.useSpirituality(mob,selectedAbility.getSpirituality());
             mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);

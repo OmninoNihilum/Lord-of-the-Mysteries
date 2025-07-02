@@ -9,7 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -21,12 +20,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.swimmingtuna.lotm.LOTM;
-import net.swimmingtuna.lotm.capabilities.doll_data.DollDataCapability;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -47,15 +43,15 @@ public class Doll extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context){
+    public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
         CompoundTag tag = stack.getOrCreateTag();
         InteractionHand hand = context.getHand();
-        if(!level.isClientSide){
-            if(!tag.contains("EntityPlayerName")){
+        if (!level.isClientSide) {
+            if (!tag.contains("EntityPlayerName")) {
                 releaseEntity(stack, level, pos, player, hand);
                 return InteractionResult.SUCCESS;
             }
@@ -70,7 +66,7 @@ public class Doll extends Item {
         super.inventoryTick(stack, level, entity, slot, selected);
         if (!level.isClientSide) {
             CompoundTag tag = stack.getOrCreateTag();
-            if(tag.contains("EntityPlayerUUID")) {
+            if (tag.contains("EntityPlayerUUID")) {
                 if (entity.getServer() != null) {
                     Player trapped = BeyonderUtil.getPlayerFromUUID(entity.getServer(), tag.getUUID("EntityPlayerUUID"));
                     if (trapped != null) {
@@ -83,7 +79,6 @@ public class Doll extends Item {
                     } else {
                         stack.shrink(1);
                     }
-                } else {
                 }
             }
         }
@@ -93,7 +88,7 @@ public class Doll extends Item {
     public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
         if (!entity.level().isClientSide) {
             CompoundTag tag = stack.getOrCreateTag();
-            if(tag.contains("EntityPlayerUUID")){
+            if (tag.contains("EntityPlayerUUID")) {
                 if (entity.getServer() == null) {
                 } else {
                     Player trapped = BeyonderUtil.getPlayerFromUUID(entity.getServer(), tag.getUUID("EntityPlayerUUID"));
@@ -113,10 +108,10 @@ public class Doll extends Item {
         return false;
     }
 
-    public void releasePlayer(ItemStack stack, Level level, BlockPos pos, Player player, InteractionHand hand){
-        if(!level.isClientSide){
+    public void releasePlayer(ItemStack stack, Level level, BlockPos pos, Player player, InteractionHand hand) {
+        if (!level.isClientSide) {
             CompoundTag tag = stack.getOrCreateTag();
-            if(tag.contains("EntityPlayerUUID")){
+            if (tag.contains("EntityPlayerUUID")) {
                 if (level.getServer() != null) {
                     Player trapped = BeyonderUtil.getPlayerFromUUID(level.getServer(), tag.getUUID("EntityPlayerUUID"));
                     if (trapped != null) {
@@ -130,10 +125,10 @@ public class Doll extends Item {
         }
     }
 
-    public void releaseEntity(ItemStack stack, Level level, BlockPos pos, Player player, InteractionHand hand){
-        if(!level.isClientSide){
+    public void releaseEntity(ItemStack stack, Level level, BlockPos pos, Player player, InteractionHand hand) {
+        if (!level.isClientSide) {
             CompoundTag tag = stack.getOrCreateTag();
-            if(!tag.contains("EntityPlayerName")){
+            if (!tag.contains("EntityPlayerName")) {
                 String entityTypeId = tag.getString("EntityID");
                 EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityTypeId));
                 if (entityType != null) {
@@ -158,7 +153,7 @@ public class Doll extends Item {
 
         String eName = getEntityString(stack);
         EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(getCachedRegName(eName));
-        if (type == null){
+        if (type == null) {
             return super.getName(stack);
         }
         return Component.translatable(type.getDescriptionId()).append("`s ").append(super.getName(stack));
@@ -193,7 +188,7 @@ public class Doll extends Item {
         CompoundTag tag = doll.getOrCreateTag();
         boolean shouldRemove = false;
 
-        if(target instanceof Player player) {
+        if (target instanceof Player player) {
             PlayerMobEntity clone = new PlayerMobEntity(EntityInit.PLAYER_MOB_ENTITY.get(), user.level());
             target = clone;
             ItemNBTHelper.setString(doll, "EntityPlayerName", player.getGameProfile().getName());
@@ -216,8 +211,6 @@ public class Doll extends Item {
                 itemListTag.add(stackTag);
             }
             tag.put("EntityPlayerEquipment", itemListTag);
-
-            // Only clear renderer buffer on client side
             if (user.level().isClientSide) {
                 if(DollRenderer.playerRendererBuffer.containsKey(tag.getUUID("EntityPlayerUUID"))) {
                     DollRenderer.playerRendererBuffer.remove(tag.getUUID("EntityPlayerUUID"));
@@ -240,7 +233,6 @@ public class Doll extends Item {
             setEntityData(compound, doll);
         }
         if (shouldRemove) target.remove(Entity.RemovalReason.DISCARDED);
-
         return doll;
     }
 
@@ -274,12 +266,10 @@ public class Doll extends Item {
                     if (entity == null) {
                         entity = EntityType.PIG.create(level);
                     }
-                }
-                else {
+                } else {
                     entity = EntityType.PIG.create(level);
                 }
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 entity = EntityType.PIG.create(level);
             }
             renderEntityMap.put(name, entity);

@@ -19,6 +19,9 @@ import net.swimmingtuna.lotm.capabilities.doll_data.IDollDataCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IIsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedCapability;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedProvider;
+import net.swimmingtuna.lotm.capabilities.replicated_entity.IReplicatedEntityCapability;
+import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityCapability;
+import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityProvider;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.IScribedAbilitiesCapability;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedAbilitiesCapability;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedAbilitiesProvider;
@@ -36,6 +39,7 @@ public class CapabilityInit {
         event.register(IsConcealedCapability.class);
         event.register(IScribedAbilitiesCapability.class);
         event.register(IDollDataCapability.class);
+        event.register(IReplicatedEntityCapability.class);
     }
 
     @SubscribeEvent
@@ -69,11 +73,17 @@ public class CapabilityInit {
         }
 
         // Player only
-        if (event.getObject() instanceof Player player){
+        if (event.getObject() instanceof Player player) {
             if (!player.getCapability(DollDataProvider.DOLL_DATA).isPresent()) {
                 event.addCapability(
                         new ResourceLocation(MOD_ID, "doll_data"),
                         new DollDataProvider()
+                );
+            }
+            if (!player.getCapability(ReplicatedEntityProvider.REPLICATED_ENTITY).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "replicated_entity"),
+                        new ReplicatedEntityProvider()
                 );
             }
         }
@@ -107,6 +117,11 @@ public class CapabilityInit {
         original.getCapability(DollDataProvider.DOLL_DATA).ifPresent(oldData -> {
             clone.getCapability(DollDataProvider.DOLL_DATA).ifPresent(newData -> {
                 ((DollDataCapability) newData).copyFrom((DollDataCapability) oldData);
+            });
+        });
+        original.getCapability(ReplicatedEntityProvider.REPLICATED_ENTITY).ifPresent(oldData -> {
+            clone.getCapability(ReplicatedEntityProvider.REPLICATED_ENTITY).ifPresent(newData -> {
+                ((ReplicatedEntityCapability) newData).copyFrom((ReplicatedEntityCapability) oldData);
             });
         });
     }

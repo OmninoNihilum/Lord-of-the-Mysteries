@@ -386,7 +386,7 @@ public class ItemInit {
     public static final RegistryObject<Item> DIMENSIONAL_SIGHT = ITEMS.register("dimensionalsight",
             () -> new DimensionalSight(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> REPLICATE = ITEMS.register("replicate",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new Replicate(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SEALING = ITEMS.register("sealing",
             () -> new Sealing(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TELEPORTATION = ITEMS.register("teleportation",
@@ -607,7 +607,9 @@ public class ItemInit {
     public static final RegistryObject<Item> FORCED_UPDATE_ITEM_3 = ITEMS.register("forced_update_item_5",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOLL = ITEMS.register("doll",
-            () -> new Doll());
+            Doll::new);
+    public static final RegistryObject<Item> DOLL_STRUCTURE = ITEMS.register("doll_structure",
+            () -> new DollStructure(new Item.Properties().stacksTo(1)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

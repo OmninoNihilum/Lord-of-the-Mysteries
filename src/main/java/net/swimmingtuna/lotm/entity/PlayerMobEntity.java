@@ -122,7 +122,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Integer> ATTACK_CHANCE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DISTANCE_FROM_TARGET = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> FLY_SPEED = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.FLOAT);
-
+    private static final EntityDataAccessor<Boolean> HAS_ABILITY_CAP = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> MAX_ABILITIES_USE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
 
     private boolean canBreakDoors;
     private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, (difficulty) -> difficulty == Difficulty.HARD);
@@ -211,6 +212,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(ATTACK_CHANCE, 0);
         getEntityData().define(FLY_SPEED, 1.0f);
         getEntityData().define(CREATOR_UUID, Optional.empty());
+        getEntityData().define(MAX_ABILITIES_USE, 1);
+        getEntityData().define(HAS_ABILITY_CAP, false);
     }
 
 
@@ -854,6 +857,22 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
     public boolean getRegenSpirituality() {
         return this.entityData.get(REGEN_SPIRITUALITY);
+    }
+
+    public void setHasAbilityCap(boolean abilityCap){
+        this.entityData.set(HAS_ABILITY_CAP, abilityCap);
+    }
+
+    public boolean getHasAbilityCap(){
+        return this.entityData.get(HAS_ABILITY_CAP);
+    }
+
+    public void setMaxAbilitiesUse(int maxAbilitiesUse){
+        this.entityData.set(MAX_ABILITIES_USE, maxAbilitiesUse);
+    }
+
+    public int getMaxAbilitiesUse(){
+        return this.entityData.get(MAX_ABILITIES_USE);
     }
 
     public int getSpiritualityRegen() {

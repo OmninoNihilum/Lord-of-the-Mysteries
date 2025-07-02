@@ -27,6 +27,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
@@ -139,6 +140,10 @@ public class ApprenticeClass implements BeyonderClass {
                 }
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
                 tag.putInt("maxScribedAbilities", 40);
+                if(player instanceof Player pPlayer){
+                    ReplicatedEntityUtils.setMaxEntities(pPlayer, 5);
+                    ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 1);
+                }
             }
             if (sequenceLevel == 1) {
                 maxWormCount = 16000;
@@ -150,6 +155,10 @@ public class ApprenticeClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 45);
+                if(player instanceof Player pPlayer){
+                    ReplicatedEntityUtils.setMaxEntities(pPlayer, 10);
+                    ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 4);
+                }
             }
             if (sequenceLevel == 0) {
                 maxWormCount = 80000;
@@ -161,6 +170,10 @@ public class ApprenticeClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
                 applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 2, false, false);
                 tag.putInt("maxScribedAbilities", 50);
+                if(player instanceof Player pPlayer){
+                    ReplicatedEntityUtils.setMaxEntities(pPlayer, 20);
+                    ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 10);
+                }
             }
             if (sequenceLevel <= 4) {
                 if (tag.getInt("wormOfStar") < maxWormCount * 0.1) {
@@ -227,7 +240,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(2, ItemInit.SYMBOLIZATION.get());
         items.put(2, ItemInit.DIMENSIONAL_SIGHT.get());
         items.put(2, ItemInit.MINIATURIZE.get());
-        //items.put(2, ItemInit.REPLICATE.get());
+        items.put(2, ItemInit.REPLICATE.get());
         items.put(2, ItemInit.SEALING.get());
         items.put(2, ItemInit.TELEPORTATION.get());
 
