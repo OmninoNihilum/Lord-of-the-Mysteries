@@ -51,8 +51,9 @@ public class MatterAccelerationBlockC2S {
                         stoneEntity.setDeltaMovement(lookDirection);
                         stoneEntity.setBB(15);
                         stoneEntity.setSent(true);
+                        stoneEntity.setOwner(player);
                         stoneEntity.setShouldntDamage(false);
-                        stoneEntity.setTickCount(440);
+                        stoneEntity.setTickCount(120);
                     }
                     if (stoneEntity == null) {
                         player.getPersistentData().putInt("matterAccelerationBlockTimer", 0);
@@ -69,7 +70,8 @@ public class MatterAccelerationBlockC2S {
                         netherrackEntity.setSent(true);
                         netherrackEntity.setBB(15);
                         netherrackEntity.setShouldDamage(true);
-                        netherrackEntity.setTickCount(440);
+                        netherrackEntity.setTickCount(120);
+                        netherrackEntity.setOwner(player);
                     }
                     if (netherrackEntity == null) {
                         player.getPersistentData().putInt("matterAccelerationBlockTimer", 0);
@@ -86,7 +88,8 @@ public class MatterAccelerationBlockC2S {
                         endStoneEntity.setSent(true);
                         endStoneEntity.setBB(15);
                         endStoneEntity.setShouldntDamage(false);
-                        endStoneEntity.setTickCount(440);
+                        endStoneEntity.setTickCount(120);
+                        endStoneEntity.setOwner(player);
                     }
                     if (endStoneEntity == null) {
                         player.getPersistentData().putInt("matterAccelerationBlockTimer", 0);

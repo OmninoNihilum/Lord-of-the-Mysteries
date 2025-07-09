@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateEntityLocationS2C;
@@ -143,8 +144,10 @@ public class StoneEntity extends AbstractArrow {
         }
         if (!this.level().isClientSide()) {
             Vec3 currentPos = this.position();
-            for (ServerPlayer player : level().getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(100))) {
-                LOTMNetworkHandler.sendToPlayer(new UpdateEntityLocationS2C(currentPos.x(), currentPos.y(), currentPos.z(),this.getDeltaMovement().x(), this.getDeltaMovement().y(), this.getDeltaMovement().z(), this.getId()), player);
+            if (this.getSent()) {
+                for (ServerPlayer player : level().getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(100))) {
+                    LOTMNetworkHandler.sendToPlayer(new UpdateEntityLocationS2C(currentPos.x(), currentPos.y(), currentPos.z(), this.getDeltaMovement().x(), this.getDeltaMovement().y(), this.getDeltaMovement().z(), this.getId()), player);
+                }
             }
             if (getRemoveAndHurt()) {
                 if (!getSent() && this.getOwner() != null) {
@@ -152,6 +155,7 @@ public class StoneEntity extends AbstractArrow {
                     this.setDeltaMovement(this.getOwner().getX() - this.getX() + getStoneStayAtX(), this.getOwner().getY() - this.getY() + getStoneStayAtY(), this.getOwner().getZ() - this.getZ() + getStoneStayAtX());
                 }
                 BlockPos entityPos = this.blockPosition();
+                int amount = 0;
                 for (int x = -2; x <= 2; x++) {
                     for (int y = -2; y <= 2; y++) {
                         for (int z = -2; z <= 2; z++) {
@@ -173,6 +177,7 @@ public class StoneEntity extends AbstractArrow {
                     }
                 }
                 if (this.tickCount >= 160) {
+                    LOTM.LOGGER.info("DISCARDED CUZ TICK");
                     this.discard();
                 }
             }
@@ -191,6 +196,7 @@ public class StoneEntity extends AbstractArrow {
     public int getStoneXRot() {
         return this.entityData.get(DATA_STONE_XROT);
     }
+
     public void setDamage(int damage) {
         this.entityData.set(DATA_STONE_DAMAGE, damage);
     }
@@ -259,6 +265,7 @@ public class StoneEntity extends AbstractArrow {
     public boolean getShouldntDamage() {
         return this.entityData.get(SHOULDNT_DAMAGE);
     }
+
     public void setTickCount(int tickCount) {
         this.tickCount = tickCount;
     }
@@ -267,8 +274,8 @@ public class StoneEntity extends AbstractArrow {
     public static void summonStoneRandom(LivingEntity livingEntity) {
         StoneEntity stoneEntity = new StoneEntity(EntityInit.STONE_ENTITY.get(), livingEntity.level());
         int random = (int) ((Math.random() * 40) - 20);
-        stoneEntity.teleportTo(random,random,random);
-        stoneEntity.setDeltaMovement(0,-2,0);
+        stoneEntity.teleportTo(random, random, random);
+        stoneEntity.setDeltaMovement(0, -2, 0);
         stoneEntity.setStoneXRot(4);
         stoneEntity.setStoneYRot(4);
         stoneEntity.setShouldntDamage(false);

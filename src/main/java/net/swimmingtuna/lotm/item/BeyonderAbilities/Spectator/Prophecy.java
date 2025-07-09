@@ -43,7 +43,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake.isOnSurface;
 
 public class Prophecy extends SimpleAbilityItem {
 
@@ -384,5 +383,9 @@ public class Prophecy extends SimpleAbilityItem {
             livingEntity.getPersistentData().putInt("spectatorProphecyItem", random.nextInt(8));
         }
         return 0;
+    }
+
+    public static boolean isOnSurface(Level level, BlockPos pos) {
+        return level.canSeeSky(pos.above()) || !level.getBlockState(pos.above()).isSolid();
     }
 }

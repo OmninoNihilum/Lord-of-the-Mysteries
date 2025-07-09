@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -23,11 +25,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
+import net.swimmingtuna.lotm.util.SpamClass;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -100,15 +104,52 @@ public class PsycheStorm extends SimpleAbilityItem {
     private void psycheStorm(LivingEntity player, Level level, BlockPos targetPos) {
         if (!player.level().isClientSide()) {
             float damage =  BeyonderUtil.getDamage(player).get(ItemInit.PSYCHESTORM.get());
-            double radius = damage * 0.66;
+            double radius = damage * 0.4;
             int duration = (int) (damage * 4);
             AABB boundingBox = new AABB(targetPos).inflate(radius);
             level.getEntitiesOfClass(LivingEntity.class, boundingBox, LivingEntity::isAlive).forEach(livingEntity -> {
                 if (livingEntity != player && !BeyonderUtil.areAllies(player, livingEntity)) {
-                    BeyonderUtil.applyMentalDamage(player, livingEntity, damage);
-                    livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 1, false, false));
+                    livingEntity.getPersistentData().putInt("psycheStormTick", 85);
+                    livingEntity.getPersistentData().putFloat("psycheStormDamage", damage);
+                    livingEntity.getPersistentData().putUUID("psycheStormUUID", player.getUUID());
+                    livingEntity.invulnerableTime = 0;
+                    livingEntity.hurtTime = 0;
+                    livingEntity.hurtDuration = 0;
                 }
             });
+        }
+    }
+
+    public static void psycheStormTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        if (!livingEntity.level().isClientSide() && livingEntity.getPersistentData().getInt("psycheStormTick") >= 1) {
+            int counter = livingEntity.getPersistentData().getInt("psycheStormTick");
+            livingEntity.getPersistentData().putInt("psycheStormTick", counter - 1);
+            if (counter <= 55 && counter % 5 == 0 && counter >= 35) {
+                livingEntity.invulnerableTime = 4;
+                livingEntity.hurtTime = 4;
+                livingEntity.hurtDuration = 4;
+                float damage = livingEntity.getPersistentData().getFloat("psycheStormDamage");
+                if (livingEntity.getPersistentData().contains("psycheStormUUID")) {
+                    LivingEntity living = BeyonderUtil.getLivingEntityFromUUID(livingEntity.level(), livingEntity.getPersistentData().getUUID("psycheStormUUID"));
+                    if (living != null) {
+                        int duration = (int) (damage * 4);
+                        BeyonderUtil.applyMentalDamage(living, livingEntity, damage / 4f);
+                        livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 1, false, false));
+                    } else {
+                        livingEntity.hurt(livingEntity.damageSources().magic(), 10);
+                        livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 40, 1, false, false));
+                    }
+                }
+            }
+            if (counter > 70) {
+                float damage = livingEntity.getPersistentData().getFloat("psycheStormDamage");
+                BeyonderUtil.createSphereOfParticlesToCenter(livingEntity.level(), livingEntity.getOnPos().getCenter(), ParticleTypes.ENCHANT,  (int) damage * 5, damage, 20);
+            } if (counter < 25) {
+                if (livingEntity instanceof Player player) {
+                    SpamClass.sendMonsterMessage(player);
+                }
+            }
         }
     }
 
@@ -133,5 +174,4 @@ public class PsycheStorm extends SimpleAbilityItem {
         }
         return 0;
     }
-
 }

@@ -83,6 +83,16 @@ public class LOTMNetworkHandler {
                 .encoder(DeathKnellLeftClickC2S::toByte)
                 .consumerMainThread(DeathKnellLeftClickC2S::handle)
                 .add();
+        INSTANCE.messageBuilder(ForceLookPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ForceLookPacketS2C::decode)
+                .encoder(ForceLookPacketS2C::encode)
+                .consumerMainThread(ForceLookPacketS2C::handle)
+                .add();
+        INSTANCE.messageBuilder(StopForceLookPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(StopForceLookPacketS2C::decode)
+                .encoder(StopForceLookPacketS2C::encode)
+                .consumerMainThread(StopForceLookPacketS2C::handle)
+                .add();
         INSTANCE.messageBuilder(SwordOfSilverC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(SwordOfSilverC2S::new)
                 .encoder(SwordOfSilverC2S::toByte)

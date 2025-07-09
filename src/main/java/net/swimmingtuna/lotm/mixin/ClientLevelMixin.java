@@ -7,6 +7,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalTileEntity;
+import net.swimmingtuna.lotm.entity.LightningEntity;
+import net.swimmingtuna.lotm.entity.SwordOfTwilightEntity;
 import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

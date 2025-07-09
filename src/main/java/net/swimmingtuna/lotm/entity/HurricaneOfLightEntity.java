@@ -16,10 +16,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -204,42 +206,51 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
     }
 
     private void destroyBlocksOptimized(int hurricaneRadius, int hurricaneHeight) {
-        double minY = this.getY() - 10;
-        double maxY = this.getY() + hurricaneHeight;
+        List<BlockPos> candidateBlocks = new ArrayList<>();
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        List<BlockPos> blocksToDestroy = new ArrayList<>();
-        int currentY = (int) minY + (this.tickCount % 3);
-        while (currentY <= maxY) {
-            double heightRatio = (currentY - minY) / (maxY - minY);
-            double effectiveRadius = hurricaneRadius * (0.5 + heightRatio * 0.5);
-            double angleStep = 0.5;
-            double radiusStep = 0.8;
-            for (double angle = 0; angle < Math.PI * 2; angle += angleStep) {
-                for (double r = 0; r < effectiveRadius; r += radiusStep) {
-                    int x = (int) (this.getX() + Math.cos(angle) * r);
-                    int z = (int) (this.getZ() + Math.sin(angle) * r);
-                    mutablePos.set(x, currentY, z);
-
-                    if (!this.level().getBlockState(mutablePos).isAir() &&
-                            !this.level().getBlockState(mutablePos).liquid() &&
-                            this.level().getBlockState(mutablePos).getDestroySpeed(this.level(), mutablePos) >= 0) {
-                        blocksToDestroy.add(new BlockPos(x, currentY, z));
+        Random random = new Random();
+        int centerX = (int) this.getX();
+        int centerZ = (int) this.getZ();
+        for (int x = centerX - hurricaneRadius; x <= centerX + hurricaneRadius; x++) {
+            for (int z = centerZ - hurricaneRadius; z <= centerZ + hurricaneRadius; z++) {
+                double distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(z - centerZ, 2));
+                if (distance <= hurricaneRadius) {
+                    int surfaceY = findHighestSolidBlock(x, z);
+                    if (surfaceY != -1) {
+                        mutablePos.set(x, surfaceY, z);
+                        if (!this.level().getBlockState(mutablePos).isAir() && !this.level().getBlockState(mutablePos).liquid() && this.level().getBlockState(mutablePos).getDestroySpeed(this.level(), mutablePos) >= 0) {
+                            candidateBlocks.add(new BlockPos(x, surfaceY, z));
+                        }
                     }
                 }
             }
-            currentY += 3;
         }
-        blocksToDestroy.sort((pos1, pos2) -> Integer.compare(pos2.getY(), pos1.getY()));
-        int blocksDestroyed = 0;
-        for (BlockPos pos : blocksToDestroy) {
-            if (blocksDestroyed >= 125) {
-                break;
-            }
-            this.level().removeBlock(pos, false);
-            blocksDestroyed++;
+        int blocksToDestroy = Math.min(100, candidateBlocks.size());
+        for (int i = 0; i < blocksToDestroy; i++) {
+            int randomIndex = random.nextInt(candidateBlocks.size());
+            BlockPos selectedBlock = candidateBlocks.remove(randomIndex);
+            this.level().removeBlock(selectedBlock, false);
         }
     }
 
+    private int findHighestSolidBlock(int x, int z) {
+        int surfaceY = this.level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z);
+        for (int y = surfaceY; y >= surfaceY - 3; y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            if (!this.level().getBlockState(pos).isAir() && this.level().getBlockState(pos).isSolid()) {
+                return y;
+            }
+        }
+        for (int y = Math.min(200, (int) this.getY() + 50); y >= this.level().getMinBuildHeight(); y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            BlockState state = this.level().getBlockState(pos);
+            if (!state.isAir() && state.isSolid()) {
+                return y;
+            }
+        }
+
+        return -1;
+    }
     private void spawnOptimizedParticles(int hurricaneRadius, int hurricaneHeight) {
         double sizeFactor = (hurricaneRadius + 1) * (hurricaneHeight + 1) / 1000.0;
         int particleCount = Math.max(20, (int) (100 * sizeFactor * PARTICLE_DENSITY_FACTOR));
@@ -316,14 +327,18 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
     }
 
     private void applyDamageAndEffects(LivingEntity livingEntity, double distance, double effectiveRadius, double entityRelativeHeight) {
+        double distanceRatio = distance / effectiveRadius;
+        float damageMultiplier = (0.5f + (float) entityRelativeHeight * 0.5f) * (distanceRatio > 1.0 ? 0.7f : 1.0f);
+        float damage = ((float) getHurricaneRadius() * damageMultiplier / 2) / 6;
+        if (livingEntity instanceof Mob) {
+            damage += livingEntity.getMaxHealth() / 50.0f;
+        }
         if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
             int amplifier = 0;
             if (livingEntity.hasEffect(ModEffects.ARMOR_WEAKNESS.get())) {
                 amplifier = livingEntity.getEffect(ModEffects.ARMOR_WEAKNESS.get()).getAmplifier();
             }
-            double distanceRatio = distance / effectiveRadius;
-            float damageMultiplier = (0.5f + (float) entityRelativeHeight * 0.5f) * (distanceRatio > 1.0 ? 0.7f : 1.0f);
-            livingEntity.hurt(BeyonderUtil.genericSource(owner), ((float) getHurricaneRadius() * damageMultiplier / 2) / 6);
+            livingEntity.hurt(BeyonderUtil.genericSource(owner), damage);
 
             if (this.tickCount % 15 == 0) {
                 if (getDestroyArmor()) {
@@ -332,11 +347,11 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
                             armor.hurtAndBreak(30, livingEntity, (player) -> player.broadcastBreakEvent(armor.getEquipmentSlot()));
                         }
                     }
-                    livingEntity.addEffect(new MobEffectInstance(ModEffects.ARMOR_WEAKNESS.get(), 200, amplifier, true, true));
+                    livingEntity.addEffect(new MobEffectInstance(ModEffects.ARMOR_WEAKNESS.get(), 200, amplifier + 1, true, true));
                 }
 
                 if (BeyonderUtil.isPurifiable(livingEntity)) {
-                    livingEntity.hurt(BeyonderUtil.magicSource(owner), ((float) getHurricaneRadius() * damageMultiplier / 2) / 6);
+                    livingEntity.hurt(BeyonderUtil.magicSource(owner),damage);
                 }
             }
         } else {
@@ -344,22 +359,21 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
             if (livingEntity.hasEffect(ModEffects.ARMOR_WEAKNESS.get())) {
                 amplifier = livingEntity.getEffect(ModEffects.ARMOR_WEAKNESS.get()).getAmplifier();
             }
-            double distanceRatio = distance / effectiveRadius;
-            float damageMultiplier = (0.5f + (float) entityRelativeHeight * 0.5f) * (distanceRatio > 1.0 ? 0.7f : 1.0f);
-            livingEntity.hurt(livingEntity.damageSources().generic(), ((float) getHurricaneRadius() * damageMultiplier / 2) / 6);
+            livingEntity.hurt(livingEntity.damageSources().generic(), damage);
             if (this.tickCount % 15 == 0) {
                 if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
                     if (!BeyonderUtil.areAllies(owner, livingEntity) && getAge()) {
+                        livingEntity.getPersistentData().putUUID("ageUUID", owner.getUUID());
                         livingEntity.getPersistentData().putInt("age", livingEntity.getPersistentData().getInt("age") + 40);
                         if (livingEntity instanceof Player player) {
                             player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
                         }
                     }
                 }
-                livingEntity.addEffect(new MobEffectInstance(ModEffects.ARMOR_WEAKNESS.get(), 200, amplifier, true, true));
+                livingEntity.addEffect(new MobEffectInstance(ModEffects.ARMOR_WEAKNESS.get(), 200, amplifier + 1, true, true));
             }
             if (BeyonderUtil.isPurifiable(livingEntity)) {
-                livingEntity.hurt(livingEntity.damageSources().magic(), ((float) getHurricaneRadius() * damageMultiplier / 2) / 4);
+                livingEntity.hurt(livingEntity.damageSources().magic(), damage);
             }
         }
     }

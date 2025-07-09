@@ -83,6 +83,7 @@ public class SwordOfTwilight extends SwordItem implements GeoItem {
     @Override
     public boolean hurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
         pTarget.getPersistentData().putInt("age", pTarget.getPersistentData().getInt("age") + 900);
+        pTarget.getPersistentData().putUUID("ageUUID", pAttacker.getUUID());
         if (pTarget instanceof Player player) {
             player.displayClientMessage(Component.literal("You were rapidly aged").withStyle(BeyonderUtil.ageStyle(pTarget)).withStyle(ChatFormatting.BOLD),true);
         }

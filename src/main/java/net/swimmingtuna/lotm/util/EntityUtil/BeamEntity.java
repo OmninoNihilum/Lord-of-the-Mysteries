@@ -220,8 +220,10 @@ public abstract class BeamEntity extends LOTMProjectile {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD), true);
                             }
                             if (BeyonderUtil.getSequence(pOwner) != 0) {
+                                livingEntity.getPersistentData().putUUID("ageUUID", pOwner.getUUID());
                                 livingEntity.getPersistentData().putInt("age", ((age + (30 - BeyonderUtil.getSequence(pOwner))) * 9) / ageDivisibleAmount);
                             } else {
+                                livingEntity.getPersistentData().putUUID("ageUUID", pOwner.getUUID());
                                 livingEntity.getPersistentData().putInt("age", (age + (50)) / ageDivisibleAmount);
                             }
                         }

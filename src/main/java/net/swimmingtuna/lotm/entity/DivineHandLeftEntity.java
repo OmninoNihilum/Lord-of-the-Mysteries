@@ -56,6 +56,7 @@ public class DivineHandLeftEntity extends AbstractHurtingProjectile implements G
             if (entity instanceof LivingEntity livingEntity && this.getOwner() instanceof LivingEntity owner ) {
                 if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity)) {
                     CompoundTag tag = livingEntity.getPersistentData();
+                    tag.putUUID("ageUUID", owner.getUUID());
                     tag.putInt("age", tag.getInt("age") + 100);
                     if (livingEntity instanceof Player player) {
                         player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
@@ -154,6 +155,7 @@ public class DivineHandLeftEntity extends AbstractHurtingProjectile implements G
             for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(scale * 0.8f))) {
                 if (this.getOwner() instanceof LivingEntity owner && livingEntity != owner) {
                     CompoundTag tag = livingEntity.getPersistentData();
+                    tag.putUUID("ageUUID", owner.getUUID());
                     tag.putInt("age", tag.getInt("age") + 70);
                     if (livingEntity instanceof Player player) {
                         player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);

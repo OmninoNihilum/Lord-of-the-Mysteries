@@ -58,7 +58,7 @@ public class EntityInit {
                     .sized(2.0f,2.0f).clientTrackingRange(300).build("meteor"));
     public static final RegistryObject<EntityType<SwordOfTwilightEntity>> SWORD_OF_TWILIGHT_ENTITY =
             ENTITIES.register("sword_of_twilight_entity", () -> EntityType.Builder.<SwordOfTwilightEntity>of(SwordOfTwilightEntity::new, MobCategory.MISC)
-                    .sized(2.0f,2.0f).clientTrackingRange(500).build("sword_of_twilight_entity"));
+                    .sized(2.0f, 2.0f).clientTrackingRange(1000).updateInterval(1).setShouldReceiveVelocityUpdates(true).build("sword_of_twilight_entity"));
     public static final RegistryObject<EntityType<SpaceRiftEntity>> SPACE_RIFT_ENTITY =
             ENTITIES.register("space_rift_entity", () -> EntityType.Builder.<SpaceRiftEntity>of(SpaceRiftEntity::new, MobCategory.MISC)
                     .sized(1f,1f).clientTrackingRange(100).build("space_rift_entity"));
@@ -133,7 +133,7 @@ public class EntityInit {
                     .sized(0.5f,0.5f).build("wind_cushion"));
     public static final RegistryObject<EntityType<LightningEntity>> LIGHTNING_ENTITY =
             ENTITIES.register("lightning_entity", () -> EntityType.Builder.<LightningEntity>of(LightningEntity::new, MobCategory.MISC)
-                    .sized(0.5f,0.5f).clientTrackingRange(200).build("lightning_entity"));
+                    .sized(0.5f,0.5f).clientTrackingRange(400).build("lightning_entity"));
     public static final RegistryObject<EntityType<CustomFallingBlockEntity>> CUSTOM_FALLING_BLOCK_ENTITY =
             ENTITIES.register("custom_falling_block_entity", () -> EntityType.Builder.<CustomFallingBlockEntity>of(CustomFallingBlockEntity::new, MobCategory.MISC)
                     .sized(0.98f,0.98f).clientTrackingRange(10).updateInterval(20).build("custom_falling_block_entity"));

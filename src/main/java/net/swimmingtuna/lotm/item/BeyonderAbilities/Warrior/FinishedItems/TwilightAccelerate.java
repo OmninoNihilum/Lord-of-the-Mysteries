@@ -84,6 +84,7 @@ public class TwilightAccelerate extends SimpleAbilityItem {
             if (livingEntity == target || BeyonderUtil.areAllies(livingEntity, target)) {
                 tag.putInt("twilightAgeAccelerate", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTACCELERATE.get()));
             } else {
+                tag.putUUID("twilightAgeAccelerateEnemyUUID", livingEntity.getUUID());
                 tag.putInt("twilightAgeAccelerateEnemy", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTACCELERATE.get()) / 2);
             }
         }
@@ -138,6 +139,16 @@ public class TwilightAccelerate extends SimpleAbilityItem {
                     }
                 }
                 if (Math.random() > 0.95) {
+                    LivingEntity accelerator = null;
+                    if (tag.contains("twilightAgeAccelerateEnemyUUID"))  {
+                        LivingEntity living = BeyonderUtil.getLivingEntityFromUUID(livingEntity.level(), tag.getUUID("twilightAgeAccelerateEnemyUUID"));
+                        if (living != null) {
+                            accelerator = living;
+                        }
+                    }
+                    if (accelerator != null) {
+                        tag.putUUID("ageUUID", accelerator.getUUID());
+                    }
                     tag.putInt("age", tag.getInt("age") + 20);
                     if (livingEntity instanceof Player player) {
                         player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);

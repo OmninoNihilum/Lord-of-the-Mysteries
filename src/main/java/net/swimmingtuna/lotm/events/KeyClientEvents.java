@@ -2,8 +2,6 @@ package net.swimmingtuna.lotm.events;
 
 import com.mojang.blaze3d.shaders.FogShape;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -16,6 +14,8 @@ import net.swimmingtuna.lotm.util.ClientData.*;
 import net.swimmingtuna.lotm.util.KeyBinding;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
+
+import static net.swimmingtuna.lotm.networking.packet.ForceLookPacketS2C.setPlayerRotation;
 
 public class KeyClientEvents {
     @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, value = Dist.CLIENT)
@@ -35,6 +35,26 @@ public class KeyClientEvents {
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END) {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.player != null && ClientLookData.isSmoothLooking()) {
+                    float targetYaw = ClientLookData.getTargetYaw();
+                    float targetPitch = ClientLookData.getTargetPitch();
+                    float currentYaw = mc.player.getYRot();
+                    float currentPitch = mc.player.getXRot();
+                    float yawDiff = targetYaw - currentYaw;
+                    float pitchDiff = targetPitch - currentPitch;
+                    while (yawDiff > 180) yawDiff -= 360;
+                    while (yawDiff < -180) yawDiff += 360;
+                    float smoothFactor = 0.2f;
+                    if (Math.abs(yawDiff) < 0.5f && Math.abs(pitchDiff) < 0.5f) {
+                        setPlayerRotation(mc.player, targetYaw, targetPitch);
+                        ClientLookData.setSmoothLooking(false);
+                    } else {
+                        float newYaw = currentYaw + yawDiff * smoothFactor;
+                        float newPitch = currentPitch + pitchDiff * smoothFactor;
+                        setPlayerRotation(mc.player, newYaw, newPitch);
+                    }
+                }
                 ClientIgnoreShouldntRenderData.decrementAll();
                 ClientShouldntRenderInvisibilityData.tick();
             }

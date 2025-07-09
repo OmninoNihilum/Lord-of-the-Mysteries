@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
@@ -80,12 +81,10 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
-            for (PlayerMobEntity playerMobEntity : player.level().getEntitiesOfClass(PlayerMobEntity.class, player.getBoundingBox().inflate(20))) {
-                playerMobEntity.setIsFlying(true);
-                playerMobEntity.setFlySpeed(0.2f);
-                player.sendSystemMessage(Component.literal(playerMobEntity.getUsername().getDisplayName() + "IS NOW FLYING"));
-                playerMobEntity.setIdealDistanceFromTarget(5);
-            }
+            double x = player.getX();
+            double z = player.getZ();
+            int surfaceY = player.level().getHeight(Heightmap.Types.WORLD_SURFACE, (int) x, (int) z) + 1;
+            player.sendSystemMessage(Component.literal("SURFACE Y = " + surfaceY));
         }
         return InteractionResult.SUCCESS;
     }

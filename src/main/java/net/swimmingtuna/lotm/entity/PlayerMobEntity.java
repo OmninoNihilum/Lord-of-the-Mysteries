@@ -391,10 +391,18 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
         super.tick();
         if (!this.level().isClientSide()) {
-            if (this.tickCount % 60 == 0) {
-                LivingEntity target = BrainUtils.getMemory(this, MemoryModuleType.ATTACK_TARGET);
+
+            if (this.getPersistentData().getInt("playerMobAbilityCooldown") == 0) {
+                if (this.getCurrentPathway() != null) {
+                    this.getPersistentData().putInt("playerMobAbilityCooldown", 30 + (this.getCurrentSequence() * 3));
+                } else {
+                    this.getPersistentData().putInt("playerMobAbilityCooldown", 60);
+                }
                 BeyonderEntityData.selectAndUseAbility(this);
+            } else {
+                this.getPersistentData().putInt("playerMobAbilityCooldown", this.getPersistentData().getInt("playerMobAbilityCooldown") - 1);
             }
+
             if (getMaxlife() != 0) {
                 if (this.tickCount > getMaxlife()) {
                     if (this.getPersistentData().getBoolean("shouldDropWormOfStar")) {

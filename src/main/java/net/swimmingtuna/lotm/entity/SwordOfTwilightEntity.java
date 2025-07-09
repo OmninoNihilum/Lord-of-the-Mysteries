@@ -43,6 +43,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
     public SwordOfTwilightEntity(EntityType<? extends SwordOfTwilightEntity> entityType, Level level) {
         super(entityType, level);
         this.noCulling = true;
+        this.blocksBuilding = true;
     }
 
 
@@ -60,6 +61,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
 
     @Override
     public void defineSynchedData() {
+        super.defineSynchedData();
         this.entityData.define(HAS_PLAYED_ANIMATION, false);
         this.entityData.define(YAW, 0.0f);
         this.entityData.define(PITCH, 0.0f);
@@ -67,7 +69,18 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
 
     @Override
     public boolean shouldRenderAtSqrDistance(double pDistance) {
-        return pDistance < 8000000; // 128 blocks squared
+        return pDistance < 1000000; // 1000 blocks squared (much larger than before)
+    }
+
+
+    @Override
+    public boolean isAlwaysTicking() {
+        return true;
+    }
+
+    @Override
+    public void checkDespawn() {
+
     }
 
     @Override
@@ -89,6 +102,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
         if (tag.contains("yaw")) {
             this.entityData.set(YAW, tag.getFloat("yaw"));
         }
@@ -115,6 +129,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
         tag.putFloat("yaw", this.entityData.get(YAW));
         tag.putBoolean("hasPlayedAnimation", this.entityData.get(HAS_PLAYED_ANIMATION));
         tag.putFloat("pitch", this.entityData.get(PITCH));
@@ -157,6 +172,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                     for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, aabb)) {
                         if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity)) {
                             CompoundTag tag = livingEntity.getPersistentData();
+                            tag.putUUID("ageUUID", owner.getUUID());
                             tag.putInt("age", tag.getInt("age") + 800);
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
@@ -170,6 +186,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                     for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, aabb)) {
                         if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity)) {
                             CompoundTag tag = livingEntity.getPersistentData();
+                            tag.putUUID("ageUUID", owner.getUUID());
                             tag.putInt("age", tag.getInt("age") + 800);
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
@@ -183,6 +200,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                     for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, aabb)) {
                         if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity)) {
                             CompoundTag tag = livingEntity.getPersistentData();
+                            tag.putUUID("ageUUID", owner.getUUID());
                             tag.putInt("age", tag.getInt("age") + 800);
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
@@ -197,6 +215,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                     for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, aabb)) {
                         if (livingEntity != owner && !BeyonderUtil.areAllies(owner, livingEntity)) {
                             CompoundTag tag = livingEntity.getPersistentData();
+                            tag.putUUID("ageUUID", owner.getUUID());
                             tag.putInt("age", tag.getInt("age") + 800);
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
@@ -209,7 +228,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
             }
         }
         if (this.level() instanceof ServerLevel serverLevel) {
-            int chunkRadius = 5;
+            int chunkRadius = 8;
             ChunkPos centerChunk = new ChunkPos(this.blockPosition());
             for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
                 for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {

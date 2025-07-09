@@ -428,6 +428,7 @@ public class ModEvents {
                 BeyonderUtil.projectileEvent(livingEntity);
                 calamityIncarnationTornado(livingEntity);
                 windManipulationGuide(livingEntity);
+                RagingBlows.ragingCombo(event);
                 windManipulationSense(livingEntity);
                 sailorLightningTravel(livingEntity);
                 PsychologicalInvisibility.psychologicalInvisibility(event);
@@ -477,6 +478,7 @@ public class ModEvents {
                 AuraOfChaos.auraOfChaos(event);
                 NoRegenerationEffect.preventRegeneration(livingEntity);
                 MisfortuneRedirection.misfortuneLivingTickEvent(event);
+                PsycheStorm.psycheStormTick(event);
                 AuraOfGlory.auraOfGloryAndTwilightTick(event);
                 livingLightningStorm(livingEntity);
                 Gigantification.gigantificationDestroyBlocks(event);

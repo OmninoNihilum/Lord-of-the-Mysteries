@@ -362,7 +362,7 @@ public class SailorClass implements BeyonderClass {
                 if (Math.random() * 100 < chanceOfDamage) {
                     LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, livingTarget.level());
                     lightningBolt.moveTo(livingTarget.getX(), livingTarget.getY(), livingTarget.getZ());
-                    lightningBolt.setVisualOnly(true);
+                    lightningBolt.setVisualOnly(false);
                     lightningBolt.setDamage(Math.max(3,15 - (sequence * 2)));
                     if (BeyonderUtil.getSequence(livingEntity) <= 1) {
                         float amount = 3;

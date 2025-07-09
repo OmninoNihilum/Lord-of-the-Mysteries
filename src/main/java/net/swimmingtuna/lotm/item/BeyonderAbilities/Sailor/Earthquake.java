@@ -14,6 +14,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -68,33 +69,30 @@ public class Earthquake extends SimpleAbilityItem {
             if (sailorEarthquake % 2 == 0) {
                 AABB checkArea = livingEntity.getBoundingBox().inflate(radius);
                 Random random = new Random();
-                for (BlockPos blockPos : BlockPos.betweenClosed(
-                        new BlockPos((int) checkArea.minX, (int) checkArea.minY, (int) checkArea.minZ),
-                        new BlockPos((int) checkArea.maxX, (int) checkArea.maxY, (int) checkArea.maxZ))) {
-
-                    if (!livingEntity.level().getBlockState(blockPos).isAir() && isOnSurface(livingEntity.level(), blockPos)) {
-                        if (random.nextInt(20) == 1) {
-                            BlockState blockState = livingEntity.level().getBlockState(blockPos); // Use the desired block type here
-                            if (livingEntity.level() instanceof ServerLevel serverLevel) {
-                                serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState),
-                                        blockPos.getX(),
-                                        blockPos.getY() + 1,
-                                        blockPos.getZ(),
-                                        0, 0.0, 0.0, 0, 0);
+                for (int x = (int) checkArea.minX; x <= (int) checkArea.maxX; x++) {
+                    for (int z = (int) checkArea.minZ; z <= (int) checkArea.maxZ; z++) {
+                        int effectiveY = findHighestSolidBlock(livingEntity.level(), x, z);
+                        if (effectiveY != -1) {
+                            BlockPos blockPos = new BlockPos(x, effectiveY, z);
+                            if (random.nextInt(20) == 1) {
+                                BlockState blockState = livingEntity.level().getBlockState(blockPos);
+                                if (livingEntity.level() instanceof ServerLevel serverLevel) {
+                                    serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), blockPos.getX(), blockPos.getY() + 1, blockPos.getZ(), 0, 0.0, 0.0, 0, 0);
+                                }
                             }
-                        }
-                        if (random.nextInt(6000) == 1) {
-                            livingEntity.level().destroyBlock(blockPos, false);
-                        } else if (random.nextInt(18000) == 2) {
-                            StoneEntity stoneEntity = new StoneEntity(livingEntity.level(), livingEntity);
-                            ScaleData scaleData = ScaleTypes.BASE.getScaleData(stoneEntity);
-                            stoneEntity.teleportTo(blockPos.getX(), blockPos.getY() + 3, blockPos.getZ());
-                            stoneEntity.setDeltaMovement(0, (3 + (Math.random() * (6 - 3))), 0);
-                            stoneEntity.setStoneYRot((int) (Math.random() * 18));
-                            stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.EARTHQUAKE.get()) / 2);
-                            stoneEntity.setStoneXRot((int) (Math.random() * 18));
-                            scaleData.setScale((float) (1 + (Math.random()) * 2.0f));
-                            livingEntity.level().addFreshEntity(stoneEntity);
+                            if (random.nextInt(6000) == 1) {
+                                livingEntity.level().destroyBlock(blockPos, false);
+                            } else if (random.nextInt(18000) == 2) {
+                                StoneEntity stoneEntity = new StoneEntity(livingEntity.level(), livingEntity);
+                                ScaleData scaleData = ScaleTypes.BASE.getScaleData(stoneEntity);
+                                stoneEntity.teleportTo(blockPos.getX(), blockPos.getY() + 3, blockPos.getZ());
+                                stoneEntity.setDeltaMovement(0, (3 + (Math.random() * (6 - 3))), 0);
+                                stoneEntity.setStoneYRot((int) (Math.random() * 18));
+                                stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.EARTHQUAKE.get()) / 2);
+                                stoneEntity.setStoneXRot((int) (Math.random() * 18));
+                                scaleData.setScale((float) (1 + (Math.random()) * 2.0f));
+                                livingEntity.level().addFreshEntity(stoneEntity);
+                            }
                         }
                     }
                 }
@@ -103,6 +101,23 @@ public class Earthquake extends SimpleAbilityItem {
         }
     }
 
+    private static int findHighestSolidBlock(Level level, int x, int z) {
+        int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        for (int y = surfaceY; y >= surfaceY - 3; y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            if (!level.getBlockState(pos).isAir() && level.getBlockState(pos).isSolid()) {
+                return y;
+            }
+        }
+        for (int y = 200; y >= level.getMinBuildHeight(); y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            BlockState state = level.getBlockState(pos);
+            if (!state.isAir() && state.isSolid()) {
+                return y;
+            }
+        }
+        return -1;
+    }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {

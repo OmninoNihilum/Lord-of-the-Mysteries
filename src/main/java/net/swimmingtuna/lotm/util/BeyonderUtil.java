@@ -1045,10 +1045,10 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof DawnWeaponry) {
                 LOTMNetworkHandler.sendToServer(new DawnWeaponryLeftClickC2S());
-            } if (heldItem.getItem() instanceof ConsciousnessStroll) {
-                LOTMNetworkHandler.sendToServer(new ConsciousnessStrollC2S());
             }
-            else if (heldItem.getItem() instanceof SwordOfTwilight) {
+            if (heldItem.getItem() instanceof ConsciousnessStroll) {
+                LOTMNetworkHandler.sendToServer(new ConsciousnessStrollC2S());
+            } else if (heldItem.getItem() instanceof SwordOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new SwordOfTwilightC2S());
             } else if (heldItem.getItem() instanceof Gigantification) {
                 LOTMNetworkHandler.sendToServer(new GigantificationC2S());
@@ -1235,7 +1235,8 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
                 LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
-            } if (heldItem.getItem() instanceof ConsciousnessStroll) {
+            }
+            if (heldItem.getItem() instanceof ConsciousnessStroll) {
                 LOTMNetworkHandler.sendToServer(new ConsciousnessStrollC2S());
             }
             if (heldItem.getItem() instanceof AqueousLightPush) {
@@ -1406,7 +1407,7 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINKAFTERIMAGE.get())));
             } else if (heldItem.getItem() instanceof BlinkAfterimage) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
-            }  else if (heldItem.getItem() instanceof Sealing) {
+            } else if (heldItem.getItem() instanceof Sealing) {
                 LOTMNetworkHandler.sendToServer(new SealingLeftClickC2S());
             }
         }
@@ -1683,7 +1684,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.PROBABILITYWIPE.get(), applyAbilityStrengthened((300.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYFORTUNEINCREASE.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYMISFORTUNEINCREASE.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.PSYCHESTORM.get(), applyAbilityStrengthened((75.0f - (sequence * 8f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.PSYCHESTORM.get(), applyAbilityStrengthened((60.0f - (sequence * 5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.REBOOTSELF.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPIRITVISION.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.WHISPEROFCORRUPTION.get(), applyAbilityStrengthened(((float) sequence * 1.5f) / abilityWeakness, abilityStrengthened));
@@ -2396,12 +2397,8 @@ public class BeyonderUtil {
                 playerMobEntity.useSpirituality(spirituality);
             } else {
                 if (living.level() instanceof ServerLevel serverLevel) {
-                    BeyonderEntityData mappingData = BeyonderEntityData.getInstance(serverLevel);
-                    String pathwayString = mappingData.getStringForEntity(living.getType());
-                    if (pathwayString != null) {
-                        int spiritualityLevel = living.getPersistentData().getInt("lotmSpirituality");
-                        living.getPersistentData().putInt("lotmSpirituality", Math.max(1, spiritualityLevel - spirituality));
-                    }
+                    int spiritualityLevel = living.getPersistentData().getInt("lotmSpirituality");
+                    living.getPersistentData().putInt("lotmSpirituality", Math.max(1, spiritualityLevel - spirituality));
                 }
             }
         }
@@ -2478,7 +2475,7 @@ public class BeyonderUtil {
         return EFFECT_INGREDIENTS.containsKey(ingredient);
     }
 
-    public static void createSphereOfParticles(ServerLevel level, Vec3 center, ParticleOptions particleOptions, int particleCount, double travelDistance) {
+    public static void createSphereOfParticlesFromCenter(ServerLevel level, Vec3 center, ParticleOptions particleOptions, int particleCount, double travelDistance, float speed) {
         if (!(level instanceof ServerLevel)) {
             return;
         }
@@ -2486,66 +2483,43 @@ public class BeyonderUtil {
         double goldenRatio = (1 + Math.sqrt(5)) / 2;
         double angleIncrement = Math.PI * 2 * goldenRatio;
 
-        double velocityScale = travelDistance / 2.2;
+        double velocityScale = (travelDistance / 2.2) * speed;
 
         for (int i = 0; i < particleCount; i++) {
             double t = (double) i / particleCount;
             double inclination = Math.acos(1 - 2 * t);
             double azimuth = angleIncrement * i;
-
-            // Calculate direction vector
             double x = Math.sin(inclination) * Math.cos(azimuth);
             double y = Math.sin(inclination) * Math.sin(azimuth);
             double z = Math.cos(inclination);
-
-            // Calculate velocities - these will determine the direction and speed
-            double velocityX = x * velocityScale;
-            double velocityY = y * velocityScale;
-            double velocityZ = z * velocityScale;
-
-            // The particles should start at the center position with zero offset
-            level.sendParticles(
-                    particleOptions,
-                    center.x, // spawn X
-                    center.y, // spawn Y
-                    center.z, // spawn Z
-                    1,  // count per particle location
-                    velocityX, // x velocity
-                    velocityY, // y velocity
-                    velocityZ, // z velocity
-                    1.0 // speed modifier - set to 1.0 to use our custom velocities
-            );
+            double velocityX = -x * velocityScale;
+            double velocityY = -y * velocityScale;
+            double velocityZ = -z * velocityScale;
+            level.sendParticles(particleOptions, center.x, center.y, center.z, 0, velocityX, velocityY, velocityZ, 1.0);
         }
     }
 
-    public static void createShphereParticlesPlayerCenter(LivingEntity livingEntity, ParticleOptions particle, int particleCount, double speed) {
-        double x = livingEntity.getX();
-        double y = livingEntity.getY();
-        double z = livingEntity.getZ();
+    public static void createSphereOfParticlesToCenter(Level level, Vec3 center, ParticleOptions particleOptions, int particleCount, double travelDistance, float speed) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
 
-        // Calculate the step size for each particle in the cube
-        double step = 2.0 / (particleCount - 1);
+        double goldenRatio = (1 + Math.sqrt(5)) / 2;
+        double angleIncrement = Math.PI * 2 * goldenRatio;
+
+        double velocityScale = (travelDistance / 2.2) * speed;
 
         for (int i = 0; i < particleCount; i++) {
-            // Calculate the position within the cube
-            double offsetX = -1.0 + i * step;
-            double offsetY = -1.0 + i * step;
-            double offsetZ = -1.0 + i * step;
-
-            // Calculate the velocity components to expand the cube
-            double velocityX = offsetX * speed;
-            double velocityY = offsetY * speed;
-            double velocityZ = offsetZ * speed;
-
-            // Create the particle packet
-            SendParticleS2C packet = new SendParticleS2C(
-                    particle,
-                    x + offsetX, y + offsetY, z + offsetZ,
-                    velocityX, velocityY, velocityZ
-            );
-
-            // Send the packet (assuming you have a method to send it)
-            LOTMNetworkHandler.sendToAllPlayers(packet);
+            double t = (double) i / particleCount;
+            double inclination = Math.acos(1 - 2 * t);
+            double azimuth = angleIncrement * i;
+            double x = Math.sin(inclination) * Math.cos(azimuth);
+            double y = Math.sin(inclination) * Math.sin(azimuth);
+            double z = Math.cos(inclination);
+            double velocityX = x * velocityScale;
+            double velocityY = y * velocityScale;
+            double velocityZ = z * velocityScale;
+            serverLevel.sendParticles(particleOptions, center.x, center.y, center.z, 0, velocityX, velocityY, velocityZ, 1.0);
         }
     }
 
@@ -2735,7 +2709,18 @@ public class BeyonderUtil {
                     }
                     tag.putInt("age", 0);
                     tag.putInt("ageDecay", 0);
-                    livingEntity.kill();
+                    LivingEntity living = null;
+                    if (tag.contains("ageUUID")) {
+                        LivingEntity living1 = getLivingEntityFromUUID(livingEntity.level(), tag.getUUID("ageUUID"));
+                        if (living1 != null) {
+                            living = living1;
+                        }
+                    }
+                    if (living == null) {
+                        livingEntity.kill();
+                    } else {
+                        livingEntity.die(livingEntity.damageSources().mobAttack(living));
+                    }
                     livingEntity.sendSystemMessage(Component.literal("You died due to aging."));
                 }
             }
@@ -3047,7 +3032,6 @@ public class BeyonderUtil {
     }
 
 
-
     public static void copyAbilityTick(Player player) {
         Iterator<Map.Entry<UUID, SimpleAbilityItem>> iterator = pendingAbilityCopies.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -3055,7 +3039,7 @@ public class BeyonderUtil {
             SimpleAbilityItem ability = entry.getValue();
             UUID uuid = entry.getKey();
             if (player.getUUID().equals(uuid)) {
-                if(player.getPersistentData().getInt("timerCopiedAbility") > 0) {
+                if (player.getPersistentData().getInt("timerCopiedAbility") > 0) {
                     player.getPersistentData().putInt("timerCopiedAbility", player.getPersistentData().getInt("timerCopiedAbility") - 1);
                     player.displayClientMessage(Component.literal("Trying to copy: ").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD).append(Component.literal(ability.getDefaultInstance().getHoverName().getString()).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
                     if (player.getPersistentData().getBoolean("acceptCopiedAbility")) {
@@ -3081,8 +3065,8 @@ public class BeyonderUtil {
         if (living instanceof Player player) {
             if (currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 6)) {
                 ScribedUtils.useScribedAbility(player, ability);
-                if(ScribedUtils.getRemainingUses(player, ability) == 0){
-                    if(player.getMainHandItem().getItem() == ability){
+                if (ScribedUtils.getRemainingUses(player, ability) == 0) {
+                    if (player.getMainHandItem().getItem() == ability) {
                         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                     }
                 }
@@ -3095,7 +3079,7 @@ public class BeyonderUtil {
     }
 
 
-    public static boolean copyAbilityTest(LivingEntity living,int copierSequence, int targetAbilitySequence) {
+    public static boolean copyAbilityTest(LivingEntity living, int copierSequence, int targetAbilitySequence) {
         float damage = BeyonderUtil.getDamage(living).get(ItemInit.RECORDSCRIBE.get());
         double chance = (0.3 + (0.7 / 9) * (targetAbilitySequence - copierSequence)) * damage;
         chance = Math.max(0.05, Math.min(chance, 1));
@@ -3622,7 +3606,7 @@ public class BeyonderUtil {
             if (livingEntity instanceof ServerPlayer serverPlayer) {
                 serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
             }
-        }  else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+        } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
             playerMobEntity.setIsFlying(false);
             playerMobEntity.setFlySpeed(1.0f);
         }
@@ -3773,5 +3757,47 @@ public class BeyonderUtil {
 
     public static void setInvisible(LivingEntity living, boolean choice, int time) {
         LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(choice, living.getUUID(), time));
+    }
+
+    public static boolean isStunned(LivingEntity living) {
+        if (living.hasEffect(ModEffects.PARALYSIS.get())) {
+            return true;
+        } else if (living.hasEffect(ModEffects.STUN.get())) {
+            return true;
+        } else if (living.hasEffect(ModEffects.AWE.get())) {
+            return true;
+        }
+        return false;
+    }
+
+    public static void forceLookAtPosition(ServerPlayer player, Vec3 targetPos, boolean smooth) {
+        Vec3 playerPos = player.position().add(0, player.getEyeHeight(), 0);
+        ForceLookPacketS2C packet = new ForceLookPacketS2C(playerPos, targetPos, smooth);
+        sendPacketToPlayer(player, packet);
+    }
+
+    public static void forceLookAtEntity(ServerPlayer player, Entity target, boolean smooth) {
+        Vec3 targetPos = target.position().add(0, target.getEyeHeight() * 0.5, 0);
+        forceLookAtPosition(player, targetPos, smooth);
+    }
+
+    // Force player to look in a specific direction (yaw/pitch)
+    public static void forceLookDirection(ServerPlayer player, float yaw, float pitch, boolean smooth) {
+        ForceLookPacketS2C packet = new ForceLookPacketS2C(yaw, pitch, smooth);
+        sendPacketToPlayer(player, packet);
+    }
+
+    // Placeholder for your networking system
+    private static void sendPacketToPlayer(ServerPlayer player, ForceLookPacketS2C packet) {
+        LOTMNetworkHandler.sendToPlayer(packet, player);
+    }
+
+    public static void stopForceLook(ServerPlayer player) {
+        StopForceLookPacketS2C stopPacket = new StopForceLookPacketS2C();
+        sendStopPacketToPlayer(player, stopPacket);
+    }
+
+    private static void sendStopPacketToPlayer(ServerPlayer player, StopForceLookPacketS2C packet) {
+        LOTMNetworkHandler.sendToPlayer(packet, player);
     }
 }

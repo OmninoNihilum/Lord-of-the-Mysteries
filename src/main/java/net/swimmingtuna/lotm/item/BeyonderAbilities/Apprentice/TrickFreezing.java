@@ -39,8 +39,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake.isOnSurface;
-
 public class TrickFreezing extends SimpleAbilityItem {
     public TrickFreezing(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 70, 300);
@@ -180,5 +178,9 @@ public class TrickFreezing extends SimpleAbilityItem {
             return 60;
         }
         return 0;
+    }
+
+    public static boolean isOnSurface(Level level, BlockPos pos) {
+        return level.canSeeSky(pos.above()) || !level.getBlockState(pos.above()).isSolid();
     }
 }

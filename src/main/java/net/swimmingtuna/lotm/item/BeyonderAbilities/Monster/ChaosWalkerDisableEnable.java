@@ -38,7 +38,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake.isOnSurface;
 import static net.swimmingtuna.lotm.util.BeyonderUtil.getCoordinateAtLeastAway;
 
 public class ChaosWalkerDisableEnable extends SimpleAbilityItem {
@@ -252,5 +251,9 @@ public class ChaosWalkerDisableEnable extends SimpleAbilityItem {
             return 20;
         }
         return 0;
+    }
+
+    public static boolean isOnSurface(Level level, BlockPos pos) {
+        return level.canSeeSky(pos.above()) || !level.getBlockState(pos.above()).isSolid();
     }
 }

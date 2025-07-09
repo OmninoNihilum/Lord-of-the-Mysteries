@@ -23,6 +23,7 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.*;
@@ -178,9 +179,9 @@ public class BeyonderEntityData extends SavedData {
     }
 
     public static void regenerateSpirituality(LivingEvent.LivingTickEvent event) {
+        LivingEntity living = event.getEntity();
+        ServerLevel level = (ServerLevel) living.level();
         if (!event.getEntity().level().isClientSide() && event.getEntity().tickCount % 20 == 0) {
-            LivingEntity living = event.getEntity();
-            ServerLevel level = (ServerLevel) living.level();
             BeyonderEntityData mappingData = BeyonderEntityData.getInstance(level);
             String pathwayString = mappingData.getStringForEntity(living.getType());
             if (pathwayString != null) {
@@ -203,23 +204,27 @@ public class BeyonderEntityData extends SavedData {
                             persistentData.putInt(key, Math.max(0, currentCooldown - 20));
                         }
                     }
-                    if (living instanceof Mob mob && mob.tickCount % 60 == 0) {
-                        selectAndUseAbility(mob);
-                    }
                     int sequenceLevel = BeyonderUtil.getSequence(living);
                     pathway.tick(living, sequenceLevel);
                 }
             }
         }
         if (!event.getEntity().level().isClientSide()) {
-            LivingEntity living = event.getEntity();
             if (!(living instanceof PlayerMobEntity) && living instanceof Mob mob) {
-                ServerLevel level = (ServerLevel) living.level();
                 BeyonderEntityData mappingData = BeyonderEntityData.getInstance(level);
                 String pathwayString = mappingData.getStringForEntity(living.getType());
                 if (pathwayString != null) {
                     BeyonderClass pathway = BeyonderUtil.getPathway(living);
                     if (pathway != null) {
+                        CompoundTag tag = mob.getPersistentData();
+                        int abilityCooldown = tag.getInt("abilityCooldown");
+                        if (abilityCooldown == 0) {
+                            int sequence = BeyonderUtil.getSequence(mob);
+                            tag.putInt("abilityCooldown", 30 + (sequence * 3));
+                            selectAndUseAbility(mob);
+                        } else {
+                            tag.putInt("abilityCooldown", abilityCooldown - 1);
+                        }
                         if (mob.getTarget() == null && mob.getLastAttacker() != null) {
                             mob.setTarget(mob.getLastAttacker());
                         }
@@ -289,6 +294,7 @@ public class BeyonderEntityData extends SavedData {
             }
             useAvailableAbilityAsMob(mob);
             BeyonderUtil.useSpirituality(mob,selectedAbility.getSpirituality());
+            LOTM.LOGGER.info("USED " + selectedAbility.getSpirituality());
             mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);
         }
     }
