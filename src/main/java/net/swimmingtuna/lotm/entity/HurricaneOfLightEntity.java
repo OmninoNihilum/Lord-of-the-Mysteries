@@ -338,7 +338,7 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
             if (livingEntity.hasEffect(ModEffects.ARMOR_WEAKNESS.get())) {
                 amplifier = livingEntity.getEffect(ModEffects.ARMOR_WEAKNESS.get()).getAmplifier();
             }
-            livingEntity.hurt(BeyonderUtil.genericSource(owner), damage);
+            livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), damage);
 
             if (this.tickCount % 15 == 0) {
                 if (getDestroyArmor()) {
@@ -351,7 +351,7 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
                 }
 
                 if (BeyonderUtil.isPurifiable(livingEntity)) {
-                    livingEntity.hurt(BeyonderUtil.magicSource(owner),damage);
+                    livingEntity.hurt(BeyonderUtil.magicSource(owner, livingEntity),damage);
                 }
             }
         } else {

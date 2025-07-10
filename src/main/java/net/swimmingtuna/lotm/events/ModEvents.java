@@ -596,7 +596,7 @@ public class ModEvents {
                     attacker.getPersistentData().putInt("beneficialDamageDoubled", attacker.getPersistentData().getInt("beneficialDamageDoubled") - 1);
                     event.setCanceled(true);
                     attacker.getPersistentData().putBoolean("shouldDoubleProphecyDamage", false);
-                    attacked.hurt(BeyonderUtil.magicSource(attacker), event.getAmount() * 2);
+                    attacked.hurt(BeyonderUtil.magicSource(attacker, attacked), event.getAmount() * 2);
                 }
                 if (attacker.getPersistentData().getInt("harmfulFalseProphecyAttack") >= 1) {
                     attacker.getPersistentData().putInt("luckDoubleDamage", attacker.getPersistentData().getInt("luckDoubleDamage") + 5);

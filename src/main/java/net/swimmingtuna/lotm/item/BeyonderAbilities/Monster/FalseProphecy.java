@@ -246,7 +246,7 @@ public class FalseProphecy extends SimpleAbilityItem {
             if (x >= 60) {
                 tag.putInt("falseProphecySprintHarmful", 0);
                 tag.putInt("harmfulFalseProphecySprint", 0);
-                livingEntity.hurt(BeyonderUtil.magicSource(livingEntity), 20);
+                livingEntity.hurt(BeyonderUtil.magicSource(livingEntity, livingEntity), 20);
             }
         }
         if (harmfulJump >= 1) {

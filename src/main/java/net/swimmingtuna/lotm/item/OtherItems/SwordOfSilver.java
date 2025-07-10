@@ -43,7 +43,7 @@ public class SwordOfSilver extends SwordItem implements GeoItem {
     @Override
     public boolean hurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
         if (BeyonderUtil.isPurifiable(pTarget)) {
-            pTarget.hurt(BeyonderUtil.magicSource(pAttacker), this.getDamage());
+            pTarget.hurt(BeyonderUtil.magicSource(pAttacker, pTarget), this.getDamage());
             pTarget.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 2, true, true));
             pTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2, true, true));
         }

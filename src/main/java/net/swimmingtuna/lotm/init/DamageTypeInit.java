@@ -25,4 +25,6 @@ public class DamageTypeInit {
         return new DamageSource(damage);
     }
 
+
+
 }

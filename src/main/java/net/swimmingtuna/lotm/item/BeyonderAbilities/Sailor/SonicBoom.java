@@ -61,7 +61,7 @@ public class SonicBoom extends SimpleAbilityItem {
             int duration = 100 - (sequence * 20);
             int damage = (int) (BeyonderUtil.getDamage(player).get(ItemInit.SONIC_BOOM.get()) * 1.25f);
             entity.addEffect(new MobEffectInstance(ModEffects.AWE.get(), duration, 1, false, false));
-            entity.hurt(BeyonderUtil.lightningSource(player), damage);
+            entity.hurt(BeyonderUtil.lightningSource(player, entity), damage);
         }
         RandomSource random = RandomSource.create();
         for (int i = 0; i < 100; i++) {

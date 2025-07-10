@@ -92,15 +92,20 @@ public class StoneEntity extends AbstractArrow {
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
-        if (this.level() != null && !this.level().isClientSide && !(result.getEntity() instanceof StoneEntity) && !(result.getEntity() instanceof LavaEntity) && !getShouldntDamage()) {
+        if (!this.level().isClientSide && !(result.getEntity() instanceof StoneEntity) && !(result.getEntity() instanceof LavaEntity) && !getShouldntDamage()) {
             Vec3 hitPos = result.getLocation();
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
             this.level().explode(this, hitPos.x, hitPos.y, hitPos.z, (5.0f * scaleData.getScale() / 3), Level.ExplosionInteraction.TNT);
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 5.0F, 5.0F);
-
-            if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
-                if (result.getEntity() instanceof LivingEntity entity && entity != owner) {
-                    entity.hurt(BeyonderUtil.explosionSource(this), getDamage() * scaleData.getScale());
+            if (!getRemoveAndHurt()) {
+                if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
+                    if (result.getEntity() instanceof LivingEntity entity && entity != owner) {
+                        if (this.getOwner() == null) {
+                            entity.hurt(BeyonderUtil.genericSource(this, entity), getDamage() * scaleData.getScale());
+                        } else {
+                            entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), getDamage() * scaleData.getScale());
+                        }
+                    }
                 }
             }
             this.discard();
@@ -109,11 +114,15 @@ public class StoneEntity extends AbstractArrow {
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
-        if (this.level() != null && !this.level().isClientSide && !getRemoveAndHurt() && !getShouldntDamage()) {
-            Random random = new Random();
-            if (random.nextInt(10) == 1) {
-                this.level().broadcastEntityEvent(this, (byte) 3);
-                this.level().setBlock(blockPosition(), Blocks.STONE.defaultBlockState(), 3);
+        if (!this.level().isClientSide) {
+            if (!getRemoveAndHurt() && !getShouldntDamage()) {
+                Random random = new Random();
+                if (random.nextInt(10) == 1) {
+                    this.level().broadcastEntityEvent(this, (byte) 3);
+                    this.level().setBlock(blockPosition(), Blocks.STONE.defaultBlockState(), 3);
+                }
+            } else if (getRemoveAndHurt()) {
+                BeyonderUtil.destroyBlocksInSphere(this, result.getBlockPos(), 18, 30);
             }
             this.discard();
         }
@@ -170,11 +179,10 @@ public class StoneEntity extends AbstractArrow {
                         }
                     }
                 }
-                LOTM.LOGGER.info("JUST GOT SHOT");
                 for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(getBB()))) {
-                    LOTM.LOGGER.info("DETECTED MOB " + entity.getName().getString());
                     if (entity != this.getOwner()) {
-                        entity.hurt(BeyonderUtil.explosionSource(entity), getDamage());
+                        entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), this.getDamage());
+                        BeyonderUtil.destroyBlocksInSphere(entity, entity.getOnPos(), 10,0);
                         this.discard();
                     }
                 }

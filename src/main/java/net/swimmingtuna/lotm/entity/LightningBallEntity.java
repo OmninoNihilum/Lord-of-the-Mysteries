@@ -278,28 +278,6 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
         this.entityData.set(ABSORB, absorbed);
     }
 
-    public void explodeLightningBallEntity(LivingEntity hitEntity, float scale) {
-        BlockPos hitPos = hitEntity.blockPosition();
-        double radius = scale * 2;
-        for (BlockPos pos : BlockPos.betweenClosed(
-                hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                hitPos.offset((int) radius, (int) radius, (int) radius))) {
-            if (pos.distSqr(hitPos) <= radius * radius) {
-                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0) {
-                    this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                }
-            }
-        }
-        List<Entity> entities = this.level().getEntities(this,
-                new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                        hitPos.offset((int) radius, (int) radius, (int) radius)));
-        for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.lightningSource(this), 10 * scale);
-            }
-        }
-    }
-
     public void explodeLightningBallBlock(BlockPos hitPos, double radius, float scale) {
         for (BlockPos pos : BlockPos.betweenClosed(
                 hitPos.offset((int) -radius, (int) -radius, (int) -radius),
@@ -317,9 +295,17 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
                 if (!(livingEntity instanceof Player)) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this), 10 * scale);
+                    if (this.getOwner() == null) {
+                        livingEntity.hurt(BeyonderUtil.lightningSource(this, livingEntity), 10 * scale);
+                    } else {
+                        livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner(), livingEntity), 10 * scale);
+                    }
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this), 6 * scale);
+                    if (this.getOwner() == null) {
+                        livingEntity.hurt(BeyonderUtil.lightningSource(this, livingEntity), 6 * scale);
+                    } else {
+                        livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner(), livingEntity), 6 * scale);
+                    }
                 }
             }
         }

@@ -23,6 +23,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -251,34 +253,74 @@ public class BeyonderUtil {
         return null;
     }
 
-    public static DamageSource genericSource(Entity entity) {
-        Level level = entity.level();
-        Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC);
-        return new DamageSource(damageTypeHolder, entity, entity, entity.getOnPos().getCenter());
-    }
-
-    public static DamageSource magicSource(Entity entity) {
-        Level level = entity.level();
+    public static DamageSource magicSource(Entity attacker, Entity target) {
+        Level level = target.level();
         Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.MAGIC);
-        return new DamageSource(damageTypeHolder, entity, entity, entity.getOnPos().getCenter());
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
     }
 
-    public static DamageSource explosionSource(Entity entity) {
-        Level level = entity.level();
+    public static DamageSource explosionSource(Entity attacker, Entity target) {
+        Level level = target.level();
         Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.EXPLOSION);
-        return new DamageSource(damageTypeHolder, entity, entity, entity.getOnPos().getCenter());
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
     }
 
-    public static DamageSource fallSource(Entity entity) {
-        Level level = entity.level();
+    public static DamageSource fallSource(Entity attacker, Entity target) {
+        Level level = target.level();
         Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FALL);
-        return new DamageSource(damageTypeHolder, entity, entity, entity.getOnPos().getCenter());
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
     }
 
-    public static DamageSource lightningSource(Entity entity) {
-        Level level = entity.level();
+    public static DamageSource lightningSource(Entity attacker, Entity target) {
+        Level level = target.level();
         Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.LIGHTNING_BOLT);
-        return new DamageSource(damageTypeHolder, entity, entity, entity.getOnPos().getCenter());
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
+    }
+
+    public static DamageSource genericSource(Entity attacker, Entity target) {
+        Level level = target.level();
+        Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC);
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
     }
 
     public static DamageSource mentalSource(Level level, LivingEntity attacker, LivingEntity target) {
@@ -3212,7 +3254,7 @@ public class BeyonderUtil {
         List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity pEntity : entities) {
             if (pEntity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(entity), damage);
+                livingEntity.hurt(BeyonderUtil.genericSource(entity, livingEntity), damage);
             }
         }
     }

@@ -111,7 +111,7 @@ public class SpearOfDawn extends SwordItem implements GeoItem {
     public boolean hurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
         boolean canBePurified = pTarget.getName().getString().toLowerCase().contains("demon") || pTarget.getName().getString().toLowerCase().contains("ghost") || pTarget.getName().getString().toLowerCase().contains("wraith") || pTarget.getName().getString().toLowerCase().contains("zombie") || pTarget.getName().getString().toLowerCase().contains("undead") || pTarget.getPersistentData().getBoolean("isWraith");
         if (canBePurified) {
-            pTarget.hurt(BeyonderUtil.magicSource(pAttacker), this.getDamage());
+            pTarget.hurt(BeyonderUtil.magicSource(pAttacker, pTarget), this.getDamage());
             pTarget.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 2, false, false));
             pTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2, false, false));
         }

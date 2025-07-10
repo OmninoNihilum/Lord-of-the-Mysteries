@@ -18,6 +18,7 @@ import net.swimmingtuna.lotm.entity.NetherrackEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationBlocks;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.Comparator;
 import java.util.List;
@@ -66,6 +67,7 @@ public class MatterAccelerationBlockC2S {
                         stoneEntity.setDeltaMovement(stoneToTarget.scale(20.0));
                         stoneEntity.setBB(15);
                         stoneEntity.setSent(true);
+                        stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         stoneEntity.setOwner(player);
                         stoneEntity.setNoGravity(true);
                         stoneEntity.setShouldntDamage(false);
@@ -89,6 +91,7 @@ public class MatterAccelerationBlockC2S {
                         netherrackEntity.setShouldDamage(true);
                         netherrackEntity.setTickCount(120);
                         netherrackEntity.setNoGravity(true);
+                        netherrackEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         netherrackEntity.setOwner(player);
                     }
                     if (netherrackEntity == null) {
@@ -108,6 +111,7 @@ public class MatterAccelerationBlockC2S {
                         endStoneEntity.setBB(15);
                         endStoneEntity.setShouldntDamage(false);
                         endStoneEntity.setTickCount(120);
+                        endStoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         endStoneEntity.setNoGravity(true);
                         endStoneEntity.setOwner(player);
                     }

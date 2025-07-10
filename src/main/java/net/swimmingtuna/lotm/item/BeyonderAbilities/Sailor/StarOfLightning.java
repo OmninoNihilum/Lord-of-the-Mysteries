@@ -156,7 +156,7 @@ public class StarOfLightning extends SimpleAbilityItem {
 
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity pEntity) {
-                pEntity.hurt(BeyonderUtil.lightningSource(livingEntity), 50);
+                pEntity.hurt(BeyonderUtil.lightningSource(livingEntity, pEntity), 50);
             }
         }
     }

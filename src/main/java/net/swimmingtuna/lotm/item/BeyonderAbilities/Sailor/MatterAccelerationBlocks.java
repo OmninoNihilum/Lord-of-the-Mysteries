@@ -143,12 +143,12 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         int randomYRot = (int) ((Math.random() * 10) - 5);
                         stoneEntity.setStoneYRot(randomYRot);
                         stoneEntity.setStoneXRot(randomXRot);
-                        stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         stoneEntity.setStoneStayAtX(randomStayX);
                         stoneEntity.setStoneStayAtY(randomStayY);
                         stoneEntity.setStoneStayAtZ(randomStayZ);
                         stoneEntity.setOwner(player);
                         stoneEntity.setRemoveAndHurt(true);
+                        stoneEntity.setDamage(30);
                         stoneEntity.setSent(false);
                         stoneEntity.teleportTo(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
                         stoneEntity.setShouldntDamage(true);
@@ -164,7 +164,6 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         float randomStayZ = (float) ((Math.random() * 6) - 3);
                         int randomXRot = (int) ((Math.random() * 10) - 5);
                         int randomYRot = (int) ((Math.random() * 10) - 5);
-                        netherrackEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         netherrackEntity.setNetherrackStayAtX(randomStayX);
                         netherrackEntity.setNetherrackStayAtY(randomStayY);
                         netherrackEntity.setNetherrackStayAtZ(randomStayZ);
@@ -173,6 +172,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         netherrackEntity.setSent(false);
                         netherrackEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
                         netherrackEntity.setShouldDamage(false);
+                        netherrackEntity.setDamage(30);
                         netherrackEntity.setNetherrackXRot(randomXRot);
                         netherrackEntity.setNetherrackYRot(randomYRot);
 
@@ -188,13 +188,13 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         float randomStayZ = (float) ((Math.random() * 6) - 3);
                         int randomXRot = (int) ((Math.random() * 10) - 5);
                         int randomYRot = (int) ((Math.random() * 10) - 5);
-                        endstoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
                         endstoneEntity.setEndstoneStayAtX(randomStayX);
                         endstoneEntity.setEndstoneStayAtY(randomStayY);
                         endstoneEntity.setEndstoneStayAtZ(randomStayZ);
                         endstoneEntity.setOwner(player);
                         endstoneEntity.setRemoveAndHurt(true);
                         endstoneEntity.setSent(false);
+                        endstoneEntity.setDamage(30);
                         endstoneEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
                         endstoneEntity.setShouldntDamage(true);
                         endstoneEntity.setEndstoneXRot(randomXRot);
@@ -215,7 +215,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
                         stoneEntity.setStoneStayAtY(randomStayY);
                         stoneEntity.setStoneStayAtZ(randomStayZ);
                         stoneEntity.setOwner(player);
-                        stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
+                        stoneEntity.setDamage(30);
                         stoneEntity.setRemoveAndHurt(true);
                         stoneEntity.setSent(false);
                         stoneEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);

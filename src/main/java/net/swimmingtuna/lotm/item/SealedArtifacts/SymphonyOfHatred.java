@@ -65,7 +65,7 @@ public class SymphonyOfHatred extends Item {
             } else {
                 damage = 12.0f;
             }
-            target.hurt(BeyonderUtil.magicSource(player), damage);
+            target.hurt(BeyonderUtil.magicSource(player, target), damage);
             player.getCooldowns().addCooldown(this, 400);
             return true;
         }
@@ -77,7 +77,7 @@ public class SymphonyOfHatred extends Item {
             for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(40))) {
                 if (living != livingEntity) {
                     Random random = new Random();
-                    living.hurt(BeyonderUtil.magicSource(livingEntity), 35.0f);
+                    living.hurt(BeyonderUtil.magicSource(livingEntity, living), 35.0f);
                     living.getPersistentData().putDouble("sanity", livingEntity.getPersistentData().getDouble("sanity") + 10);
                     BeyonderUtil.applyMobEffect(living, MobEffects.CONFUSION, 100, 1, true, true);
                     int sequence = 10;
@@ -92,7 +92,7 @@ public class SymphonyOfHatred extends Item {
                         if (random1.nextInt(2) == 0) {
                             BeyonderUtil.applyMobEffect(living, MobEffects.BLINDNESS, 60, 1, false, false);
                         } else {
-                            living.hurt(BeyonderUtil.magicSource(livingEntity), 15.0f);
+                            living.hurt(BeyonderUtil.magicSource(livingEntity, living), 15.0f);
                         }
                     }
                     if (random.nextInt(3) == 0) {

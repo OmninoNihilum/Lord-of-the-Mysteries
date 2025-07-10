@@ -98,7 +98,11 @@ public class NetherrackEntity extends AbstractArrow {
             this.level().explode(this, hitPos.x, hitPos.y, hitPos.z, (5.0f * scaleData.getScale() / 3), Level.ExplosionInteraction.TNT);
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 5.0F, 5.0F);
             if (result.getEntity() instanceof LivingEntity entity) {
-                entity.hurt(BeyonderUtil.genericSource(this), getDamage() * scaleData.getScale());
+                if (this.getOwner() == null) {
+                    entity.hurt(BeyonderUtil.genericSource(this, entity), getDamage() * scaleData.getScale());
+                } else {
+                    entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), getDamage() * scaleData.getScale());
+                }
             }
             this.discard();
         }
@@ -106,11 +110,16 @@ public class NetherrackEntity extends AbstractArrow {
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
-        if (!this.level().isClientSide && !getRemoveAndHurt() && getShouldDamage()) {
-            Random random = new Random();
-            if (random.nextInt(10) == 1) {
-            this.level().broadcastEntityEvent(this, (byte) 3);
-            this.level().setBlock(blockPosition(), Blocks.NETHERRACK.defaultBlockState(), 3);}
+        if (!this.level().isClientSide) {
+            if (!getRemoveAndHurt()) {
+                Random random = new Random();
+                if (random.nextInt(10) == 1) {
+                    this.level().broadcastEntityEvent(this, (byte) 3);
+                    this.level().setBlock(blockPosition(), Blocks.STONE.defaultBlockState(), 3);
+                }
+            } else if (getRemoveAndHurt()) {
+                BeyonderUtil.destroyBlocksInSphere(this, result.getBlockPos(), 18, 30);
+            }
             this.discard();
         }
     }
@@ -168,7 +177,16 @@ public class NetherrackEntity extends AbstractArrow {
                 }
                 for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(getBB()))) {
                     if (entity != this.getOwner()) {
-                        entity.hurt(BeyonderUtil.genericSource(this), getDamage());
+                        entity.invulnerableTime = 0;
+                        entity.hurtTime = 0;
+                        entity.hurtDuration = 0;
+                        if (this.getOwner() == null) {
+                            entity.hurt(BeyonderUtil.genericSource(this, entity), this.getDamage());
+                        } else {
+                            entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), this.getDamage());
+                        }
+                        BeyonderUtil.destroyBlocksInSphere(entity, entity.getOnPos(), 10,0);
+                        this.discard();
                     }
                 }
                 if (this.tickCount >= 160) {

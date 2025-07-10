@@ -607,7 +607,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
                                 if (getMentalDamage() != 0) {
                                     BeyonderUtil.applyMentalDamage(getOwner(), livingEntity, getMentalDamage());
                                 }
-                                livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()), damage * 1.4f);
+                                livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner(), livingEntity), damage * 1.4f);
                             } else {
                                 if (getMentalDamage() != 0) {
                                     BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
@@ -619,7 +619,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
                                 if (getMentalDamage() != 0) {
                                     BeyonderUtil.applyMentalDamage(getOwner(), livingEntity, getMentalDamage());
                                 }
-                                livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner()),damage * 0.9f);
+                                livingEntity.hurt(BeyonderUtil.lightningSource(this.getOwner(), livingEntity), damage * 0.9f);
                             } else {
                                 if (getMentalDamage() != 0) {
                                     BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
@@ -671,7 +671,11 @@ public class LightningEntity extends AbstractHurtingProjectile {
     protected void onHitEntity(EntityHitResult result) {
         if (!this.level().isClientSide()) {
             if (result.getEntity() instanceof LivingEntity entity) {
-                entity.hurt(BeyonderUtil.lightningSource(this), getDamage());
+                if (this.getOwner() == null) {
+                    entity.hurt(BeyonderUtil.lightningSource(this, entity), getDamage());
+                } else {
+                    entity.hurt(BeyonderUtil.lightningSource(this.getOwner(), entity), getDamage());
+                }
                 if (this.getOwner() != null && getMentalDamage() != 0) {
                     BeyonderUtil.applyMentalDamage(owner, entity, getMentalDamage());
                 }
