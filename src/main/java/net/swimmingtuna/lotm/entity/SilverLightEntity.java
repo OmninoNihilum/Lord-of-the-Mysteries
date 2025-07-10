@@ -82,7 +82,7 @@ public class SilverLightEntity extends AbstractHurtingProjectile implements GeoE
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
             float scale = scaleData.getScale();
             if (hitEntity instanceof LivingEntity livingEntity && this.getOwner() != null) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner()), scale * 25);
+                livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), scale * 25);
                 this.discard();
             }
         }
@@ -243,7 +243,7 @@ public class SilverLightEntity extends AbstractHurtingProjectile implements GeoE
             float scale = scaleData.getScale();
             for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(scale * 0.8f))) {
                 if (this.getOwner() instanceof LivingEntity owner && livingEntity != owner) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner()), scale * 25);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), scale * 25);
                     this.discard();
                 }
             }

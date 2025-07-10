@@ -16,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -82,7 +83,11 @@ public class MeteorNoLevelEntity extends AbstractHurtingProjectile {
                         hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), 16 * scale);
+                if (this.getOwner() == null) {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 16 * scale);
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 16 * scale);
+                }
             }
         }
     }
@@ -104,26 +109,31 @@ public class MeteorNoLevelEntity extends AbstractHurtingProjectile {
                     return;
                 } else {
                     this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 30.0f, 1.0f);
-                    this.meteorExplodeBlock(radius,hitPos, scale);
+                    explodeMeteorBlock(hitPos,radius,scale);
                 }
             }
             this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 30.0f, 1.0f);
-            meteorExplodeBlock(radius,hitPos,scale);
+            explodeMeteorBlock(hitPos,radius,scale);
             this.discard();
         }
     }
 
-
-    public void meteorExplodeBlock(double radius, BlockPos hitPos, float scale) {
+    public void explodeMeteorBlock(BlockPos hitPos, double radius, float scale) {
         List<Entity> entities = this.level().getEntities(this,
                 new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
                         hitPos.offset((int) radius, (int) radius, (int) radius)));
+
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), 16 * scale); // Adjust damage as needed
+                if (this.getOwner() == null) {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), scale * 16);
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), scale * 16);
+                }
             }
         }
     }
+
     public boolean isPickable() {
         return false;
     }

@@ -250,11 +250,19 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 if (this.tickCount % 10 == 0) {
                     if (!getTornadoLightning()) {
                         if (entity.getPersistentData().getInt("luckTornadoResistance") >= 1) {
-                            entity.hurt(BeyonderUtil.genericSource(this), 2);
+                            if (this.getOwner() == null) {
+                                entity.hurt(BeyonderUtil.genericSource(this, entity), 2);
+                            } else {
+                                entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), 2);
+                            }
                         } else if (entity.getPersistentData().getInt("luckTornadoImmunity") >= 1) {
                             continue;
                         } else {
-                            entity.hurt(BeyonderUtil.genericSource(this), (float) getTornadoHeight() / 4);
+                            if (this.getOwner() == null) {
+                                entity.hurt(BeyonderUtil.genericSource(this, entity), (float) this.getTornadoHeight() / 4);
+                            } else {
+                                entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), (float) this.getTornadoHeight() / 4);
+                            }
                         }
                     } else if (getTornadoLightning() && getOwner() != null && getOwner() instanceof LivingEntity owner && entity instanceof LivingEntity living){
                         if (entity.getPersistentData().getInt("luckTornadoResistance") >= 1) {

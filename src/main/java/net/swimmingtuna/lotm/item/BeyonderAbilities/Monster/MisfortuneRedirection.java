@@ -232,7 +232,7 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                     calamityGroundTremorCounter++;
                     for (LivingEntity living : interactionTarget.level().getEntitiesOfClass(LivingEntity.class, interactionTarget.getBoundingBox().inflate(calamityGroundTremorCounter * 5))) {
                         if (livingEntity != player) {
-                            living.hurt(BeyonderUtil.genericSource(interactionTarget), 5 * enhancement);
+                            living.hurt(BeyonderUtil.genericSource(interactionTarget, living), 5 * enhancement);
                         }
                     }
                 }
@@ -302,7 +302,7 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                     for (LivingEntity living : interactionTarget.level().getEntitiesOfClass(LivingEntity.class, interactionTarget.getBoundingBox().inflate((calamityBreezeCounter * 5) + (enhancement * 5)))) {
                         if (livingEntity != player) {
                             living.addEffect(new MobEffectInstance(ModEffects.STUN.get(), calamityBreezeCounter * 10));
-                            living.hurt(BeyonderUtil.genericSource(interactionTarget), 4);
+                            living.hurt(BeyonderUtil.genericSource(interactionTarget, living), 4);
                             living.setTicksFrozen(calamityBreezeCounter * 10);
                         }
                     }
@@ -335,7 +335,7 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                                     hitPos.offset((int) radius, (int) radius, (int) radius)));
                     for (Entity entity : entities) {
                         if (entity instanceof LivingEntity livingEntity1) {
-                            livingEntity1.hurt(BeyonderUtil.genericSource(interactionTarget), 4 * radius); // problem w/ damage sources
+                            livingEntity1.hurt(BeyonderUtil.genericSource(interactionTarget, livingEntity1), 4 * radius); // problem w/ damage sources
                         }
                     }
                 }
@@ -376,6 +376,9 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                 LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, livingEntity.level());
                 lightningBolt.teleportTo(lightningBolt.getX(), lightningBolt.getY(), lightningBolt.getZ());
                 lightningBolt.setDamage(12);
+                livingEntity.invulnerableTime = 2;
+                livingEntity.hurtTime = 2;
+                livingEntity.hurtDuration = 2;
                 livingEntity.level().addFreshEntity(lightningBolt);
             }
         }

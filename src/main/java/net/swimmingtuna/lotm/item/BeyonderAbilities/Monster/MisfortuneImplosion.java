@@ -114,7 +114,7 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
                     double misfortune = tag.getDouble("misfortune");
                     float duration = (float) (100 + (misfortune * 5) * enhancement);
                     entity.addEffect(new MobEffectInstance(MobEffects.WITHER, (int) duration, 4, false, false));
-                    entity.hurt(BeyonderUtil.genericSource(player), (float) misfortune / 2);
+                    entity.hurt(BeyonderUtil.genericSource(player, entity), (float) misfortune / 2);
                     tag.putDouble("misfortune", 0);
                 }
             }
@@ -134,7 +134,7 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
         List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity pEntity : entities) {
             if (pEntity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(entity), damage); // problem w/ damage sources
+                livingEntity.hurt(BeyonderUtil.genericSource(entity, livingEntity), damage); // problem w/ damage sources
             }
         }
     }

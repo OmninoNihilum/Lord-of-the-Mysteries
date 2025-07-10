@@ -78,12 +78,12 @@ public class RoarEntity extends AbstractHurtingProjectile {
             if (entity instanceof LivingEntity livingEntity) {
                 if (getOwner() != null && getOwner() instanceof LivingEntity owner) {
                     if (!BeyonderUtil.areAllies(livingEntity, owner) && livingEntity != owner) {
-                        livingEntity.hurt(BeyonderUtil.genericSource(this), (int) (20 * scaleData.getScale()));
+                        livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), (int) (20 * scaleData.getScale()));
                         float explosionRadius = 3 * scaleData.getScale();
                         this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
                     }
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this), (int) (20 * scaleData.getScale()));
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), (int) (20 * scaleData.getScale()));
                     float explosionRadius = 3 * scaleData.getScale();
                     this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
                 }
@@ -184,7 +184,11 @@ public class RoarEntity extends AbstractHurtingProjectile {
                         hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), 10 * scale); // Adjust damage as needed
+                if (this.getOwner() == null) {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 10 * scale);
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 10 * scale);
+                }
             }
         }
     }

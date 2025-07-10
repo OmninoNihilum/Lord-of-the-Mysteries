@@ -131,12 +131,12 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                                 if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.MONSTER.get())) {
                                     int explosionSequence = BeyonderUtil.getSequence(explosionHitEntity);
                                     if (explosionSequence <= 5 && explosionSequence > 3) {
-                                        explosionHitEntity.hurt(BeyonderUtil.genericSource(player), 10 + (enhancement * 3));
+                                        explosionHitEntity.hurt(BeyonderUtil.genericSource(player, explosionHitEntity), 10 + (enhancement * 3));
                                     } else if (explosionSequence <= 3) {
                                         return;
                                     }
                                 } else {
-                                    explosionHitEntity.hurt(BeyonderUtil.genericSource(player), 10 + (enhancement * 3));
+                                    explosionHitEntity.hurt(BeyonderUtil.genericSource(player, explosionHitEntity), 10 + (enhancement * 3));
                                 }
                             }
                         }

@@ -33,7 +33,6 @@ import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.List;
-import java.util.Objects;
 
 public class MeteorEntity extends AbstractHurtingProjectile {
     private static final EntityDataAccessor<Boolean> DATA_DANGEROUS = SynchedEntityData.defineId(MeteorEntity.class, EntityDataSerializers.BOOLEAN);
@@ -225,7 +224,11 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                         hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), 16 * scale);
+                if (this.getOwner() == null) {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 16 * scale);
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 16 * scale);
+                }
             }
         }
     }
@@ -246,7 +249,11 @@ public class MeteorEntity extends AbstractHurtingProjectile {
 
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(this), damage); // problem w/ damage sources
+                if (this.getOwner() == null) {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), damage * 16);
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), damage * 16);
+                }
             }
         }
     }
@@ -296,7 +303,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 float scale = ScaleTypes.BASE.getScaleData(this).getScale();
                 Vec3 lookVec = livingEntity.getLookAngle();
                 if (tag.getInt("calamityIncarnationInMeteor") >= 1 && !livingEntity.onGround()) {
-                    EnvisionLocation.envisionLocationTeleport((LivingEntity) this.getOwner(),livingEntity.getX(), livingEntity.getY() + 1 * scale, livingEntity.getZ());
+                    EnvisionLocation.envisionLocationTeleport((LivingEntity) this.getOwner(), livingEntity.getX(), livingEntity.getY() + 1 * scale, livingEntity.getZ());
                     this.setDeltaMovement(lookVec.x, -1, lookVec.z);
                     this.hurtMarked = true;
                     if (livingEntity.onGround()) {

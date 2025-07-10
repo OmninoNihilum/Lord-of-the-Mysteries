@@ -119,7 +119,7 @@ public class EndStoneEntity extends AbstractArrow {
                     this.level().setBlock(blockPosition(), Blocks.STONE.defaultBlockState(), 3);
                 }
             } else if (getRemoveAndHurt()) {
-                BeyonderUtil.destroyBlocksInSphere(this, result.getBlockPos(), 18, 30);
+                BeyonderUtil.destroyBlocksInSphere(this, result.getBlockPos(), 12, 30);
             }
             this.discard();
         }

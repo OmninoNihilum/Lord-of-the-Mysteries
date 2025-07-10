@@ -131,7 +131,7 @@ public class SpaceRiftEntity extends AbstractHurtingProjectile implements GeoEnt
                         livingEntity.teleportTo(this.getX(), this.getY(), this.getZ());
                         if (this.tickCount % 15 == 0) {
                             float damage = (float) Math.max((double) scale, (scale * 10 - (livingEntity.distanceTo(this) * 1.5f)));
-                            livingEntity.hurt(BeyonderUtil.genericSource(owner), damage * 0.8f);
+                            livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), damage * 0.8f);
                         }
                     }
                     Vec3 direction = this.position().subtract(livingEntity.position());
@@ -139,7 +139,7 @@ public class SpaceRiftEntity extends AbstractHurtingProjectile implements GeoEnt
                     if (distance < 0.1) continue;
                     if (this.tickCount % 20 == 0) {
                         float damage = (float) Math.max((double) scale, (scale * 10 - (livingEntity.distanceTo(this) * 1.5f)));
-                        livingEntity.hurt(BeyonderUtil.genericSource(owner), damage);
+                        livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), damage);
                     }
                     Vec3 pullDirection = direction.normalize();
                     double pullStrength = Math.max(0.1, 3.5 / distance);

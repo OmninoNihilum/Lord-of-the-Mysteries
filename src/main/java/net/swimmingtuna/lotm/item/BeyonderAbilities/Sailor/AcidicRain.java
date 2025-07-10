@@ -73,7 +73,7 @@ public class AcidicRain extends SimpleAbilityItem {
                 if (entity == livingEntity || BeyonderUtil.areAllies(livingEntity, entity)) {
                     continue;
                 }
-                entity.hurt(BeyonderUtil.genericSource(livingEntity), BeyonderUtil.getDamage(livingEntity).get(ItemInit.ACIDIC_RAIN.get()) / 4);
+                entity.hurt(BeyonderUtil.genericSource(livingEntity, entity), BeyonderUtil.getDamage(livingEntity).get(ItemInit.ACIDIC_RAIN.get()) / 4);
                 if (entity.hasEffect(MobEffects.POISON)) {
                     int poisonAmp = entity.getEffect(MobEffects.POISON).getAmplifier();
                     if (poisonAmp == 0) {

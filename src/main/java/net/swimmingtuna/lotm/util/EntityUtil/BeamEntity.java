@@ -210,7 +210,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                     }
                     if (getIsTwilight() && entity instanceof LivingEntity livingEntity && this.getOwner() instanceof LivingEntity pOwner && !BeyonderUtil.areAllies(pOwner, livingEntity)) {
                         int age = livingEntity.getPersistentData().getInt("age");
-                        livingEntity.hurt(BeyonderUtil.genericSource(owner), 10);
+                        livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), 10);
                         int ageDivisibleAmount = 1;
                         if (pOwner instanceof Mob mob) {
                             ageDivisibleAmount = 3;

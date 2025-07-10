@@ -177,7 +177,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
                             }
-                            livingEntity.hurt(BeyonderUtil.genericSource(owner), 80);
+                            livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), 80);
                             livingEntity.getPersistentData().putInt("inTwilight", Math.max(tag.getInt("inTwilight"), 25));
                         }
                     }
@@ -191,7 +191,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
                             }
-                            livingEntity.hurt(BeyonderUtil.genericSource(owner), 80);
+                            livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), 80);
                             livingEntity.getPersistentData().putInt("inTwilight", Math.max(tag.getInt("inTwilight"), 25));
                         }
                     }
@@ -205,7 +205,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
                             }
-                            livingEntity.hurt(BeyonderUtil.genericSource(owner), 80);
+                            livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), 80);
                             livingEntity.getPersistentData().putInt("inTwilight", Math.max(tag.getInt("inTwilight"), 25));
                         }
                     }
@@ -220,7 +220,7 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
                             }
-                            livingEntity.hurt(BeyonderUtil.genericSource(owner), 80);
+                            livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), 80);
                             livingEntity.getPersistentData().putInt("inTwilight", Math.max(tag.getInt("inTwilight"), 25));
                         }
                     }

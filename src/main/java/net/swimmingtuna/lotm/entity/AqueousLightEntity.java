@@ -74,7 +74,11 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
         if (entity.level().isClientSide() || owner.level().isClientSide()) {
             return;
         }
-        entity.hurt(BeyonderUtil.genericSource(this), damage);
+        if (this.getOwner() == null) {
+            entity.hurt(BeyonderUtil.genericSource(this, entity), damage);
+        } else {
+            entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), damage);
+        }
         if (holder.getSequence() > 7) {
             return;
         }

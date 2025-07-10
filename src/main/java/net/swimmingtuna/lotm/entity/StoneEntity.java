@@ -122,7 +122,7 @@ public class StoneEntity extends AbstractArrow {
                     this.level().setBlock(blockPosition(), Blocks.STONE.defaultBlockState(), 3);
                 }
             } else if (getRemoveAndHurt()) {
-                BeyonderUtil.destroyBlocksInSphere(this, result.getBlockPos(), 18, 30);
+                BeyonderUtil.destroyBlocksInSphere(this, result.getBlockPos(), 12, 30);
             }
             this.discard();
         }
@@ -182,7 +182,7 @@ public class StoneEntity extends AbstractArrow {
                 for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(getBB()))) {
                     if (entity != this.getOwner()) {
                         entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), this.getDamage());
-                        BeyonderUtil.destroyBlocksInSphere(entity, entity.getOnPos(), 10,0);
+                        BeyonderUtil.destroyBlocksInSphere(entity, entity.getOnPos(), 9,0);
                         this.discard();
                     }
                 }

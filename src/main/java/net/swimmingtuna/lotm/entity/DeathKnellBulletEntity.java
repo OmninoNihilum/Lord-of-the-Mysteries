@@ -60,13 +60,13 @@ public class DeathKnellBulletEntity extends AbstractHurtingProjectile {
                 } else if (getSlaughter()) {
                     if (livingEntity.getHealth() <= livingEntity.getMaxHealth() * 0.3f) {
                         if (this.getOwner() != null) {
-                            livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner()), getDamage() * 2);
+                            livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), getDamage() * 2);
                         } else {
                             livingEntity.hurt(livingEntity.damageSources().generic(), getDamage() * 2);
                         }
                     } else {
                         if (this.getOwner() != null) {
-                            livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner()), getDamage());
+                            livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), getDamage());
                         } else {
                             livingEntity.hurt(livingEntity.damageSources().generic(), getDamage());
                         }
@@ -74,7 +74,7 @@ public class DeathKnellBulletEntity extends AbstractHurtingProjectile {
                 }
                 if (!getSlaughter()) {
                     if (this.getOwner() != null) {
-                        livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner()), getDamage());
+                        livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), getDamage());
                     } else {
                         livingEntity.hurt(livingEntity.damageSources().generic(), getDamage());
                     }
@@ -109,7 +109,7 @@ public class DeathKnellBulletEntity extends AbstractHurtingProjectile {
             }
             for (LivingEntity livingEntity : level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(radius))) {
                 if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(owner), getDamage() / distanceTo(this));
+                    livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), getDamage() / distanceTo(this));
                 } else {
                     livingEntity.hurt(livingEntity.damageSources().generic(), getDamage() / distanceTo(this));
                 }
