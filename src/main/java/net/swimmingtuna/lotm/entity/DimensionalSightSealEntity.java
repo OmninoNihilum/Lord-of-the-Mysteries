@@ -218,7 +218,7 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
         if (livingEntity.getPersistentData().getInt("ignoreShouldntRender") >= 1) {
             if (livingEntity.getPersistentData().contains("dimensionalSightPlayerUUID") && livingEntity instanceof ServerPlayer) {
                 LivingEntity living = BeyonderUtil.getLivingEntityFromUUID(livingEntity.level(), livingEntity.getPersistentData().getUUID("dimensionalSightPlayerUUID"));
-                if (living instanceof ServerPlayer serverPlayer) {
+                if (living instanceof ServerPlayer) {
                     Vec3 displayCenter = new Vec3(0, 0, 0);
                     SendPlayerRenderDataS2C packet = new SendPlayerRenderDataS2C(
                             livingEntity.getUUID(),

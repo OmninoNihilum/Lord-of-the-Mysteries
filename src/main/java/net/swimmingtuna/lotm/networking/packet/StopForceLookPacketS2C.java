@@ -2,6 +2,8 @@ package net.swimmingtuna.lotm.networking.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.swimmingtuna.lotm.util.ClientData.ClientLookData;
 
 import java.util.function.Supplier;
@@ -17,10 +19,12 @@ public class StopForceLookPacketS2C {
         return new StopForceLookPacketS2C();
     }
 
-    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
+    public static void handle(StopForceLookPacketS2C packet, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
-            ClientLookData.setSmoothLooking(false);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                ClientLookData.setSmoothLooking(false);
+            });
         });
         context.setPacketHandled(true);
     }

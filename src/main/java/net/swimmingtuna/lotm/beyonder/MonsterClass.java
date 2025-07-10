@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static net.swimmingtuna.lotm.util.BeyonderUtil.applyMobEffect;
+
 public class MonsterClass implements BeyonderClass {
     private int speed;
     private int resistance;
@@ -103,59 +105,63 @@ public class MonsterClass implements BeyonderClass {
     public void tick(LivingEntity player, int sequenceLevel) {
         CompoundTag tag = player.getPersistentData();
         if (player.tickCount % 20 == 0) {
-            if (sequenceLevel == 8 || sequenceLevel == 7) {
-                if (player.getMainHandItem().getItem() instanceof SwordItem) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+            if (player instanceof Player) {
+                if (sequenceLevel == 8 || sequenceLevel == 7) {
+                    if (player.getMainHandItem().getItem() instanceof SwordItem) {
+                        applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof AxeItem) {
+                        applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof PickaxeItem || player.getMainHandItem().getItem() instanceof ShovelItem) {
+                        applyMobEffect(player, MobEffects.DIG_SPEED, 60, 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof BowItem || player.getMainHandItem().getItem() instanceof CrossbowItem) {
+                        applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
+                        applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+                    }
+                } else if (sequenceLevel == 6 || sequenceLevel == 5) {
+                    if (player.getMainHandItem().getItem() instanceof SwordItem) {
+                        applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+                        applyMobEffect(player, MobEffects.DIG_SPEED, 60, 0, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof AxeItem) {
+                        applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
+                        applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof PickaxeItem || player.getMainHandItem().getItem() instanceof ShovelItem) {
+                        applyMobEffect(player, MobEffects.DIG_SPEED, 60, 2, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof BowItem || player.getMainHandItem().getItem() instanceof CrossbowItem) {
+                        applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
+                        applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+                    }
+                } else if (sequenceLevel <= 4) {
+                    if (player.getMainHandItem().getItem() instanceof SwordItem) {
+                        applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 2, true, true);
+                        applyMobEffect(player, MobEffects.DIG_SPEED, 60, 0, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof AxeItem) {
+                        applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
+                        applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof PickaxeItem || player.getMainHandItem().getItem() instanceof ShovelItem) {
+                        applyMobEffect(player, MobEffects.DIG_SPEED, 60, 3, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof BowItem || player.getMainHandItem().getItem() instanceof CrossbowItem) {
+                        applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 2, true, true);
+                        applyMobEffect(player, MobEffects.REGENERATION, 60, regen + 1, true, true);
+                    }
+                    if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
+                        applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+                    }
                 }
-                if (player.getMainHandItem().getItem() instanceof AxeItem) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof PickaxeItem || player.getMainHandItem().getItem() instanceof ShovelItem) {
-                    applyMobEffect(player, MobEffects.DIG_SPEED, 60, 1, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof BowItem || player.getMainHandItem().getItem() instanceof CrossbowItem) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
-                }
-            } else if (sequenceLevel == 6 || sequenceLevel == 5) {
-                if (player.getMainHandItem().getItem() instanceof SwordItem) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
-                    applyMobEffect(player, MobEffects.DIG_SPEED, 60, 0, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof AxeItem) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof PickaxeItem || player.getMainHandItem().getItem() instanceof ShovelItem) {
-                    applyMobEffect(player, MobEffects.DIG_SPEED, 60, 2, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof BowItem || player.getMainHandItem().getItem() instanceof CrossbowItem) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
-                }
-            } else if (sequenceLevel <= 4) {
-                if (player.getMainHandItem().getItem() instanceof SwordItem) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 2, true, true);
-                    applyMobEffect(player, MobEffects.DIG_SPEED, 60, 0, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof AxeItem) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof PickaxeItem || player.getMainHandItem().getItem() instanceof ShovelItem) {
-                    applyMobEffect(player, MobEffects.DIG_SPEED, 60, 3, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof BowItem || player.getMainHandItem().getItem() instanceof CrossbowItem) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 2, true, true);
-                    applyMobEffect(player, MobEffects.REGENERATION, 60, regen + 1, true, true);
-                }
-                if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
-                }
+            } else {
+                applyRandomWeaponEffects(player, sequenceLevel);
             }
         }
         if (player.tickCount % 60 == 0) {
@@ -1124,6 +1130,100 @@ public class MonsterClass implements BeyonderClass {
                 explosion.finalizeExplosion(true);
                 tag.putInt("calamityExplosionOccurrence", 0);
             }
+        }
+    }
+    private void applyRandomWeaponEffects(LivingEntity entity, int sequenceLevel) {
+        // Get or create a persistent random weapon type for this entity
+        String weaponType = getOrSetRandomWeaponType(entity);
+
+        // Apply effects based on the selected weapon type and sequence level
+        switch (weaponType) {
+            case "sword":
+                applySwordEffects(entity, sequenceLevel);
+                break;
+            case "axe":
+                applyAxeEffects(entity, sequenceLevel);
+                break;
+            case "pickaxe":
+                applyPickaxeEffects(entity, sequenceLevel);
+                break;
+            case "bow":
+                applyBowEffects(entity, sequenceLevel);
+                break;
+            case "shield":
+                applyShieldEffects(entity, sequenceLevel);
+                break;
+        }
+    }
+
+    private String getOrSetRandomWeaponType(LivingEntity entity) {
+        CompoundTag persistentData = entity.getPersistentData();
+        String weaponType = persistentData.getString("randomWeaponType");
+
+        if (weaponType.isEmpty()) {
+            // Select a random weapon type and store it persistently
+            String[] weaponTypes = {"sword", "axe", "pickaxe", "bow", "shield"};
+            weaponType = weaponTypes[entity.getRandom().nextInt(weaponTypes.length)];
+            persistentData.putString("randomWeaponType", weaponType);
+        }
+
+        return weaponType;
+    }
+
+    private void applySwordEffects(LivingEntity entity, int sequenceLevel) {
+        if (sequenceLevel == 8 || sequenceLevel == 7) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+        } else if (sequenceLevel == 6 || sequenceLevel == 5) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+            applyMobEffect(entity, MobEffects.DIG_SPEED, 60, 0, true, true);
+        } else if (sequenceLevel <= 4) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 2, true, true);
+            applyMobEffect(entity, MobEffects.DIG_SPEED, 60, 0, true, true);
+        }
+    }
+
+    private void applyAxeEffects(LivingEntity entity, int sequenceLevel) {
+        if (sequenceLevel == 8 || sequenceLevel == 7) {
+            applyMobEffect(entity, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
+        } else if (sequenceLevel == 6 || sequenceLevel == 5) {
+            applyMobEffect(entity, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
+            applyMobEffect(entity, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+        } else if (sequenceLevel <= 4) {
+            applyMobEffect(entity, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
+            applyMobEffect(entity, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+        }
+    }
+
+    private void applyPickaxeEffects(LivingEntity entity, int sequenceLevel) {
+        if (sequenceLevel == 8 || sequenceLevel == 7) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+
+        } else if (sequenceLevel == 6 || sequenceLevel == 5) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 2, true, true);
+
+        } else if (sequenceLevel <= 4) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 3, true, true);
+        }
+    }
+
+    private void applyBowEffects(LivingEntity entity, int sequenceLevel) {
+        if (sequenceLevel == 8 || sequenceLevel == 7) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+        } else if (sequenceLevel == 6 || sequenceLevel == 5) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
+        } else if (sequenceLevel <= 4) {
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 60, speed + 2, true, true);
+            applyMobEffect(entity, MobEffects.REGENERATION, 60, regen + 1, true, true);
+        }
+    }
+
+    private void applyShieldEffects(LivingEntity entity, int sequenceLevel) {
+        if (sequenceLevel == 8 || sequenceLevel == 7) {
+            applyMobEffect(entity, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+        } else if (sequenceLevel == 6 || sequenceLevel == 5) {
+            applyMobEffect(entity, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+        } else if (sequenceLevel <= 4) {
+            applyMobEffect(entity, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
         }
     }
 }

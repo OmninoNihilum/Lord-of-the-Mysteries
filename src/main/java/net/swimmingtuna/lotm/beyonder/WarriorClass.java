@@ -519,9 +519,9 @@ public class WarriorClass implements BeyonderClass {
 
     private void applyPickaxeEffects(LivingEntity entity, int sequenceLevel) {
         if (sequenceLevel <= 7 && sequenceLevel >= 6) {
-            applyMobEffect(entity, MobEffects.DIG_SPEED, 20, 1, true, true);
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 20, speed + 1, true, true);
         } else if (sequenceLevel <= 5) {
-            applyMobEffect(entity, MobEffects.DIG_SPEED, 20, 3, true, true);
+            applyMobEffect(entity, MobEffects.MOVEMENT_SPEED, 20, speed + 2, true, true);
         }
     }
 

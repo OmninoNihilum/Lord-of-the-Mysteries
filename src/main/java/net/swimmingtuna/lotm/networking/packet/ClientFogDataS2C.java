@@ -24,7 +24,6 @@ public class ClientFogDataS2C {
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
-            // This should run on the client side
             ClientFogData.setFogTimer(fogAmount);
         });
         return true;

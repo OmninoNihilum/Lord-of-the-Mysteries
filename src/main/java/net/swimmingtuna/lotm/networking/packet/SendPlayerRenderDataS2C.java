@@ -1,10 +1,11 @@
 package net.swimmingtuna.lotm.networking.packet;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.LOTM;
@@ -98,31 +99,46 @@ public class SendPlayerRenderDataS2C {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             LocalPlayer clientPlayer = Minecraft.getInstance().player;
-            if (clientPlayer != null) {
-                CompoundTag renderData = new CompoundTag();
-                renderData.putUUID("displayEntityUUID", this.entityUUID);
-                renderData.putFloat("displayYaw", this.yaw);
-                renderData.putFloat("displayPitch", this.pitch);
-                renderData.putFloat("displayHeadYaw", this.headYaw);
-                renderData.putFloat("displayRenderYaw", this.bodyYaw);
-                renderData.putDouble("displayVelX", this.velX);
-                renderData.putDouble("displayVelY", this.velY);
-                renderData.putDouble("displayVelZ", this.velZ);
-                renderData.putFloat("displaySwingProgress", this.swingProgress);
-                renderData.putDouble("displayEntityDisplayPosX", this.posX);
-                renderData.putDouble("displayEntityDisplayPosY", this.posY);
-                renderData.putDouble("displayEntityDisplayPosZ", this.posZ);
-                renderData.putDouble("displayCenterX", this.displayCenter.x);
-                renderData.putDouble("displayCenterY", this.displayCenter.y);
-                renderData.putDouble("displayCenterZ", this.displayCenter.z);
-                renderData.putBoolean("displayOnGround", this.onGround);
-                renderData.putFloat("displayFallDistance", this.fallDistance);
-                renderData.putBoolean("displayOnFire", this.onFire);
-                clientPlayer.getPersistentData().put("dimensionalSightRenderData", renderData);
+            if (clientPlayer != null && clientPlayer.level() instanceof ClientLevel clientLevel) {
+                LOTM.LOGGER.info("1");
+                Entity observedEntity = null;
+                for (Entity entity : clientLevel.entitiesForRendering()) {
+                    if (entity.getUUID().equals(this.entityUUID)) {
+                        LOTM.LOGGER.info("FOUND ENTITY " + entity.getName().getString());
+                        observedEntity = entity;
+                        break;
+                    }
+                }
+                if (observedEntity != null) {
+                    CompoundTag renderData = new CompoundTag();
+                    renderData.putUUID("displayEntityUUID", this.entityUUID);
+                    renderData.putFloat("displayYaw", this.yaw);
+                    renderData.putFloat("displayPitch", this.pitch);
+                    renderData.putFloat("displayHeadYaw", this.headYaw);
+                    renderData.putFloat("displayRenderYaw", this.bodyYaw);
+                    renderData.putDouble("displayVelX", this.velX);
+                    renderData.putDouble("displayVelY", this.velY);
+                    renderData.putDouble("displayVelZ", this.velZ);
+                    renderData.putFloat("displaySwingProgress", this.swingProgress);
+                    renderData.putDouble("displayEntityDisplayPosX", this.posX);
+                    renderData.putDouble("displayEntityDisplayPosY", this.posY);
+                    renderData.putDouble("displayEntityDisplayPosZ", this.posZ);
+                    renderData.putDouble("displayCenterX", this.displayCenter.x);
+                    renderData.putDouble("displayCenterY", this.displayCenter.y);
+                    renderData.putDouble("displayCenterZ", this.displayCenter.z);
+                    renderData.putBoolean("displayOnGround", this.onGround);
+                    renderData.putFloat("displayFallDistance", this.fallDistance);
+                    renderData.putBoolean("displayOnFire", this.onFire);
+                    clientPlayer.getPersistentData().put("dimensionalSightRenderData", renderData);
+                } else {
+                    LOTM.LOGGER.info("OBSERVED ENTITY NULL");
+                }
+                LOTM.LOGGER.info("PACKET RECEIVED");
             }
         });
         return true;
     }
+
     // Getters
     public UUID getEntityUUID() {
         return entityUUID;
