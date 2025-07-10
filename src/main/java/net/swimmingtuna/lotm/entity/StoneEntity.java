@@ -170,14 +170,15 @@ public class StoneEntity extends AbstractArrow {
                         }
                     }
                 }
+                LOTM.LOGGER.info("JUST GOT SHOT");
                 for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(getBB()))) {
+                    LOTM.LOGGER.info("DETECTED MOB " + entity.getName().getString());
                     if (entity != this.getOwner()) {
                         entity.hurt(BeyonderUtil.explosionSource(entity), getDamage());
                         this.discard();
                     }
                 }
                 if (this.tickCount >= 160) {
-                    LOTM.LOGGER.info("DISCARDED CUZ TICK");
                     this.discard();
                 }
             }

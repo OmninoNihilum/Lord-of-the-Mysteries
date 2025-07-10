@@ -83,43 +83,51 @@ public class SpectatorClass implements BeyonderClass {
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {
-        if (!player.level().isClientSide() && player.isCrouching()) {
-            player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 5, -1, false, false));
-        }
-        if (player.tickCount % 80 == 0) {
-            if (sequenceLevel >= 0) {
-                player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 30 * 20, -1, false, false));
+        if (!player.level().isClientSide()) {
+            if (player instanceof Player pPlayer) {
+                if (pPlayer.isCrouching()) {
+                    player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 5, -1, false, false));
+                }
+            } else {
+                if (player.tickCount % 200 == 0) {
+                    BeyonderUtil.applyMobEffect(player, MobEffects.INVISIBILITY, 40, 1, false, false);
+                }
             }
-            if (sequenceLevel == 6) {
-                applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-            } else if (sequenceLevel == 5) {
-                applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-            } else if (sequenceLevel == 4) {
-                applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-            } else if (sequenceLevel == 3) {
-                applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-            } else if (sequenceLevel == 2) {
-                applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+            if (player.tickCount % 80 == 0) {
+                if (sequenceLevel >= 0) {
+                    player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 30 * 20, -1, false, false));
+                }
+                if (sequenceLevel == 6) {
+                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
+                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
+                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+                } else if (sequenceLevel == 5) {
+                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
+                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
+                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+                } else if (sequenceLevel == 4) {
+                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
+                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
+                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+                } else if (sequenceLevel == 3) {
+                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
+                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
+                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+                } else if (sequenceLevel == 2) {
+                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
+                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
+                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
 
-            } else if (sequenceLevel == 1) {
-                applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+                } else if (sequenceLevel == 1) {
+                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
+                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
+                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
 
-            } else if (sequenceLevel == 0) {
-                applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+                } else if (sequenceLevel == 0) {
+                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
+                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
+                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
+                }
             }
         }
     }
@@ -185,6 +193,7 @@ public class SpectatorClass implements BeyonderClass {
 
     public static final Pattern PROPHECY_PATTERN = Pattern.compile("(\\w+) will (.*?) in (\\d+) (second|seconds|minute|minutes)");
     public static final Map<String, String> EVENT_TO_TAG = new HashMap<>();
+
     static {
         EVENT_TO_TAG.put("encounter a meteor", "spectatorProphesizedMeteor");
         EVENT_TO_TAG.put("encounter a tornado", "spectatorProphesizedTornado");
@@ -227,8 +236,8 @@ public class SpectatorClass implements BeyonderClass {
                     tag.putInt("spectatorProphesizedSinkholeZ", (int) livingEntity.getZ());
                 }
                 if (sinkholeOccurence == 1) {
-                    tag.putInt("spectatorProphesizedSinkholeX",0);
-                    tag.putInt("spectatorProphesizedSinkholeY",  0);
+                    tag.putInt("spectatorProphesizedSinkholeX", 0);
+                    tag.putInt("spectatorProphesizedSinkholeY", 0);
                     tag.putInt("spectatorProphesizedSinkholeZ", 0);
                 }
                 if (sinkholeOccurence != 1) {
@@ -257,7 +266,8 @@ public class SpectatorClass implements BeyonderClass {
                                     }
                                     BlockState state = livingEntity.level().getBlockState(targetPos);
                                     if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
-                                        if (livingEntity.getRandom().nextInt(5) == 0 && livingEntity.level() instanceof ServerLevel serverLevel) {serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.05);
+                                        if (livingEntity.getRandom().nextInt(5) == 0 && livingEntity.level() instanceof ServerLevel serverLevel) {
+                                            serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.05);
                                         }
                                         livingEntity.level().destroyBlock(targetPos, false);
                                     }
@@ -276,7 +286,8 @@ public class SpectatorClass implements BeyonderClass {
                                             continue;
                                         }
                                         BlockState state = livingEntity.level().getBlockState(targetPos);
-                                        if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {livingEntity.level().destroyBlock(targetPos, false);
+                                        if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
+                                            livingEntity.level().destroyBlock(targetPos, false);
                                         }
                                     }
                                 }
@@ -293,8 +304,7 @@ public class SpectatorClass implements BeyonderClass {
                                 entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.4, 0));
                                 entity.hurtMarked = true;
                             }
-                        }
-                        else if (distance <= sinkholeRadius * 2) {
+                        } else if (distance <= sinkholeRadius * 2) {
                             dx = dx / distance;
                             dz = dz / distance;
                             double pullStrength = 0.1 * (1 - distance / (sinkholeRadius * 2));
@@ -315,7 +325,7 @@ public class SpectatorClass implements BeyonderClass {
                 tag.putInt("spectatorProphesizedMeteor", meteor - 1);
             }
             if (sinkhole >= 1) {
-                tag.putInt("spectatorProphesizedSinkhole", sinkhole -1 );
+                tag.putInt("spectatorProphesizedSinkhole", sinkhole - 1);
             }
             if (tornado >= 1) {
                 tag.putInt("spectatorProphesizedTornado", tornado - 1);
@@ -409,12 +419,12 @@ public class SpectatorClass implements BeyonderClass {
                 }
             }
             if (plague == 1) {
-               for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(80))) {
-                   BeyonderUtil.applyMobEffect(living, MobEffects.WITHER, 500, 5, true, true);
-                   BeyonderUtil.applyMobEffect(living, ModEffects.NOREGENERATION.get(), 300, 1, true, true);
-                   BeyonderUtil.applyMobEffect(living, MobEffects.WEAKNESS, 500, 3, true, true);
-                   BeyonderUtil.applyMobEffect(living, MobEffects.CONFUSION, 300, 1, true, true);
-               }
+                for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(80))) {
+                    BeyonderUtil.applyMobEffect(living, MobEffects.WITHER, 500, 5, true, true);
+                    BeyonderUtil.applyMobEffect(living, ModEffects.NOREGENERATION.get(), 300, 1, true, true);
+                    BeyonderUtil.applyMobEffect(living, MobEffects.WEAKNESS, 500, 3, true, true);
+                    BeyonderUtil.applyMobEffect(living, MobEffects.CONFUSION, 300, 1, true, true);
+                }
             }
             if (weakness == 1) {
                 BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 1200, 1, true, true);

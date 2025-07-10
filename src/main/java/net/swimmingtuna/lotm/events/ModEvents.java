@@ -386,6 +386,7 @@ public class ModEvents {
                 //mob ticks
                 MatterAccelerationBlocks.matterAccelerationBlocksMobTick(event);
                 BeyonderEntityData.regenerateSpirituality(event);
+                DawnWeaponry.dawnWeaponryTick(event);
 
                 //regular ticks
                 Sealing.sealingTick(event);
@@ -1010,6 +1011,4 @@ public class ModEvents {
             PlayerMobSequenceData.onEntityLeaveLevel(event); //add it to do the sequence and pathway stuff
         }
     }
-
-
 }

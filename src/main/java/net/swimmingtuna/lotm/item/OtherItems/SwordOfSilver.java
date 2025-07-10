@@ -7,8 +7,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
@@ -58,6 +60,27 @@ public class SwordOfSilver extends SwordItem implements GeoItem {
     }
 
     @Override
+    public void inventoryTick(ItemStack pStack, Level level, Entity livingEntity, int pSlotId, boolean pIsSelected) {
+        if (livingEntity instanceof Mob mob && !level.isClientSide()) {
+            if (mob.getMainHandItem().getItem() instanceof SpearOfDawn && mob.getTarget() != null) {
+                if (livingEntity.tickCount % 100 == 0) {
+                    if (BeyonderUtil.getSpirituality(mob) >= 25) {
+                        ItemStack originalItem = mob.getPersistentData().contains("originalMainHand") ? ItemStack.of(mob.getPersistentData().getCompound("originalMainHand")) : ItemStack.EMPTY;
+                        throwSword(mob);
+                        if (!originalItem.isEmpty()) {
+                            mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);
+                            mob.getPersistentData().remove("originalMainHand");
+                        } else {
+                            mob.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                        }
+                    }
+                }
+            }
+        }
+        super.inventoryTick(pStack, level, livingEntity, pSlotId, pIsSelected);
+    }
+
+    @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("A sword made out of mercury, you can hold down right click in order to throw it like a spear.").withStyle(ChatFormatting.GRAY));
         tooltipComponents.add(Component.literal("On hit, if the creature is evil, it will deal additional damage, slow, and weaken them.").withStyle(ChatFormatting.GRAY));
@@ -68,6 +91,17 @@ public class SwordOfSilver extends SwordItem implements GeoItem {
         return Rarity.create("SILVER_ITEM", ChatFormatting.GRAY);
     }
 
+    public void throwSword(LivingEntity livingEntity) {
+        SilverLightEntity silverLight = new SilverLightEntity(EntityInit.SILVER_LIGHT_ENTITY.get(), livingEntity.level());
+        silverLight.setShouldTeleport(false);
+        Vec3 lookVec = livingEntity.getLookAngle().normalize().scale(10);
+        silverLight.setDeltaMovement(lookVec);
+        silverLight.setOwner(livingEntity);
+        silverLight.hurtMarked = true;
+        silverLight.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+        BeyonderUtil.setScale(silverLight, 6);
+        livingEntity.level().addFreshEntity(silverLight);
+    }
     @Override
     public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity livingEntity, int pTimeCharged) {
         int i = this.getUseDuration(pStack) - pTimeCharged;

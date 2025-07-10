@@ -80,7 +80,7 @@ public class Replicate extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, all non-allies will be affected by a fog that will reduce their vision greatly."));
+        tooltipComponents.add(Component.literal("WIP, DOES NOTHING RIGHT NOW, UPDATE SOON!!!!").withStyle(ChatFormatting.RED));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

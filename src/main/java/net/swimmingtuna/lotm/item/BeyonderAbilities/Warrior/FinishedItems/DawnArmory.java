@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.DawnWeaponry.hasFullDawnArmor;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.DawnWeaponry.hasFullSilverArmor;
 
 public class DawnArmory extends SimpleAbilityItem {
 
@@ -145,6 +146,9 @@ public class DawnArmory extends SimpleAbilityItem {
         }
         else if (!livingEntity.getPersistentData().getBoolean("dawnArmorOn") && target != null) {
             return 100;
+        }
+        if (hasFullSilverArmor(livingEntity)) {
+            return 0;
         }
         return 0;
     }

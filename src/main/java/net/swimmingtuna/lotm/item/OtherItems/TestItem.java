@@ -23,6 +23,7 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.SpiritWorldSyncPacket;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import net.swimmingtuna.lotm.util.SpiritWorld.SpiritWorldHandler;
 
@@ -65,7 +66,8 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
-            LOTMNetworkHandler.sendToAllPlayers(new SpiritWorldSyncPacket(SpiritWorldHandler.getEntityVisibilityMap()));
+            BeyonderUtil.setPathway(interactionTarget, BeyonderClassInit.APOTHECARY.get());
+            BeyonderUtil.setSequence(interactionTarget, 7);
         }
         return InteractionResult.SUCCESS;
     }

@@ -225,9 +225,6 @@ public class BeyonderEntityData extends SavedData {
                         } else {
                             tag.putInt("abilityCooldown", abilityCooldown - 1);
                         }
-                        if (mob.getTarget() == null && mob.getLastAttacker() != null) {
-                            mob.setTarget(mob.getLastAttacker());
-                        }
                     }
                 }
             }
@@ -282,7 +279,12 @@ public class BeyonderEntityData extends SavedData {
                 }
                 LOTM.LOGGER.info("{} chose ability {} with a {}/{} probability. Current spirituality is {}/{}", entityName, abilityName, abilityPriority, totalPriority, BeyonderUtil.getSpirituality(mob), BeyonderUtil.getMaxSpirituality(mob));
             }
-            ItemStack originalItem = mob.getMainHandItem().copy();
+            ItemStack originalMainHand = mob.getMainHandItem().copy();
+            if (!originalMainHand.isEmpty()) {
+                CompoundTag originalItemTag = new CompoundTag();
+                originalMainHand.save(originalItemTag);
+                mob.getPersistentData().put("originalMainHandItem", originalItemTag);
+            }
             mob.setItemInHand(InteractionHand.MAIN_HAND, selectedAbility.getDefaultInstance());
             if(mob instanceof PlayerMobEntity playerMob){
                 if(playerMob.getHasAbilityCap()){
@@ -294,8 +296,13 @@ public class BeyonderEntityData extends SavedData {
             }
             useAvailableAbilityAsMob(mob);
             BeyonderUtil.useSpirituality(mob,selectedAbility.getSpirituality());
-            LOTM.LOGGER.info("USED " + selectedAbility.getSpirituality());
-            mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);
+            ItemStack originalItem = mob.getPersistentData().contains("originalMainHandItem") ? ItemStack.of(mob.getPersistentData().getCompound("originalMainHandItem")) : ItemStack.EMPTY;
+            if (!originalItem.isEmpty()) {
+                mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);
+                mob.getPersistentData().remove("originalMainHandItem");
+            } else {
+                mob.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
         }
     }
 
@@ -320,6 +327,8 @@ public class BeyonderEntityData extends SavedData {
         }
         return weightedAbilities.get(0).abilityItem;
     }
+
+
 
     private static class WeightedAbility {
         final SimpleAbilityItem abilityItem;

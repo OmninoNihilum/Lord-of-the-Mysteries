@@ -12,6 +12,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -43,11 +44,9 @@ import java.util.function.Consumer;
 
 public class SpearOfDawn extends SwordItem implements GeoItem {
 
-
     public SpearOfDawn(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
-
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
@@ -61,10 +60,43 @@ public class SpearOfDawn extends SwordItem implements GeoItem {
                     } else {
                         removeItemFromSlot(livingEntity, stack);
                     }
+                    if (livingEntity instanceof Mob mob && mob.getTarget() == null) {
+                        removeItemFromSlot(livingEntity, stack);
+                    }
+                }
+            }
+
+            if (livingEntity instanceof Mob mob && !level.isClientSide()) {
+                if (mob.getMainHandItem().getItem() instanceof SpearOfDawn && mob.getTarget() != null) {
+                    if (livingEntity.tickCount % 100 == 0) {
+                        if (BeyonderUtil.getSpirituality(mob) >= 25) {
+                            ItemStack originalItem = mob.getPersistentData().contains("originalMainHand") ? ItemStack.of(mob.getPersistentData().getCompound("originalMainHand")) : ItemStack.EMPTY;
+                            throwSpear(level, mob);
+                            if (!originalItem.isEmpty()) {
+                                mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);
+                                mob.getPersistentData().remove("originalMainHand");
+                            } else {
+                                mob.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                            }
+                        }
+                    }
                 }
             }
         }
         super.inventoryTick(stack, level, entity, itemSlot, isSelected);
+    }
+
+    private void throwSpear(Level level, LivingEntity thrower) {
+        if (!level.isClientSide) {
+            SpearOfDawnEntity spearOfDawn = new SpearOfDawnEntity(EntityInit.SPEAR_OF_DAWN_ENTITY.get(), level);
+            Vec3 lookVec = thrower.getLookAngle().normalize().scale(10);
+            spearOfDawn.setDeltaMovement(lookVec);
+            spearOfDawn.setOwner(thrower);
+            spearOfDawn.hurtMarked = true;
+            spearOfDawn.teleportTo(thrower.getX(), thrower.getY() + thrower.getEyeHeight(), thrower.getZ());
+            BeyonderUtil.setScale(spearOfDawn, BeyonderUtil.getDamage(thrower).get(ItemInit.SPEAROFDAWN.get()));
+            level.addFreshEntity(spearOfDawn);
+        }
     }
 
     private void removeItemFromSlot(LivingEntity entity, ItemStack stack) {
@@ -129,7 +161,6 @@ public class SpearOfDawn extends SwordItem implements GeoItem {
         return f;
     }
 
-
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Can be used as a melee weapon, or hold down right click to throw it at a rapid speed."));
@@ -187,11 +218,8 @@ public class SpearOfDawn extends SwordItem implements GeoItem {
         });
     }
 
-
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("DAWN_ITEM", ChatFormatting.YELLOW);
     }
-
-
 }

@@ -86,7 +86,7 @@ public class LightOfDawn extends SimpleAbilityItem {
                     }
                 }
                 for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(maxRadius))) {
-                    if (BeyonderUtil.isPurifiable(entity)) {
+                    if (BeyonderUtil.isPurifiable(entity) && entity != livingEntity) {
                         entity.hurt(BeyonderUtil.magicSource(entity), 15.0f - sequence);
                         entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 2, true, true));
                         entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2, true, true));

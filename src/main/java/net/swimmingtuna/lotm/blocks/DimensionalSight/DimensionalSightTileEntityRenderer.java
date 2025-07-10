@@ -88,7 +88,7 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
             float glowIntensity = (float) (0.7 + 0.3 * Math.sin((gameTime + partialTicks) * 0.05));
             int magicalLight = Math.max(combinedLight, (int) (240 * glowIntensity));
             if (scryTarget instanceof Player player && scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
-                LOTM.LOGGER.info("RENDERING TILE PLAYER");
+                LOTM.LOGGER.info("RENDERING TILE PLAYER " + player.getName().getString());
                 CompoundTag renderData = player.getPersistentData().getCompound("dimensionalSightRenderData");
                 float originalYRot = player.getYRot();
                 float originalXRot = player.getXRot();
@@ -138,7 +138,9 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
                     player.fallDistance = originalFallDistance;
                 }
 
-            } else {
+            } else if (scryTarget instanceof Player player && !scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
+                LOTM.LOGGER.info(player.getName().getString() + " doesn't have data");
+            }else {
                 Vec3 entityDisplayPos = tileEntity.getEntityDisplayPos();
                 Vec3 displayCenter = tileEntity.getDisplayCenter();
                 Vec3 relativePos = entityDisplayPos.subtract(displayCenter);

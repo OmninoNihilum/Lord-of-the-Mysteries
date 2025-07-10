@@ -178,7 +178,7 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
 
                         player.level().addFreshEntity(netherrackEntity);
                     }
-                    if (level.dimension() == Level.NETHER) {
+                    if (level.dimension() == Level.END) {
                         EndStoneEntity endstoneEntity = new EndStoneEntity(EntityInit.ENDSTONE_ENTITY.get(), player.level());
                         float randomStayX;
                         do {

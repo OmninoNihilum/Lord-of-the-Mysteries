@@ -1469,6 +1469,11 @@ public class BeyonderUtil {
                                 }
                             }
                         }
+                    } else {
+                        String pathwayName = living.getPersistentData().getString("separateEntityPathway");
+                        if (!pathwayName.isEmpty()) {
+                            return getPathwayByName(pathwayName);
+                        }
                     }
                 }
             }
@@ -1482,6 +1487,8 @@ public class BeyonderUtil {
             holder.setPathway(pathway);
         } else if (living instanceof PlayerMobEntity playerMobEntity) {
             playerMobEntity.setPathway(pathway);
+        } else {
+            living.getPersistentData().putString("separateEntityPathway", getPathwayName(pathway));
         }
     }
 
@@ -1503,6 +1510,10 @@ public class BeyonderUtil {
                                 return i;
                             }
                         }
+                    }
+                } else {
+                    if (living.getPersistentData().contains("separateEntitySequence")) {
+                        return living.getPersistentData().getInt("separateEntitySequence");
                     }
                 }
             } else if (living instanceof Player player) {
@@ -2834,6 +2845,9 @@ public class BeyonderUtil {
             } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
                 playerMobEntity.setPathway(null);
                 playerMobEntity.setSequence(-1);
+            } else {
+                livingEntity.getPersistentData().putInt("separateEntitySequence", 0);
+                livingEntity.getPersistentData().putString("separateEntityPathway", "");
             }
         }
     }
@@ -3115,7 +3129,7 @@ public class BeyonderUtil {
             } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
                 playerMobEntity.setSequence(sequence);
             } else {
-                return;
+                livingEntity.getPersistentData().putInt("separateEntitySequence", sequence);
             }
         }
     }
@@ -3446,6 +3460,8 @@ public class BeyonderUtil {
             tag.putBoolean("trickmasterTelekenisis", false);
             tag.putInt("escapeTrickCount", 0);
             tag.putInt("wormOfStar", 0);
+            tag.remove("separateEntitySequence");
+            tag.remove("separateEntityPathway");
             if (livingEntity instanceof ServerPlayer serverPlayer) {
                 LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(0), serverPlayer);
             }

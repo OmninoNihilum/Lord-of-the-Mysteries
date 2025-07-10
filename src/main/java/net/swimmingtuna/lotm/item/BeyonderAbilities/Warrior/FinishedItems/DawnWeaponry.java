@@ -18,6 +18,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -70,10 +72,34 @@ public class DawnWeaponry extends SimpleAbilityItem {
                     }
                 }
             } else if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
-                if (mob.getTarget().distanceTo(mob) >= 20) {
-                    mob.setItemInHand(InteractionHand.MAIN_HAND, spear);
+                livingEntity.getPersistentData().putInt("dawnWeaponryTick", 3);
+            }
+        }
+    }
+
+    public static void dawnWeaponryTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        if (livingEntity instanceof Mob mob && mob.getPersistentData().getInt("dawnWeaponryTick") >= 1) {
+            mob.getPersistentData().putInt("dawnWeaponryTick", mob.getPersistentData().getInt("dawnWeaponryTick") - 1);
+            ItemStack sword = createSword(ItemInit.SWORDOFDAWN.get().getDefaultInstance());
+            ItemStack spear = createSpear(ItemInit.SPEAROFDAWN.get().getDefaultInstance());
+            ItemStack originalMainHand = mob.getMainHandItem().copy();
+            if (!originalMainHand.isEmpty()) {
+                CompoundTag originalItemTag = new CompoundTag();
+                originalMainHand.save(originalItemTag);
+                mob.getPersistentData().put("originalMainHand", originalItemTag);
+            }
+            if (mob.getTarget() != null && mob.getPersistentData().getInt("dawnWeaponryTick") == 1) {
+                if (mob.getPersistentData().getBoolean("dawnWeaponrySilverSword")) {
+                    ItemStack silverSword = createSword(ItemInit.SWORDOFSILVER.get().getDefaultInstance());
+                    mob.setItemSlot(EquipmentSlot.MAINHAND, silverSword);
+                    mob.getPersistentData().putBoolean("dawnWeaponrySilverSword", false);
                 } else {
-                    mob.setItemInHand(InteractionHand.MAIN_HAND, sword);
+                    if (mob.getTarget().distanceTo(mob) >= 20) {
+                        mob.setItemSlot(EquipmentSlot.MAINHAND, spear);
+                    } else {
+                        mob.setItemSlot(EquipmentSlot.MAINHAND, sword);
+                    }
                 }
             }
         }
@@ -204,9 +230,8 @@ public class DawnWeaponry extends SimpleAbilityItem {
     }
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        livingEntity.getPersistentData().putInt("dawnWeaponry", 1);
         if (target != null) {
-            return 90;
+            return 60;
         }
         return 0;
     }

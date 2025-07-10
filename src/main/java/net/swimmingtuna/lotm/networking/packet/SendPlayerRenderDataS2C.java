@@ -100,7 +100,6 @@ public class SendPlayerRenderDataS2C {
         context.enqueueWork(() -> {
             LocalPlayer clientPlayer = Minecraft.getInstance().player;
             if (clientPlayer != null && clientPlayer.level() instanceof ClientLevel clientLevel) {
-                LOTM.LOGGER.info("1");
                 Entity observedEntity = null;
                 for (Entity entity : clientLevel.entitiesForRendering()) {
                     if (entity.getUUID().equals(this.entityUUID)) {

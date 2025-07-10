@@ -10,6 +10,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.ClipContext;
@@ -18,6 +19,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.GuardianBoxEntity;
 import net.swimmingtuna.lotm.entity.HurricaneOfLightEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -43,7 +45,6 @@ import java.util.function.Consumer;
 
 public class SwordOfDawn extends SwordItem implements GeoItem {
 
-
     public SwordOfDawn(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
@@ -60,6 +61,20 @@ public class SwordOfDawn extends SwordItem implements GeoItem {
                     } else {
                         removeItemFromSlot(livingEntity, stack);
                     }
+                    if (livingEntity instanceof Mob mob && mob.getTarget() == null) {
+                        removeItemFromSlot(livingEntity, stack);
+                    }
+                }
+            }
+
+            if (livingEntity instanceof Mob mob && !level.isClientSide()) {
+                if (mob.getMainHandItem().getItem() instanceof SwordOfDawn && mob.getTarget() != null) {
+                    if (livingEntity.tickCount % 200 == 0) {
+                        if (BeyonderUtil.getSpirituality(mob) >= 350) {
+                            HurricaneOfLightEntity.summonHurricaneOfLightDawn(mob);
+                            BeyonderUtil.useSpirituality(mob, 1000 - (BeyonderUtil.getSequence(mob) * 115));
+                        }
+                    }
                 }
             }
         }
@@ -67,6 +82,7 @@ public class SwordOfDawn extends SwordItem implements GeoItem {
     }
 
     private void removeItemFromSlot(LivingEntity entity, ItemStack stack) {
+        LOTM.LOGGER.info("REMOVED");
         if (entity.getItemBySlot(EquipmentSlot.MAINHAND) == stack) {
             entity.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         } else if (entity.getItemBySlot(EquipmentSlot.OFFHAND) == stack) {
@@ -135,7 +151,6 @@ public class SwordOfDawn extends SwordItem implements GeoItem {
         return Rarity.create("DAWN_ITEM", ChatFormatting.YELLOW);
     }
 
-
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "Activation", 0, state -> PlayState.STOP));
@@ -162,6 +177,4 @@ public class SwordOfDawn extends SwordItem implements GeoItem {
             }
         });
     }
-
-
 }

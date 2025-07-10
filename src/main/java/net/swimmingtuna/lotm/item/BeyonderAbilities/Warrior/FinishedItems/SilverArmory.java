@@ -88,6 +88,9 @@ public class SilverArmory extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target == null && !DawnWeaponry.hasFullSilverArmor(livingEntity)) {
+            return 30;
+        }
         return 0;
     }
 }

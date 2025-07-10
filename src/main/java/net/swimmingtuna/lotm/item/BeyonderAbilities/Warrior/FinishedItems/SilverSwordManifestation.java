@@ -5,6 +5,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -49,13 +50,15 @@ public class SilverSwordManifestation extends SimpleAbilityItem {
                     inventory.setItem(selectedSlot, sword);
                 }
             } else {
-                player.setItemInHand(InteractionHand.MAIN_HAND, sword);
+                player.getPersistentData().putInt("dawnWeaponryTick", 3);
+                player.getPersistentData().putBoolean("dawnWeaponrySilverSword", true);
+                player.setItemSlot(EquipmentSlot.MAINHAND, sword);
             }
             player.setHealth(player.getHealth() - 10.0f);
         }
     }
 
-    private static ItemStack createSword(ItemStack armor) {
+    public static ItemStack createSword(ItemStack armor) {
         armor.enchant(Enchantments.SHARPNESS, 5);
         armor.enchant(Enchantments.KNOCKBACK, 2);
         armor.enchant(Enchantments.UNBREAKING, 3);

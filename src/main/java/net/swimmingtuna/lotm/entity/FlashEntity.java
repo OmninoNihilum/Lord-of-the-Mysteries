@@ -92,11 +92,13 @@ public class FlashEntity extends AbstractHurtingProjectile {
                 }
             } if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner && this.tickCount > 40) {
                 for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 25))) {
-                    if (isEntityLookingAtThis(livingEntity)) {
-                        if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
-                            mob.setTarget(null);
+                    if (livingEntity != owner) {
+                        if (isEntityLookingAtThis(livingEntity)) {
+                            if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
+                                mob.setTarget(null);
+                            }
+                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.FLASH.get(), (int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFLASH.get()) * BeyonderUtil.getScale(this)), 1, true, true);
                         }
-                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.FLASH.get(), (int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFOG.get()) * BeyonderUtil.getScale(this)), 1, true, true);
                     }
                 }
             }

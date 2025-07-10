@@ -58,21 +58,11 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
         int blinkDistance = player.getPersistentData().getInt("tyrantSelfAcceleration");
         Vec3 lookVector = player.getLookAngle();
         BlockPos startPos = player.blockPosition();
-        BlockPos endPos = new BlockPos(
-                (int) (player.getX() + blinkDistance * lookVector.x()),
-                (int) (player.getY() + 1 + blinkDistance * lookVector.y()),
-                (int) (player.getZ() + blinkDistance * lookVector.z())
-        );
+        BlockPos endPos = new BlockPos((int) (player.getX() + blinkDistance * lookVector.x()), (int) (player.getY() + 1 + blinkDistance * lookVector.y()), (int) (player.getZ() + blinkDistance * lookVector.z()));
         BlockPos blockPos = new BlockPos(endPos.getX(), endPos.getY(), endPos.getZ());
         double distance = startPos.getCenter().distanceTo(blockPos.getCenter());
-        Vec3 direction = new Vec3(
-                endPos.getX() - startPos.getX(),
-                endPos.getY() - startPos.getY(),
-                endPos.getZ() - startPos.getZ()
-        ).normalize();
-
+        Vec3 direction = new Vec3(endPos.getX() - startPos.getX(), endPos.getY() - startPos.getY(), endPos.getZ() - startPos.getZ()).normalize();
         Set<BlockPos> visitedPositions = new HashSet<>();
-
         for (double i = 0; i <= distance; i += 0.5) {
             BlockPos pos = new BlockPos(
                     (int) (startPos.getX() + i * direction.x),
@@ -96,7 +86,7 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
                 level.blockUpdated(blockPosToUpdate, block);
             }
 
-            AABB boundingBox = new AABB(pos).inflate(1); // Adjust size as needed
+            AABB boundingBox = new AABB(pos).inflate(6);
             List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, boundingBox);
             for (LivingEntity entity : entities) {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
@@ -160,8 +150,29 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             }
         }
         if (livingEntity.isShiftKeyDown() && livingEntity.getMainHandItem().getItem() instanceof Blink && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 5)) {
-            if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") < BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINK.get())) {
-                livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", doorBlinkDistance + 10);
+            int maxBlinkDistance = 50;
+            int blinkIncrement = 2;
+            int sequence = BeyonderUtil.getSequence(livingEntity);
+            if (sequence == 5) {
+                maxBlinkDistance = 30;
+            } else if (sequence == 4) {
+                maxBlinkDistance = 100;
+                blinkIncrement = 4;
+            } else if (sequence == 3) {
+                maxBlinkDistance = 200;
+                blinkIncrement = 10;
+            } else if (sequence == 2) {
+                maxBlinkDistance = 450;
+                blinkIncrement = 20;
+            } else if (sequence == 1) {
+                maxBlinkDistance = 900;
+                blinkIncrement = 20;
+            } else if (sequence == 0) {
+                maxBlinkDistance = 2000;
+                blinkIncrement = 30;
+            }
+            if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") < maxBlinkDistance) {
+                livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", blinkIncrement);
             } else {
                 if (livingEntity instanceof Player player) {
                     player.displayClientMessage(Component.literal("Blink Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);

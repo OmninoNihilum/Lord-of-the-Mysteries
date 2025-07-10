@@ -26,6 +26,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.*;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -204,7 +205,7 @@ public class CorruptionAndLuckHandler {
                                         highestHealthTarget = nearby;
                                     }
                                 }
-                                if (highestHealthTarget != null) {
+                                if (highestHealthTarget != null && highestHealthTarget != mob) {
                                     mob.setTarget(highestHealthTarget);
                                 }
                             }

@@ -255,8 +255,8 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, Conceal a part of the Spirit World, to be used as you will."));
-        tooltipComponents.add(Component.literal("If used while sneaking, will create in the off hand a special door that leads to the users Concealed Space."));
+        tooltipComponents.add(Component.literal("Upon use, Conceal a part of the Spirit World, to be used at you will."));
+        tooltipComponents.add(Component.literal("If used while sneaking, in your off hand, you will receive a special door that leads to the users Concealed Space."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("400").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
