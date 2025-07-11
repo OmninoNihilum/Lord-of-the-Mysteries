@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ExtremeColdness extends SimpleAbilityItem {
 
@@ -88,6 +89,7 @@ public class ExtremeColdness extends SimpleAbilityItem {
             for (LivingEntity entity : entities) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity) && entity.getPersistentData().getInt("affectedBySailorExtremeColdness") == 0) {
                     entity.getPersistentData().putInt("affectedBySailorExtremeColdness", 20);
+                    entity.getPersistentData().putUUID("affectedBySailorExtremeColdnessUUID", livingEntity.getUUID());
                     entity.setTicksFrozen(1);
                 }
             }
@@ -135,6 +137,14 @@ public class ExtremeColdness extends SimpleAbilityItem {
         if (!entity.level().isClientSide()) {
             int affectedBySailorExtremeColdness = tag.getInt("affectedBySailorExtremeColdness");
             if (!entity.level().isClientSide() && affectedBySailorExtremeColdness >= 1) {
+                LivingEntity causer = null;
+                if (entity.getPersistentData().contains("affectedBySailorExtremeColdnessUUID")) {
+                    UUID uuid = entity.getPersistentData().getUUID("affectedBySailorExtremeColdnessUUID");
+                    LivingEntity living = BeyonderUtil.getLivingEntityFromUUID(entity.level(), uuid);
+                    if (living != null) {
+                        causer = living;
+                    }
+                }
                 tag.putInt("affectedBySailorExtremeColdness", affectedBySailorExtremeColdness - 1);
                 if (entity instanceof Player player) {
                     player.setTicksFrozen(3);
@@ -151,7 +161,11 @@ public class ExtremeColdness extends SimpleAbilityItem {
                 if (affectedBySailorExtremeColdness >= 20) {
                     entity.addEffect(new MobEffectInstance(ModEffects.AWE.get(), 100, 1, false, false));
                     tag.putInt("affectedBySailorExtremeColdness", 0);
-                    entity.hurt(entity.damageSources().freeze(), BeyonderUtil.getDamage(entity).get(ItemInit.EXTREME_COLDNESS.get()) / 4);
+                    if (causer == null) {
+                        entity.hurt(BeyonderUtil.freezeSource(entity, entity), BeyonderUtil.getDamage(entity).get(ItemInit.EXTREME_COLDNESS.get()) / 4);
+                    } else {
+                        entity.hurt(BeyonderUtil.freezeSource(causer, entity), BeyonderUtil.getDamage(entity).get(ItemInit.EXTREME_COLDNESS.get()) / 4);
+                    }
                 }
             }
         }

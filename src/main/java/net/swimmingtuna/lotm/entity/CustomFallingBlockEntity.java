@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class CustomFallingBlockEntity extends FallingBlockEntity {
@@ -223,7 +224,7 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
         List<Entity> entities = this.level().getEntities(this, area, e -> e != this);
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity living && living != thrower) {
-                living.hurt(this.level().damageSources().fallingBlock(this), damage);
+                living.hurt(BeyonderUtil.fallingBlockSource(Objects.requireNonNullElse(thrower, this), living), damage);
                 spawnBlockBreakParticles(this.level(), this.blockPosition(), this.blockState);
                 playBlockBreakSound(this.level(), this.blockPosition(), this.blockState);
                 this.discard();

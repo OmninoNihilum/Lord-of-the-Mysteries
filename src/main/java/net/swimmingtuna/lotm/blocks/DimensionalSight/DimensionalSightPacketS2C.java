@@ -39,7 +39,6 @@ public class DimensionalSightPacketS2C {
             this.dataManagerEntries = list;
         } catch (Exception var5) {
             Exception e = var5;
-            LOTM.LOGGER.info(e.toString());
         }
 
     }

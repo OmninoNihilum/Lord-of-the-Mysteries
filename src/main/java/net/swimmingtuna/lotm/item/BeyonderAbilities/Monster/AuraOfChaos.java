@@ -159,7 +159,7 @@ public class AuraOfChaos extends SimpleAbilityItem {
                             if (livingEntity instanceof Player ppPlayer) {
                                 ppPlayer.getPersistentData().putInt("cantUseAbility", ppPlayer.getPersistentData().getInt("cantUseAbility") + enhancement);
                             } else {
-                                livingEntity.hurt(livingEntity.damageSources().magic(), 15 + (enhancement * 5));
+                                livingEntity.hurt(BeyonderUtil.magicSource(entity, livingEntity), 15 + (enhancement * 5));
                             }
                         }
                         livingEntity.getPersistentData().putDouble("misfortune", livingEntity.getPersistentData().getDouble("misfortune") + (3 * enhancement));

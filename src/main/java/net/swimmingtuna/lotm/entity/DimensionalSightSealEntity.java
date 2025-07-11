@@ -236,8 +236,7 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
                             livingEntity.onGround(),
                             livingEntity.fallDistance,
                             displayCenter,
-                            livingEntity.isOnFire(),
-                            livingEntity.getUUID()
+                            livingEntity.isOnFire()
                     );
                     LOTMNetworkHandler.sendToAllPlayers(packet);
                 }

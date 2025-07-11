@@ -170,7 +170,7 @@ public class BeyonderUtil {
                 }
                 for (LivingEntity livingEntity : projectile.level().getEntitiesOfClass(LivingEntity.class, projectile.getBoundingBox().inflate(5))) {
                     if (currentPathwayAndSequenceMatches(living, BeyonderClassInit.SAILOR.get(), 0)) {
-                        livingEntity.hurt(livingEntity.damageSources().lightningBolt(), 40);
+                        livingEntity.hurt(BeyonderUtil.lightningSource(living, livingEntity), 40);
                     }
                 }
             }
@@ -284,6 +284,48 @@ public class BeyonderUtil {
     public static DamageSource fallSource(Entity attacker, Entity target) {
         Level level = target.level();
         Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FALL);
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
+    }
+
+    public static DamageSource freezeSource(Entity attacker, Entity target) {
+        Level level = target.level();
+        Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FREEZE);
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
+    }
+
+    public static DamageSource lavaSource(Entity attacker, Entity target) {
+        Level level = target.level();
+        Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.LAVA);
+        return new DamageSource(damageTypeHolder, attacker, attacker, null) {
+            @Override
+            public boolean is(TagKey<DamageType> damageTypeKey) {
+                if (damageTypeKey == DamageTypeTags.BYPASSES_INVULNERABILITY) {
+                    return true;
+                }
+                return super.is(damageTypeKey);
+            }
+        };
+    }
+
+    public static DamageSource fallingBlockSource(Entity attacker, Entity target) {
+        Level level = target.level();
+        Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FALLING_BLOCK);
         return new DamageSource(damageTypeHolder, attacker, attacker, null) {
             @Override
             public boolean is(TagKey<DamageType> damageTypeKey) {

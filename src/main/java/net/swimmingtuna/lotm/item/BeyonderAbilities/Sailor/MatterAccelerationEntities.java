@@ -98,9 +98,10 @@ public class MatterAccelerationEntities extends SimpleAbilityItem {
                 continue;
             }
             if (!BeyonderUtil.currentPathwayMatches(entity, BeyonderClassInit.SAILOR.get())) {
+                entity.hurt(BeyonderUtil.lightningSource(entity1, entity), 100);
                 entity.hurt(entity1.damageSources().lightningBolt(), 100);
             } else {
-                entity1.hurt(entity1.damageSources().lightningBolt(), 100);
+                entity1.hurt(BeyonderUtil.lightningSource(entity, entity1), 100);
             }
         }
     }

@@ -312,7 +312,7 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                     for (LivingEntity living : interactionTarget.level().getEntitiesOfClass(LivingEntity.class, interactionTarget.getBoundingBox().inflate((calamityBreezeCounter * 5) + (enhancement * 5)))) {
                         if (livingEntity != player) {
                             living.setSecondsOnFire(calamityWaveCounter * 2);
-                            living.hurt(living.damageSources().lava(), 5 * enhancement);
+                            living.hurt(BeyonderUtil.lavaSource(player, living), 5 * enhancement);
                         }
                     }
                 }

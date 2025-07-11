@@ -387,7 +387,7 @@ public class SailorClass implements BeyonderClass {
                 Entity entity = entityHit.getEntity();
                 if (!entity.level().isClientSide()) {
                     if (entity instanceof LivingEntity) {
-                        entity.hurt(projectile.damageSources().lightningBolt(), (x * 5));
+                        entity.hurt(BeyonderUtil.lightningSource(projectile, entity), (x * 5));
                         LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, entity.level());
                         lightningBolt.moveTo(entity.getX(), entity.getY(), entity.getZ());
                         entity.level().addFreshEntity(lightningBolt);

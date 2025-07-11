@@ -578,7 +578,11 @@ public class ModEvents {
                         if (BeyonderUtil.currentPathwayMatchesNoException(attacked, BeyonderClassInit.WARRIOR.get()) && x) {
                             DamageSource source = event.getSource();
                             float amount = event.getAmount();
-                            attacked.hurt(attacked.damageSources().generic(), amount / 2);
+                            if (source.getEntity() != null) {
+                                attacked.hurt(BeyonderUtil.genericSource(source.getEntity(), attacked), amount / 2);
+                            } else {
+                                attacked.hurt(BeyonderUtil.genericSource(attacked, attacked), amount / 2);
+                            }
                         }
                     }
                 }

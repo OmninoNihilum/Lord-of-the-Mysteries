@@ -82,7 +82,6 @@ public class SwordOfDawn extends SwordItem implements GeoItem {
     }
 
     private void removeItemFromSlot(LivingEntity entity, ItemStack stack) {
-        LOTM.LOGGER.info("REMOVED");
         if (entity.getItemBySlot(EquipmentSlot.MAINHAND) == stack) {
             entity.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         } else if (entity.getItemBySlot(EquipmentSlot.OFFHAND) == stack) {

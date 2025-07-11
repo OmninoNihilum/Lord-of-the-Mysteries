@@ -91,9 +91,9 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             for (LivingEntity entity : entities) {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
                     if (!(entity instanceof Player)) {
-                        entity.hurt(level.damageSources().lightningBolt(), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get()) * 2.5f); // Adjust damage amount as needed
+                        entity.hurt(BeyonderUtil.lightningSource(player, entity), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get()) * 2.5f); // Adjust damage amount as needed
                     } else {
-                        entity.hurt(level.damageSources().lightningBolt(), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get())); // Adjust damage amount as needed
+                        entity.hurt(BeyonderUtil.lightningSource(player, entity), BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_SELF.get())); // Adjust damage amount as needed
                     }
                 }
             }

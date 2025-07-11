@@ -62,13 +62,13 @@ public class DeathKnellBulletEntity extends AbstractHurtingProjectile {
                         if (this.getOwner() != null) {
                             livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), getDamage() * 2);
                         } else {
-                            livingEntity.hurt(livingEntity.damageSources().generic(), getDamage() * 2);
+                            livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), getDamage() * 2);
                         }
                     } else {
                         if (this.getOwner() != null) {
                             livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), getDamage());
                         } else {
-                            livingEntity.hurt(livingEntity.damageSources().generic(), getDamage());
+                            livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), getDamage());
                         }
                     }
                 }
@@ -76,7 +76,7 @@ public class DeathKnellBulletEntity extends AbstractHurtingProjectile {
                     if (this.getOwner() != null) {
                         livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), getDamage());
                     } else {
-                        livingEntity.hurt(livingEntity.damageSources().generic(), getDamage());
+                        livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), getDamage());
                     }
                 }
                 this.discard();
@@ -111,7 +111,7 @@ public class DeathKnellBulletEntity extends AbstractHurtingProjectile {
                 if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
                     livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), getDamage() / distanceTo(this));
                 } else {
-                    livingEntity.hurt(livingEntity.damageSources().generic(), getDamage() / distanceTo(this));
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), getDamage() / distanceTo(this));
                 }
             }
             this.discard();

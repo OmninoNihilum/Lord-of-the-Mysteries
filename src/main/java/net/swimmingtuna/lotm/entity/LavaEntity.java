@@ -72,7 +72,11 @@ public class LavaEntity extends AbstractArrow {
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
             this.level().setBlock(BlockPos.containing(hitPos), Blocks.LAVA.defaultBlockState(), 3);
             if (result.getEntity() instanceof LivingEntity living) {
-                living.hurt(living.damageSources().lava(), 5 * BeyonderUtil.getScale(this));
+                if (this.getOwner() == null) {
+                    living.hurt(BeyonderUtil.lavaSource(this, living), 5 * BeyonderUtil.getScale(this));
+                } else {
+                    living.hurt(BeyonderUtil.lavaSource(this.getOwner(), living), 5 * BeyonderUtil.getScale(this));
+                }
             }
             this.discard();
         }
@@ -113,7 +117,11 @@ public class LavaEntity extends AbstractArrow {
         }
         for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this)))) {
             this.level().setBlock(this.getOnPos(), Blocks.LAVA.defaultBlockState(), 3);
-            living.hurt(living.damageSources().lava(), 5 * BeyonderUtil.getScale(this));
+            if (this.getOwner() == null) {
+                living.hurt(BeyonderUtil.lavaSource(this, living), 5 * BeyonderUtil.getScale(this));
+            } else {
+                living.hurt(BeyonderUtil.lavaSource(this.getOwner(), living), 5 * BeyonderUtil.getScale(this));
+            }
         }
     }
 

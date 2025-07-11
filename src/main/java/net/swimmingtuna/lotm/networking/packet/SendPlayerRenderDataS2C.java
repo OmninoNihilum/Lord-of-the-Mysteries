@@ -16,7 +16,6 @@ import java.util.function.Supplier;
 // SendPlayerRenderDataS2C.java
 public class SendPlayerRenderDataS2C {
     private final UUID entityUUID;
-    private final UUID senderUUID;
     private final float yaw;
     private final float pitch;
     private final float headYaw;
@@ -33,7 +32,7 @@ public class SendPlayerRenderDataS2C {
     private final Vec3 displayCenter;
     private final boolean onFire;
 
-    public SendPlayerRenderDataS2C(UUID entityUUID, float yaw, float pitch, float headYaw, float bodyYaw, double velX, double velY, double velZ, float swingProgress, double posX, double posY, double posZ, boolean onGround, float fallDistance, Vec3 displayCenter, boolean onFire, UUID senderUUID) {
+    public SendPlayerRenderDataS2C(UUID entityUUID, float yaw, float pitch, float headYaw, float bodyYaw, double velX, double velY, double velZ, float swingProgress, double posX, double posY, double posZ, boolean onGround, float fallDistance, Vec3 displayCenter, boolean onFire) {
         this.entityUUID = entityUUID;
         this.yaw = yaw;
         this.pitch = pitch;
@@ -50,7 +49,6 @@ public class SendPlayerRenderDataS2C {
         this.onGround = onGround;
         this.fallDistance = fallDistance;
         this.displayCenter = displayCenter;
-        this.senderUUID = senderUUID;
     }
 
     public SendPlayerRenderDataS2C(FriendlyByteBuf buf) {
@@ -70,7 +68,6 @@ public class SendPlayerRenderDataS2C {
         this.fallDistance = buf.readFloat();
         this.displayCenter = new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.onFire = buf.readBoolean();
-        this.senderUUID = buf.readUUID();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
@@ -92,7 +89,6 @@ public class SendPlayerRenderDataS2C {
         buf.writeDouble(this.displayCenter.y);
         buf.writeDouble(this.displayCenter.z);
         buf.writeBoolean(this.onFire);
-        buf.writeUUID(this.senderUUID);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
@@ -103,7 +99,6 @@ public class SendPlayerRenderDataS2C {
                 Entity observedEntity = null;
                 for (Entity entity : clientLevel.entitiesForRendering()) {
                     if (entity.getUUID().equals(this.entityUUID)) {
-                        LOTM.LOGGER.info("FOUND ENTITY " + entity.getName().getString());
                         observedEntity = entity;
                         break;
                     }
@@ -128,11 +123,8 @@ public class SendPlayerRenderDataS2C {
                     renderData.putBoolean("displayOnGround", this.onGround);
                     renderData.putFloat("displayFallDistance", this.fallDistance);
                     renderData.putBoolean("displayOnFire", this.onFire);
-                    clientPlayer.getPersistentData().put("dimensionalSightRenderData", renderData);
-                } else {
-                    LOTM.LOGGER.info("OBSERVED ENTITY NULL");
+                    observedEntity.getPersistentData().put("dimensionalSightRenderData", renderData);
                 }
-                LOTM.LOGGER.info("PACKET RECEIVED");
             }
         });
         return true;

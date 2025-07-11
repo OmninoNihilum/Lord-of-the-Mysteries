@@ -383,7 +383,7 @@ public class SpectatorClass implements BeyonderClass {
                 if (prophesizedEarthquake % 20 == 0) {
                     for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate((radius)))) {
                         if (entity.onGround()) {
-                            entity.hurt(livingEntity.damageSources().fall(), 20);
+                            entity.hurt(BeyonderUtil.fallSource(livingEntity, entity), 20);
                         }
                     }
                 }

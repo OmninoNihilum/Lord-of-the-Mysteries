@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -88,7 +87,6 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
             float glowIntensity = (float) (0.7 + 0.3 * Math.sin((gameTime + partialTicks) * 0.05));
             int magicalLight = Math.max(combinedLight, (int) (240 * glowIntensity));
             if (scryTarget instanceof Player player && scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
-                LOTM.LOGGER.info("RENDERING TILE PLAYER " + player.getName().getString());
                 CompoundTag renderData = player.getPersistentData().getCompound("dimensionalSightRenderData");
                 float originalYRot = player.getYRot();
                 float originalXRot = player.getXRot();
@@ -116,9 +114,18 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
                     Vec3 relativePos = entityDisplayPos.subtract(displayCenter);
                     Vec3 scaledPos = new Vec3(relativePos.x / DimensionalSightTileEntity.RENDER_SCALE, relativePos.y / DimensionalSightTileEntity.RENDER_SCALE, relativePos.z / DimensionalSightTileEntity.RENDER_SCALE);
                     poseStack.translate(scaledPos.x, scaledPos.y, scaledPos.z);
-                    EntityRenderer<? super Player> renderer = (EntityRenderer<? super Player>) this.entityRenderer.getRenderer(player);
+                    EntityRenderer<? super Player> renderer = this.entityRenderer.getRenderer(player);
                     if (renderer != null) {
-                        renderer.render(player, 0.0f, partialTicks, poseStack, bufferSource, magicalLight);
+                        if (player.isAlive()) {
+                            renderer.render(player, 0.0f, partialTicks, poseStack, bufferSource, magicalLight);
+                        } else {
+                            tileEntity.removeThis();
+                            if (Minecraft.getInstance().level != null) {
+                                Minecraft.getInstance().level.removeEntity(scryTarget.getId(), Entity.RemovalReason.DISCARDED); // only if fake
+                                player.remove(Entity.RemovalReason.DISCARDED);
+                            }
+
+                        }
                     } else {
                         LOTM.LOGGER.error("Player renderer is null!");
                     }
@@ -140,7 +147,7 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
 
             } else if (scryTarget instanceof Player player && !scryTarget.getPersistentData().contains("dimensionalSightRenderData")) {
                 LOTM.LOGGER.info(player.getName().getString() + " doesn't have data");
-            }else {
+            } else {
                 Vec3 entityDisplayPos = tileEntity.getEntityDisplayPos();
                 Vec3 displayCenter = tileEntity.getDisplayCenter();
                 Vec3 relativePos = entityDisplayPos.subtract(displayCenter);

@@ -61,6 +61,7 @@ public class Earthquake extends SimpleAbilityItem {
                 for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate((radius)))) {
                     if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
                         if (entity.onGround()) {
+                            entity.hurt(BeyonderUtil.fallSource(livingEntity, entity), 35 - (sequence * 5));
                             entity.hurt(livingEntity.damageSources().fall(), 35 - (sequence * 5));
                         }
                     }

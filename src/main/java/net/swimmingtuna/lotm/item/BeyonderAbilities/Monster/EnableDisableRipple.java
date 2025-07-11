@@ -109,7 +109,7 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                 if (livingEntity != player && !BeyonderUtil.areAllies(player, livingEntity) && livingEntity.getMaxHealth() >= 15) {
                     int randomInt = random.nextInt(14);
                     if (randomInt == 0) {
-                        livingEntity.hurt(livingEntity.damageSources().generic(), livingEntity.getMaxHealth() / (10 - enhancement));
+                        livingEntity.hurt(BeyonderUtil.genericSource(player, livingEntity), livingEntity.getMaxHealth() / (10 - enhancement));
                     }
                     if (randomInt == 1) {
                         BlockPos hitPos = livingEntity.blockPosition();
@@ -234,12 +234,12 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                                     if (holder1.getSequence() <= 3) {
                                         return;
                                     } else if (holder1.getSequence() <= 6) {
-                                        pPlayer.hurt(pPlayer.damageSources().lava(), 9);
+                                        pPlayer.hurt(BeyonderUtil.lavaSource(player, pPlayer), 9);
                                         pPlayer.setSecondsOnFire(4 + (enhancement * 2));
                                     }
                                 }
                             } else {
-                                entity.hurt(entity.damageSources().lava(), 12);
+                                entity.hurt(BeyonderUtil.lavaSource(player, entity), 12);
                                 entity.setSecondsOnFire(6 + (enhancement * 3));
                             }
                         }

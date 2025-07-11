@@ -359,7 +359,11 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
             if (livingEntity.hasEffect(ModEffects.ARMOR_WEAKNESS.get())) {
                 amplifier = livingEntity.getEffect(ModEffects.ARMOR_WEAKNESS.get()).getAmplifier();
             }
-            livingEntity.hurt(livingEntity.damageSources().generic(), damage);
+            if (this.getOwner() != null) {
+                livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), damage);
+            } else {
+                livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), damage);
+            }
             if (this.tickCount % 15 == 0) {
                 if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
                     if (!BeyonderUtil.areAllies(owner, livingEntity) && getAge()) {
@@ -373,7 +377,11 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
                 livingEntity.addEffect(new MobEffectInstance(ModEffects.ARMOR_WEAKNESS.get(), 200, amplifier + 1, true, true));
             }
             if (BeyonderUtil.isPurifiable(livingEntity)) {
-                livingEntity.hurt(livingEntity.damageSources().magic(), damage);
+                if (this.getOwner() != null) {
+                    livingEntity.hurt(BeyonderUtil.magicSource(this.getOwner(), livingEntity), damage);
+                } else {
+                    livingEntity.hurt(BeyonderUtil.magicSource(this, livingEntity), damage);
+                }
             }
         }
     }

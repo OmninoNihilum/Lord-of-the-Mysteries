@@ -206,7 +206,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                     if (getIsDragonBreath() && this.getOwner() != null && this.getOwner() instanceof LivingEntity livingOwner && entity instanceof LivingEntity livingEntity && !BeyonderUtil.areAllies(livingOwner, livingEntity)) {
                         BeyonderUtil.applyMentalDamage(livingOwner, livingEntity, this.getDamage());
                     } else if (getIsDragonBreath() && this.getOwner() == null && entity instanceof LivingEntity livingEntity) {
-                        livingEntity.hurt(livingEntity.damageSources().magic(), getDamage());
+                        livingEntity.hurt(BeyonderUtil.magicSource(this, livingEntity), getDamage());
                     }
                     if (getIsTwilight() && entity instanceof LivingEntity livingEntity && this.getOwner() instanceof LivingEntity pOwner && !BeyonderUtil.areAllies(pOwner, livingEntity)) {
                         int age = livingEntity.getPersistentData().getInt("age");

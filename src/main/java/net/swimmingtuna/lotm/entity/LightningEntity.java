@@ -594,9 +594,9 @@ public class LightningEntity extends AbstractHurtingProjectile {
                     }
                     if (this.getOwner() == null) {
                         if (!BeyonderUtil.isBeyonderCapable(livingEntity)) {
-                            livingEntity.hurt(livingEntity.damageSources().lightningBolt(), damage);
+                            livingEntity.hurt(BeyonderUtil.lightningSource(this, livingEntity), damage);
                         } else {
-                            livingEntity.hurt(livingEntity.damageSources().lightningBolt(), damage * 1.2f);
+                            livingEntity.hurt(BeyonderUtil.lightningSource(this, livingEntity), damage * 1.2f);
                         }
                         if (getMentalDamage() != 0) {
                             BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
@@ -612,7 +612,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
                                 if (getMentalDamage() != 0) {
                                     BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
                                 }
-                                livingEntity.hurt(livingEntity.damageSources().lightningBolt(), damage * 1.4f);
+                                livingEntity.hurt(BeyonderUtil.lightningSource(this, livingEntity), damage * 1.4f);
                             }
                         } else {
                             if (this.getOwner() != null) {
@@ -624,7 +624,7 @@ public class LightningEntity extends AbstractHurtingProjectile {
                                 if (getMentalDamage() != 0) {
                                     BeyonderUtil.applyMentalDamage(livingEntity, livingEntity, getMentalDamage());
                                 }
-                                livingEntity.hurt(livingEntity.damageSources().lightningBolt(), damage * 0.9f);
+                                livingEntity.hurt(BeyonderUtil.lightningSource(this, livingEntity), damage * 0.9f);
                             }
                         }
                     }

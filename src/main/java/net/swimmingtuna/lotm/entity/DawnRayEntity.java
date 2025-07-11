@@ -172,7 +172,7 @@ public class DawnRayEntity extends Entity {
                     if (dot > 0 && dot < 250.0) {
                         Vec3 projection = beamStart.add(beamDir.scale(dot));
                         if (projection.distanceTo(entity.position()) < width * 2) {
-                            entity.hurt(this.damageSources().magic(), 2.0F);
+                            entity.hurt(BeyonderUtil.magicSource(this, entity), 2.0F);
                         }
                     }
                 }
