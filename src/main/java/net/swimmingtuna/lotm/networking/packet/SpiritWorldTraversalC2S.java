@@ -1,3 +1,4 @@
+
 package net.swimmingtuna.lotm.networking.packet;
 
 import net.minecraft.ChatFormatting;
@@ -11,6 +12,7 @@ import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class SpiritWorldTraversalC2S {
@@ -37,24 +39,14 @@ public class SpiritWorldTraversalC2S {
                     if (BeyonderUtil.getSequence(pPlayer) == 0) {
                         if (spiritWorld != null) {
                             pPlayer.sendSystemMessage(Component.literal("Transporting to Spirit World...").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.BLUE));
-                            pPlayer.teleportTo(spiritWorld,
-                                    pPlayer.getX(),
-                                    pPlayer.getY(),
-                                    pPlayer.getZ(),
-                                    pPlayer.getYRot(),
-                                    pPlayer.getXRot());
+                            pPlayer.teleportTo(spiritWorld, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), pPlayer.getYRot(), pPlayer.getXRot());
                         }
-                    } else if (pPlayer.level().dimension() == DimensionInit.SPIRIT_WORLD_LEVEL_KEY) {
-                        ServerLevel overworldWorld = server.getLevel(Level.OVERWORLD);
-                        if (overworldWorld != null) {
-                            pPlayer.sendSystemMessage(Component.literal("Transporting to Overworld...").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN));
-                            pPlayer.teleportTo(overworldWorld,
-                                    pPlayer.getX(), // Convert back to overworld coordinates
-                                    pPlayer.getY(),
-                                    pPlayer.getZ(),
-                                    pPlayer.getYRot(),
-                                    pPlayer.getXRot());
-                        }
+                    }
+                } else if (pPlayer.level().dimension() == DimensionInit.SPIRIT_WORLD_LEVEL_KEY) {
+                    ServerLevel overworldWorld = server.getLevel(Level.OVERWORLD);
+                    if (overworldWorld != null) {
+                        pPlayer.sendSystemMessage(Component.literal("Transporting to Overworld...").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN));
+                        pPlayer.teleportTo(overworldWorld, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), pPlayer.getYRot(), pPlayer.getXRot());
                     }
                 }
             }

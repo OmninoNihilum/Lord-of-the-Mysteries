@@ -526,6 +526,7 @@ public class ModEvents {
     }
 
 
+
     @SubscribeEvent
     public static void attackEvent(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntity();
@@ -572,19 +573,6 @@ public class ModEvents {
                     if (livingEntity.getMainHandItem().getItem() instanceof AllyMaker) {
                         event.setCanceled(true);
                     }
-                    BeyonderClass pathway = BeyonderUtil.getPathway(livingEntity);
-                    boolean x = attacked.getHealth() <= attacked.getMaxHealth() * 0.4f || attacked.hasEffect(MobEffects.WEAKNESS) || attacked.hasEffect(ModEffects.ABILITY_WEAKNESS.get()) || attacked.hasEffect(MobEffects.WITHER) || attacked.hasEffect(MobEffects.POISON);
-                    if (pathway != null) {
-                        if (BeyonderUtil.currentPathwayMatchesNoException(attacked, BeyonderClassInit.WARRIOR.get()) && x) {
-                            DamageSource source = event.getSource();
-                            float amount = event.getAmount();
-                            if (source.getEntity() != null) {
-                                attacked.hurt(BeyonderUtil.genericSource(source.getEntity(), attacked), amount / 2);
-                            } else {
-                                attacked.hurt(BeyonderUtil.genericSource(attacked, attacked), amount / 2);
-                            }
-                        }
-                    }
                 }
                 if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(attacked, BeyonderClassInit.MONSTER.get(), 5)) {
                     if (attacker instanceof LivingEntity) {
@@ -606,6 +594,7 @@ public class ModEvents {
                     attacker.getPersistentData().putInt("luckDoubleDamage", attacker.getPersistentData().getInt("luckDoubleDamage") + 5);
                     attacker.getPersistentData().putInt("harmfulFalseProphecyAttack", 0);
                 }
+
                 int stoneImmunity = tag.getInt("luckStoneDamageImmunity");
                 int meteorImmunity = tag.getInt("calamityMeteorImmunity");
                 int mcLightningImmunity = tag.getInt("luckMCLightningImmunity");
@@ -790,6 +779,7 @@ public class ModEvents {
         }
     }
 
+
     @SubscribeEvent
     public static void deathEvent(LivingDeathEvent event) {
         LivingEntity livingEntity = event.getEntity();
@@ -896,7 +886,6 @@ public class ModEvents {
             }
         }
     }
-
 
     @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
     public static class SpawnHandler {

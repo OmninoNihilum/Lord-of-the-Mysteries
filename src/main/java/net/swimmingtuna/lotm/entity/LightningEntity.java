@@ -332,8 +332,6 @@ public class LightningEntity extends AbstractHurtingProjectile {
                 }
 
                 AABB detectionBox = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
-
-                // Create a copy of the entities to avoid concurrent modification
                 List<Entity> nearbyEntities = new ArrayList<>(this.level().getEntitiesOfClass(Entity.class, detectionBox));
                 boolean foundValidTarget = false;
 
@@ -543,6 +541,9 @@ public class LightningEntity extends AbstractHurtingProjectile {
                 return;
             }
             if (!this.getStar()) {
+                if (this.getOwner() != null && BeyonderUtil.getSequence(getOwner()) >= 5 && BeyonderUtil.currentPathwayMatchesNoException(this.getOwner(), BeyonderClassInit.SAILOR.get())) {
+                    radius *= 0.6f;
+                }
                 BeyonderUtil.destroyBlocksInSphere(this, hitPos, radius * 0.7f, 0);
             } else {
                 BeyonderUtil.destroyBlocksInSphere(this, hitPos, radius * 0.35f, 0);

@@ -230,30 +230,40 @@ public class SpectatorClass implements BeyonderClass {
                 int x = tag.getInt("spectatorProphesizedSinkholeX");
                 int y = tag.getInt("spectatorProphesizedSinkholeY");
                 int z = tag.getInt("spectatorProphesizedSinkholeZ");
+
+                // Initialize sinkhole position if not set
                 if (x == 0 && y == 0 && z == 0) {
                     tag.putInt("spectatorProphesizedSinkholeX", (int) livingEntity.getX());
                     tag.putInt("spectatorProphesizedSinkholeY", (int) livingEntity.getY());
                     tag.putInt("spectatorProphesizedSinkholeZ", (int) livingEntity.getZ());
                 }
+
+                // Reset position when sinkhole ends
                 if (sinkholeOccurence == 1) {
                     tag.putInt("spectatorProphesizedSinkholeX", 0);
                     tag.putInt("spectatorProphesizedSinkholeY", 0);
                     tag.putInt("spectatorProphesizedSinkholeZ", 0);
                 }
+
                 if (sinkholeOccurence != 1) {
                     int livingX = tag.getInt("spectatorProphesizedSinkholeX");
                     int livingY = tag.getInt("spectatorProphesizedSinkholeY");
                     int livingZ = tag.getInt("spectatorProphesizedSinkholeZ");
                     tag.putInt("spectatorProphecySinkholeOccurence", sinkholeOccurence - 1);
                     int currentDepth = tag.getInt("sinkholeProphecyCurrentDepth");
+
+                    // Reset depth when starting new sinkhole
                     if (sinkholeOccurence == 80) {
                         currentDepth = 0;
                         tag.putInt("sinkholeProphecyCurrentDepth", 0);
                     }
+
                     int sinkholeRadius = (int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 1.5);
                     sinkholeRadius = Math.max(5, sinkholeRadius);
                     BlockPos center = new BlockPos(livingX, livingY, livingZ);
-                    if (z % 2 == 0 && currentDepth < 40) {
+
+                    // Destroy one layer per tick (removed z % 2 == 0 condition)
+                    if (currentDepth < 40) {
                         currentDepth++;
                         tag.putInt("sinkholeProphecyCurrentDepth", currentDepth);
                         for (int i = -sinkholeRadius; i <= sinkholeRadius; i++) {
@@ -275,7 +285,9 @@ public class SpectatorClass implements BeyonderClass {
                             }
                         }
                     }
-                    if (z % 10 == 0) {
+
+                    // Clean up existing blocks every 10 ticks
+                    if (sinkholeOccurence % 10 == 0) {
                         for (int depth = 1; depth <= currentDepth; depth++) {
                             for (int i = -sinkholeRadius; i <= sinkholeRadius; i++) {
                                 for (int j = -sinkholeRadius; j <= sinkholeRadius; j++) {
@@ -294,6 +306,8 @@ public class SpectatorClass implements BeyonderClass {
                             }
                         }
                     }
+
+                    // Entity physics
                     List<LivingEntity> entities = livingEntity.level().getEntitiesOfClass(LivingEntity.class, new AABB(center.getX() - sinkholeRadius - 5, center.getY() - currentDepth - 5, center.getZ() - sinkholeRadius - 5, center.getX() + sinkholeRadius + 5, center.getY() + 10, center.getZ() + sinkholeRadius + 5));
                     for (LivingEntity entity : entities) {
                         double dx = center.getX() + 0.5 - entity.getX();
@@ -351,6 +365,13 @@ public class SpectatorClass implements BeyonderClass {
             if (misfortune >= 1) {
                 tag.putInt("spectatorProphesizedMisfortune", misfortune - 1);
             }
+
+            if (luck == 1) {
+                tag.putDouble("luck", tag.getDouble("luck") + 200);
+            }
+            if (misfortune == 1) {
+                tag.putDouble("misfortune", tag.getDouble("misfortune") + 200);
+            }
             if (meteor == 1) {
                 MeteorEntity.summonMeteorAtPositionWithScale(livingEntity, livingEntity.getX(), livingEntity.getY() + 200, livingEntity.getZ(), livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 9);
                 for (int i = 0; i < 6; i++) {
@@ -360,7 +381,7 @@ public class SpectatorClass implements BeyonderClass {
                 }
             }
             if (tornado == 1) {
-                TornadoEntity tornadoEntity = new TornadoEntity(livingEntity.level(), null, 0, 0, 0);
+                TornadoEntity tornadoEntity = new TornadoEntity(livingEntity.level(), livingEntity, 0, 0, 0);
                 tornadoEntity.setTornadoHeight(100);
                 tornadoEntity.setTornadoRadius(70);
                 if (BeyonderUtil.getSequence(livingEntity) == 0) {

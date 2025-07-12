@@ -113,9 +113,9 @@ public class WindBladeEntity extends AbstractHurtingProjectile {
         int decrease = (holder.getSequence() * 9) + 30;
         currentLifeCount = currentLifeCount - decrease;
         if (this.getOwner() == null) {
-            entity.hurt(BeyonderUtil.genericSource(this, entity), (float) currentLifeCount / 20);
+            entity.hurt(BeyonderUtil.genericSource(this, entity), (float) currentLifeCount / 10);
         } else {
-            entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), (float) currentLifeCount / 20);
+            entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), (float) currentLifeCount / 10);
         }
         this.entityData.set(DATA_LIFE_COUNT, currentLifeCount);
 

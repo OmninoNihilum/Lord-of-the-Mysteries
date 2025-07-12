@@ -93,8 +93,12 @@ public class WindManipulationSense extends SimpleAbilityItem {
         if (BeyonderUtil.getSpirituality(livingEntity) <= 1) return;
         BeyonderUtil.useSpirituality(livingEntity, 1);
         double radius = 100 - (BeyonderUtil.getSequence(livingEntity) * 10);
-        for (Player otherPlayer : livingEntity.level().getEntitiesOfClass(Player.class, livingEntity.getBoundingBox().inflate(radius))) {
+        for (LivingEntity otherPlayer : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius))) {
             if (otherPlayer == livingEntity || BeyonderUtil.areAllies(livingEntity, otherPlayer)) {
+                continue;
+            }
+            int lowestSequence = BeyonderUtil.getSequence(livingEntity) + 2;
+            if (BeyonderUtil.getSequence(otherPlayer) > lowestSequence) {
                 continue;
             }
             Vec3 directionToPlayer = otherPlayer.position().subtract(livingEntity.position()).normalize();
@@ -130,7 +134,7 @@ public class WindManipulationSense extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, summon constant winds around you. While active, you'll get the location of nearby entities"));
+        tooltipComponents.add(Component.literal("Upon use, summon constant winds around you. While active, you'll get the location of nearby entities that aren't far weaker than you"));
         tooltipComponents.add(Component.literal("Left Click for Wind Manipulation (Blade)"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("20 per second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));

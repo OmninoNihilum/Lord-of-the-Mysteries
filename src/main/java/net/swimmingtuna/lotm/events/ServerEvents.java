@@ -75,14 +75,14 @@ public class ServerEvents {
         Style style = BeyonderUtil.getStyle(player);
         Astrolabe.astrolabeChatMessage(event);
         if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof EnvisionWeather) {
-            if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
+            if (!BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
                 player.displayClientMessage(Component.literal("You are not of the Spectator pathway").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
             }
             if (BeyonderUtil.getSpirituality(player) < (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_WEATHER.get())) {
                 player.displayClientMessage(Component.literal("You need " + ((int) 500 / BeyonderUtil.getDreamIntoReality(player) + " spirituality in order to use this")).withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
             }
             String message = event.getMessage().getString().toLowerCase();
-            if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get()) && player.getMainHandItem().getItem() instanceof EnvisionWeather) {
+            if (BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
                 if (message.equals("clear") && BeyonderUtil.getSpirituality(player) > (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_WEATHER.get())) {
                     setWeatherClear(level);
                     event.getPlayer().displayClientMessage(Component.literal("Set Weather to Clear").withStyle(style), true);

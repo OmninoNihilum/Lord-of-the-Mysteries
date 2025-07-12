@@ -239,14 +239,19 @@ public class Prophecy extends SimpleAbilityItem {
                 int livingZ = tag.getInt("prophecySinkholeZ");
                 tag.putInt("prophecySinkhole", z - 1);
                 int currentDepth = tag.getInt("sinkholeCurrentDepth");
+
+                // Reset depth when starting new sinkhole
                 if (z == 80) {
                     currentDepth = 0;
                     tag.putInt("sinkholeCurrentDepth", 0);
                 }
+
                 int sinkholeRadius = (int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 1.5);
                 sinkholeRadius = Math.max(5, sinkholeRadius);
                 BlockPos center = new BlockPos(livingX, livingY, livingZ);
-                if (z % 2 == 0 && currentDepth < 40) {
+
+                // Destroy one layer per tick (removed z % 2 == 0 condition)
+                if (currentDepth < 40) {
                     currentDepth++;
                     tag.putInt("sinkholeCurrentDepth", currentDepth);
                     for (int i = -sinkholeRadius; i <= sinkholeRadius; i++) {
@@ -259,7 +264,8 @@ public class Prophecy extends SimpleAbilityItem {
                                 }
                                 BlockState state = livingEntity.level().getBlockState(targetPos);
                                 if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
-                                    if (livingEntity.getRandom().nextInt(5) == 0 && livingEntity.level() instanceof ServerLevel serverLevel) {serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.05);
+                                    if (livingEntity.getRandom().nextInt(5) == 0 && livingEntity.level() instanceof ServerLevel serverLevel) {
+                                        serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.05);
                                     }
                                     livingEntity.level().destroyBlock(targetPos, false);
                                 }
@@ -267,6 +273,8 @@ public class Prophecy extends SimpleAbilityItem {
                         }
                     }
                 }
+
+                // Clean up existing blocks every 10 ticks
                 if (z % 10 == 0) {
                     for (int depth = 1; depth <= currentDepth; depth++) {
                         for (int i = -sinkholeRadius; i <= sinkholeRadius; i++) {
@@ -278,13 +286,16 @@ public class Prophecy extends SimpleAbilityItem {
                                         continue;
                                     }
                                     BlockState state = livingEntity.level().getBlockState(targetPos);
-                                    if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {livingEntity.level().destroyBlock(targetPos, false);
+                                    if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
+                                        livingEntity.level().destroyBlock(targetPos, false);
                                     }
                                 }
                             }
                         }
                     }
                 }
+
+                // Entity physics
                 List<Entity> entities = livingEntity.level().getEntitiesOfClass(Entity.class, new AABB(center.getX() - sinkholeRadius - 5, center.getY() - currentDepth - 5, center.getZ() - sinkholeRadius - 5, center.getX() + sinkholeRadius + 5, center.getY() + 10, center.getZ() + sinkholeRadius + 5));
                 for (Entity entity : entities) {
                     if (entity == livingEntity) {
@@ -298,8 +309,7 @@ public class Prophecy extends SimpleAbilityItem {
                             entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.4, 0));
                             entity.hurtMarked = true;
                         }
-                    }
-                    else if (distance <= sinkholeRadius * 2) {
+                    } else if (distance <= sinkholeRadius * 2) {
                         dx = dx / distance;
                         dz = dz / distance;
                         double pullStrength = 0.1 * (1 - distance / (sinkholeRadius * 2));

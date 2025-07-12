@@ -17,6 +17,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -70,11 +72,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
             tag.putBoolean("psychologicalInvisibility", newState);
 
             UUID playerId = player.getUUID();
-            Boolean lastState = lastSentInvisibilityStates.get(playerId);
-            if (lastState == null || lastState != newState) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(newState, playerId, 20));
-                lastSentInvisibilityStates.put(playerId, newState);
-            }
+            LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 20));
         }
     }
 
@@ -87,7 +85,6 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
             tag.putBoolean("psychologicalInvisibility", false);
             tag.putInt("psychologicalInvisibilityHurt", 0);
             LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, living.getUUID(), 0));
-            lastSentInvisibilityStates.put(living.getUUID(), false);
         }
         living.removeEffect(MobEffects.INVISIBILITY);
     }
@@ -107,8 +104,6 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
     }
-
-    public static final Map<UUID, Boolean> lastSentInvisibilityStates = new HashMap<>();
 
     public static void psychologicalInvisibility(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
@@ -141,12 +136,8 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                 }
                 livingEntity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 11, 1, false, false));
                 BeyonderUtil.useSpirituality(livingEntity, Math.min(10, BeyonderUtil.getMaxSpirituality(livingEntity) / 100));
-            }
-            UUID playerId = livingEntity.getUUID();
-            Boolean lastState = lastSentInvisibilityStates.get(playerId);
-            if (lastState == null || lastState != currentState) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(currentState, playerId, 20));
-                lastSentInvisibilityStates.put(playerId, currentState);
+                UUID playerId = livingEntity.getUUID();
+                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 20));
             }
         }
     }

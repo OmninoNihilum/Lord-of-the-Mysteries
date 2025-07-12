@@ -39,7 +39,7 @@ public class DragonBreath extends SimpleAbilityItem {
     public static void dragonbreath(LivingEntity player) {
         if (!player.level().isClientSide()) {
             int sequence = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.DRAGON_BREATH.get());
-            DragonBreathEntity.shootDragonBreath(player, (int) (sequence * 1.2f), player.getX(), player.getY(), player.getZ());
+            DragonBreathEntity.shootDragonBreath(player, (int) (sequence * 1.2f), player.getX(), player.getEyeY(), player.getZ());
         }
     }
 

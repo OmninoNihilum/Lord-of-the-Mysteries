@@ -187,77 +187,80 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
     public static void addCooldown(LivingEntity livingEntity, Item item, int cooldown) {
-        if (!(livingEntity instanceof Player pPlayer && pPlayer.isCreative())) {
-            if (livingEntity instanceof Player player) {
-                if (player.getPersistentData().getBoolean("doorBlinkState")) {
-                    int distance = player.getPersistentData().getInt("doorBlinkStateDistance");
-                    int wormsToBeUsed = distance / 10;
-                    if (distance > 0) {
-                        if (distance >= cooldown) {
-                            player.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0, distance - cooldown * 1.5f));
-                            cooldown = 0;
-                        } else {
-                            player.getPersistentData().putInt("doorBlinkStateDistance", 0);
-                            cooldown = cooldown - distance;
-                        }
-                        CompoundTag tag = player.getPersistentData();
-                        int currentWormOfStar = tag.getInt("wormOfStar");
-                        tag.putInt("wormOfStar", Math.max(0, currentWormOfStar - wormsToBeUsed));
-                        if (player instanceof ServerPlayer serverPlayer) {
-                            LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                        }
+        if (livingEntity instanceof Player player && player.isCreative()) {
+            player.getCooldowns().addCooldown(item, 5);
+            return;
+        }
+
+        if (livingEntity instanceof Player player) {
+            if (player.getPersistentData().getBoolean("doorBlinkState")) {
+                int distance = player.getPersistentData().getInt("doorBlinkStateDistance");
+                int wormsToBeUsed = distance / 10;
+                if (distance > 0) {
+                    if (distance >= cooldown) {
+                        player.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0, distance - cooldown * 1.5f));
+                        cooldown = 0;
+                    } else {
+                        player.getPersistentData().putInt("doorBlinkStateDistance", 0);
+                        cooldown = cooldown - distance;
+                    }
+                    CompoundTag tag = player.getPersistentData();
+                    int currentWormOfStar = tag.getInt("wormOfStar");
+                    tag.putInt("wormOfStar", Math.max(0, currentWormOfStar - wormsToBeUsed));
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                     }
                 }
-                if (player.getPersistentData().getBoolean("wormOfStarChoice")) {
-                    CompoundTag tag = player.getPersistentData();
-                    int wormOfStarAmount = tag.getInt("wormOfStar");
-                    if (wormOfStarAmount == 0) {
-                        player.getCooldowns().addCooldown(item, cooldown);
-                    } else {
-                        int maxReduction = cooldown / 2;
-                        int actualReduction = Math.min(maxReduction * (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEPARATE_WORM_OF_STAR.get()), wormOfStarAmount);
-                        int newCooldown = cooldown - actualReduction;
-                        tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
-                        if (player instanceof ServerPlayer serverPlayer) {
-                            LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                        }
-                        player.getCooldowns().addCooldown(item, newCooldown);
-                    }
-                } else {
+            }
+            if (player.getPersistentData().getBoolean("wormOfStarChoice")) {
+                CompoundTag tag = player.getPersistentData();
+                int wormOfStarAmount = tag.getInt("wormOfStar");
+                if (wormOfStarAmount == 0) {
                     player.getCooldowns().addCooldown(item, cooldown);
+                } else {
+                    int maxReduction = cooldown / 2;
+                    int actualReduction = Math.min(maxReduction * (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEPARATE_WORM_OF_STAR.get()), wormOfStarAmount);
+                    int newCooldown = cooldown - actualReduction;
+                    tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                    }
+                    player.getCooldowns().addCooldown(item, newCooldown);
                 }
             } else {
-                if (livingEntity.getPersistentData().getBoolean("doorBlinkState")) {
-                    int distance = livingEntity.getPersistentData().getInt("doorBlinkStateDistance");
-                    int wormsToBeUsed = distance / 10;
-                    if (distance > 0) {
-                        if (distance >= cooldown) {
-                            livingEntity.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0, distance - cooldown * 1.5f));
-                            cooldown = 0;
-                        } else {
-                            livingEntity.getPersistentData().putInt("doorBlinkStateDistance", 0);
-                            cooldown = cooldown - distance;
-                        }
-                        CompoundTag tag = livingEntity.getPersistentData();
-                        int currentWormOfStar = tag.getInt("wormOfStar");
-                        tag.putInt("wormOfStar", Math.max(0, currentWormOfStar - wormsToBeUsed));
-                    }
-                }
-                if (livingEntity.getPersistentData().getBoolean("wormOfStarChoice")) {
-                    CompoundTag tag = livingEntity.getPersistentData();
-                    int wormOfStarAmount = tag.getInt("wormOfStar");
-                    if (wormOfStarAmount == 0) {
-                        livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
+                player.getCooldowns().addCooldown(item, cooldown);
+            }
+        } else {
+            if (livingEntity.getPersistentData().getBoolean("doorBlinkState")) {
+                int distance = livingEntity.getPersistentData().getInt("doorBlinkStateDistance");
+                int wormsToBeUsed = distance / 10;
+                if (distance > 0) {
+                    if (distance >= cooldown) {
+                        livingEntity.getPersistentData().putInt("doorBlinkStateDistance", (int) Math.max(0, distance - cooldown * 1.5f));
+                        cooldown = 0;
                     } else {
-                        int maxReduction = cooldown / 2;
-                        int actualReduction = Math.min(maxReduction, wormOfStarAmount);
-                        int newCooldown = cooldown - actualReduction;
-                        tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
-                        livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), newCooldown);
+                        livingEntity.getPersistentData().putInt("doorBlinkStateDistance", 0);
+                        cooldown = cooldown - distance;
                     }
-                } else {
-                    livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
+                    CompoundTag tag = livingEntity.getPersistentData();
+                    int currentWormOfStar = tag.getInt("wormOfStar");
+                    tag.putInt("wormOfStar", Math.max(0, currentWormOfStar - wormsToBeUsed));
                 }
+            }
+            if (livingEntity.getPersistentData().getBoolean("wormOfStarChoice")) {
+                CompoundTag tag = livingEntity.getPersistentData();
+                int wormOfStarAmount = tag.getInt("wormOfStar");
+                if (wormOfStarAmount == 0) {
+                    livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
+                } else {
+                    int maxReduction = cooldown / 2;
+                    int actualReduction = Math.min(maxReduction, wormOfStarAmount);
+                    int newCooldown = cooldown - actualReduction;
+                    tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
+                    livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), newCooldown);
+                }
+            } else {
+                livingEntity.getPersistentData().putInt("abilityCooldownFor" + item.getDescription().getString(), cooldown);
             }
         }
     }

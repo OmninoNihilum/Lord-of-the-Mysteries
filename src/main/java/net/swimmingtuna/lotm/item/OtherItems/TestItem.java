@@ -2,8 +2,10 @@ package net.swimmingtuna.lotm.item.OtherItems;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.core.BlockPos;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -14,20 +16,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
-import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.SpiritWorldSyncPacket;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.SpiritWorld.SpiritWorldHandler;
+import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 
-import java.util.List;
+import java.util.Set;
 
 public class TestItem extends SimpleAbilityItem {
 
@@ -73,20 +70,34 @@ public class TestItem extends SimpleAbilityItem {
     }
 
     @Override
-    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
         if (!level.isClientSide()) {
-            if (player instanceof Player pPlayer) {
-                for (int i = 0; i < pPlayer.getInventory().getContainerSize(); i++) {
-                    ItemStack stack = pPlayer.getInventory().getItem(i);
+            if (livingEntity instanceof Player player) {
+                for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                    ItemStack stack = player.getInventory().getItem(i);
                     if (!stack.isEmpty()) {
-                        pPlayer.getCooldowns().removeCooldown(stack.getItem());
+                        player.getCooldowns().removeCooldown(stack.getItem());
                     }
                 }
             }
-            double x = player.getX();
-            double z = player.getZ();
-            int surfaceY = player.level().getHeight(Heightmap.Types.WORLD_SURFACE, (int) x, (int) z) + 1;
-            player.sendSystemMessage(Component.literal("SURFACE Y = " + surfaceY));
+            MinecraftServer server = livingEntity.getServer();
+            if (server != null && livingEntity instanceof Player pPlayer) {
+                if (pPlayer.level().dimension() == Level.OVERWORLD) {
+                    ServerLevel spiritWorld = server.getLevel(DimensionInit.SPIRIT_WORLD_LEVEL_KEY);
+                    if (BeyonderUtil.getSequence(pPlayer) == 0) {
+                        if (spiritWorld != null) {
+                            pPlayer.sendSystemMessage(Component.literal("Transporting to Spirit World...").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.BLUE));
+                            pPlayer.teleportTo(spiritWorld, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), Set.of(), pPlayer.getYRot(), pPlayer.getXRot());
+                        }
+                    }
+                } else if (pPlayer.level().dimension() == DimensionInit.SPIRIT_WORLD_LEVEL_KEY) {
+                    ServerLevel overworldWorld = server.getLevel(Level.OVERWORLD);
+                    if (overworldWorld != null) {
+                        pPlayer.sendSystemMessage(Component.literal("Transporting to Overworld...").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN));
+                        pPlayer.teleportTo(overworldWorld, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), Set.of(), pPlayer.getYRot(), pPlayer.getXRot());
+                    }
+                }
+            }
         }
         return InteractionResult.SUCCESS;
     }

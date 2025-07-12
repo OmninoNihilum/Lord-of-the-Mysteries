@@ -1881,7 +1881,7 @@ public class BeyonderUtil {
         return null;
     }
 
-    private static void updatePositions(Entity entity, CompoundTag tag) {
+    public static void updatePositions(Entity entity, CompoundTag tag) {
         int tickCounter = tag.getInt("tickCounter");
 
         if (tickCounter == 0) {
@@ -2377,11 +2377,13 @@ public class BeyonderUtil {
                 int sequence = BeyonderUtil.getSequence(livingEntity);
                 if (sequence != -1) {
                     mentalStrength = pathway.mentalStrength().get(sequence);
-                } else {
-                    mentalStrength = 10;
                 }
             }
         }
+        if (Float.isNaN(mentalStrength) || Float.isInfinite(mentalStrength) || mentalStrength < 0) {
+            return 10.0f;
+        }
+
         return Math.max(1, mentalStrength * mobReducer);
     }
 

@@ -6,7 +6,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -15,7 +14,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,7 +27,6 @@ import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
@@ -109,63 +106,54 @@ public class Nightmare extends SimpleAbilityItem {
         int duration = 300 - (sequence * 20);
         AABB boundingBox = new AABB(targetPos).inflate(radius);
         level.getEntitiesOfClass(LivingEntity.class, boundingBox, LivingEntity::isAlive).forEach(living -> {
-           String name = living.getDisplayName().getString();
-           CompoundTag tag = living.getPersistentData();
-           if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
-               living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
-               if (tag.getInt("NightmareTimer") < 300) {
-                   int addToAmount = tag.getInt("NightmareTimer") + (sequence < 3 ? 200 : 100);
-                   tag.putInt("NightmareTimer", addToAmount);
-                   ChatFormatting style;
-                   int entitySequence = BeyonderUtil.getSequence(living);
-                   if (entitySequence >= 9 || entitySequence == -1) {
-                       style = ChatFormatting.WHITE;
-                   } else if (entitySequence >= 6) {
-                       style = ChatFormatting.YELLOW;
-                   } else if (entitySequence >= 4) {
-                       style = ChatFormatting.RED;
-                   } else {
-                       style = ChatFormatting.DARK_RED;
-                   }
-                   livingEntity.sendSystemMessage(Component.literal(name + "'s nightmare value is " + tag.getInt("NightmareTimer") + " / 300").withStyle(style));
-               } else {
-                   tag.putInt("NightmareTimer", 0);
-                   if (living instanceof Player) {
-                       BeyonderUtil.applyMentalDamage(livingEntity, living, damage / 2);
-                   } else {
-                       BeyonderUtil.applyMentalDamage(livingEntity, living, damage);
-                   }
-               }
-           }
+            String name = living.getDisplayName().getString();
+            CompoundTag tag = living.getPersistentData();
+            if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
+                living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
+                if (tag.getInt("NightmareTimer") < 300) {
+                    int addToAmount = 100;
+                    if (sequence < 3) {
+                        addToAmount = 200;
+                    }
+                    tag.putInt("NightmareTimer", tag.getInt("NightmareTimer") + addToAmount);
+                    ChatFormatting style;
+                    int entitySequence = BeyonderUtil.getSequence(living);
+                    if (entitySequence >= 9 || entitySequence == -1) {
+                        style = ChatFormatting.WHITE;
+                    } else if (entitySequence >= 6) {
+                        style = ChatFormatting.YELLOW;
+                    } else if (entitySequence >= 4) {
+                        style = ChatFormatting.RED;
+                    } else {
+                        style = ChatFormatting.DARK_RED;
+                    }
+                    livingEntity.sendSystemMessage(Component.literal(name + "'s nightmare value is " + tag.getInt("NightmareTimer") + " / 300").withStyle(style));
+                } else {
+                    tag.putInt("NightmareTimer", 0);
+                    if (living instanceof Player) {
+                        BeyonderUtil.applyMentalDamage(livingEntity, living, damage / 2);
+                    } else {
+                        BeyonderUtil.applyMentalDamage(livingEntity, living, damage);
+                    }
+                }
+            }
         });
     }
 
 
-    public static void nightmareTick(LivingEntity livingEntity) {
-        if (livingEntity instanceof Player player) {
-            AttributeInstance nightmareAttribute = player.getAttribute(ModAttributes.NIGHTMARE.get());
-            CompoundTag tag = player.getPersistentData();
-            int nightmareTimer = tag.getInt("NightmareTimer");
-            int matterAccelerationBlockTimer = player.getPersistentData().getInt("matterAccelerationBlockTimer");
-            if (matterAccelerationBlockTimer >= 1) {
-                player.getPersistentData().putInt("matterAccelerationBlockTimer", matterAccelerationBlockTimer - 1);
-            }
-            if (nightmareAttribute.getValue() >= 1) {
-                nightmareTimer++;
-                if (nightmareTimer >= 600) {
-                    nightmareAttribute.setBaseValue(0);
-                    nightmareTimer = 0;
-                }
-            } else {
-                nightmareTimer = 0;
-            }
-            tag.putInt("NightmareTimer", nightmareTimer);
+    public static void nightmareTick(LivingEntity player) {
+        CompoundTag tag = player.getPersistentData();
+        int nightmareTimer = tag.getInt("NightmareTimer");
+        int matterAccelerationBlockTimer = player.getPersistentData().getInt("matterAccelerationBlockTimer");
+        if (matterAccelerationBlockTimer >= 1) {
+            player.getPersistentData().putInt("matterAccelerationBlockTimer", matterAccelerationBlockTimer - 1);
         }
+        tag.putInt("NightmareTimer", nightmareTimer - 1);
     }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, makes all entities around the clicked block enter a nightmare, plunging them into darkness. If a player is hit by this three times in 30 seconds, they take immense damage. If a mob is hit, they take damage immediately, but less."));
+        tooltipComponents.add(Component.literal("Upon use, makes all entities around the clicked block or entity enter a nightmare, plunging them into darkness. If an entity is hit by this three times in 30 seconds, they take immense damage."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("45 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

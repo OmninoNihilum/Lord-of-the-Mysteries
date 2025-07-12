@@ -46,7 +46,7 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
         if (entity instanceof Player player) {
             if (player.tickCount % 2 == 0 && !level.isClientSide()) {
-                if (player.getMainHandItem().getItem() instanceof MisfortuneManipulation) {
+                if (player.getMainHandItem().getItem() instanceof ConsciousnessStroll) {
                     player.displayClientMessage(Component.literal(misfortuneManipulationString(player)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GRAY), true);
                 }
             }

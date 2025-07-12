@@ -20,10 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.RotationUtil;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -32,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class BeamEntity extends LOTMProjectile {
     public double endPosX;
@@ -335,21 +333,6 @@ public abstract class BeamEntity extends LOTMProjectile {
         this.entityData.set(DATA_PITCH, pitch);
     }
 
-    private void calculateEndPos() {
-        Vec3 direction;
-        if (this.level().isClientSide) {
-            direction = new Vec3(Math.cos(this.renderYaw) * Math.cos(this.renderPitch), Math.sin(this.renderPitch), Math.sin(this.renderYaw) * Math.cos(this.renderPitch)).normalize();
-        } else {
-            direction = new Vec3(Math.cos(this.getYaw()) * Math.cos(this.getPitch()), Math.sin(this.getPitch()), Math.sin(this.getYaw()) * Math.cos(this.getPitch())).normalize();
-        }
-
-        Vec3 end = new Vec3(this.getX(), this.getY(), this.getZ()).add(direction.scale(this.getRange()));
-        this.endPosX = end.x;
-        this.endPosY = end.y;
-        this.endPosZ = end.z;
-        this.endPos = end;
-    }
-
 
     public List<Entity> checkCollisions(Vec3 from, Vec3 to) {
         if (!(this.getOwner() instanceof LivingEntity owner)) return List.of();
@@ -376,7 +359,18 @@ public abstract class BeamEntity extends LOTMProjectile {
                 Math.max(from.y, this.collidePosY) + radius,
                 Math.max(from.z, this.collidePosZ) + radius
         );
+
         if (!this.level().isClientSide) {
+            // Check if owner is looking downward (pitch > 70 degrees - really looking at ground)
+            boolean isLookingDown = false;
+            if (owner != null) {
+                float pitch = owner.getXRot(); // Positive values = looking down
+                isLookingDown = pitch > 70.0f; // 90 degrees is straight down, so 70 is 20 degrees from straight down
+            }
+
+            // Get owner's ground level for comparison
+            double ownerGroundY = owner != null ? owner.getY() : Double.MAX_VALUE;
+
             BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
             for (int x = (int) Math.floor(bounds.minX); x <= Math.ceil(bounds.maxX); x++) {
                 for (int y = (int) Math.floor(bounds.minY); y <= Math.ceil(bounds.maxY); y++) {
@@ -388,18 +382,37 @@ public abstract class BeamEntity extends LOTMProjectile {
                         Vec3 projection = dir.scale(dot);
                         Vec3 distanceVec = fromToPoint.subtract(projection);
                         double distance = distanceVec.length();
+
                         if (distance <= radius) {
-                            if (getDestroyBlocks()) {
+                            // Check if this block is near the owner's feet and if we should skip it
+                            boolean isNearOwnerFeet = false;
+                            if (owner != null) {
+                                double blockDistanceFromOwner = Math.sqrt(
+                                        Math.pow(x + 0.5 - owner.getX(), 2) +
+                                                Math.pow(z + 0.5 - owner.getZ(), 2)
+                                );
+                                // Block is within 2 blocks horizontally and at or below owner's feet
+                                isNearOwnerFeet = blockDistanceFromOwner <= 2.0 &&
+                                        y <= ownerGroundY + 1 &&
+                                        !isLookingDown;
+                            }
+
+                            if (getDestroyBlocks() && !isNearOwnerFeet) {
                                 if (this.breaksBlocks() && !EXCLUDED_BLOCKS.contains(this.level().getBlockState(mutablePos).getBlock())) {
                                     this.level().destroyBlock(mutablePos, false);
                                 }
-                            } else if (this.tickCount % 5 == 0 && getIsTwilight() && this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState()) {
-                                if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
+                            } else if (this.tickCount % 5 == 0 && getIsTwilight() &&
+                                    this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() &&
+                                    this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState() &&
+                                    !isNearOwnerFeet) {
+                                if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() &&
+                                        this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
                                     this.level().setBlock(mutablePos, Blocks.DIRT.defaultBlockState(), 11);
                                 } else {
                                     this.level().destroyBlock(mutablePos, false);
                                 }
                             }
+
                             if (this.causesFire()) {
                                 if (this.random.nextInt(3) == 0 &&
                                         this.level().getBlockState(mutablePos).isAir() &&
@@ -412,9 +425,10 @@ public abstract class BeamEntity extends LOTMProjectile {
                 }
             }
         }
-        double rayLength = from.distanceTo(new Vec3(this.collidePosX, this.collidePosY, this.collidePosZ));
-        double entityDetectionRadius = radius * 1.5; // Wider radius for entity detection
 
+        // Rest of the method remains the same...
+        double rayLength = from.distanceTo(new Vec3(this.collidePosX, this.collidePosY, this.collidePosZ));
+        double entityDetectionRadius = radius * 1.5;
 
         AABB entityBounds = new AABB(
                 Math.min(from.x, this.collidePosX) - radius * 0.8,
@@ -523,13 +537,125 @@ public abstract class BeamEntity extends LOTMProjectile {
 
     private void update() {
         if (this.getOwner() instanceof LivingEntity owner) {
-            this.renderYaw = (float) ((RotationUtil.getTargetAdjustedYRot(owner) + 90.0D) * Math.PI / 180.0D);
-            this.renderPitch = (float) (-RotationUtil.getTargetAdjustedXRot(owner) * Math.PI / 180.0D);
-            this.setYaw((float) ((RotationUtil.getTargetAdjustedYRot(owner) + 90.0F) * Math.PI / 180.0D));
-            this.setPitch((float) (-RotationUtil.getTargetAdjustedXRot(owner) * Math.PI / 180.0D));
+            // Use the owner's actual look angles directly instead of target-adjusted ones
+            float yaw = owner.getYRot();
+            float pitch = owner.getXRot();
+
+            // Convert to radians for the beam calculation
+            this.renderYaw = (float) Math.toRadians(yaw + 90.0F);
+            this.renderPitch = (float) Math.toRadians(-pitch);
+
+            // Set the data for synchronization
+            this.setYaw((float) Math.toRadians(yaw + 90.0F));
+            this.setPitch((float) Math.toRadians(-pitch));
+
             Vec3 spawn = this.calculateSpawnPos(owner);
             double yOffset = (this.getFrames() <= this.getCharge()) ? 0.5 : 0.0;
             this.setPos(spawn.x, spawn.y + yOffset, spawn.z);
         }
+    }
+
+
+    private void calculateEndPos() {
+        Vec3 direction;
+        Vec3 startPos;
+
+        if (this.getOwner() instanceof LivingEntity owner) {
+            float scale = 1.0f;
+            try {
+                scale = BeyonderUtil.getScale(owner);
+            } catch (Exception ignored) {
+            }
+
+            // Get the player's look direction
+            direction = owner.getLookAngle();
+
+            // Start raycast from player's eye position
+            startPos = owner.getEyePosition();
+
+            // Perform raycast to find what the player is looking at
+            Vec3 endPos = performRaycast(startPos, direction, scale);
+
+            this.endPosX = endPos.x;
+            this.endPosY = endPos.y;
+            this.endPosZ = endPos.z;
+            this.endPos = endPos;
+
+        } else {
+            // Fallback for non-living entities
+            if (this.level().isClientSide) {
+                direction = new Vec3(
+                        Math.cos(this.renderYaw) * Math.cos(this.renderPitch),
+                        Math.sin(this.renderPitch),
+                        Math.sin(this.renderYaw) * Math.cos(this.renderPitch)
+                ).normalize();
+            } else {
+                direction = new Vec3(Math.cos(this.getYaw()) * Math.cos(this.getPitch()), Math.sin(this.getPitch()), Math.sin(this.getYaw()) * Math.cos(this.getPitch())).normalize();
+            }
+
+            startPos = new Vec3(this.getX(), this.getY(), this.getZ());
+            Vec3 end = startPos.add(direction.scale(this.getRange()));
+            this.endPosX = end.x;
+            this.endPosY = end.y;
+            this.endPosZ = end.z;
+            this.endPos = end;
+        }
+    }
+
+    private Vec3 performRaycast(Vec3 startPos, Vec3 direction, float scale) {
+        double maxDistance = 50.0;
+        maxDistance *= Math.max(1.0, scale * 0.5);
+        Vec3 endPos = startPos.add(direction.scale(maxDistance));
+        BlockHitResult blockHit = this.level().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, this.getOwner()));
+        EntityHitResult entityHit = getEntityHitResult(startPos, direction, maxDistance);
+        Vec3 finalEndPos;
+        if (entityHit != null && blockHit.getType() != HitResult.Type.MISS) {
+            double entityDistance = startPos.distanceTo(entityHit.getLocation());
+            double blockDistance = startPos.distanceTo(blockHit.getLocation());
+            if (entityDistance < blockDistance) {
+                finalEndPos = entityHit.getLocation();
+            } else {
+                finalEndPos = blockHit.getLocation();
+            }
+        } else if (entityHit != null) {
+            finalEndPos = entityHit.getLocation();
+        } else if (blockHit.getType() != HitResult.Type.MISS) {
+            finalEndPos = blockHit.getLocation();
+        } else {
+            finalEndPos = startPos.add(direction.scale(50.0));
+        }
+
+        return finalEndPos;
+    }
+
+    private EntityHitResult getEntityHitResult(Vec3 startPos, Vec3 direction, double maxDistance) {
+        Vec3 endPos = startPos.add(direction.scale(maxDistance));
+        AABB searchBox = new AABB(startPos, endPos).inflate(1.0);
+        Entity closestEntity = null;
+        Vec3 closestHitPos = null;
+        double closestDistance = maxDistance;
+        for (Entity entity : this.level().getEntities(this.getOwner(), searchBox)) {
+            if (entity == this.getOwner() || entity == this) {
+                continue;
+            }
+
+            AABB entityBox = entity.getBoundingBox();
+            Optional<Vec3> hitResult = entityBox.clip(startPos, endPos);
+            if (hitResult.isPresent()) {
+                Vec3 hitPos = hitResult.get();
+                double distance = startPos.distanceTo(hitPos);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestEntity = entity;
+                    closestHitPos = hitPos;
+                }
+            }
+        }
+
+        if (closestEntity != null) {
+            return new EntityHitResult(closestEntity, closestHitPos);
+        }
+
+        return null;
     }
 }

@@ -96,11 +96,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
                 BeyonderUtil.useSpirituality(livingEntity, 10);
             }
             UUID playerId = livingEntity.getUUID();
-            Boolean lastState = PsychologicalInvisibility.lastSentInvisibilityStates.get(playerId);
-            if (lastState == null || lastState != currentState) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(currentState, playerId, 20));
-                PsychologicalInvisibility.lastSentInvisibilityStates.put(playerId, currentState);
-            }
+            LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 20));
             Vec3 lookVec = livingEntity.getLookAngle();
             Random random = new Random();
             float scale = ScaleTypes.BASE.getScaleData(livingEntity).getScale();

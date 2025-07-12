@@ -185,8 +185,18 @@ public class PlayerMobTracker extends SavedData {
     }
 
     private void syncToAllPlayers(ServerLevel level) {
-        LOTMNetworkHandler.sendToAllPlayers(new SyncPlayerMobTrackerPacketS2C(getTrackedMobs()));
+        final int MAX_ENTRIES_PER_PACKET = 250;
+        List<PlayerMobData> allMobs = new ArrayList<>(trackedMobs.values());
+        for (int i = 0; i < allMobs.size(); i += MAX_ENTRIES_PER_PACKET) {
+            List<PlayerMobData> sublist = allMobs.subList(i, Math.min(i + MAX_ENTRIES_PER_PACKET, allMobs.size()));
+            Map<UUID, PlayerMobData> chunk = new HashMap<>();
+            for (PlayerMobData mob : sublist) {
+                chunk.put(mob.entityUUID, mob);
+            }
+            LOTMNetworkHandler.sendToAllPlayers(new SyncPlayerMobTrackerPacketS2C(chunk));
+        }
     }
+
 
     public void handleDimensionChange(UUID entityUUID, ServerLevel oldLevel, ServerLevel newLevel) {
         PlayerMobData mobData = trackedMobs.get(entityUUID);

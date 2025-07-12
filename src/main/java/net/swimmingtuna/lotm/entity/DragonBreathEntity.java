@@ -150,6 +150,7 @@ public class DragonBreathEntity extends BeamEntity {
         dragonBreath.setIsDragonbreath(true);
         dragonBreath.setFrenzyTime((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.DRAGON_BREATH.get()));
         dragonBreath.setDuration(12);
+        dragonBreath.setRange(200);
         player.level().addFreshEntity(dragonBreath);
     }
 

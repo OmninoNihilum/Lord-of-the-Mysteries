@@ -33,6 +33,7 @@ import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -310,30 +311,7 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 entity.hurtMarked = true;
             }
             if (pickup) {
-                int blockCheckLimit = 50;
-                int pickedUpBlocks = 0;
-                int maxPickupPerTick = 5;
-                for (int i = 0; i < blockCheckLimit && pickedUpBlocks < maxPickupPerTick; i++) {
-                    int randomX = random.nextInt(tornadoRadius * 2) - tornadoRadius;
-                    int randomY = random.nextInt(tornadoHeight);
-                    int randomZ = random.nextInt(tornadoRadius * 2) - tornadoRadius;
-                    BlockPos blockPosition = new BlockPos((int)this.getX() + randomX, (int)this.getY() + randomY, (int)this.getZ() + randomZ);
-                    BlockState state = this.level().getBlockState(blockPosition);
-                    if (state.isAir() || state.is(BlockTags.TALL_FLOWERS) || state.getBlock() == Blocks.BEDROCK) {
-                        continue;
-                    }
-                    if (random.nextInt(20) == 0 && this.tickCount % 5 == 0) {
-                        FallingBlockEntity fallingBlock = FallingBlockEntity.fall(this.level(), blockPosition, state);
-                        fallingBlock.time = 1;
-                        double randomDirectionX = (random.nextDouble() - 0.5) * 2.0;
-                        double randomDirectionY = random.nextDouble() * 2.0;
-                        double randomDirectionZ = (random.nextDouble() - 0.5) * 2.0;
-                        fallingBlock.setDeltaMovement(randomDirectionX, randomDirectionY, randomDirectionZ);
-                        this.level().setBlock(blockPosition, Blocks.AIR.defaultBlockState(), 3);
-                        this.level().addFreshEntity(fallingBlock);
-                        pickedUpBlocks++;
-                    }
-                }
+                pickupBlocksOptimized(tornadoRadius, tornadoHeight);
             }
 
             this.setDeltaMovement(new Vec3(tornadoMov));
@@ -379,6 +357,78 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 }
             }
         }
+    }
+
+    private void pickupBlocksOptimized(int tornadoRadius, int tornadoHeight) {
+        List<BlockPos> candidateBlocks = new ArrayList<>();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        Random random = new Random();
+        int centerX = (int) this.getX();
+        int centerZ = (int) this.getZ();
+        for (int x = centerX - tornadoRadius; x <= centerX + tornadoRadius; x++) {
+            for (int z = centerZ - tornadoRadius; z <= centerZ + tornadoRadius; z++) {
+                double distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(z - centerZ, 2));
+                if (distance <= tornadoRadius) {
+                    int surfaceY = findHighestSolidBlock(x, z, tornadoHeight);
+                    if (surfaceY != -1) {
+                        mutablePos.set(x, surfaceY, z);
+                        BlockState state = this.level().getBlockState(mutablePos);
+                        if (!state.isAir() &&
+                                !state.is(BlockTags.TALL_FLOWERS) &&
+                                state.getBlock() != Blocks.BEDROCK &&
+                                state.getDestroySpeed(this.level(), mutablePos) >= 0) {
+                            candidateBlocks.add(new BlockPos(x, surfaceY, z));
+                        }
+                    }
+                }
+            }
+        }
+
+        int maxPickupPerTick = 5;
+        int pickedUpBlocks = 0;
+        for (BlockPos blockPos : candidateBlocks) {
+            if (pickedUpBlocks >= maxPickupPerTick) break;
+            if (random.nextInt(2) == 0 && this.tickCount % 5 == 0) {
+                BlockState state = this.level().getBlockState(blockPos);
+                FallingBlockEntity fallingBlock = FallingBlockEntity.fall(this.level(), blockPos, state);
+                fallingBlock.time = 1;
+                double dx = blockPos.getX() - this.getX();
+                double dz = blockPos.getZ() - this.getZ();
+                double distance = Math.sqrt(dx * dx + dz * dz);
+                double normalizedX = distance > 0 ? dx / distance : 0;
+                double normalizedZ = distance > 0 ? dz / distance : 0;
+
+                double randomDirectionX = normalizedX * 0.5 + (random.nextDouble() - 0.5) * 1.5;
+                double randomDirectionY = random.nextDouble() * 2.0 + 1.0; // Always upward
+                double randomDirectionZ = normalizedZ * 0.5 + (random.nextDouble() - 0.5) * 1.5;
+
+                fallingBlock.setDeltaMovement(randomDirectionX, randomDirectionY, randomDirectionZ);
+                this.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                this.level().addFreshEntity(fallingBlock);
+                pickedUpBlocks++;
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private int findHighestSolidBlock(int x, int z, int tornadoHeight) {
+        int maxY = Math.min(this.level().getMaxBuildHeight() - 1, (int) this.getY() + tornadoHeight);
+        int minY = Math.max(this.level().getMinBuildHeight(), (int) this.getY() - 10);
+        for (int y = (int) this.getY(); y >= minY; y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            BlockState state = this.level().getBlockState(pos);
+            if (!state.isAir() && state.isSolid()) {
+                return y;
+            }
+        }
+        for (int y = (int) this.getY() + 1; y <= maxY; y++) {
+            BlockPos pos = new BlockPos(x, y, z);
+            BlockState state = this.level().getBlockState(pos);
+            if (!state.isAir() && state.isSolid()) {
+                return y;
+            }
+        }
+        return -1;
     }
 
     @Override
