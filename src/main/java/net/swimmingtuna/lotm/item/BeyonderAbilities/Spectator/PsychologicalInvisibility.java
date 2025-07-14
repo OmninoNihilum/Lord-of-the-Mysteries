@@ -62,17 +62,18 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                     }
                 }
                 if (player instanceof Player pPlayer) {
+                    UUID playerId = player.getUUID();
+                    LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 30));
                     pPlayer.displayClientMessage(Component.literal("You are now invisible").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                 }
             } else {
                 if (player instanceof Player pPlayer) {
+                    removePsychologicalInvisibilityEffect(player);
                     pPlayer.displayClientMessage(Component.literal("You are now visible").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.RED), true);
                 }
             }
             tag.putBoolean("psychologicalInvisibility", newState);
 
-            UUID playerId = player.getUUID();
-            LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 20));
         }
     }
 

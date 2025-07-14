@@ -186,7 +186,17 @@ public class DimensionalSightTileEntityRenderer implements BlockEntityRenderer<D
                     living.hurtDuration = scryTarget.hurtDuration;
                     living.deathTime = scryTarget.deathTime;
                     EntityRenderer<? super LivingEntity> renderer = this.entityRenderer.getRenderer(living);
-                    renderer.render(living, 0.0F, partialTicks, poseStack, bufferSource, magicalLight);
+                    if (renderer != null) {
+                        if (living.isAlive()) {
+                            renderer.render(living, 0.0F, partialTicks, poseStack, bufferSource, magicalLight);
+                        } else {
+                            tileEntity.removeThis();
+                            if (Minecraft.getInstance().level != null) {
+                                Minecraft.getInstance().level.removeEntity(scryTarget.getId(), Entity.RemovalReason.DISCARDED); // only if fake
+                                living.remove(Entity.RemovalReason.DISCARDED);
+                            }
+                        }
+                    }
                 }
             }
         } catch (Exception e) {

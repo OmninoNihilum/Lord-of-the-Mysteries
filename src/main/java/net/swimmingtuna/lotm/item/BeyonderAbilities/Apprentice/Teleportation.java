@@ -143,10 +143,24 @@ public class Teleportation extends SimpleAbilityItem {
                 float amount = event.getAmount();
                 if (playerMobEntity.getCreator() != null) {
                     LivingEntity creator = playerMobEntity.getCreator();
+                    boolean x = !(creator instanceof Player player) || (!player.isCreative() && !player.isSpectator());
                     if (creator.isAlive()) {
-                        creator.hurt(event.getSource(), amount);
-                        event.setCanceled(true);
-                        creator.sendSystemMessage(Component.empty().append(Component.literal("Your copy flickering at ").withStyle(ChatFormatting.AQUA)).append(Component.literal(String.format("%.1f, %.1f, %.1f", playerMobEntity.getX(), playerMobEntity.getY(), playerMobEntity.getZ())).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)).append(Component.literal(" hurt you.").withStyle(ChatFormatting.AQUA)));
+                        if (event.getAmount() > creator.getHealth() - 10) {
+                            playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
+                            creator.sendSystemMessage(Component.empty().append(Component.literal("Your copy flickering at ").withStyle(ChatFormatting.AQUA)).append(Component.literal(String.format("%.1f, %.1f, %.1f", playerMobEntity.getX(), playerMobEntity.getY(), playerMobEntity.getZ())).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)).append(Component.literal(" was removed due to too much damage").withStyle(ChatFormatting.AQUA)));
+                        }
+                        if (creator.getHealth() > 10) {
+                            event.setCanceled(true);
+                            if (x) {
+                                creator.hurt(event.getSource(), amount);
+                                creator.sendSystemMessage(Component.empty().append(Component.literal("Your copy flickering at ").withStyle(ChatFormatting.AQUA)).append(Component.literal(String.format("%.1f, %.1f, %.1f", playerMobEntity.getX(), playerMobEntity.getY(), playerMobEntity.getZ())).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)).append(Component.literal(" hurt you.").withStyle(ChatFormatting.AQUA)));
+                            }
+                        } else {
+                            creator.sendSystemMessage(Component.empty().append(Component.literal("Your copy flickering at ").withStyle(ChatFormatting.AQUA)).append(Component.literal(String.format("%.1f, %.1f, %.1f", playerMobEntity.getX(), playerMobEntity.getY(), playerMobEntity.getZ())).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)).append(Component.literal(" was removed due to your low health.").withStyle(ChatFormatting.AQUA)));
+                            playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
+                        }
+                    } else {
+                        playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
                     }
                 } else {
                     playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
@@ -158,7 +172,7 @@ public class Teleportation extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, create a copy of yourself that is flickering in front of you, which will keep any active abilities you choose."));
-        tooltipComponents.add(Component.literal("These flickering copies will try to attach anything nearby, and cause you to take any damage they take, and use your spirituality."));
+        tooltipComponents.add(Component.literal("These flickering copies will try to attach anything nearby, and cause you to take any damage they take (despawning if the damage will put you near death), and use your spirituality."));
         tooltipComponents.add(Component.literal("Type in a player's name or any coordinates in order to cause a copy to appear at that location."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));

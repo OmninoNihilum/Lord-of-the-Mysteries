@@ -51,7 +51,7 @@ public class TrickBlackCurtain extends SimpleAbilityItem {
         BlockPos basePos = entity.blockPosition().offset((int) Math.round(look.x), 0, (int) Math.round(look.z));
         int counter = 0;
         for (int y = 0; y < height; y++) {
-            for (int x = (int) -(Math.floor(width / 2)); x <= (int) (Math.floor(width / 2)); x++) {
+            for (int x = (int) -(Math.floor((double) width / 2)); x <= (int) (Math.floor((double) width / 2)); x++) {
                 Vec3 offset = right.scale(x).add(0, y, 0);
                 Vec3 spawnPos;
                 DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(entity);

@@ -84,9 +84,9 @@ public class MeteorNoLevelEntity extends AbstractHurtingProjectile {
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 16 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 12 * scale);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 16 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 12 * scale);
                 }
             }
         }
@@ -126,9 +126,9 @@ public class MeteorNoLevelEntity extends AbstractHurtingProjectile {
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), scale * 16);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), scale * 12);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), scale * 16);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), scale * 12);
                 }
             }
         }

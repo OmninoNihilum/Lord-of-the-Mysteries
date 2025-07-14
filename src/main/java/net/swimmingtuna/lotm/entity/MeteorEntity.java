@@ -225,9 +225,9 @@ public class MeteorEntity extends AbstractHurtingProjectile {
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 16 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 12 * scale);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 16 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 12 * scale);
                 }
             }
         }
@@ -250,9 +250,9 @@ public class MeteorEntity extends AbstractHurtingProjectile {
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), damage * 16);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), damage * 12);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), damage * 16);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), damage * 12);
                 }
             }
         }

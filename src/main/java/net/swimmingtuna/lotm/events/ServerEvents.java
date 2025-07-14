@@ -181,20 +181,28 @@ public class ServerEvents {
                     } else if (BeyonderUtil.getSpirituality(player) < 300) {
                         player.displayClientMessage(Component.literal("You need 300 spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
                     } else {
-                        player.getPersistentData().putInt("consciousnessStrollActivated", 60);
                         player.getCooldowns().addCooldown(ItemInit.CONSCIOUSNESS_STROLL.get(), 400);
                         player.getPersistentData().putInt("consciousnessStrollActivatedX", (int) player.getX());
                         player.getPersistentData().putInt("consciousnessStrollActivatedY", (int) player.getY());
                         player.getPersistentData().putInt("consciousnessStrollActivatedZ", (int) player.getZ());
                         player.getPersistentData().putString("consciousnessStrollDimension", player.level().dimension().toString());
+                        if (player.isCreative()) {
+                            player.getPersistentData().putString("consciousnessStrollGamemode", "creative");
+                        } else if (player.isSpectator()) {
+                            player.getPersistentData().putString("consciousnessStrollGamemode", "spectator");
+                        } else {
+                            player.getPersistentData().putString("consciousnessStrollGamemode", "survival");
+                        }
                         player.setGameMode(GameType.SPECTATOR);
                         BeyonderUtil.useSpirituality(player, 300);
                         if (player.level().dimension() != onlinePlayer.level().dimension()) {
                             ServerLevel targetDimension = onlinePlayer.getServer().getLevel(onlinePlayer.level().dimension());
                             player.changeDimension(targetDimension);
+                            player.getPersistentData().putInt("consciousnessStrollActivated", 600);
                             player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
                         } else {
                             player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
+                            player.getPersistentData().putInt("consciousnessStrollActivated", 120);
                         }
 
                         event.setCanceled(true);
@@ -252,6 +260,7 @@ public class ServerEvents {
                 int x = (int) targetPlayer.getX();
                 int y = (int) targetPlayer.getY();
                 int z = (int) targetPlayer.getZ();
+                EnvisionLocation.envisionLocationTeleport(player, targetPlayer.level(), x, y, z);
                 player.teleportTo(x, y, z);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
             } else {

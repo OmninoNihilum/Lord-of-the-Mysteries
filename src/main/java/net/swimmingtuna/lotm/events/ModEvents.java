@@ -284,6 +284,7 @@ public class ModEvents {
         }
     }
 
+    @OnlyIn(Dist.DEDICATED_SERVER)
     @SubscribeEvent
     public static void onPlayerTickServer(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
@@ -305,11 +306,6 @@ public class ModEvents {
 
         if (player instanceof ServerPlayer serverPlayer) {
             if (player.tickCount % 20 == 0) {
-                for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(40))) {
-                    if (living.hasEffect(MobEffects.INVISIBILITY)) {
-                        LOTMNetworkHandler.sendToPlayer(new RemoveInvisibiltyS2C(living.getUUID()), serverPlayer);
-                    }
-                }
                 AbilityRegisterCommand.tickEvent(serverPlayer);
                 if (holder.getSequence() != 0 && ClientSequenceData.getCurrentSequence() == 0) {
                     ClientSequenceData.setCurrentSequence(-1);
@@ -369,6 +365,7 @@ public class ModEvents {
     }
 
 
+    @OnlyIn(Dist.DEDICATED_SERVER)
     @SubscribeEvent
     public static void handleLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
@@ -656,6 +653,9 @@ public class ModEvents {
             Entity entitySourceOwner = source.getEntity();
             if (entitySourceOwner instanceof Projectile projectile && projectile.getOwner() != null) {
                 entitySourceOwner = projectile.getOwner();
+            }
+            if (entitySource.getPersistentData().getInt("dreamWeavingDeathTimer") >= 1) {
+                event.setAmount(event.getAmount() * 4.0f);
             }
             if (entitySource != null) {
                 CompoundTag sourceTag = entitySource.getPersistentData();

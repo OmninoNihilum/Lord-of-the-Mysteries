@@ -41,11 +41,15 @@ public class LOTMNetworkHandler {
                 .build();
         packets.forEach(consumer -> consumer.accept(INSTANCE, id()));
 
-
         INSTANCE.messageBuilder(DimensionalSightCompleteDataPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(DimensionalSightCompleteDataPacketS2C::new)
                 .encoder(DimensionalSightCompleteDataPacketS2C::encode)
                 .consumerMainThread(DimensionalSightCompleteDataPacketS2C::handle)
+                .add();
+        INSTANCE.messageBuilder(CleanupDimensionalSightPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(CleanupDimensionalSightPacketS2C::decode)
+                .encoder(CleanupDimensionalSightPacketS2C::encode)
+                .consumerMainThread(CleanupDimensionalSightPacketS2C::handle)
                 .add();
 
         INSTANCE.messageBuilder(LuckManipulationLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
@@ -83,11 +87,6 @@ public class LOTMNetworkHandler {
                 .encoder(DeathKnellLeftClickC2S::toByte)
                 .consumerMainThread(DeathKnellLeftClickC2S::handle)
                 .add();
-
-
-
-
-
 
 
         INSTANCE.messageBuilder(ForceLookPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)

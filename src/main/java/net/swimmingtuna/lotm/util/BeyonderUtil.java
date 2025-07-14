@@ -98,7 +98,6 @@ import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.*;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.ClientData.ClientLeftclickCooldownData;
-import net.swimmingtuna.lotm.util.ClientData.ClientLookData;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
@@ -1280,6 +1279,10 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BEAMOFTWILIGHT.get())));
             } else if (heldItem.getItem() instanceof BeamOfTwilight) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AURAOFTWILIGHT.get())));
+            } else if (heldItem.getItem() instanceof Blink) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINKAFTERIMAGE.get())));
+            } else if (heldItem.getItem() instanceof BlinkAfterimage) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
             } else if (heldItem.getItem() instanceof LuckManipulation) {
                 LOTMNetworkHandler.sendToServer(new LuckManipulationLeftClickC2S());
             } else if (heldItem.getItem() instanceof MisfortuneManipulation) {
@@ -1362,13 +1365,6 @@ public class BeyonderUtil {
                 heldItem.shrink(1);
             } else if (heldItem.getItem() instanceof TrickBlackCurtain) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKBURNING.get())));
-                heldItem.shrink(1);
-            }
-            if (heldItem.getItem() instanceof Blink) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.BLINKAFTERIMAGE.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof BlinkAfterimage) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.BLINK.get())));
                 heldItem.shrink(1);
             } else if (heldItem.getItem() instanceof AqueousLightDrown) {
                 pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_PUSH.get())));

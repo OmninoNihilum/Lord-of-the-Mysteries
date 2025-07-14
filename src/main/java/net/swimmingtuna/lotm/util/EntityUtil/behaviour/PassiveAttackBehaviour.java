@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.tslat.smartbrainlib.api.core.behaviour.ExtendedBehaviour;
 import net.tslat.smartbrainlib.util.BrainUtils;
 
@@ -62,9 +63,7 @@ public class PassiveAttackBehaviour<E extends LivingEntity> extends ExtendedBeha
         for (UUID uuid : alliesUUID) {
             Entity entityFromUUID = ((ServerLevel) entity.level()).getEntity(uuid);
             if (!entities.contains(entityFromUUID)) {
-                // Check if the potential target is a clone with the same owner
-                if (entity instanceof PlayerMobEntity beyonderEntity &&
-                        entityFromUUID instanceof PlayerMobEntity targetPlayerMob) {
+                if (entity instanceof PlayerMobEntity beyonderEntity && entityFromUUID instanceof PlayerMobEntity targetPlayerMob) {
                     if (isSameOwner(beyonderEntity, targetPlayerMob)) {
                         continue; // Skip this target, look for another
                     }
@@ -87,12 +86,13 @@ public class PassiveAttackBehaviour<E extends LivingEntity> extends ExtendedBeha
         if (entity instanceof PlayerMobEntity beyonderEntity){
             try {
                 if (beyonderEntity.getAttackChance() >= new Random().nextFloat(0, 100)) {
-
                     if (!BrainUtils.hasMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET)) { // prob gets checked often, but need to be sure memory exists
                         BrainUtils.addMemories(entity.getBrain(), MemoryModuleType.ATTACK_TARGET);
                     }
                     E target = getTarget(entity);
-                    if (target != null) BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
+                    if (target != null && !BeyonderUtil.areAllies(target, beyonderEntity)) {
+                        BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
+                    }
                 }
             } catch (NullPointerException e){
                 LogUtils.getLogger().warn("LOTM Carft: Attack Chance of Entity was not present ");

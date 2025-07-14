@@ -43,7 +43,7 @@ public class LuckDenial extends SimpleAbilityItem {
             }
             useSpirituality(player);
             addCooldown(player);
-            giftLuck(player, player);
+            giftLuck(player, interactionTarget);
         }
         return InteractionResult.SUCCESS;
     }

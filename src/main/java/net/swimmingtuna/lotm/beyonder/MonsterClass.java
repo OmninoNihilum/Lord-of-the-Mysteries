@@ -460,66 +460,68 @@ public class MonsterClass implements BeyonderClass {
 
     public static void dodgeProjectiles(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
-            if (livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") >= 1) {
-                for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {
-                    if (projectile.getPersistentData().getInt("windDodgeProjectilesCounter") == 0) {
-                        if (projectile instanceof Arrow arrow && arrow.tickCount >= 100) {
-                            return;
-                        }
-                        float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
-                        double maxDistance = 6 * scale;
-                        double deltaX = Math.abs(projectile.getX() - livingEntity.getX());
-                        double deltaY = Math.abs(projectile.getY() - livingEntity.getY());
-                        double deltaZ = Math.abs(projectile.getZ() - livingEntity.getZ());
-                        if ((deltaX <= maxDistance && deltaY <= maxDistance && deltaZ <= maxDistance) && projectile.getOwner() != livingEntity) {
-                            double mathRandom = (Math.random() + .4) - 0.2;
-                            double x = projectile.getDeltaMovement().x() + (mathRandom * scale);
-                            double y = projectile.getDeltaMovement().y() + (mathRandom * scale);
-                            double z = projectile.getDeltaMovement().z() + (mathRandom * scale);
-                            projectile.setDeltaMovement(x, y, z);
-                            projectile.hurtMarked = true;
-                            projectile.getPersistentData().putInt("windDodgeProjectilesCounter", 100);
-                            livingEntity.getPersistentData().putInt("windMovingProjectilesCounter", livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") - 1);
-                            if (livingEntity instanceof Player player) {
-                                player.displayClientMessage(Component.literal("A gust of wind moved a projectile headed towards you").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+            if (livingEntity.tickCount % 3 == 0) {
+                if (livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") >= 1) {
+                    for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {
+                        if (projectile.getPersistentData().getInt("windDodgeProjectilesCounter") == 0) {
+                            if (projectile instanceof Arrow arrow && arrow.tickCount >= 100) {
+                                return;
                             }
+                            float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
+                            double maxDistance = 6 * scale;
+                            double deltaX = Math.abs(projectile.getX() - livingEntity.getX());
+                            double deltaY = Math.abs(projectile.getY() - livingEntity.getY());
+                            double deltaZ = Math.abs(projectile.getZ() - livingEntity.getZ());
+                            if ((deltaX <= maxDistance && deltaY <= maxDistance && deltaZ <= maxDistance) && projectile.getOwner() != livingEntity) {
+                                double mathRandom = (Math.random() + .4) - 0.2;
+                                double x = projectile.getDeltaMovement().x() + (mathRandom * scale);
+                                double y = projectile.getDeltaMovement().y() + (mathRandom * scale);
+                                double z = projectile.getDeltaMovement().z() + (mathRandom * scale);
+                                projectile.setDeltaMovement(x, y, z);
+                                projectile.hurtMarked = true;
+                                projectile.getPersistentData().putInt("windDodgeProjectilesCounter", 100);
+                                livingEntity.getPersistentData().putInt("windMovingProjectilesCounter", livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") - 1);
+                                if (livingEntity instanceof Player player) {
+                                    player.displayClientMessage(Component.literal("A gust of wind moved a projectile headed towards you").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+                                }
+                            }
+                        } else {
+                            projectile.getPersistentData().putInt("windDodgeProjectilesCounter", projectile.getPersistentData().getInt("windDodgeProjectilesCounter") - 1);
                         }
-                    } else {
-                        projectile.getPersistentData().putInt("windDodgeProjectilesCounter", projectile.getPersistentData().getInt("windDodgeProjectilesCounter") - 1);
                     }
-                }
-            } else {
-                if (BeyonderUtil.isBeyonderCapable(livingEntity)) {
-                    if (livingEntity instanceof Player pPlayer) {
-                        BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
-                        int sequence = holder.getSequence();
-                        if (BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.MONSTER.get()) && holder.getSequence() <= 7) {
-                            int reverseChance = (int) (Math.random() * 20 - sequence);
-                            for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {
-                                if (projectile.getPersistentData().getInt("monsterReverseProjectiles") == 0) {
-                                    if (projectile instanceof Arrow arrow && arrow.tickCount >= 80) {
-                                        return;
-                                    }
-                                    if (reverseChance >= 10) {
-                                        float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
-                                        double maxDistance = 6 * scale;
-                                        double deltaX = Math.abs(projectile.getX() - livingEntity.getX());
-                                        double deltaY = Math.abs(projectile.getY() - livingEntity.getY());
-                                        double deltaZ = Math.abs(projectile.getZ() - livingEntity.getZ());
-                                        if ((deltaX <= maxDistance && deltaY <= maxDistance && deltaZ <= maxDistance) && projectile.getOwner() != livingEntity) {
-                                            double x = projectile.getDeltaMovement().x() * -1;
-                                            double y = projectile.getDeltaMovement().y() * -1;
-                                            double z = projectile.getDeltaMovement().z() * -1;
-                                            projectile.setDeltaMovement(x, y, z);
-                                            projectile.hurtMarked = true;
-                                            projectile.getPersistentData().putInt("monsterReverseProjectiles", 60);
-                                            if (livingEntity instanceof Player player) {
-                                                player.displayClientMessage(Component.literal("A strong breeze luckily reversed a projectile headed towards you").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+                } else {
+                    if (BeyonderUtil.isBeyonderCapable(livingEntity)) {
+                        if (livingEntity instanceof Player pPlayer) {
+                            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
+                            int sequence = holder.getSequence();
+                            if (BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.MONSTER.get()) && holder.getSequence() <= 7) {
+                                int reverseChance = (int) (Math.random() * 20 - sequence);
+                                for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {
+                                    if (projectile.getPersistentData().getInt("monsterReverseProjectiles") == 0) {
+                                        if (projectile instanceof Arrow arrow && arrow.tickCount >= 80) {
+                                            return;
+                                        }
+                                        if (reverseChance >= 10) {
+                                            float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
+                                            double maxDistance = 6 * scale;
+                                            double deltaX = Math.abs(projectile.getX() - livingEntity.getX());
+                                            double deltaY = Math.abs(projectile.getY() - livingEntity.getY());
+                                            double deltaZ = Math.abs(projectile.getZ() - livingEntity.getZ());
+                                            if ((deltaX <= maxDistance && deltaY <= maxDistance && deltaZ <= maxDistance) && projectile.getOwner() != livingEntity) {
+                                                double x = projectile.getDeltaMovement().x() * -1;
+                                                double y = projectile.getDeltaMovement().y() * -1;
+                                                double z = projectile.getDeltaMovement().z() * -1;
+                                                projectile.setDeltaMovement(x, y, z);
+                                                projectile.hurtMarked = true;
+                                                if (livingEntity instanceof Player player) {
+                                                    player.displayClientMessage(Component.literal("A strong breeze luckily reversed a projectile headed towards you").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+                                                }
                                             }
                                         }
+                                        projectile.getPersistentData().putInt("monsterReverseProjectiles", 60);
+                                    } else {
+                                        projectile.getPersistentData().putInt("monsterReverseProjectiles", projectile.getPersistentData().getInt("windDodgeProjectilesCounter") - 1);
                                     }
-                                } else {
-                                    projectile.getPersistentData().putInt("monsterReverseProjectiles", projectile.getPersistentData().getInt("windDodgeProjectilesCounter") - 1);
                                 }
                             }
                         }

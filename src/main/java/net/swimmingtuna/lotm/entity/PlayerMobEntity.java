@@ -507,6 +507,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (BeyonderUtil.areAllies(target, this)) {
             return false;
         }
+        if (this.getIsClone() && ((this.getCreator() != null && target == this.getCreator()) || this.getUsername().getDisplayName() == target.getScoreboardName())) {
+            return false;
+        }
         return super.canAttack(target);
     }
 

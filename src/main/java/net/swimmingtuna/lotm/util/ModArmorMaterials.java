@@ -8,8 +8,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.swimmingtuna.lotm.LOTM;
 
 public enum ModArmorMaterials implements ArmorMaterial {
-    DAWN("dawn", 26, new int[]{ 5, 7, 5, 4 }, 25, SoundEvents.ARMOR_EQUIP_GOLD, 1f, 0f),
-    SILVER("silver", 15, new int[]{6, 8, 6, 5}, 9, SoundEvents.ARMOR_EQUIP_IRON, 1.5f, 0.2f);
+    DAWN("dawn", 26, new int[]{ 6, 13, 11, 7}, 25, SoundEvents.ARMOR_EQUIP_GOLD, 5f, 1f),
+    SILVER("silver", 15, new int[]{6, 12, 10, 7}, 9, SoundEvents.ARMOR_EQUIP_IRON, 4f, 0.5f);
 
 
 
@@ -42,6 +42,8 @@ public enum ModArmorMaterials implements ArmorMaterial {
     public int getDefenseForType(ArmorItem.Type type) {
         return this.protectionAmounts[type.ordinal()];
     }
+
+
 
     @Override
     public int getEnchantmentValue() {

@@ -233,14 +233,12 @@ public class Prophecy extends SimpleAbilityItem {
                     }
                 }
             }
-            if (z >= 1) {
+            if (z >= 1 && livingEntity.tickCount % 3 == 0) {
                 int livingX = tag.getInt("prophecySinkholeX");
                 int livingY = tag.getInt("prophecySinkholeY");
                 int livingZ = tag.getInt("prophecySinkholeZ");
                 tag.putInt("prophecySinkhole", z - 1);
                 int currentDepth = tag.getInt("sinkholeCurrentDepth");
-
-                // Reset depth when starting new sinkhole
                 if (z == 80) {
                     currentDepth = 0;
                     tag.putInt("sinkholeCurrentDepth", 0);
@@ -249,8 +247,6 @@ public class Prophecy extends SimpleAbilityItem {
                 int sinkholeRadius = (int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 1.5);
                 sinkholeRadius = Math.max(5, sinkholeRadius);
                 BlockPos center = new BlockPos(livingX, livingY, livingZ);
-
-                // Destroy one layer per tick (removed z % 2 == 0 condition)
                 if (currentDepth < 40) {
                     currentDepth++;
                     tag.putInt("sinkholeCurrentDepth", currentDepth);

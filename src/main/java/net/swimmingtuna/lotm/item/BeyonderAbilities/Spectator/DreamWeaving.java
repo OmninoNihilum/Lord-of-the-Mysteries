@@ -18,6 +18,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -85,11 +86,13 @@ public class DreamWeaving extends SimpleAbilityItem {
         if (!level.isClientSide()) {
             for (int i = 0; i < numberOfMobs; i++) {
                 Mob mob = mobEntityType.create(level);
-                spawnEntityInRadius(mob, level, x, y, z);
-                BeyonderHolder.updateMaxHealthModifier(mob, 551);
-                mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
-                mob.setTarget(entity);
-                mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);
+                if (mob != null) {
+                    spawnEntityInRadius(mob, level, x, y, z);
+                    BeyonderHolder.updateMaxHealthModifier(mob, 551);
+                    mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
+                    mob.setTarget(entity);
+                    mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);
+                }
             }
         }
     }
@@ -101,17 +104,23 @@ public class DreamWeaving extends SimpleAbilityItem {
             entity.getPersistentData().putInt("dreamWeavingDeathTimer", deathTimer - 1);
             if (deathTimer >= 1) {
                 if (entity.getPersistentData().contains("dreamWeavingUUID")) {
-                    UUID targetUUID = entity.getPersistentData().getUUID("dreamWeavingUUID");
-                    LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(entity.level(), targetUUID);
-                    if (livingEntity != null) {
-                        if (livingEntity.isAlive() && entity instanceof Mob mob) {
-                            mob.setTarget(livingEntity);
+                    try {
+                        UUID targetUUID = entity.getPersistentData().getUUID("dreamWeavingUUID");
+                        if (targetUUID != null) {
+                            LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(entity.level(), targetUUID);
+                            if (livingEntity != null) {
+                                if (livingEntity.isAlive() && entity instanceof Mob mob) {
+                                    mob.setTarget(livingEntity);
+                                }
+                            }
                         }
+                    } catch (Exception e) {
+                        entity.getPersistentData().remove("dreamWeavingUUID");
                     }
                 }
-                if (deathTimer == 1) {
-                    entity.remove(Entity.RemovalReason.DISCARDED);
-                }
+            }
+            if (deathTimer == 1) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
             }
         }
     }

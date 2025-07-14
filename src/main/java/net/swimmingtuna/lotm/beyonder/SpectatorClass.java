@@ -24,6 +24,7 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -249,86 +250,87 @@ public class SpectatorClass implements BeyonderClass {
                     int livingX = tag.getInt("spectatorProphesizedSinkholeX");
                     int livingY = tag.getInt("spectatorProphesizedSinkholeY");
                     int livingZ = tag.getInt("spectatorProphesizedSinkholeZ");
-                    tag.putInt("spectatorProphecySinkholeOccurence", sinkholeOccurence - 1);
-                    int currentDepth = tag.getInt("sinkholeProphecyCurrentDepth");
+                    if (livingEntity.tickCount % 3 == 0) {
+                        tag.putInt("spectatorProphecySinkholeOccurence", sinkholeOccurence - 1);
+                        int currentDepth = tag.getInt("sinkholeProphecyCurrentDepth");
 
-                    // Reset depth when starting new sinkhole
-                    if (sinkholeOccurence == 80) {
-                        currentDepth = 0;
-                        tag.putInt("sinkholeProphecyCurrentDepth", 0);
-                    }
-
-                    int sinkholeRadius = (int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 1.5);
-                    sinkholeRadius = Math.max(5, sinkholeRadius);
-                    BlockPos center = new BlockPos(livingX, livingY, livingZ);
-
-                    // Destroy one layer per tick (removed z % 2 == 0 condition)
-                    if (currentDepth < 40) {
-                        currentDepth++;
-                        tag.putInt("sinkholeProphecyCurrentDepth", currentDepth);
-                        for (int i = -sinkholeRadius; i <= sinkholeRadius; i++) {
-                            for (int j = -sinkholeRadius; j <= sinkholeRadius; j++) {
-                                if (i * i + j * j <= sinkholeRadius * sinkholeRadius) {
-                                    BlockPos pos = center.offset(i, 0, j);
-                                    BlockPos targetPos = pos.offset(0, -currentDepth, 0);
-                                    if (targetPos.getY() <= -50) {
-                                        continue;
-                                    }
-                                    BlockState state = livingEntity.level().getBlockState(targetPos);
-                                    if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
-                                        if (livingEntity.getRandom().nextInt(5) == 0 && livingEntity.level() instanceof ServerLevel serverLevel) {
-                                            serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.05);
-                                        }
-                                        livingEntity.level().destroyBlock(targetPos, false);
-                                    }
-                                }
-                            }
+                        if (sinkholeOccurence == 80) {
+                            currentDepth = 0;
+                            tag.putInt("sinkholeProphecyCurrentDepth", 0);
                         }
-                    }
 
-                    // Clean up existing blocks every 10 ticks
-                    if (sinkholeOccurence % 10 == 0) {
-                        for (int depth = 1; depth <= currentDepth; depth++) {
+                        int sinkholeRadius = (int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 1.5);
+                        sinkholeRadius = Math.max(5, sinkholeRadius);
+                        BlockPos center = new BlockPos(livingX, livingY, livingZ);
+
+                        // Destroy one layer per tick (removed z % 2 == 0 condition)
+                        if (currentDepth < 40) {
+                            currentDepth++;
+                            tag.putInt("sinkholeProphecyCurrentDepth", currentDepth);
                             for (int i = -sinkholeRadius; i <= sinkholeRadius; i++) {
                                 for (int j = -sinkholeRadius; j <= sinkholeRadius; j++) {
                                     if (i * i + j * j <= sinkholeRadius * sinkholeRadius) {
                                         BlockPos pos = center.offset(i, 0, j);
-                                        BlockPos targetPos = pos.offset(0, -depth, 0);
+                                        BlockPos targetPos = pos.offset(0, -currentDepth, 0);
                                         if (targetPos.getY() <= -50) {
                                             continue;
                                         }
                                         BlockState state = livingEntity.level().getBlockState(targetPos);
                                         if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
+                                            if (livingEntity.getRandom().nextInt(5) == 0 && livingEntity.level() instanceof ServerLevel serverLevel) {
+                                                serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.05);
+                                            }
                                             livingEntity.level().destroyBlock(targetPos, false);
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    // Entity physics
-                    List<LivingEntity> entities = livingEntity.level().getEntitiesOfClass(LivingEntity.class, new AABB(center.getX() - sinkholeRadius - 5, center.getY() - currentDepth - 5, center.getZ() - sinkholeRadius - 5, center.getX() + sinkholeRadius + 5, center.getY() + 10, center.getZ() + sinkholeRadius + 5));
-                    for (LivingEntity entity : entities) {
-                        double dx = center.getX() + 0.5 - entity.getX();
-                        double dz = center.getZ() + 0.5 - entity.getZ();
-                        double distance = Math.sqrt(dx * dx + dz * dz);
-                        if (distance <= sinkholeRadius * 0.8) {
-                            if (entity.getY() > center.getY() - currentDepth - 1) {
-                                entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.4, 0));
-                                entity.hurtMarked = true;
+                        // Clean up existing blocks every 10 ticks
+                        if (sinkholeOccurence % 10 == 0) {
+                            for (int depth = 1; depth <= currentDepth; depth++) {
+                                for (int i = -sinkholeRadius; i <= sinkholeRadius; i++) {
+                                    for (int j = -sinkholeRadius; j <= sinkholeRadius; j++) {
+                                        if (i * i + j * j <= sinkholeRadius * sinkholeRadius) {
+                                            BlockPos pos = center.offset(i, 0, j);
+                                            BlockPos targetPos = pos.offset(0, -depth, 0);
+                                            if (targetPos.getY() <= -50) {
+                                                continue;
+                                            }
+                                            BlockState state = livingEntity.level().getBlockState(targetPos);
+                                            if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
+                                                livingEntity.level().destroyBlock(targetPos, false);
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                        } else if (distance <= sinkholeRadius * 2) {
-                            dx = dx / distance;
-                            dz = dz / distance;
-                            double pullStrength = 0.1 * (1 - distance / (sinkholeRadius * 2));
-                            entity.setDeltaMovement(entity.getDeltaMovement().add(dx * (pullStrength * 3), -0.1, dz * (pullStrength * 3)));
-                            entity.hurtMarked = true;
-                            if (entity instanceof Player player && !player.isCreative()) {
-                                player.setSprinting(false);
-                                if (player.isCrouching()) {
-                                    player.setDeltaMovement(player.getDeltaMovement().scale(0.8));
-                                    player.hurtMarked = true;
+                        }
+
+                        // Entity physics
+                        List<LivingEntity> entities = livingEntity.level().getEntitiesOfClass(LivingEntity.class, new AABB(center.getX() - sinkholeRadius - 5, center.getY() - currentDepth - 5, center.getZ() - sinkholeRadius - 5, center.getX() + sinkholeRadius + 5, center.getY() + 10, center.getZ() + sinkholeRadius + 5));
+                        for (LivingEntity entity : entities) {
+                            double dx = center.getX() + 0.5 - entity.getX();
+                            double dz = center.getZ() + 0.5 - entity.getZ();
+                            double distance = Math.sqrt(dx * dx + dz * dz);
+                            if (distance <= sinkholeRadius * 0.8) {
+                                if (entity.getY() > center.getY() - currentDepth - 1) {
+                                    entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.4, 0));
+                                    entity.hurtMarked = true;
+                                }
+                            } else if (distance <= sinkholeRadius * 2) {
+                                dx = dx / distance;
+                                dz = dz / distance;
+                                double pullStrength = 0.1 * (1 - distance / (sinkholeRadius * 2));
+                                entity.setDeltaMovement(entity.getDeltaMovement().add(dx * (pullStrength * 3), -0.1, dz * (pullStrength * 3)));
+                                entity.hurtMarked = true;
+                                if (entity instanceof Player player && !player.isCreative()) {
+                                    player.setSprinting(false);
+                                    if (player.isCrouching()) {
+                                        player.setDeltaMovement(player.getDeltaMovement().scale(0.8));
+                                        player.hurtMarked = true;
+                                    }
                                 }
                             }
                         }
@@ -381,7 +383,8 @@ public class SpectatorClass implements BeyonderClass {
                 }
             }
             if (tornado == 1) {
-                TornadoEntity tornadoEntity = new TornadoEntity(livingEntity.level(), livingEntity, 0, 0, 0);
+                TornadoEntity tornadoEntity = new TornadoEntity(EntityInit.TORNADO_ENTITY.get(), livingEntity.level());
+                tornadoEntity.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
                 tornadoEntity.setTornadoHeight(100);
                 tornadoEntity.setTornadoRadius(70);
                 if (BeyonderUtil.getSequence(livingEntity) == 0) {

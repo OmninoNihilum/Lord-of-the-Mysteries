@@ -108,14 +108,14 @@ public class Nightmare extends SimpleAbilityItem {
         level.getEntitiesOfClass(LivingEntity.class, boundingBox, LivingEntity::isAlive).forEach(living -> {
             String name = living.getDisplayName().getString();
             CompoundTag tag = living.getPersistentData();
+            int amountToAdd = 100;
+            if (sequence < 3) {
+                amountToAdd = 200;
+            }
             if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
                 living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
-                if (tag.getInt("NightmareTimer") < 300) {
-                    int addToAmount = 100;
-                    if (sequence < 3) {
-                        addToAmount = 200;
-                    }
-                    tag.putInt("NightmareTimer", tag.getInt("NightmareTimer") + addToAmount);
+                if (tag.getInt("NightmareTimer") < 300 - amountToAdd) {
+                    tag.putInt("NightmareTimer", tag.getInt("NightmareTimer") + amountToAdd);
                     ChatFormatting style;
                     int entitySequence = BeyonderUtil.getSequence(living);
                     if (entitySequence >= 9 || entitySequence == -1) {
@@ -148,7 +148,9 @@ public class Nightmare extends SimpleAbilityItem {
         if (matterAccelerationBlockTimer >= 1) {
             player.getPersistentData().putInt("matterAccelerationBlockTimer", matterAccelerationBlockTimer - 1);
         }
-        tag.putInt("NightmareTimer", nightmareTimer - 1);
+        if (nightmareTimer >= 1) {
+            tag.putInt("NightmareTimer", nightmareTimer - 1);
+        }
     }
 
     @Override

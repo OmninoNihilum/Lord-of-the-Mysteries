@@ -3,7 +3,12 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -43,7 +48,33 @@ public class EnvisionLocation extends SimpleAbilityItem {
     }
 
     public static void envisionLocationTeleport(Entity player, double x, double y, double z) {
-        player.teleportTo(x,y,z);
+        player.teleportTo(x, y, z);
+    }
+
+    public static void envisionLocationTeleport(Entity entity, Level destination, double x, double y, double z) {
+        if (entity == null || entity.level().isClientSide()) {
+            return;
+        }
+
+        ServerLevel currentWorld = (ServerLevel) entity.level();
+        MinecraftServer server = currentWorld.getServer();
+        ServerLevel destinationWorld = server.getLevel(destination.dimension());
+
+        if (destinationWorld == null) {
+            return;
+        }
+
+        if (entity instanceof ServerPlayer player) {
+            player.teleportTo(destinationWorld, x, y, z, player.getYRot(), player.getXRot());
+        } else {
+            Entity newEntity = entity.getType().create(destinationWorld);
+            if (newEntity != null) {
+                newEntity.restoreFrom(entity);
+                newEntity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
+                entity.discard();
+                destinationWorld.addFreshEntity(newEntity);
+            }
+        }
     }
 
     public void envisionLocationBlink(LivingEntity player) {

@@ -34,7 +34,7 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Type a player's name in chat to teleport to their location in the form of your spirit body, not being able to be seen or hurt. Teleporting back after 3 seconds"));
+        tooltipComponents.add(Component.literal("Type a player's name in chat to teleport to their location in the form of your spirit body, not being able to be seen or hurt. Teleporting back after a few seconds, with the duration increasing if the target is another dimension to account for loading"));
         tooltipComponents.add(Component.literal("Left click in order to choose whether or not you return to your original location after three seconds."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("20 Seconds").withStyle(ChatFormatting.YELLOW)));
@@ -57,14 +57,15 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
     public static String misfortuneManipulationString(Player pPlayer) {
         CompoundTag tag = pPlayer.getPersistentData();
         boolean cs = tag.getBoolean("consciousnessStrollChoice");
-        if (cs) {
+        if (!cs) {
             return "Your Consciousness Stroll will move you to the target's location after viewing them";
         }
         return "Your Consciousness Stroll will NOT move you to the target's location after viewing them";
     }
-        public static void consciousnessStroll(LivingEntity livingEntity) {
+    public static void consciousnessStroll(LivingEntity livingEntity) {
         //CONSCIOUSNESS STROLL
         if (!(livingEntity instanceof ServerPlayer serverPlayer)) return;
+
         CompoundTag tag = livingEntity.getPersistentData();
         boolean cs = tag.getBoolean("consciousnessStrollChoice");
         int strollCounter = tag.getInt("consciousnessStrollActivated");
@@ -74,6 +75,7 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
         String originalDimension = tag.getString("consciousnessStrollDimension");
         ResourceLocation dimLocation = ResourceLocation.tryParse(originalDimension);
         ResourceKey<Level> targetDimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(originalDimension));
+
 
         if (strollCounter >= 1) {
             tag.putInt("consciousnessStrollActivated", strollCounter - 1);
@@ -87,7 +89,14 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
                 }
                 livingEntity.teleportTo(consciousnessStrollActivatedX, consciousnessStrollActivatedY, consciousnessStrollActivatedZ);
             }
-            serverPlayer.setGameMode(GameType.SURVIVAL);
+            String string = serverPlayer.getPersistentData().getString("consciousnessStrollGamemode");
+            if (string.equalsIgnoreCase("creative")) {
+                serverPlayer.setGameMode(GameType.CREATIVE);
+            } else if (string.equalsIgnoreCase("spectator")) {
+                serverPlayer.setGameMode(GameType.SPECTATOR);
+            } else {
+                serverPlayer.setGameMode(GameType.SURVIVAL);
+            }
         }
     }
 

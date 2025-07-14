@@ -360,6 +360,9 @@ public abstract class BeamEntity extends LOTMProjectile {
                 Math.max(from.z, this.collidePosZ) + radius
         );
 
+        // Replace the block destruction logic in the checkCollisions method
+// (around lines 250-290 in your original code)
+
         if (!this.level().isClientSide) {
             // Check if owner is looking downward (pitch > 70 degrees - really looking at ground)
             boolean isLookingDown = false;
@@ -368,8 +371,9 @@ public abstract class BeamEntity extends LOTMProjectile {
                 isLookingDown = pitch > 70.0f; // 90 degrees is straight down, so 70 is 20 degrees from straight down
             }
 
-            // Get owner's ground level for comparison
+            // Get owner's ground level and size for comparison
             double ownerGroundY = owner != null ? owner.getY() : Double.MAX_VALUE;
+            double ownerRadius = owner != null ? owner.getBbWidth() / 2.0 : 1.0; // Use owner's actual width
 
             BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
             for (int x = (int) Math.floor(bounds.minX); x <= Math.ceil(bounds.maxX); x++) {
@@ -384,27 +388,19 @@ public abstract class BeamEntity extends LOTMProjectile {
                         double distance = distanceVec.length();
 
                         if (distance <= radius) {
-                            // Check if this block is near the owner's feet and if we should skip it
                             boolean isNearOwnerFeet = false;
-                            if (owner != null) {
-                                double blockDistanceFromOwner = Math.sqrt(
-                                        Math.pow(x + 0.5 - owner.getX(), 2) +
-                                                Math.pow(z + 0.5 - owner.getZ(), 2)
-                                );
-                                // Block is within 2 blocks horizontally and at or below owner's feet
-                                isNearOwnerFeet = blockDistanceFromOwner <= 2.0 &&
-                                        y <= ownerGroundY + 1 &&
-                                        !isLookingDown;
-                            }
+                            double blockDistanceFromOwner = Math.sqrt(Math.pow(x + 0.5 - owner.getX(), 2) + Math.pow(z + 0.5 - owner.getZ(), 2));
+                            isNearOwnerFeet = blockDistanceFromOwner <= (ownerRadius + 0.5) && y <= ownerGroundY + 1;
+                            boolean shouldDestroy = getDestroyBlocks() && (!isNearOwnerFeet || isLookingDown);
 
-                            if (getDestroyBlocks() && !isNearOwnerFeet) {
+                            if (shouldDestroy) {
                                 if (this.breaksBlocks() && !EXCLUDED_BLOCKS.contains(this.level().getBlockState(mutablePos).getBlock())) {
                                     this.level().destroyBlock(mutablePos, false);
                                 }
                             } else if (this.tickCount % 5 == 0 && getIsTwilight() &&
                                     this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() &&
                                     this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState() &&
-                                    !isNearOwnerFeet) {
+                                    (!isNearOwnerFeet || isLookingDown)) { // Same logic for twilight effect
                                 if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() &&
                                         this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
                                     this.level().setBlock(mutablePos, Blocks.DIRT.defaultBlockState(), 11);
@@ -425,9 +421,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                 }
             }
         }
-
-        // Rest of the method remains the same...
-        double rayLength = from.distanceTo(new Vec3(this.collidePosX, this.collidePosY, this.collidePosZ));
+        
         double entityDetectionRadius = radius * 1.5;
 
         AABB entityBounds = new AABB(

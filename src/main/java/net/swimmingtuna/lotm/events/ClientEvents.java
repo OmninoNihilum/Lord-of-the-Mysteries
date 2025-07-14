@@ -1,7 +1,5 @@
 package net.swimmingtuna.lotm.events;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -23,7 +21,6 @@ import net.swimmingtuna.lotm.client.AbilityOverlay;
 import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
 import net.swimmingtuna.lotm.client.WormOfStarOverlay;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorMirage;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderFlashData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
@@ -35,6 +32,8 @@ import net.swimmingtuna.lotm.util.effect.ModEffects;
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientEvents {
     public static ShaderInstance VOID_SHADER;
+
+    /*
     @SubscribeEvent
     public static void onPlayerRender(RenderPlayerEvent.Pre event) {
         if (ClientShouldntRenderTransformData.getInstance().isTransformed()) {
@@ -57,6 +56,8 @@ public class ClientEvents {
             dispatcher.render(mob, 0, 0, 0, 0, event.getPartialTick(), event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
         }
     }
+
+     */
 
     private static float lerpAngle(float partialTick, float prev, float current) {
         return prev + (current - prev) * partialTick;
@@ -100,15 +101,10 @@ public class ClientEvents {
             if (event.getRenderer().shadowRadius == 1.0f) {
                 event.getRenderer().shadowRadius = 0.0f;
             }
-        } else if (event.getRenderer().shadowRadius == 0.0f) {
-            event.getRenderer().shadowRadius = 1.0f;
         }
-
         if (ClientShouldntRenderInvisibilityData.getShouldntRender(entity.getUUID())) {
             event.setCanceled(true);
-            if (event.getRenderer().shadowRadius == 1.0f) {
-                event.getRenderer().shadowRadius = 0.0f;
-            }
+            event.getRenderer().shadowRadius = 0.0f;
         } else if (event.getRenderer().shadowRadius == 0.0f) {
             event.getRenderer().shadowRadius = 1.0f;
         }
@@ -121,7 +117,6 @@ public class ClientEvents {
             event.getRenderer().shadowRadius = 1.0f;
         }
     }
-
 
 
 }
