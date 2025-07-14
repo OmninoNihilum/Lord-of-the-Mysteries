@@ -64,7 +64,7 @@ public class DragonBreathEntity extends BeamEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("duration", this.getDuration());
         compound.putInt("range", (int) this.getRange());

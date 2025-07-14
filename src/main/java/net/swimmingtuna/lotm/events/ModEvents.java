@@ -13,7 +13,6 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -31,7 +30,10 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.*;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -71,7 +73,6 @@ import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.RemoveInvisibiltyS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
 import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
@@ -87,7 +88,6 @@ import net.swimmingtuna.lotm.util.effect.NoRegenerationEffect;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
-import org.openjdk.nashorn.internal.ir.Symbol;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -365,7 +365,6 @@ public class ModEvents {
     }
 
 
-    @OnlyIn(Dist.DEDICATED_SERVER)
     @SubscribeEvent
     public static void handleLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
@@ -386,6 +385,7 @@ public class ModEvents {
                 DawnWeaponry.dawnWeaponryTick(event);
 
                 //regular ticks
+                PsychologicalInvisibility.psychologicalInvisibilityTick(event);
                 Sealing.sealingTick(event);
                 Symbolization.symbolizationTick(event);
                 DimensionalSightSealEntity.dimensionalSightSealTick(livingEntity);
@@ -429,7 +429,6 @@ public class ModEvents {
                 RagingBlows.ragingCombo(event);
                 windManipulationSense(livingEntity);
                 sailorLightningTravel(livingEntity);
-                PsychologicalInvisibility.psychologicalInvisibility(event);
                 monsterDomainIntHandler(livingEntity);
                 nightmareTick(livingEntity);
                 MonsterClass.calamityUndeadArmy(livingEntity);
@@ -461,7 +460,6 @@ public class ModEvents {
                 EyeOfDemonHunting.eyeTick(event);
                 EyeOfDemonHunting.demonHunterAntiConcealment(event);
                 livingNoMoveEffect(event);
-                //PsychologicalInvisibility.psychologicalInvisibilityHurtTick(livingEntity);
                 WintryBlade.wintryBladeTick(event);
                 warriorGiant(livingEntity);
                 DeathKnell.deathKnellNegativeTick(livingEntity);
@@ -651,13 +649,13 @@ public class ModEvents {
             newWarriorDamageNegation(event);
             MercuryLiquefication.mercuryArmorHurt(event);
             Entity entitySourceOwner = source.getEntity();
-            if (entitySourceOwner instanceof Projectile projectile && projectile.getOwner() != null) {
-                entitySourceOwner = projectile.getOwner();
-            }
-            if (entitySource.getPersistentData().getInt("dreamWeavingDeathTimer") >= 1) {
-                event.setAmount(event.getAmount() * 4.0f);
-            }
             if (entitySource != null) {
+                if (entitySourceOwner instanceof Projectile projectile && projectile.getOwner() != null) {
+                    entitySourceOwner = projectile.getOwner();
+                }
+                if (entitySourceOwner.getPersistentData().getInt("dreamWeavingDeathTimer") >= 1) {
+                    event.setAmount(event.getAmount() * 4.0f);
+                }
                 CompoundTag sourceTag = entitySource.getPersistentData();
                 if (entity instanceof LivingEntity living) {
                     TrickEscapeTrick.escapeTrickHurtEvent(event);

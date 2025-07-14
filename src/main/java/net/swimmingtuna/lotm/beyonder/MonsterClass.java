@@ -47,8 +47,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static net.swimmingtuna.lotm.util.BeyonderUtil.applyMobEffect;
-
 public class MonsterClass implements BeyonderClass {
     private int speed;
     private int resistance;

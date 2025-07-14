@@ -12,7 +12,6 @@ import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 
-import java.util.Set;
 import java.util.function.Supplier;
 
 public class SpiritWorldTraversalC2S {

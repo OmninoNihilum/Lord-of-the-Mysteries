@@ -15,21 +15,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderInvisibilityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 
 public class PsychologicalInvisibility extends SimpleAbilityItem {
@@ -54,7 +54,6 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
         if (!player.level().isClientSide()) {
             CompoundTag tag = player.getPersistentData();
             boolean newState = !tag.getBoolean("psychologicalInvisibility");
-
             if (newState) {
                 for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(50))) {
                     if (mob.getTarget() == player) {
@@ -62,17 +61,17 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                     }
                 }
                 if (player instanceof Player pPlayer) {
-                    UUID playerId = player.getUUID();
-                    LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 30));
+                    BeyonderUtil.setInvisible(player, true, 30);
                     pPlayer.displayClientMessage(Component.literal("You are now invisible").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                 }
+                tag.putBoolean("psychologicalInvisibility", true);
             } else {
                 if (player instanceof Player pPlayer) {
-                    removePsychologicalInvisibilityEffect(player);
                     pPlayer.displayClientMessage(Component.literal("You are now visible").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.RED), true);
                 }
+                removePsychologicalInvisibilityEffect(player);
+                tag.putBoolean("psychologicalInvisibility", false);
             }
-            tag.putBoolean("psychologicalInvisibility", newState);
 
         }
     }
@@ -85,9 +84,13 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
         if (tag.getBoolean("psychologicalInvisibility")) {
             tag.putBoolean("psychologicalInvisibility", false);
             tag.putInt("psychologicalInvisibilityHurt", 0);
-            LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, living.getUUID(), 0));
+            BeyonderUtil.setInvisible(living, false, 0);
         }
-        living.removeEffect(MobEffects.INVISIBILITY);
+        if (living.hasEffect(MobEffects.INVISIBILITY)) {
+            if (living.getEffect(MobEffects.INVISIBILITY).endsWithin(100)) {
+                living.removeEffect(MobEffects.INVISIBILITY);
+            }
+        }
     }
 
 
@@ -106,7 +109,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
     }
 
-    public static void psychologicalInvisibility(LivingEvent.LivingTickEvent event) {
+    public static void psychologicalInvisibilityTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         if (livingEntity.tickCount % 10 == 0) {
             CompoundTag tag = livingEntity.getPersistentData();
@@ -114,8 +117,8 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
             if (x >= 1) {
                 tag.putInt("psychologicalInvisibilityHurt", x - 1);
             }
-            boolean currentState = tag.getBoolean("psychologicalInvisibility");
-            if (currentState) {
+            boolean psychologicalInvisibility = tag.getBoolean("psychologicalInvisibility");
+            if (psychologicalInvisibility) {
                 if (x >= 400) {
                     removePsychologicalInvisibilityEffect(livingEntity);
                     if (livingEntity instanceof Player player) {
@@ -125,6 +128,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                 }
                 Collection<MobEffectInstance> effects = livingEntity.getActiveEffects();
                 effects.forEach(effect -> {
+
                     if (effect.isAmbient() || effect.isVisible()) {
                         MobEffectInstance newEffect = new MobEffectInstance(effect.getEffect(), effect.getDuration(), effect.getAmplifier(), false, false, false);
                         effect.update(newEffect);
@@ -135,10 +139,10 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                         mob.setTarget(null);
                     }
                 }
-                livingEntity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 11, 1, false, false));
+
+                BeyonderUtil.applyMobEffect(livingEntity, MobEffects.INVISIBILITY, 100, 1, false, false);
                 BeyonderUtil.useSpirituality(livingEntity, Math.min(10, BeyonderUtil.getMaxSpirituality(livingEntity) / 100));
-                UUID playerId = livingEntity.getUUID();
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 20));
+                BeyonderUtil.setInvisible(livingEntity, true, 30);
             }
         }
     }

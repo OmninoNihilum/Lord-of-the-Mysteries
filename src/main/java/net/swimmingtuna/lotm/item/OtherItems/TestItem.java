@@ -63,8 +63,7 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
-            BeyonderUtil.setPathway(interactionTarget, BeyonderClassInit.APOTHECARY.get());
-            BeyonderUtil.setSequence(interactionTarget, 7);
+            BeyonderUtil.setInvisible(interactionTarget, true, 100);
         }
         return InteractionResult.SUCCESS;
     }

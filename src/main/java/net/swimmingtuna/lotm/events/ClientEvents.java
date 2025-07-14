@@ -2,15 +2,12 @@ package net.swimmingtuna.lotm.events;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -22,9 +19,7 @@ import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
 import net.swimmingtuna.lotm.client.WormOfStarOverlay;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
-import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderFlashData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
-import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderTransformData;
 import net.swimmingtuna.lotm.util.SpiritWorld.SpiritWorldHandler;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 
@@ -105,16 +100,6 @@ public class ClientEvents {
         if (ClientShouldntRenderInvisibilityData.getShouldntRender(entity.getUUID())) {
             event.setCanceled(true);
             event.getRenderer().shadowRadius = 0.0f;
-        } else if (event.getRenderer().shadowRadius == 0.0f) {
-            event.getRenderer().shadowRadius = 1.0f;
-        }
-        if (ClientShouldntRenderFlashData.getShouldntRender(entity.getUUID())) {
-            event.setCanceled(true);
-            if (event.getRenderer().shadowRadius == 1.0f) {
-                event.getRenderer().shadowRadius = 0.0f;
-            }
-        } else if (event.getRenderer().shadowRadius == 0.0f) {
-            event.getRenderer().shadowRadius = 1.0f;
         }
     }
 

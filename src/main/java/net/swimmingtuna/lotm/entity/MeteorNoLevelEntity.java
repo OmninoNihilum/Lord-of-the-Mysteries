@@ -16,7 +16,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -78,15 +77,18 @@ public class MeteorNoLevelEntity extends AbstractHurtingProjectile {
     public void explodeMeteor(LivingEntity hitEntity, float scale) {
         BlockPos hitPos = hitEntity.blockPosition();
         double radius = scale * 4;
-        List<Entity> entities = this.level().getEntities(this,
-                new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                        hitPos.offset((int) radius, (int) radius, (int) radius)));
+        List<Entity> entities = this.level().getEntities(this, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity) {
+            if (entity instanceof LivingEntity livingEntity && !BeyonderUtil.isCreative(livingEntity)) {
+                double distance = Math.sqrt(entity.blockPosition().distSqr(hitPos));
+                double normalizedDistance = Math.min(distance / radius, 1.0);
+                float damageMultiplier = (float) (16 - (10 * normalizedDistance));
+                float finalDamage = scale * damageMultiplier;
+
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 12 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), finalDamage);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 12 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), finalDamage);
                 }
             }
         }
@@ -119,16 +121,17 @@ public class MeteorNoLevelEntity extends AbstractHurtingProjectile {
     }
 
     public void explodeMeteorBlock(BlockPos hitPos, double radius, float scale) {
-        List<Entity> entities = this.level().getEntities(this,
-                new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                        hitPos.offset((int) radius, (int) radius, (int) radius)));
-
+        List<Entity> entities = this.level().getEntities(this, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity) {
+            if (entity instanceof LivingEntity livingEntity && !BeyonderUtil.isCreative(livingEntity)) {
+                double distance = Math.sqrt(entity.blockPosition().distSqr(hitPos));
+                double normalizedDistance = Math.min(distance / radius, 1.0);
+                float damageMultiplier = (float) (16 - (10 * normalizedDistance));
+                float finalDamage = scale * damageMultiplier;
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), scale * 12);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), finalDamage);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), scale * 12);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), finalDamage);
                 }
             }
         }

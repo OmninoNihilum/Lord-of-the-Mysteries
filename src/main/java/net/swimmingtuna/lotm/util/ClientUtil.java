@@ -1,6 +1,8 @@
 package net.swimmingtuna.lotm.util;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.block.Blocks;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalTileEntity;
 import net.swimmingtuna.lotm.networking.packet.ForceLookPacketS2C;
 import net.swimmingtuna.lotm.util.ClientData.ClientLookData;
 
@@ -19,4 +21,9 @@ public class ClientUtil {
         }
     }
 
+    public static void removeDimensionalSight(DimensionalTileEntity dimensionalTileEntity) {
+        if (dimensionalTileEntity.getLevel() != null) {
+            dimensionalTileEntity.getLevel().setBlock(dimensionalTileEntity.getBlockPos(), Blocks.AIR.defaultBlockState(), 3);
+        }
+    }
 }

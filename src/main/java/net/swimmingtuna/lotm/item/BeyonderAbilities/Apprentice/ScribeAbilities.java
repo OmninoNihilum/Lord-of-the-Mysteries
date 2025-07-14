@@ -22,7 +22,6 @@ import net.swimmingtuna.lotm.util.ScribeRecording.ScribeMenu;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.List;
 
 public class ScribeAbilities extends SimpleAbilityItem {

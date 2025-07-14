@@ -49,7 +49,7 @@ public class SpatialCageEntity extends Entity{
         Level level = entity.level();
         CompoundTag tag = entity.getPersistentData();
         if(level.isClientSide && !tag.getBoolean("spatialCageIsSealed")) return;
-        if(tag.getInt("spatialCageTime") > 0){
+        if(tag.getInt("spatialCageTime") > 0) {
             double x = tag.getDouble("spatialCageX");
             double y = tag.getDouble("spatialCageY");
             double z = tag.getDouble("spatialCageZ");
@@ -61,7 +61,7 @@ public class SpatialCageEntity extends Entity{
             cage.moveTo(x, y, z);
             level.addFreshEntity(cage);
             tag.putInt("spatialCageTime", tag.getInt("spatialCageTime") - 1);
-        }else{
+        } else {
             unsetSealed(entity);
         }
     }

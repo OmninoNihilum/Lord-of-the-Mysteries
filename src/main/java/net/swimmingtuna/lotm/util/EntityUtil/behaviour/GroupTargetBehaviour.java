@@ -6,6 +6,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.tslat.smartbrainlib.api.core.behaviour.ExtendedBehaviour;
@@ -62,14 +63,24 @@ public class GroupTargetBehaviour<E extends LivingEntity> extends ExtendedBehavi
             Entity entityFromUUID = BeyonderUtil.getEntityFromUUID(entity.level(), uuid);
             if (entityFromUUID == target) return;
         }
-        BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
+        boolean canAttack = true;
+        if (target != null) {
+            if (entity instanceof PlayerMobEntity playerMobEntity) {
+                if (!playerMobEntity.canAttack(target)) {
+                    canAttack = false;
+                }
+            }
+        }
+        if (canAttack) {
+            BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
+        }
         for (UUID uuid : alliesUUID) {
             Entity entityFromUUID = BeyonderUtil.getEntityFromUUID(entity.level(), uuid);
             if (entityFromUUID instanceof LivingEntity livingAlly) {
-                if (!BrainUtils.hasMemory(livingAlly.getBrain(), MemoryModuleType.ATTACK_TARGET)){ // prob gets checked often, but need to be sure memory exists
+                if (!BrainUtils.hasMemory(livingAlly.getBrain(), MemoryModuleType.ATTACK_TARGET)) {
                     BrainUtils.addMemories(livingAlly.getBrain(), MemoryModuleType.ATTACK_TARGET);
                 }
-                if (BrainUtils.getMemory(livingAlly.getBrain() ,MemoryModuleType.ATTACK_TARGET) == null){
+                if (BrainUtils.getMemory(livingAlly.getBrain(), MemoryModuleType.ATTACK_TARGET) == null) {
                     BrainUtils.setMemory(livingAlly.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
                 }
             }

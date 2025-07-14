@@ -79,7 +79,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
                         entity.hurtMarked = true;
                         float amount;
                         if (entity instanceof LivingEntity living) {
-                            amount = 10 - BeyonderUtil.getSequence(living) * 10;
+                            amount = (10 - BeyonderUtil.getSequence(living)) * 10;
                         } else if (entity instanceof Projectile projectile) {
                             amount = (int) ((BeyonderUtil.getScale(entity) * 3) + (Math.abs(projectile.getDeltaMovement().y() + projectile.getDeltaMovement().x() + projectile.getDeltaMovement().z())) * 3);
                         } else {

@@ -17,7 +17,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -212,7 +211,7 @@ public class RagingBlows extends SimpleAbilityItem {
                                 punchParticles(target);
                                 punchParticles(target);
                                 punchParticles(target);
-                                ExplosionUtil.createNoKnockbackExplosion(living.level(), living, BeyonderUtil.getDamage(living).get(ItemInit.RAGING_BLOWS.get()), false);
+                                BeyonderUtil.destroyBlocksInSphereNotHittingOwner(living, target.getOnPos(), 12 - (BeyonderUtil.getSequence(living)), 0);
                                 target.setDeltaMovement(0, -damage, 0);
                                 target.hurtMarked = true;
                                 tag.putInt("ragingCombo", 0);
@@ -337,7 +336,7 @@ public class RagingBlows extends SimpleAbilityItem {
             LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, target.level());
             lightningBolt.moveTo(target.getX(), target.getY(), target.getZ());
             lightningBolt.setVisualOnly(false);
-            lightningBolt.setDamage(Math.max(6, damage * 3));
+            target.hurt(BeyonderUtil.lightningSource(living, target), Math.max(6, damage * 3));
             if (BeyonderUtil.getSequence(living) <= 1) {
                 float amount = 3;
                 if (BeyonderUtil.getSequence(living) == 1) {

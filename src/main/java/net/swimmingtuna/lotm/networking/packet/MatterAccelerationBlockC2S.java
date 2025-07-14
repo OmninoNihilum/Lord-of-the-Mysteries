@@ -5,7 +5,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -21,7 +20,6 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationBlo
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.function.Supplier;
 
 public class MatterAccelerationBlockC2S {

@@ -40,6 +40,7 @@ public class MentalDamageSource extends DamageSource {
         if (Float.isNaN(result) || Float.isInfinite(result)) {
             return baseAmount * 1.2f;
         }
+        target.getPersistentData().putInt("gotHitByMentalAttack", 20);
         return baseAmount * multiplier;
     }
 }

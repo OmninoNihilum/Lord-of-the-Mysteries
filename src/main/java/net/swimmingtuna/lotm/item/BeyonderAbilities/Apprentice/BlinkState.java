@@ -25,8 +25,6 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.SyncFlashRenderS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
@@ -110,8 +108,7 @@ public class BlinkState extends SimpleAbilityItem {
                     }
                     if (blinkStateDistance >= 12) {
                         tag.putBoolean("wasInvisibleLastTick", false);
-                        SyncFlashRenderS2C packet = new SyncFlashRenderS2C(livingEntity.getUUID(), false);
-                        LOTMNetworkHandler.sendToAllPlayers(packet);
+                        BeyonderUtil.setInvisible(livingEntity, false, 0);
                     }
                 }
                 int blinkStateTimer = tag.getInt("blinkStateTimer");
@@ -129,15 +126,13 @@ public class BlinkState extends SimpleAbilityItem {
                 }
                 if (shouldBeInvisible != wasInvisible) {
                     tag.putBoolean("wasInvisibleLastTick", shouldBeInvisible);
-                    SyncFlashRenderS2C packet = new SyncFlashRenderS2C(livingEntity.getUUID(), shouldBeInvisible);
-                    LOTMNetworkHandler.sendToAllPlayers(packet);
+                    BeyonderUtil.setInvisible(livingEntity, true, 1);
                 }
             } else {
                 boolean wasInvisible = tag.getBoolean("wasInvisibleLastTick");
                 if (wasInvisible) {
                     tag.putBoolean("wasInvisibleLastTick", false);
-                    SyncFlashRenderS2C packet = new SyncFlashRenderS2C(livingEntity.getUUID(), false);
-                    LOTMNetworkHandler.sendToAllPlayers(packet);
+                    BeyonderUtil.setInvisible(livingEntity, false, 0);
                 }
             }
         }

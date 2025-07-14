@@ -2490,10 +2490,8 @@ public class BeyonderUtil {
             } else if (living instanceof PlayerMobEntity playerMobEntity) {
                 playerMobEntity.useSpirituality(spirituality);
             } else {
-                if (living.level() instanceof ServerLevel serverLevel) {
-                    int spiritualityLevel = living.getPersistentData().getInt("lotmSpirituality");
-                    living.getPersistentData().putInt("lotmSpirituality", Math.max(1, spiritualityLevel - spirituality));
-                }
+                int spiritualityLevel = living.getPersistentData().getInt("lotmSpirituality");
+                living.getPersistentData().putInt("lotmSpirituality", Math.max(1, spiritualityLevel - spirituality));
             }
         }
     }
@@ -3294,7 +3292,52 @@ public class BeyonderUtil {
         List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity pEntity : entities) {
             if (pEntity instanceof LivingEntity livingEntity) {
-                livingEntity.hurt(BeyonderUtil.genericSource(entity, livingEntity), damage);
+                double distance = Math.sqrt(pEntity.blockPosition().distSqr(hitPos));
+                double normalizedDistance = Math.min(distance / radius, 1.0);
+                float damageMultiplier = (float) (1.0 - (0.6 * normalizedDistance));
+                float finalDamage = damage * damageMultiplier;
+                if (entity instanceof Projectile projectile) {
+                    if (projectile.getOwner() == null) {
+                        livingEntity.hurt(BeyonderUtil.genericSource(projectile, livingEntity), finalDamage);
+                    } else {
+                        livingEntity.hurt(BeyonderUtil.genericSource(projectile.getOwner(), livingEntity), finalDamage);
+                    }
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(entity, livingEntity), finalDamage);
+                }
+            }
+        }
+    }
+
+    public static void destroyBlocksInSphereNotHittingOwner(Entity entity, BlockPos hitPos, double radius, float damage) {
+        for (BlockPos pos : BlockPos.betweenClosed(
+                hitPos.offset((int) -radius, (int) -radius, (int) -radius),
+                hitPos.offset((int) radius, (int) radius, (int) radius))) {
+            if (pos.distSqr(hitPos) <= radius * radius) {
+                if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
+                    entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                }
+            }
+        }
+        List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
+        for (Entity pEntity : entities) {
+            if (pEntity == entity) {
+                continue;
+            }
+            if (pEntity instanceof LivingEntity livingEntity) {
+                double distance = Math.sqrt(pEntity.blockPosition().distSqr(hitPos));
+                double normalizedDistance = Math.min(distance / radius, 1.0);
+                float damageMultiplier = (float) (1.0 - (0.6 * normalizedDistance));
+                float finalDamage = damage * damageMultiplier;
+                if (entity instanceof Projectile projectile) {
+                    if (projectile.getOwner() == null) {
+                        livingEntity.hurt(BeyonderUtil.genericSource(projectile, livingEntity), finalDamage);
+                    } else {
+                        livingEntity.hurt(BeyonderUtil.genericSource(projectile.getOwner(), livingEntity), finalDamage);
+                    }
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(entity, livingEntity), finalDamage);
+                }
             }
         }
     }
@@ -3899,4 +3942,9 @@ public class BeyonderUtil {
     private static void sendStopPacketToPlayer(ServerPlayer player, StopForceLookPacketS2C packet) {
         LOTMNetworkHandler.sendToPlayer(packet, player);
     }
+
+    public static boolean isCreative(LivingEntity living) {
+        return (living instanceof Player player && (player.isCreative() || player.isSpectator()));
+    }
+
 }

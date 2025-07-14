@@ -8,7 +8,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
-import net.swimmingtuna.lotm.LOTM;
 
 import java.util.UUID;
 import java.util.function.Supplier;

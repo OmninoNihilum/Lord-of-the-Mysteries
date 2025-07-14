@@ -2,7 +2,6 @@ package net.swimmingtuna.lotm.util.Replicating;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -11,14 +10,12 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 
 import java.util.List;
-import java.util.Map;
 
 public class ReplicatedEntityMenu extends AbstractContainerMenu {
     private final Container container;

@@ -50,8 +50,6 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.init.*;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderInvisibilityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupBeyondersBehaviour;
 import net.swimmingtuna.lotm.util.EntityUtil.behaviour.GroupTargetBehaviour;
@@ -367,7 +365,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
                         }
                         this.getCreator().getPersistentData().putInt("ignoreShouldntRender", 10);
                     }
-                    LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, this.getUUID(), 1));
+                    BeyonderUtil.setInvisible(this, true, 1);
+                    this.getPersistentData().putInt("ignoreShouldntRender", 10);
                 }
             }
             if (this.tickCount % 200 == 0) {

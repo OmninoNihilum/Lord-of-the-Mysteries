@@ -6,7 +6,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.SynchedEntityData.DataValue;
 import net.minecraftforge.network.NetworkEvent;
-import net.swimmingtuna.lotm.LOTM;
 
 import java.util.ArrayList;
 import java.util.List;

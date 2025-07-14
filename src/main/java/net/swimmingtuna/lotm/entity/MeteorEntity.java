@@ -223,11 +223,16 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
                         hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity) {
+            if (entity instanceof LivingEntity livingEntity && !BeyonderUtil.isCreative(livingEntity)) {
+                double distance = Math.sqrt(entity.blockPosition().distSqr(hitPos));
+                double normalizedDistance = Math.min(distance / radius, 1.0); // Clamp to 0-1 range
+                float damageMultiplier = (float) (16 - (10 * normalizedDistance)); // 16 -> 6
+                float finalDamage = damageMultiplier * scale;
+
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), 12 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), finalDamage);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), 12 * scale);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), finalDamage);
                 }
             }
         }
@@ -248,11 +253,16 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                         hitPos.offset((int) radius, (int) radius, (int) radius)));
 
         for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity) {
+            if (entity instanceof LivingEntity livingEntity && !BeyonderUtil.isCreative(livingEntity)) {
+                double distance = Math.sqrt(entity.blockPosition().distSqr(hitPos));
+                double normalizedDistance = Math.min(distance / radius, 1.0);
+                float damageMultiplier = (float) (16 - (10 * normalizedDistance));
+                float finalDamage = damage * damageMultiplier;
+
                 if (this.getOwner() == null) {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), damage * 12);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), finalDamage);
                 } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), damage * 12);
+                    livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), finalDamage);
                 }
             }
         }

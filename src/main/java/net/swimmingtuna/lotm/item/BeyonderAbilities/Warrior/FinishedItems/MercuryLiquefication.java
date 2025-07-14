@@ -29,7 +29,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.MercuryLiqueficationC2S;
 import net.swimmingtuna.lotm.networking.packet.SendDustParticleS2C;
@@ -75,7 +74,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
 
             }
             if (x) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, livingEntity.getUUID(), 0));
+                BeyonderUtil.setInvisible(livingEntity, false, 0);
             }
         }
     }
@@ -95,8 +94,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             if (y == 0) {
                 BeyonderUtil.useSpirituality(livingEntity, 10);
             }
-            UUID playerId = livingEntity.getUUID();
-            LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, playerId, 20));
+            BeyonderUtil.setInvisible(livingEntity, true, 20);
             Vec3 lookVec = livingEntity.getLookAngle();
             Random random = new Random();
             float scale = ScaleTypes.BASE.getScaleData(livingEntity).getScale();

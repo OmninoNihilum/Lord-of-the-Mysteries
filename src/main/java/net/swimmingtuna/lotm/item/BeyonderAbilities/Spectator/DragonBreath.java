@@ -61,7 +61,7 @@ public class DragonBreath extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (target != null) {
-            return 65;
+            return 80;
         }
         return 0;
     }

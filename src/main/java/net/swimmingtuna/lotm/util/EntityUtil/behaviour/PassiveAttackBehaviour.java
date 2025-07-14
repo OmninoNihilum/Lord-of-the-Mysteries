@@ -85,12 +85,18 @@ public class PassiveAttackBehaviour<E extends LivingEntity> extends ExtendedBeha
     protected void start(E entity) {
         if (entity instanceof PlayerMobEntity beyonderEntity){
             try {
+                E target = getTarget(entity);
+                boolean canAttack = true;
+                if (target != null) {
+                    if (!beyonderEntity.canAttack(target)) {
+                        canAttack = false;
+                    }
+                }
                 if (beyonderEntity.getAttackChance() >= new Random().nextFloat(0, 100)) {
-                    if (!BrainUtils.hasMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET)) { // prob gets checked often, but need to be sure memory exists
+                    if (!BrainUtils.hasMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET) && canAttack) { // prob gets checked often, but need to be sure memory exists
                         BrainUtils.addMemories(entity.getBrain(), MemoryModuleType.ATTACK_TARGET);
                     }
-                    E target = getTarget(entity);
-                    if (target != null && !BeyonderUtil.areAllies(target, beyonderEntity)) {
+                    if (target != null && !BeyonderUtil.areAllies(target, beyonderEntity) && canAttack) {
                         BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
                     }
                 }

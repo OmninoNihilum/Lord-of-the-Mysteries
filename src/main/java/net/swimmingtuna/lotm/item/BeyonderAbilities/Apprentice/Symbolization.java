@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -20,8 +19,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderInvisibilityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,10 +53,10 @@ public class Symbolization extends SimpleAbilityItem {
             }
             if (isNowSymbolized) {
                 BeyonderUtil.startFlying(player, 0.15f);
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, player.getUUID(), 10));
+                BeyonderUtil.setInvisible(player, true, 10);
             } else {
                 BeyonderUtil.stopFlying(player);
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, player.getUUID(), 0));
+                BeyonderUtil.setInvisible(player, false, 0);
             }
         }
     }
@@ -70,7 +67,7 @@ public class Symbolization extends SimpleAbilityItem {
         if (!living.level().isClientSide() && living.getPersistentData().getBoolean("planeswalkerSymbolization")) {
             CompoundTag tag = living.getPersistentData();
             if (BeyonderUtil.getSpirituality(living) < 10) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(false, living.getUUID(), 10));
+                BeyonderUtil.setInvisible(living, false, 0);
                 tag.putBoolean("planeswalkerSymbolization", false);
             } else {
                 BeyonderUtil.useSpirituality(living, 10);
@@ -82,7 +79,7 @@ public class Symbolization extends SimpleAbilityItem {
                     }
                 }
                 if (living.tickCount % 20 == 0) {
-                    LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, living.getUUID(), 30));
+                    BeyonderUtil.setInvisible(living, true, 30);
                 }
             }
         }

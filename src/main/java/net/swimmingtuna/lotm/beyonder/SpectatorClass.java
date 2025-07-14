@@ -91,7 +91,7 @@ public class SpectatorClass implements BeyonderClass {
                 }
             } else {
                 if (player.tickCount % 200 == 0) {
-                    BeyonderUtil.applyMobEffect(player, MobEffects.INVISIBILITY, 40, 1, false, false);
+                    BeyonderUtil.applyMobEffect(player, MobEffects.INVISIBILITY, 50, 1, false, false);
                 }
             }
             if (player.tickCount % 80 == 0) {
@@ -212,6 +212,16 @@ public class SpectatorClass implements BeyonderClass {
         if (!event.getEntity().level().isClientSide()) {
             LivingEntity livingEntity = event.getEntity();
             CompoundTag tag = livingEntity.getPersistentData();
+            if (tag.getInt("gotHitByMentalAttack") >= 1) {
+                float health = livingEntity.getHealth();
+                if (Float.isNaN(health) || health < 0.0F) {
+                    livingEntity.setHealth(0.0F);
+                }
+                tag.putInt("gotHitByMentalAttack", tag.getInt("gotHitByMentalAttack") - 1);
+            }
+            if (tag.getInt("abilityCooldown") >= 1 ) {
+                tag.putInt("abilityCooldown", tag.getInt("abilityCooldown") - 1);
+            }
             int meteor = tag.getInt("spectatorProphesizedMeteor");
             int tornado = tag.getInt("spectatorProphesizedTornado");
             int earthquake = tag.getInt("spectatorProphesizedEarthquake");

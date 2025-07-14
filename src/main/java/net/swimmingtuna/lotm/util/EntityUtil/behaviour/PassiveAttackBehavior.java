@@ -68,29 +68,31 @@ public class PassiveAttackBehavior<E extends LivingEntity> extends ExtendedBehav
     protected void start(E entity) {
         if (entity instanceof PlayerMobEntity beyonderEntity && entity.tickCount % 100 == 0) {
             try {
+                E target = getTarget(entity);
+                boolean canAttack = true;
+                if (target != null) {
+                    if (!beyonderEntity.canAttack(target)) {
+                        canAttack = false;
+                    }
+                }
                 float random = new Random().nextFloat(0, 100);
                 if (beyonderEntity.getAttackChance() >= random) {
                     if (!BrainUtils.hasMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET)) {
                         BrainUtils.addMemories(entity.getBrain(), MemoryModuleType.ATTACK_TARGET);
                     }
-                    E target = getTarget(entity);
-                    if (target != null && !isSameOwner(beyonderEntity, target)) {
+                    if (target != null && !isSameOwner(beyonderEntity, target) && canAttack) {
                         BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
                     }
                 }
                 if (beyonderEntity.getCreator() != null) {
                     LivingEntity livingEntity = beyonderEntity.getCreator();
-                    LivingEntity target = livingEntity.getLastHurtMob();
+                    LivingEntity lastHurtMob = livingEntity.getLastHurtMob();
 
-                    // Check if target is a clone with the same owner
-                    if (target instanceof PlayerMobEntity playerMobEntity &&
-                            playerMobEntity.getCreator() != null &&
-                            playerMobEntity.getCreator().equals(beyonderEntity.getCreator())) {
-                        return; // Don't attack clones with same owner
+                    if (lastHurtMob instanceof PlayerMobEntity playerMobEntity && playerMobEntity.getCreator() != null && playerMobEntity.getCreator().equals(beyonderEntity.getCreator())) {
+                        return;
                     }
-
-                    if (target != null && !BeyonderUtil.areAllies(livingEntity, target)) {
-                        BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
+                    if (lastHurtMob != null && !BeyonderUtil.areAllies(livingEntity, lastHurtMob)) {
+                        BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, lastHurtMob);
                     }
                 }
             } catch (NullPointerException e) {

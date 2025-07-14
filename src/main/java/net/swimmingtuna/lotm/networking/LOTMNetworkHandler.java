@@ -41,6 +41,12 @@ public class LOTMNetworkHandler {
                 .build();
         packets.forEach(consumer -> consumer.accept(INSTANCE, id()));
 
+
+        INSTANCE.messageBuilder(LuckManipulationLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(LuckManipulationLeftClickC2S::new)
+                .encoder(LuckManipulationLeftClickC2S::toByte)
+                .consumerMainThread(LuckManipulationLeftClickC2S::handle)
+                .add();
         INSTANCE.messageBuilder(DimensionalSightCompleteDataPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(DimensionalSightCompleteDataPacketS2C::new)
                 .encoder(DimensionalSightCompleteDataPacketS2C::encode)
@@ -52,11 +58,7 @@ public class LOTMNetworkHandler {
                 .consumerMainThread(CleanupDimensionalSightPacketS2C::handle)
                 .add();
 
-        INSTANCE.messageBuilder(LuckManipulationLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(LuckManipulationLeftClickC2S::new)
-                .encoder(LuckManipulationLeftClickC2S::toByte)
-                .consumerMainThread(LuckManipulationLeftClickC2S::handle)
-                .add();
+
         INSTANCE.messageBuilder(AbilityUsePacketC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(AbilityUsePacketC2S::new)
                 .encoder(AbilityUsePacketC2S::toByte)
@@ -119,11 +121,6 @@ public class LOTMNetworkHandler {
                 .encoder(SyncShouldntRenderInvisibilityPacketS2C::encode)
                 .consumerMainThread(SyncShouldntRenderInvisibilityPacketS2C::handle)
                 .add();
-        INSTANCE.messageBuilder(SyncFlashRenderS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(SyncFlashRenderS2C::new)
-                .encoder(SyncFlashRenderS2C::encode)
-                .consumerMainThread(SyncFlashRenderS2C::handle)
-                .add();
         INSTANCE.messageBuilder(SyncShouldntRenderHandPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(SyncShouldntRenderHandPacketS2C::new)
                 .encoder(SyncShouldntRenderHandPacketS2C::encode)
@@ -143,11 +140,6 @@ public class LOTMNetworkHandler {
                 .decoder(ScribeCopyAbilityC2S::new)
                 .encoder(ScribeCopyAbilityC2S::toByte)
                 .consumerMainThread(ScribeCopyAbilityC2S::handle)
-                .add();
-        INSTANCE.messageBuilder(RemoveInvisibiltyS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(RemoveInvisibiltyS2C::new)
-                .encoder(RemoveInvisibiltyS2C::encode)
-                .consumerMainThread(RemoveInvisibiltyS2C::handle)
                 .add();
         INSTANCE.messageBuilder(MonsterLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(MonsterLeftClickC2S::new)

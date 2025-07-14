@@ -41,7 +41,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static net.swimmingtuna.lotm.util.BeyonderUtil.isLivingEntityMoving;
-import static net.swimmingtuna.lotm.util.BeyonderUtil.updatePositions;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ProphesizeDemise extends SimpleAbilityItem {

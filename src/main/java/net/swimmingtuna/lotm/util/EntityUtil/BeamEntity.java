@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.UpdateDragonBreathS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.RotationUtil;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -170,6 +172,7 @@ public abstract class BeamEntity extends LOTMProjectile {
             this.update();
         }
 
+
         if (this.getOwner() instanceof LivingEntity owner) {
             if (!this.on && this.animation == 0) {
                 this.discard();
@@ -188,6 +191,24 @@ public abstract class BeamEntity extends LOTMProjectile {
             }
 
             if (this.getTime() >= this.getCharge()) {
+                if (!this.level().isClientSide) {
+                    LOTMNetworkHandler.sendToAllPlayers(new UpdateDragonBreathS2C(
+                            this.getX(), this.getY(), this.getZ(),  // start positions
+                            this.endPosX, this.endPosY, this.endPosZ,  // end positions
+                            this.getId(),  // entity ID
+                            this.prevYaw, this.renderYaw,  // yaw data
+                            this.prevPitch, this.renderPitch,  // pitch data
+                            this.getTime(),  // current time
+                            this.getCharge(),  // charge time
+                            this.getDuration(),  // duration
+                            (float) this.animation,  // animation progress
+                            (float) this.getSize(),  // size
+                            this.causesFire(),  // causes fire flag
+                            this.prevCollidePosX, this.prevCollidePosY, this.prevCollidePosZ,  // previous collision pos
+                            this.collidePosX, this.collidePosY, this.collidePosZ  // current collision pos
+                    ));
+                }
+
                 if (!this.isStill()) {
                     this.calculateEndPos();
                 }
@@ -236,13 +257,6 @@ public abstract class BeamEntity extends LOTMProjectile {
                 }
 
                 // Handle block breaking and fire
-                if (!this.level().isClientSide) {
-                    double radius = this.getSize();
-                    AABB bounds = new AABB(
-                            this.collidePosX - radius, this.collidePosY - radius, this.collidePosZ - radius,
-                            this.collidePosX + radius, this.collidePosY + radius, this.collidePosZ + radius
-                    );
-                }
             }
 
             if (this.getTime() - this.getCharge() >= this.getDuration()) {
@@ -421,7 +435,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                 }
             }
         }
-        
+
         double entityDetectionRadius = radius * 1.5;
 
         AABB entityBounds = new AABB(
@@ -531,22 +545,17 @@ public abstract class BeamEntity extends LOTMProjectile {
 
     private void update() {
         if (this.getOwner() instanceof LivingEntity owner) {
-            // Use the owner's actual look angles directly instead of target-adjusted ones
             float yaw = owner.getYRot();
             float pitch = owner.getXRot();
-
-            // Convert to radians for the beam calculation
             this.renderYaw = (float) Math.toRadians(yaw + 90.0F);
             this.renderPitch = (float) Math.toRadians(-pitch);
-
-            // Set the data for synchronization
             this.setYaw((float) Math.toRadians(yaw + 90.0F));
             this.setPitch((float) Math.toRadians(-pitch));
-
             Vec3 spawn = this.calculateSpawnPos(owner);
             double yOffset = (this.getFrames() <= this.getCharge()) ? 0.5 : 0.0;
             this.setPos(spawn.x, spawn.y + yOffset, spawn.z);
         }
+        //LOTMNetworkHandler.sendToAllPlayers(new UpdateDragonBreathS2C(this.getX(), this.getY(), this.getZ(), this.endPosX, this.endPosY, this.endPosZ, this.getId()));
     }
 
 

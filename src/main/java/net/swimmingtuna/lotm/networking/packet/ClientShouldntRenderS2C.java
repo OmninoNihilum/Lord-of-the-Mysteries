@@ -1,12 +1,7 @@
 package net.swimmingtuna.lotm.networking.packet;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkEvent;
-import net.swimmingtuna.lotm.LOTM;
-import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 
 import java.util.UUID;

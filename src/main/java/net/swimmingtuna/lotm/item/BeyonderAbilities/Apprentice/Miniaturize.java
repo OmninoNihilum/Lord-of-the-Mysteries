@@ -3,10 +3,9 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -55,8 +54,10 @@ public class Miniaturize extends SimpleAbilityItem {
                 LOTMNetworkHandler.sendToAllPlayers(packet);
             }
             miniaturize(player, dimensionalSightTileEntity.getScryTarget());
-            if (Minecraft.getInstance().level != null && dimensionalSightTileEntity.getScryTarget() != null) {
-                Minecraft.getInstance().level.removeEntity(dimensionalSightTileEntity.getScryTarget().getId(), Entity.RemovalReason.DISCARDED); // only if fake
+            if (dimensionalSightTileEntity.getScryTarget() != null) {
+                if (level instanceof ClientLevel clientLevel) {
+                    clientLevel.removeEntity(dimensionalSightTileEntity.getScryTarget().getId(), Entity.RemovalReason.DISCARDED);
+                }
                 dimensionalSightTileEntity.getScryTarget().remove(Entity.RemovalReason.DISCARDED);
             }
             int actualSequence = BeyonderUtil.getSequence(player);

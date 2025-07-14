@@ -15,23 +15,17 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.network.PacketDistributor;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderInvisibilityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
-
-import static net.swimmingtuna.lotm.networking.LOTMNetworkHandler.INSTANCE;
 
 public class DoorMirage extends SimpleAbilityItem {
     private static final Random RANDOM = new Random();
@@ -69,7 +63,7 @@ public class DoorMirage extends SimpleAbilityItem {
         int invincibilityCounter = tag.getInt("doorMirageInvincibilityCounter");
         if (doorMirage) {
             if (counter < 100) {
-                LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(true, entity.getUUID(), 20));
+                BeyonderUtil.setInvisible(entity, true, 20);
                 entity.getPersistentData().putInt("doorMirageDodgeCounter", counter - 1);
             }
             if (entity.level() instanceof ServerLevel level) {
