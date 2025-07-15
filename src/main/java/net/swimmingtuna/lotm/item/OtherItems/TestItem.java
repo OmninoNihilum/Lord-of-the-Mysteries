@@ -63,7 +63,13 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
-            BeyonderUtil.setInvisible(interactionTarget, true, 100);
+            BeyonderUtil.setPathway(interactionTarget, BeyonderClassInit.SAILOR.get());
+            BeyonderUtil.setSequence(interactionTarget, 5);
+            player.sendSystemMessage(Component.literal("WORKED ON " + interactionTarget.getName().getString()));
+            if (BeyonderUtil.getPathway(interactionTarget) != null) {
+                player.sendSystemMessage(Component.literal("RAVAGER IS NOW " + BeyonderUtil.getPathwayName(BeyonderUtil.getPathway(interactionTarget))));
+                player.sendSystemMessage(Component.literal("RAVAGER IS NOW " + BeyonderUtil.getSequence(interactionTarget)));
+            }
         }
         return InteractionResult.SUCCESS;
     }

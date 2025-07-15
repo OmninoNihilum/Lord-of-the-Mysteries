@@ -1283,6 +1283,10 @@ public class BeyonderUtil {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINKAFTERIMAGE.get())));
             } else if (heldItem.getItem() instanceof BlinkAfterimage) {
                 LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
+            } else if (heldItem.getItem() instanceof Tsunami) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TSUNAMI_SEAL.get())));
+            } else if (heldItem.getItem() instanceof TsunamiSeal) {
+                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TSUNAMI.get())));
             } else if (heldItem.getItem() instanceof LuckManipulation) {
                 LOTMNetworkHandler.sendToServer(new LuckManipulationLeftClickC2S());
             } else if (heldItem.getItem() instanceof MisfortuneManipulation) {
@@ -1549,13 +1553,10 @@ public class BeyonderUtil {
                                 }
                             }
                         }
-                    } else {
-                        String pathwayName = living.getPersistentData().getString("separateEntityPathway");
-                        if (!pathwayName.isEmpty()) {
-                            return getPathwayByName(pathwayName);
-                        }
                     }
                 }
+                //String pathwayName = living.getPersistentData().getString("separateEntityPathway");
+                //return getPathwayByName(pathwayName);
             }
         }
         return null;
@@ -1568,7 +1569,7 @@ public class BeyonderUtil {
         } else if (living instanceof PlayerMobEntity playerMobEntity) {
             playerMobEntity.setPathway(pathway);
         } else {
-            living.getPersistentData().putString("separateEntityPathway", getPathwayName(pathway));
+            //living.getPersistentData().putString("separateEntityPathway", getPathwayName(pathway));
         }
     }
 
@@ -1591,14 +1592,13 @@ public class BeyonderUtil {
                             }
                         }
                     }
-                } else {
-                    if (living.getPersistentData().contains("separateEntitySequence")) {
-                        return living.getPersistentData().getInt("separateEntitySequence");
-                    }
                 }
             } else if (living instanceof Player player) {
                 BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
                 return holder.getSequence();
+            }
+            if (living.getPersistentData().contains("separateEntitySequence")) {
+                //return living.getPersistentData().getInt("separateEntitySequence");
             }
             float maxHp = living.getMaxHealth();
             if (maxHp <= 20) {

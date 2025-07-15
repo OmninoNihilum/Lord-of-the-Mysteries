@@ -15,6 +15,7 @@ public class BeyonderClassInit {
     public static final DeferredRegister<BeyonderClass> BEYONDER_CLASS = DeferredRegister.create(new ResourceLocation(LOTM.MOD_ID, "beyonder_class"), LOTM.MOD_ID);
     private static final Supplier<IForgeRegistry<BeyonderClass>> SUPPLIER = BEYONDER_CLASS.makeRegistry(RegistryBuilder::new);
 
+    public static final RegistryObject<MonsterClass> MONSTER = BEYONDER_CLASS.register("monster", MonsterClass::new);
     public static final RegistryObject<SpectatorClass> SPECTATOR = BEYONDER_CLASS.register("spectator", SpectatorClass::new);
     public static final RegistryObject<SailorClass> SAILOR = BEYONDER_CLASS.register("sailor", SailorClass::new);
     public static final RegistryObject<SeerClass> SEER = BEYONDER_CLASS.register("seer", SeerClass::new);
@@ -31,7 +32,6 @@ public class BeyonderClassInit {
     public static final RegistryObject<MysteryPryerClass> MYSTERYPRYER = BEYONDER_CLASS.register("mystery_pryer", MysteryPryerClass::new);
     public static final RegistryObject<CorpseCollectorClass> CORPSECOLLECTOR = BEYONDER_CLASS.register("corpse_collector", CorpseCollectorClass::new);
     public static final RegistryObject<LawyerClass> LAWYER = BEYONDER_CLASS.register("lawyer", LawyerClass::new);
-    public static final RegistryObject<MonsterClass> MONSTER = BEYONDER_CLASS.register("monster", MonsterClass::new);
     public static final RegistryObject<ApothecaryClass> APOTHECARY = BEYONDER_CLASS.register("apothecary", ApothecaryClass::new);
     public static final RegistryObject<PlanterClass> PLANTER = BEYONDER_CLASS.register("planter", PlanterClass::new);
     public static final RegistryObject<ArbiterClass> ARBITER = BEYONDER_CLASS.register("arbiter", ArbiterClass::new);

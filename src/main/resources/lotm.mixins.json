@@ -5,9 +5,11 @@
   "refmap": "lotm.refmap.json",
   "mixins": [
     "ClientUpdateStructureBlockUnlimit",
+    "DollSlotMixin",
     "EntityCollisionMixin",
     "EntityMixin",
     "ExplosionNoKnockback",
+    "HopperBlockEntityMixin",
     "IELevelEntityGetterAdapter",
     "ItemStackMixin",
     "MixinBrewingStandMenu",
@@ -15,9 +17,6 @@
     "MixinPotionItem",
     "MixinSplashPotionItem",
     "MobAttackMixin",
-    "DollSlotMixin",
-    "StructureBlockUnlimit",
-    "HopperBlockEntityMixin",
     "ServerLevelMixin",
     "ServerPlayerMixin",
     "ServerPlayNetworkDesyncFixMixin",
@@ -28,9 +27,10 @@
   "client": [
     "ClientLevelMixin",
     "EntityRenderDispatcherMixin",
-    "ItemInHandRendererMixin",
     "IItemRendererMixin",
+    "ItemInHandRendererMixin",
     "ItemRendererMixin",
+    "LevelRendererMixin",
     "StructureBlockRenderMixin"
   ],
   "server": [],

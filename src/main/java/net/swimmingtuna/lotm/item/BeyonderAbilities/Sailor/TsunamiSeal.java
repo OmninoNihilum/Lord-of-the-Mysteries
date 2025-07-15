@@ -102,8 +102,6 @@ public class TsunamiSeal extends SimpleAbilityItem {
                 double radius = 6.0;
                 double minRemovalRadius = 6.0;
                 double maxRemovalRadius = 11.0;
-
-                // Create a sphere of water around the player
                 for (int x = (int) -radius; x <= radius; x++) {
                     for (int y = (int) -radius; y <= radius; y++) {
                         for (int z = (int) -radius; z <= radius; z++) {
@@ -224,6 +222,9 @@ public class TsunamiSeal extends SimpleAbilityItem {
                         livingEntity.getPersistentData().putInt("sailorSealX", (int) livingEntity.getX());
                         livingEntity.getPersistentData().putInt("sailorSeaY", (int) livingEntity.getY());
                         livingEntity.getPersistentData().putInt("sailorSealZ", (int) livingEntity.getZ());
+                        if (player instanceof Player pPlayer) {
+                            pPlayer.displayClientMessage(Component.literal("You sealed " + livingEntity.getName().getString() + " in your tsunami").withStyle(ChatFormatting.BLUE), true);
+                        }
                     }
                 }
             }

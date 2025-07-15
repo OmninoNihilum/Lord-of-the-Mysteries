@@ -35,7 +35,7 @@ public class Tsunami extends SimpleAbilityItem {
             return InteractionResult.FAIL;
         }
         if (player instanceof Player pPlayer) {
-            pPlayer.getCooldowns().addCooldown(ItemInit.TSUNAMI_SEAL.get(), 2400); //marked
+            pPlayer.getCooldowns().addCooldown(ItemInit.TSUNAMI_SEAL.get(), 2400);
         }
         addCooldown(player);
         useSpirituality(player);
