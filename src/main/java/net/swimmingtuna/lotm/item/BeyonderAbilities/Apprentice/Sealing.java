@@ -60,7 +60,7 @@ public class Sealing extends SimpleAbilityItem {
             }
             addCooldown(livingEntity, this, 1200 - (BeyonderUtil.getSequence(interactionTarget) * 100));
             useSpirituality(livingEntity, 4000 - (BeyonderUtil.getSequence(interactionTarget) * 250));
-            sealAbilities(livingEntity, livingEntity);
+            sealAbilities(livingEntity, interactionTarget);
         }
         return InteractionResult.SUCCESS;
     }
