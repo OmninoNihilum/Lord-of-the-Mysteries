@@ -63,9 +63,9 @@ public class DoorMirage extends SimpleAbilityItem {
         int invincibilityCounter = tag.getInt("doorMirageInvincibilityCounter");
         if (doorMirage) {
             if (counter < 100) {
-                BeyonderUtil.setInvisible(entity, true, 20);
-                entity.getPersistentData().putInt("doorMirageDodgeCounter", counter - 1);
+                entity.getPersistentData().putInt("doorMirageDodgeCounter", counter + 1);
             }
+            BeyonderUtil.setInvisible(entity, true, 20);
             if (entity.level() instanceof ServerLevel level) {
                 level.sendParticles(ParticleInit.DOOR.get(), entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), counter / 10, 0.2, 0.25, 0.2, 0.01);
             }
@@ -100,7 +100,8 @@ public class DoorMirage extends SimpleAbilityItem {
                     event.setCanceled(true);
                     return;
                 }
-                if (counter >= BeyonderUtil.getDamage(attacked).get(ItemInit.DOOR_MIRAGE.get())) {
+                int requiredCounter = (int) (float) BeyonderUtil.getDamage(attacked).get(ItemInit.DOOR_MIRAGE.get());
+                if (counter >= requiredCounter) {
                     event.setCanceled(true);
                     if (attacked instanceof Player player) {
                         player.displayClientMessage(Component.literal("Successfully dodged an attack").withStyle(BeyonderUtil.getStyle(player)), true);
@@ -112,7 +113,8 @@ public class DoorMirage extends SimpleAbilityItem {
                     attacked.getPersistentData().putInt("doorMirageDodgeCounter", 0);
                 } else {
                     if (attacked instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Dodge not ready yet. Dodge counter ready in: " + (int) (counter) / 20 + " seconds").withStyle(BeyonderUtil.getStyle(player)), true);
+                        int timeRemaining = Math.max(1, (requiredCounter - counter) / 20);
+                        player.displayClientMessage(Component.literal("Dodge not ready yet. Time until next dodge: " + timeRemaining + " seconds").withStyle(BeyonderUtil.getStyle(player)), true);
                     }
                 }
             }

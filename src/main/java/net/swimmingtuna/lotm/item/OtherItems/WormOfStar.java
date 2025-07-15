@@ -71,7 +71,6 @@ public class WormOfStar extends Item {
         tooltipComponents.add(Component.literal("If you're a high sequence beyonder of the Apprentice Pathway, you can shift while holding this item to choose how much spirituality that should be put into it.").withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.BOLD));
         tooltipComponents.add(Component.literal("Depending on the amount of spirituality, a copy of yourself will be made which can attack, however it will be unable to regenerate spirituality.").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
         tooltipComponents.add(Component.literal("The sequence will always be 2 less than your own.").withStyle(ChatFormatting.LIGHT_PURPLE).withStyle(ChatFormatting.BOLD));
-        tooltipComponents.add(Component.literal("With this in your inventory, when you use an ability, it's cooldown will be shortened in exchange for an equivalent amount of these.").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
         super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 }
