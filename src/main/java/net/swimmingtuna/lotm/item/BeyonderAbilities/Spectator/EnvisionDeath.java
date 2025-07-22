@@ -45,7 +45,7 @@ public class EnvisionDeath extends SimpleAbilityItem {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
                     if (!(entity instanceof Player)) {
                         maxAmount *= 25;
-                        LOTM.LOGGER.info("MAX AMOUNT IS " + maxAmount);
+                        LOTM.LOGGER.info("MAX AMOUNT FOR ENVISION DEATH IS " + maxAmount);
                     }
                     int entityHealth = (int) entity.getHealth();
                     if (entityHealth <= maxAmount) {

@@ -1548,7 +1548,7 @@ public class BeyonderUtil {
                         String lowerPathway = pathwayString.toLowerCase();
                         for (BeyonderClass beyonderClass : BeyonderClassInit.getRegistry()) {
                             for (String sequenceName : beyonderClass.sequenceNames()) {
-                                if (lowerPathway.contains(sequenceName.toLowerCase())) {
+                                if (lowerPathway.equalsIgnoreCase(sequenceName.toLowerCase())) {
                                     return beyonderClass;
                                 }
                             }
@@ -1587,7 +1587,7 @@ public class BeyonderUtil {
                     if (beyonderClass != null) {
                         List<String> sequenceNames = beyonderClass.sequenceNames();
                         for (int i = 0; i < sequenceNames.size(); i++) {
-                            if (lowerPathway.contains(sequenceNames.get(i).toLowerCase())) {
+                            if (lowerPathway.equalsIgnoreCase(sequenceNames.get(i).toLowerCase())) {
                                 return i;
                             }
                         }
@@ -1817,7 +1817,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.INVISIBLEHAND.get(), applyAbilityStrengthened((float) (75 - (sequence * 12)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MINIATURIZE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), abilityStrengthened));
         damageMap.put(ItemInit.RECORDSCRIBE.get(), applyAbilityStrengthened(1.0f * abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((400.0f - sequence * 100) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.SPATIAL_CAGE.get(), applyAbilityStrengthened((400.0f - sequence * 100) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SEPARATE_WORM_OF_STAR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));

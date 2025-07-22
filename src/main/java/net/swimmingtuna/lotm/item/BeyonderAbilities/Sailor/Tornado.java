@@ -76,8 +76,8 @@ public class Tornado extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (target != null) {
-            return 75;
+            return 80;
         }
-        return 10;
+        return 0;
     }
 }

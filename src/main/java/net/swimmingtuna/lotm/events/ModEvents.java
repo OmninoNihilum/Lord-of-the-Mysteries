@@ -176,6 +176,25 @@ public class ModEvents {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientAbilityCombinationData.clientSideLoginHandling();
         }
+        Player player = event.getEntity();
+        if (!player.level().isClientSide()) {
+            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+            LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(holder.getSequence()), (ServerPlayer) player);
+            CompoundTag persistentData = player.getPersistentData();
+
+            if (persistentData.contains("DemiseCounter")) {
+                int demiseCounter = persistentData.getInt("DemiseCounter");
+
+                if (!persistentData.contains("EntityDemise") || persistentData.getInt("EntityDemise") == 0) {
+                    player.getPersistentData().putInt("EntityDemise", demiseCounter);
+                }
+            } else {
+                if (!persistentData.contains("EntityDemise") || persistentData.getInt("EntityDemise") == 0) {
+
+                    player.getPersistentData().putInt("EntityDemise", 0);
+                }
+            }
+        }
     }
 
 
@@ -284,7 +303,6 @@ public class ModEvents {
         }
     }
 
-    @OnlyIn(Dist.DEDICATED_SERVER)
     @SubscribeEvent
     public static void onPlayerTickServer(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
@@ -485,7 +503,7 @@ public class ModEvents {
                 MonsterCalamityIncarnation.calamityTickEvent(event);
                 dreamWeaving(livingEntity);
                 LightConcealment.lightConcealmentTick(event);
-                ProphesizeDemise.demiseTick(event);
+                SpectatorClass.demiseTick(event);
                 AqueousLightDrown.aqueousLightDrownTick(event);
                 matterAccelerationEntities(livingEntity);
                 ExtremeColdness.extremeColdnessTick(event);
@@ -529,6 +547,9 @@ public class ModEvents {
         if (!attacked.level().isClientSide()) {
             Symbolization.symbolizationAttack(event);
             ApprenticeClass.apprenticeAttackEvent(event);
+            if (BeyonderUtil.isCreative(attacked)) {
+                event.setCanceled(true);
+            }
         }
         if (attacker != null) {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {

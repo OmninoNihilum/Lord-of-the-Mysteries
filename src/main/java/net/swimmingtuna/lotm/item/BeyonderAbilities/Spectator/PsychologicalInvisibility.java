@@ -87,7 +87,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
             BeyonderUtil.setInvisible(living, false, 0);
         }
         if (living.hasEffect(MobEffects.INVISIBILITY)) {
-            if (living.getEffect(MobEffects.INVISIBILITY).endsWithin(100)) {
+            if (living.getEffect(MobEffects.INVISIBILITY).endsWithin(300)) {
                 living.removeEffect(MobEffects.INVISIBILITY);
             }
         }
@@ -115,7 +115,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
             CompoundTag tag = livingEntity.getPersistentData();
             int x = tag.getInt("psychologicalInvisibilityHurt");
             if (x >= 1) {
-                tag.putInt("psychologicalInvisibilityHurt", x - 1);
+                tag.putInt("psychologicalInvisibilityHurt", x - 10);
             }
             boolean psychologicalInvisibility = tag.getBoolean("psychologicalInvisibility");
             if (psychologicalInvisibility) {
@@ -140,7 +140,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                     }
                 }
 
-                BeyonderUtil.applyMobEffect(livingEntity, MobEffects.INVISIBILITY, 100, 1, false, false);
+                BeyonderUtil.applyMobEffect(livingEntity, MobEffects.INVISIBILITY, 300, 1, false, false);
                 BeyonderUtil.useSpirituality(livingEntity, Math.min(10, BeyonderUtil.getMaxSpirituality(livingEntity) / 100));
                 BeyonderUtil.setInvisible(livingEntity, true, 30);
             }

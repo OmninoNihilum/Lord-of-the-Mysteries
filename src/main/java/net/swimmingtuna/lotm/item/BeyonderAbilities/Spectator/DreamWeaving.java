@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -12,6 +13,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -81,26 +83,13 @@ public class DreamWeaving extends SimpleAbilityItem {
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
-    private static void spawnMobsAroundTarget(LivingEntity interactionTarget, EntityType<? extends Mob> mobEntityType, LivingEntity entity, Level level, double x, double y, double z, int numberOfMobs) {
-        if (!level.isClientSide()) {
-            for (int i = 0; i < numberOfMobs; i++) {
-                Mob mob = mobEntityType.create(level);
-                if (mob != null) {
-                    spawnEntityInRadius(mob, level, x, y, z);
-                    BeyonderHolder.updateMaxHealthModifier(mob, 551);
-                    mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
-                    mob.setTarget(entity);
-                    mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);
-                }
-            }
-        }
-    }
-
+    //RUN AS A TICK EVENT
     public static void dreamWeaving(LivingEntity entity) {
         //DREAM WEAVING
         if (entity != null && entity.getPersistentData().getInt("dreamWeavingDeathTimer") >= 1) {
             int deathTimer = entity.getPersistentData().getInt("dreamWeavingDeathTimer");
             entity.getPersistentData().putInt("dreamWeavingDeathTimer", deathTimer - 1);
+
             if (deathTimer >= 1) {
                 if (entity.getPersistentData().contains("dreamWeavingUUID")) {
                     try {
@@ -118,10 +107,58 @@ public class DreamWeaving extends SimpleAbilityItem {
                     }
                 }
             }
+
             if (deathTimer == 1) {
+                cleanupBossEffects(entity);
                 entity.remove(Entity.RemovalReason.DISCARDED);
             }
         }
+    }
+
+    private static void cleanupBossEffects(LivingEntity entity) {
+        if (entity instanceof Mob) {
+            try {
+                java.lang.reflect.Method getBossEventMethod = entity.getClass().getMethod("getBossEvent");
+                Object bossEvent = getBossEventMethod.invoke(entity);
+                if (bossEvent instanceof ServerBossEvent serverBossEvent) {
+                    serverBossEvent.removeAllPlayers();
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private static void spawnMobsAroundTarget(LivingEntity interactionTarget, EntityType<? extends Mob> mobEntityType, LivingEntity entity, Level level, double x, double y, double z, int numberOfMobs) {
+        if (!level.isClientSide()) {
+            for (int i = 0; i < numberOfMobs; i++) {
+                Mob mob = mobEntityType.create(level);
+                if (mob != null) {
+                    spawnEntityInRadius(mob, level, x, y, z);
+                    BeyonderHolder.updateMaxHealthModifier(mob, 551);
+                    mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
+                    mob.setTarget(entity);
+                    mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);
+
+                    // Mark boss entities for special handling
+                    if (isBossEntity(mob)) {
+                        mob.getPersistentData().putBoolean("dreamWeavingBoss", true);
+                    }
+                }
+            }
+        }
+    }
+
+    // Generic boss entity detection using duck typing
+    private static boolean isBossEntity(Mob mob) {
+        if (!(mob instanceof Enemy)) {
+            return false;
+        }
+        try {
+            mob.getClass().getMethod("getBossEvent");
+            return true;
+        } catch (NoSuchMethodException ignored) {
+        }
+        return false;
     }
 
     private static void spawnEntityInRadius(Mob entity, Level level, double x, double y, double z) {

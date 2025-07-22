@@ -2,6 +2,8 @@ package net.swimmingtuna.lotm.events;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -80,8 +82,18 @@ public class ClientEvents {
     @OnlyIn(Dist.CLIENT)
     public static void onPlaySound(PlaySoundEvent event) {
         Player player = Minecraft.getInstance().player;
-        if (player != null && player.hasEffect(ModEffects.DEAFNESS.get()) && event.isCancelable()) {
-            event.setCanceled(true);
+        if (event.isCancelable()) {
+            if (player != null && player.hasEffect(ModEffects.DEAFNESS.get())) {
+                event.setCanceled(true);
+            }
+            if (event.getSound() instanceof EntityBoundSoundInstance entityBoundSoundInstance) {
+                Entity entity = entityBoundSoundInstance.entity;
+                if (entity != null) {
+                    if (ClientShouldntRenderInvisibilityData.getShouldntRender(entity.getUUID())) {
+                        event.setCanceled(true);
+                    }
+                }
+            }
         }
     }
 

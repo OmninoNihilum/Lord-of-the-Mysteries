@@ -93,8 +93,8 @@ public class Roar extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (target != null) {
-            return 40;
+            return 50;
         }
-        return 10;
+        return 0;
     }
 }

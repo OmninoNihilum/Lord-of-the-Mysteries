@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilitiesData;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
 
@@ -34,7 +35,9 @@ public class AbilityOverlay implements IGuiOverlay {
 
         if (player == null) return;
         Map<String, String> abilities = ClientAbilitiesData.getAbilities();
-        if (abilities.isEmpty()) return;
+        if (abilities.isEmpty()) {
+            return;
+        }
 
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastCycleTime >= CYCLE_INTERVAL) {

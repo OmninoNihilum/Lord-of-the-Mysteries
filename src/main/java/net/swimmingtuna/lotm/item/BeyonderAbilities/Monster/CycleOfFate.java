@@ -178,7 +178,6 @@ public class CycleOfFate extends SimpleAbilityItem {
                     if (player != null) {
                         // Cancel death FIRST
                         event.setCanceled(true);
-                        LOTM.LOGGER.info("Death event canceled for due to CYCLE OF FATE" + entity);
 
                         // Mark as temporarily dead for visual effects
                         tag.putBoolean("monsterCycleOfFateIsDead", true);
@@ -222,7 +221,6 @@ public class CycleOfFate extends SimpleAbilityItem {
                 if (holder.getSpirituality() >= 1000) {
                     // Cancel death FIRST
                     event.setCanceled(true);
-                    LOTM.LOGGER.info("Death event canceled for user due to CYCLE OF FATE: " + pPlayer);
 
                     int userX = tag.getInt("monsterCycleOfFateUserX");
                     int userY = tag.getInt("monsterCycleOfFateUserY");

@@ -215,7 +215,6 @@ public class BeyonderEntityData extends SavedData {
                 if (pathwayString != null) {
                     BeyonderClass pathway = BeyonderUtil.getPathway(living);
                     if (pathway != null) {
-                        LOTM.LOGGER.info("PATHWAY IS " + pathway);
                         CompoundTag tag = mob.getPersistentData();
                         int abilityCooldown = tag.getInt("abilityCooldown");
                         if (abilityCooldown == 0) {

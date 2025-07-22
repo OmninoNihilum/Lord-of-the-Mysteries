@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
@@ -34,6 +35,8 @@ import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.*;
 import java.util.regex.Pattern;
+
+import static net.swimmingtuna.lotm.util.BeyonderUtil.isLivingEntityMoving;
 
 public class SpectatorClass implements BeyonderClass {
     @Override
@@ -215,7 +218,7 @@ public class SpectatorClass implements BeyonderClass {
             if (tag.getInt("gotHitByMentalAttack") >= 1) {
                 float health = livingEntity.getHealth();
                 if (Float.isNaN(health) || health < 0.0F) {
-                    livingEntity.setHealth(0.0F);
+                    livingEntity.kill();
                 }
                 tag.putInt("gotHitByMentalAttack", tag.getInt("gotHitByMentalAttack") - 1);
             }
@@ -476,6 +479,138 @@ public class SpectatorClass implements BeyonderClass {
             }
             if (misfortune == 1) {
                 livingEntity.getPersistentData().putDouble("misfortune", livingEntity.getPersistentData().getDouble("misfortune") + 100);
+            }
+        }
+    }
+
+    public static void demiseTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity entity = event.getEntity();
+        CompoundTag tag = entity.getPersistentData();
+        if (!entity.level().isClientSide()) {
+            boolean hasSpectatorDemise = entity.hasEffect(ModEffects.SPECTATORDEMISE.get());
+            if (!hasSpectatorDemise) {
+                tag.putInt("EntityDemise", 0);
+                tag.putInt("NonDemise", 0);
+            }
+
+            if (hasSpectatorDemise) {
+                MobEffectInstance demiseEffect = entity.getEffect(ModEffects.SPECTATORDEMISE.get());
+                if (demiseEffect != null) {
+                    int effectDuration = demiseEffect.getDuration();
+                    int effectDurationSeconds;
+                    if (effectDuration < 20) {
+                        effectDurationSeconds = 1;
+                    } else {
+                        effectDurationSeconds = (effectDuration + 19) / 20;
+                    }
+                    int demise = tag.getInt("EntityDemise");
+                    int nonDemise = tag.getInt("NonDemise");
+                    if (isLivingEntityMoving(entity)) {
+                        tag.putInt("EntityDemise", demise + 1);
+                    } else {
+                        tag.putInt("NonDemise", nonDemise + 1);
+                    }
+                    if (demise == 400) {
+                        entity.kill();
+                        tag.putInt("NonDemise", 0);
+                    }
+                    if (nonDemise > 200) {
+                        tag.putInt("EntityDemise", 0);
+                        tag.putInt("NonDemise", 0);
+                        entity.removeEffect(ModEffects.SPECTATORDEMISE.get());
+                        tag.putInt("NonDemise", 0);
+                    }
+                    if (nonDemise == 200) {
+                        tag.putInt("EntityDemise", 0);
+                        tag.putInt("NonDemise", 0);
+                        entity.removeEffect(ModEffects.SPECTATORDEMISE.get());
+                        entity.sendSystemMessage(Component.literal("You survived your fate").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 20) {
+                        tag.putInt("EntityDemise", 21);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 19 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 40) {
+                        tag.putInt("EntityDemise", 41);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 18 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 60) {
+                        tag.putInt("EntityDemise", 61);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 17 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 80) {
+                        tag.putInt("EntityDemise", 81);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 16 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 100) {
+                        tag.putInt("EntityDemise", 101);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 15 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 120) {
+                        tag.putInt("EntityDemise", 121);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 14 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 140) {
+                        tag.putInt("EntityDemise", 141);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 13 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 160) {
+                        tag.putInt("EntityDemise", 161);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 12 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 180) {
+                        tag.putInt("EntityDemise", 181);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 11 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 200) {
+                        tag.putInt("EntityDemise", 201);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 10 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 220) {
+                        tag.putInt("EntityDemise", 221);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 9 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 240) {
+                        tag.putInt("EntityDemise", 241);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 8 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 260) {
+                        tag.putInt("EntityDemise", 261);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 7 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 280) {
+                        tag.putInt("EntityDemise", 281);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 6 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 300) {
+                        tag.putInt("EntityDemise", 301);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 5 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 320) {
+                        tag.putInt("EntityDemise", 321);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 4 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 340) {
+                        tag.putInt("EntityDemise", 341);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 3 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 360) {
+                        tag.putInt("EntityDemise", 361);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 2 seconds, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (demise == 380) {
+                        tag.putInt("EntityDemise", 381);
+                        entity.sendSystemMessage(Component.literal("You need to stand still or you will die in 1 second, remaining time left on Death Prophecy is " + effectDurationSeconds).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                    }
+                    if (nonDemise >= 20 && nonDemise <= 180 && nonDemise % 20 == 0) {
+                        tag.putInt("NonDemise", nonDemise + 1);
+                        int standStillSecondsLeft = (200 - nonDemise) / 20;
+                        entity.sendSystemMessage(Component.literal("You need to stand still for " + standStillSecondsLeft + " more seconds").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD));
+                    }
+                }
+            } else if (entity.tickCount % 100 == 0) {
+                tag.putInt("NonDemise", 0);
+                tag.putInt("EntityDemise", 0);
             }
         }
     }

@@ -88,11 +88,13 @@ public class WindManipulationFlight extends SimpleAbilityItem {
         boolean enhancedFlight = tag.getBoolean("sailorFlight1");
         if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(livingEntity, BeyonderClassInit.SAILOR.get(), 6) && livingEntity.isShiftKeyDown() && livingEntity.fallDistance >= 3 && !(livingEntity instanceof Player player && player.getAbilities().instabuild) && !enhancedFlight) {
             Vec3 movement = livingEntity.getDeltaMovement();
-            double deltaX = Math.cos(Math.toRadians(livingEntity.getYRot() + 90)) * 0.06;
-            double deltaZ = Math.sin(Math.toRadians(livingEntity.getYRot() + 90)) * 0.06;
-            livingEntity.setDeltaMovement(movement.x + deltaX, -0.05, movement.z + deltaZ);
-            livingEntity.fallDistance = 5;
-            livingEntity.hurtMarked = true;
+            if (movement.y() < 0) {
+                double deltaX = Math.cos(Math.toRadians(livingEntity.getYRot() + 90)) * 0.06;
+                double deltaZ = Math.sin(Math.toRadians(livingEntity.getYRot() + 90)) * 0.06;
+                livingEntity.setDeltaMovement(movement.x + deltaX, -0.05, movement.z + deltaZ);
+                livingEntity.fallDistance = 5;
+                livingEntity.hurtMarked = true;
+            }
         }
     }
 

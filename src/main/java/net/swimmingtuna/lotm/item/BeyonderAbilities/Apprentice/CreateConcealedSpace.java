@@ -167,7 +167,6 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
                             if (attempts >= 1000) {
                                 if (entity instanceof Player player)
                                     player.displayClientMessage(Component.literal("It wasn't possible to find any safe space to build your concealed space"), false);
-                                LOTM.LOGGER.error("somehow this shit didnt find any place to build");
                                 return;
                             }
                             continue outer;

@@ -94,9 +94,11 @@ public class Prophecy extends SimpleAbilityItem {
                     if (BeyonderUtil.getDreamIntoReality(player) > 1) {
                         interactionTarget.addEffect(new MobEffectInstance(ModEffects.FRENZY.get(), 40, 1, false, false));
                     }
+                    interactionTarget.getPersistentData().putInt("prophesizeDemise", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.PROPHECY.get()) * 70);
                     interactionTarget.addEffect(new MobEffectInstance(ModEffects.SPECTATORDEMISE.get(), 600, 1, false, false));
                 } else {
                     interactionTarget.addEffect(new MobEffectInstance(MobEffects.WITHER, 500, 6, false, false));
+                    interactionTarget.addEffect(new MobEffectInstance(ModEffects.NOREGENERATION.get(), 300, 1, false, false));
                 }
             }
         }
@@ -116,9 +118,9 @@ public class Prophecy extends SimpleAbilityItem {
             } else if (prophecy == 2) {
                 for (int i = 0; i < BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()); i++) {
                     MeteorNoLevelEntity.summonMultipleMeteors(livingEntity);
-                    if (livingEntity instanceof Player player) {
-                        player.sendSystemMessage(Component.literal("You prophesized meteors that don't destroy blocks into the world").withStyle(BeyonderUtil.getStyle(livingEntity)));
-                    }
+                }
+                if (livingEntity instanceof Player player) {
+                    player.sendSystemMessage(Component.literal("You prophesized meteors that don't destroy blocks into the world").withStyle(BeyonderUtil.getStyle(livingEntity)));
                 }
             } else if (prophecy == 3) {
                 TornadoEntity tornado = new TornadoEntity(livingEntity.level(), livingEntity, 0, 0, 0);

@@ -84,6 +84,9 @@ public class SailorLightningTravel extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return 10;
+        if (target != null) {
+            return (int) target.distanceTo(livingEntity);
+        }
+        return 0;
     }
 }
