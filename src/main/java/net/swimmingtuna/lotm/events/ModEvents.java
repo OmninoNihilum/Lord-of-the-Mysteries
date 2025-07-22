@@ -955,7 +955,6 @@ public class ModEvents {
             }
             if (holder.getCurrentClass() != null && holder.getSequence() != -1) {
                 BeyonderHolder.updateMaxHealthModifier(player, holder.getCurrentClass().maxHealth().get(sequence));
-                player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(holder.getCurrentClass().maxHealth().get(sequence));
                 player.setHealth(player.getMaxHealth());
             }
             if (!persistentData.contains("keysClicked")) {

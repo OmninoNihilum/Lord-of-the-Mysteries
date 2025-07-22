@@ -32,24 +32,24 @@ public class EnvisionDeath extends SimpleAbilityItem {
         if (!checkAll(player)) {
             return InteractionResult.FAIL;
         }
-        envisionDeath(player, BeyonderUtil.getDreamIntoReality(player));
+        envisionDeath(player);
         addCooldown(player);
         useSpirituality(player);
         return InteractionResult.SUCCESS;
     }
 
-    private void envisionDeath(LivingEntity player, int dir) {
+    private void envisionDeath(LivingEntity player) {
         if (!player.level().isClientSide()) {
-            float maxAmount = BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_DEATH.get());
-            for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(maxAmount * 10))) {
+            float damage = BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_DEATH.get());
+            for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(damage * 10))) {
                 if (entity != player && !BeyonderUtil.areAllies(player, entity)) {
+                    float maxAmount = BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_DEATH.get());
                     if (!(entity instanceof Player)) {
                         maxAmount *= 25;
-                        LOTM.LOGGER.info("MAX AMOUNT FOR ENVISION DEATH IS " + maxAmount);
                     }
                     int entityHealth = (int) entity.getHealth();
                     if (entityHealth <= maxAmount) {
-                        BeyonderUtil.applyMentalDamage(player, entity, (float) 2 * maxAmount);
+                        BeyonderUtil.applyMentalDamage(player, entity, (float) 4 * maxAmount);
                     }
                 }
             }

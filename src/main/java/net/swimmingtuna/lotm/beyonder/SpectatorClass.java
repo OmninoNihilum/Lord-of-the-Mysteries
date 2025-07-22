@@ -8,13 +8,16 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
@@ -23,6 +26,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.MeteorEntity;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -37,6 +41,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static net.swimmingtuna.lotm.util.BeyonderUtil.isLivingEntityMoving;
+import static net.swimmingtuna.lotm.util.BeyonderUtil.stopFlying;
 
 public class SpectatorClass implements BeyonderClass {
     @Override
@@ -487,6 +492,30 @@ public class SpectatorClass implements BeyonderClass {
         LivingEntity entity = event.getEntity();
         CompoundTag tag = entity.getPersistentData();
         if (!entity.level().isClientSide()) {
+            LivingEntity livingEntity = event.getEntity();
+            if (!livingEntity.level().isClientSide()) {
+                int flyTime = tag.getInt("LOTMFlying");
+                float flySpeed = tag.getFloat("LOTMFlySpeed");
+                if (flyTime >= 1) {
+                    tag.putInt("LOTMFlying", flyTime - 1);
+                    if (livingEntity instanceof Player pPlayer) {
+                        Abilities playerAbilities = pPlayer.getAbilities();
+                        if (!pPlayer.isCreative()) {
+                            playerAbilities.mayfly = true;
+                            playerAbilities.setFlyingSpeed(flySpeed);
+                        }
+                        pPlayer.onUpdateAbilities();
+                        if (livingEntity instanceof ServerPlayer serverPlayer) {
+                            serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
+                        }
+                    } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+                        playerMobEntity.setIsFlying(true);
+                        playerMobEntity.setFlySpeed(flySpeed);
+                    }
+                } else {
+                    stopFlying(livingEntity);
+                }
+            }
             boolean hasSpectatorDemise = entity.hasEffect(ModEffects.SPECTATORDEMISE.get());
             if (!hasSpectatorDemise) {
                 tag.putInt("EntityDemise", 0);

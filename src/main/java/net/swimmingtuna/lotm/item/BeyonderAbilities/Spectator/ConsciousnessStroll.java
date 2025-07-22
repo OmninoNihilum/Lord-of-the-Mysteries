@@ -56,9 +56,9 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
         CompoundTag tag = pPlayer.getPersistentData();
         boolean cs = tag.getBoolean("consciousnessStrollChoice");
         if (!cs) {
-            return "Your Consciousness Stroll will move you to the target's location after viewing them";
+            return "You will stay at the target's location after briefly viewing them";
         }
-        return "Your Consciousness Stroll will NOT move you to the target's location after viewing them";
+        return "You will NOT stay at the target's location after briefly viewing them";
     }
     public static void consciousnessStroll(LivingEntity livingEntity) {
         //CONSCIOUSNESS STROLL

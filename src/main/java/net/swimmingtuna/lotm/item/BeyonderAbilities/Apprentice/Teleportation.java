@@ -109,7 +109,7 @@ public class Teleportation extends SimpleAbilityItem {
 
 
             if (BeyonderUtil.canFly(player)) {
-                BeyonderUtil.startFlying(playerMobEntity, 0.12f * BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()));
+                BeyonderUtil.startFlying(playerMobEntity, 0.12f * BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()), 5000);
             }
 
             playerMobEntity.setCreator(player);
@@ -145,7 +145,7 @@ public class Teleportation extends SimpleAbilityItem {
                     LivingEntity creator = playerMobEntity.getCreator();
                     boolean x = !(creator instanceof Player player) || (!player.isCreative() && !player.isSpectator());
                     if (creator.isAlive()) {
-                        if (event.getAmount() > creator.getHealth() - 10) {
+                        if (event.getAmount() > creator.getHealth() + 10) {
                             playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
                             creator.sendSystemMessage(Component.empty().append(Component.literal("Your copy flickering at ").withStyle(ChatFormatting.AQUA)).append(Component.literal(String.format("%.1f, %.1f, %.1f", playerMobEntity.getX(), playerMobEntity.getY(), playerMobEntity.getZ())).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)).append(Component.literal(" was removed due to too much damage").withStyle(ChatFormatting.AQUA)));
                         }

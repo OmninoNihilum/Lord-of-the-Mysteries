@@ -59,7 +59,7 @@ public class WindManipulationFlight extends SimpleAbilityItem {
     public static void startFlying(LivingEntity player) { //marked
         if (!player.level().isClientSide() && player instanceof Player) {
             player.getPersistentData().putBoolean("sailorFlight1", true);
-            BeyonderUtil.startFlying(player, 0.1f);
+            BeyonderUtil.startFlying(player, 0.1f, 20);
         }
     }
     public static void toggleFlying(LivingEntity player) {
@@ -105,6 +105,7 @@ public class WindManipulationFlight extends SimpleAbilityItem {
             if (livingEntity instanceof Player player && player.getAbilities().flying) {
                 BeyonderUtil.useSpirituality(player, 2);
             }
+            BeyonderUtil.startFlying(livingEntity, 0.1f, 10);
         }
         int flightCancel = tag.getInt("sailorFlightDamageCancel");
         if (flightCancel >= 1) {

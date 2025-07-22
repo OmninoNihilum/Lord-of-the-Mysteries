@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -14,9 +15,11 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -24,6 +27,7 @@ import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 public class EnvisionLife extends SimpleAbilityItem {
 
@@ -44,7 +48,8 @@ public class EnvisionLife extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @javax.annotation.Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("While holding this item, type in a mob's name (for example, minecraft:cow) in order to envision it into the world. You can also use it in order to have almost all projectiles not owned by you to be imbued with life, allowing them to hit their owner and having them be directed at them."));
+        tooltipComponents.add(Component.literal("While holding this item, type in a mob's name (for example, minecraft:cow) in order to envision it into the world. You can also use it in order to have almost all projectiles not owned by you or allies to be imbued with life, allowing them to move towards their owner if it's nearby"));
+        tooltipComponents.add(Component.literal("You can also use it in order to have almost all projectiles and NPC Clones not owned by you or allies to be imbued with life. Projectiles will move towards their owner at a quick pace and NPCs will have their target be their creator."));
         tooltipComponents.add(Component.literal("Left Click for Envision Weather"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("Envisioned Mob's Max Health * 3").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("None for summoning. 20 Seconds for use.").withStyle(ChatFormatting.YELLOW)));
@@ -58,6 +63,8 @@ public class EnvisionLife extends SimpleAbilityItem {
         for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(150))) {
             if (projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity living && !BeyonderUtil.areAllies(living, player)) {
                 Entity owner = projectile.getOwner();
+                projectile.getPersistentData().putUUID("envisionLifeUUID", owner.getUUID());
+                owner.getPersistentData().putInt("envisionLifeCounter", 1000);
                 Vec3 vec = new Vec3(owner.getX() - projectile.getX(), owner.getY() + owner.getEyeHeight() / 2 - projectile.getY(), owner.getZ() - projectile.getZ());
                 vec = vec.normalize().scale(1.5);
                 projectile.setDeltaMovement(vec);
@@ -65,7 +72,17 @@ public class EnvisionLife extends SimpleAbilityItem {
                 projectile.setOwner(null);
             }
         }
+        for (PlayerMobEntity playerMobEntity : player.level().getEntitiesOfClass(PlayerMobEntity.class, player.getBoundingBox().inflate(150))) {
+            if (playerMobEntity.getIsClone()) {
+                playerMobEntity.getPersistentData().putBoolean("canAttackOwner", true);
+                if (playerMobEntity.getCreator() != null && playerMobEntity.getCreator().isAlive()) {
+                    playerMobEntity.setTarget(playerMobEntity.getCreator());
+                    playerMobEntity.setIsClone(false);
+                }
+            }
+        }
     }
+
 
     public static void spawnMob(Player player, String mobName) {
         if (!player.level().isClientSide() && player.level() instanceof ServerLevel serverLevel) {

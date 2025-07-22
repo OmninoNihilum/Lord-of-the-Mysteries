@@ -148,6 +148,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (this.getIsClone()) {
             return true;
         }
+        if (this.getPersistentData().getBoolean("canAttackOwner")) {
+            return true;
+        }
         return false;
     }
 
@@ -324,11 +327,25 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (!this.level().isClientSide()) {
             if (this.tickCount % 59 == 0) {
                 if (this.getIsClone() && this.getCreator() != null && this.getCreator().isAlive() && !BeyonderUtil.areAllies(this, this.getCreator())) {
-                    BeyonderUtil.forceAlly(this, this.getCreator());
+                    if (!this.getPersistentData().getBoolean("canAttackOwner")) {
+                        BeyonderUtil.forceAlly(this, this.getCreator());
+                    }
                 }
             }
             if (this.tickCount % 5 == 0) {
+                if (this.getPersistentData().getBoolean("canAttackOwner")) {
+                    if (this.getCreator() != null && this.getCreator().isAlive()) {
+                        this.setTarget(this.getCreator());
+                        if (BeyonderUtil.areAllies(this, this.getCreator())) {
+                            BeyonderUtil.forceRemoveAlly(this.getCreator(), this);
+                        }
+
+                    }
+                }
                 if (this.getPersistentData().getBoolean("shouldFlicker")) {
+                    if (!this.getIsClone()) {
+                        this.remove(RemovalReason.DISCARDED);
+                    }
                     if (this.getCreator() != null) {
                         LivingEntity player = this.getCreator();
                         for (EquipmentSlot slot : EquipmentSlot.values()) {
@@ -361,7 +378,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
                             this.addTag(tag2);
                         }
                         if (BeyonderUtil.canFly(player)) {
-                            BeyonderUtil.startFlying(this, 0.12f);
+                            BeyonderUtil.startFlying(this, Math.max(0.08f, player.getPersistentData().getFloat("LOTMFlySpeed")), 10);
                         }
                         this.getCreator().getPersistentData().putInt("ignoreShouldntRender", 10);
                     }
@@ -385,7 +402,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
                 this.setSpirituality(this.getSpirituality() + this.getCurrentPathway().spiritualityRegen().get(this.getCurrentSequence()));
             }
             if (this.getSpirituality() < this.getMaxSpirituality() / 10 && this.tickCount >= 10 && !this.getRegenSpirituality()) {
-                this.kill();
+                this.remove(RemovalReason.DISCARDED);
             }
         }
         super.tick();
@@ -506,7 +523,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (BeyonderUtil.areAllies(target, this)) {
             return false;
         }
-        if (this.getIsClone() && ((this.getCreator() != null && target == this.getCreator()) || this.getUsername().getDisplayName() == target.getScoreboardName())) {
+        if (this.getPersistentData().getBoolean("canAttackOwner")) {
+            return true;
+        } else if (this.getIsClone() && ((this.getCreator() != null && target == this.getCreator()) || this.getUsername().getDisplayName() == target.getScoreboardName())) {
             return false;
         }
         return super.canAttack(target);
@@ -820,7 +839,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     public int getSpirituality() {
-        if (this.getCreator() != null) {
+        if (this.getCreator() != null && this.getIsClone()) {
             if (this.getPersistentData().getBoolean("shouldFlicker") && this.getCreator().isAlive()) {
                 return BeyonderUtil.getSpirituality(this.getCreator());
             }
@@ -869,19 +888,19 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return this.entityData.get(REGEN_SPIRITUALITY);
     }
 
-    public void setHasAbilityCap(boolean abilityCap){
+    public void setHasAbilityCap(boolean abilityCap) {
         this.entityData.set(HAS_ABILITY_CAP, abilityCap);
     }
 
-    public boolean getHasAbilityCap(){
+    public boolean getHasAbilityCap() {
         return this.entityData.get(HAS_ABILITY_CAP);
     }
 
-    public void setMaxAbilitiesUse(int maxAbilitiesUse){
+    public void setMaxAbilitiesUse(int maxAbilitiesUse) {
         this.entityData.set(MAX_ABILITIES_USE, maxAbilitiesUse);
     }
 
-    public int getMaxAbilitiesUse(){
+    public int getMaxAbilitiesUse() {
         return this.entityData.get(MAX_ABILITIES_USE);
     }
 
@@ -1057,7 +1076,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (this.getSpirituality() - amount < 0) {
             return false;
         }
-        if (this.getCreator() != null) {
+        if (this.getCreator() != null && this.getIsClone()) {
             if (this.getPersistentData().getBoolean("shouldFlicker") && this.getCreator().isAlive()) {
                 BeyonderUtil.useSpirituality(this.getCreator(), amount);
                 return true;
@@ -1236,7 +1255,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
 
         if (BeyonderUtil.canFly(player)) {
-            BeyonderUtil.startFlying(playerMobEntity, 0.1f);
+            BeyonderUtil.startFlying(playerMobEntity, Math.max(0.08f, player.getPersistentData().getFloat("LOTMFlySpeed")), 20);
         }
         playerMobEntity.setUsername(player.getScoreboardName());
         playerMobEntity.setIsClone(true);

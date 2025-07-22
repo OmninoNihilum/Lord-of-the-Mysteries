@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,10 +49,12 @@ import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.world.worlddata.PlayerMobTracker;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 import static net.swimmingtuna.lotm.beyonder.SpectatorClass.EVENT_TO_TAG;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Teleportation.flickeringCopy;
@@ -192,11 +195,19 @@ public class ServerEvents {
                         player.setGameMode(GameType.SPECTATOR);
                         BeyonderUtil.useSpirituality(player, 300);
                         if (player.level().dimension() != onlinePlayer.level().dimension()) {
-                            ServerLevel targetDimension = onlinePlayer.getServer().getLevel(onlinePlayer.level().dimension());
-                            player.changeDimension(targetDimension);
-                            player.getPersistentData().putInt("consciousnessStrollActivated", 600);
-                            player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
-                        } else {
+                            ResourceLocation dimensionLocation = onlinePlayer.level().dimension().location();
+                            String dimensionName;
+                            if (dimensionLocation.equals(Level.OVERWORLD.location())) {
+                                dimensionName = "Overworld";
+                            } else if (dimensionLocation.equals(Level.NETHER.location())) {
+                                dimensionName = "The Nether";
+                            } else if (dimensionLocation.equals(Level.END.location())) {
+                                dimensionName = "The End";
+                            } else {
+                                String path = dimensionLocation.getPath();
+                                dimensionName = Arrays.stream(path.split("_")).map(word -> word.substring(0, 1).toUpperCase() + word.substring(1)).collect(Collectors.joining(" "));
+                            }
+                            player.displayClientMessage(Component.literal("You can't view from the target's consciousness as they are in another dimension. Try going to the " + dimensionName + " dimension").withStyle(ChatFormatting.RED), true);                        } else {
                             player.teleportTo(onlinePlayer.getX(), onlinePlayer.getY(), onlinePlayer.getZ());
                             player.getPersistentData().putInt("consciousnessStrollActivated", 120);
                         }
@@ -238,7 +249,6 @@ public class ServerEvents {
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
-
                 EnvisionLocation.envisionLocationTeleport(player, x, y, z);
                 event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
@@ -257,7 +267,6 @@ public class ServerEvents {
                 int y = (int) targetPlayer.getY();
                 int z = (int) targetPlayer.getZ();
                 EnvisionLocation.envisionLocationTeleport(player, targetPlayer.level(), x, y, z);
-                player.teleportTo(x, y, z);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
             } else {
                 event.getPlayer().displayClientMessage(Component.literal("Invalid coordinates or player name: " + message).withStyle(BeyonderUtil.getStyle(player)), true);

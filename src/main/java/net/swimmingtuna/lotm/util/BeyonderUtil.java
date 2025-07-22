@@ -791,7 +791,7 @@ public class BeyonderUtil {
         ItemStack abilityItemStack = new ItemStack(item);
 
         // Check if we can use the ability - using our modified version that doesn't require holding the item
-        if (!checkIfCanUseAbility(player)) {
+        if (!checkIfCanUseAbility(player, item)) {
             return;
         }
 
@@ -939,6 +939,13 @@ public class BeyonderUtil {
 
     public static boolean checkAll(LivingEntity living, Item item) {
         boolean itemCheckPassed = !(living instanceof Player);
+        if (living instanceof Player player && player.getCooldowns().isOnCooldown(item)) {
+            return false;
+        } else {
+            if (living.getPersistentData().getInt("abilityCooldownFor" + item.getDescription().getString()) >= 1) {
+                return false;
+            }
+        }
         if (item instanceof SimpleAbilityItem simpleAbilityItem) {
             if (living instanceof Player) {
                 itemCheckPassed = living.getItemInHand(InteractionHand.MAIN_HAND).is(item) || living.getItemInHand(InteractionHand.MAIN_HAND).is(ItemInit.BEYONDER_ABILITY_USER.get());
@@ -966,32 +973,50 @@ public class BeyonderUtil {
         return false;
     }
 
-    private static boolean checkIfCanUseAbility(LivingEntity livingEntity) {
+    private static boolean checkIfCanUseAbility(LivingEntity livingEntity, Item simpleAbilityItem) {
         if (!livingEntity.level().isClientSide()) {
+            if (livingEntity instanceof Player player && player.getCooldowns().isOnCooldown(simpleAbilityItem)) {
+                return false;
+            } else {
+                if (livingEntity.getPersistentData().getInt("abilityCooldownFor" + simpleAbilityItem.getDescription().getString()) >= 1) {
+                    return false;
+                }
+            }
+            boolean shouldntActiveCalamity = true;
+            boolean allowBeyonderAbilitiesNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            if (!allowBeyonderAbilitiesNearSpawn) {
+                BlockPos entityPos = livingEntity.getOnPos();
+                BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
+                if (entityPos.closerThan(worldSpawnPos, 300)) {
+                    shouldntActiveCalamity = false;
+                }
+            }
+            if (!shouldntActiveCalamity) {
+                if (livingEntity instanceof Player player) {
+                    player.displayClientMessage(Component.literal("You are unable to use abilities too close to spawn").withStyle(ChatFormatting.RED), true);
+                }
+                return false;
+            }
             MisfortuneManipulation.livingUseAbilityMisfortuneManipulation(livingEntity);
             CompoundTag tag = livingEntity.getPersistentData();
-
-            if (livingEntity.hasEffect(ModEffects.STUN.get())) {
-                if (livingEntity instanceof Player) {
-                    livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " +
-                                    (int) Objects.requireNonNull(livingEntity.getEffect(ModEffects.STUN.get())).getDuration() / 20 + " seconds.")
-                            .withStyle(ChatFormatting.RED));
+            if (livingEntity.getMainHandItem().getItem() instanceof SimpleAbilityItem) {
+                if (livingEntity.hasEffect(ModEffects.STUN.get())) {
+                    if (livingEntity instanceof Player) {
+                        livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " + (int) Objects.requireNonNull(livingEntity.getEffect(ModEffects.STUN.get())).getDuration() / 20 + " seconds.").withStyle(ChatFormatting.RED));
+                    }
+                    return false;
+                } else if (tag.getInt("cantUseAbility") >= 1) {
+                    tag.putInt("cantUseAbility", tag.getInt("cantUseAbility") - 1);
+                    if (livingEntity instanceof Player) {
+                        livingEntity.sendSystemMessage(Component.literal("How unlucky! You messed up and couldn't use your ability!").withStyle(ChatFormatting.RED));
+                    }
+                    return false;
+                } else if (tag.getInt("unableToUseAbility") >= 1) {
+                    tag.putInt("unableToUseAbility", tag.getInt("unableToUseAbility") - 1);
+                    if (livingEntity instanceof Player player) {
+                        player.displayClientMessage(Component.literal("You are unable to use your ability").withStyle(ChatFormatting.RED), true);
+                    }
                 }
-                return false;
-            } else if (tag.getInt("cantUseAbility") >= 1) {
-                tag.putInt("cantUseAbility", tag.getInt("cantUseAbility") - 1);
-                if (livingEntity instanceof Player) {
-                    livingEntity.sendSystemMessage(Component.literal("How unlucky! You messed up and couldn't use your ability!")
-                            .withStyle(ChatFormatting.RED));
-                }
-                return false;
-            } else if (tag.getInt("unableToUseAbility") >= 1) {
-                tag.putInt("unableToUseAbility", tag.getInt("unableToUseAbility") - 1);
-                if (livingEntity instanceof Player player) {
-                    player.displayClientMessage(Component.literal("You are unable to use your ability")
-                            .withStyle(ChatFormatting.RED), true);
-                }
-                return false;
             }
         }
         return true;
@@ -1064,6 +1089,7 @@ public class BeyonderUtil {
         return x;
     }
 
+    //TICK EVENT
     public static void abilityCooldownsServerTick(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
         if (!player.level().isClientSide()) {
@@ -1076,26 +1102,27 @@ public class BeyonderUtil {
                         String abilityResourceLocationString = registeredAbilities.getString(combinationNumber);
                         ResourceLocation resourceLocation = new ResourceLocation(abilityResourceLocationString);
                         Item item = ForgeRegistries.ITEMS.getValue(resourceLocation);
-                        if (item instanceof SimpleAbilityItem simpleAbilityItem && player.getCooldowns().isOnCooldown(item)) {
-                            float cooldownPercent = player.getCooldowns().getCooldownPercent(item, 0.0F);
-                            if (cooldownPercent > 0) {
-                                int totalCooldown = simpleAbilityItem.getCooldown();
-                                int remainingCooldown = (int) (totalCooldown * cooldownPercent);
-                                if (remainingCooldown > 0) {
-                                    String combination = AbilityRegisterCommand.findCombinationForNumber(Integer.parseInt(combinationNumber));
-                                    if (!combination.isEmpty()) {
+                        if (item instanceof SimpleAbilityItem simpleAbilityItem) {
+                            String combination = AbilityRegisterCommand.findCombinationForNumber(Integer.parseInt(combinationNumber));
+                            if (!combination.isEmpty()) {
+                                if (player.getCooldowns().isOnCooldown(item)) {
+                                    float cooldownPercent = player.getCooldowns().getCooldownPercent(item, 0.0F);
+                                    if (cooldownPercent > 0) {
+                                        int totalCooldown = simpleAbilityItem.getCooldown();
+                                        int remainingCooldown = (int) (totalCooldown * cooldownPercent);
                                         cooldowns.put(combination, remainingCooldown);
+                                    } else {
+                                        cooldowns.put(combination, 0);
                                     }
+                                } else {
+                                    cooldowns.put(combination, 0);
                                 }
                             }
                         }
                     }
                 }
-
-                if (!cooldowns.isEmpty()) {
-                    SyncAbilityCooldownsS2C syncPacket = new SyncAbilityCooldownsS2C(cooldowns);
-                    LOTMNetworkHandler.sendToPlayer(syncPacket, serverPlayer);
-                }
+                SyncAbilityCooldownsS2C syncPacket = new SyncAbilityCooldownsS2C(cooldowns);
+                LOTMNetworkHandler.sendToPlayer(syncPacket, serverPlayer);
             }
         }
     }
@@ -1782,7 +1809,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.WHISPEROFCORRUPTION.get(), applyAbilityStrengthened(((float) sequence * 1.5f) / abilityWeakness, abilityStrengthened));
 
         // WARRIOR
-        damageMap.put(ItemInit.GIGANTIFICATION.get(), applyAbilityStrengthened((13.5f - sequence * 1.5f) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.GIGANTIFICATION.get(), applyAbilityStrengthened((10.0f - sequence * 1.5f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SWORDOFDAWN.get(), applyAbilityStrengthened((225.0f - (sequence * 22.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SWORDOFSILVER.get(), applyAbilityStrengthened((300.0f - (sequence * 30)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TWILIGHTSWORD.get(), applyAbilityStrengthened((600.0f - (sequence * 150)) / abilityWeakness, abilityStrengthened));
@@ -1850,7 +1877,7 @@ public class BeyonderUtil {
     public static boolean isLivingEntityMoving(LivingEntity entity) {
         CompoundTag tag = entity.getPersistentData();
         updatePositions(entity, tag);
-        double MOVEMENT_THRESHOLD = 0.0023;
+        double MOVEMENT_THRESHOLD = 0.0018;
         double prevX = tag.getDouble("prevX");
         double prevY = tag.getDouble("prevY");
         double prevZ = tag.getDouble("prevZ");
@@ -2480,6 +2507,14 @@ public class BeyonderUtil {
             PlayerAllyData allyData = serverLevel.getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
             allyData.addAlly(user.getUUID(), allyToBe.getUUID());
             allyData.addAlly(allyToBe.getUUID(), user.getUUID());
+        }
+    }
+
+    public static void forceRemoveAlly(LivingEntity user, LivingEntity allyToRemove) {
+        if (user.level() instanceof ServerLevel serverLevel) {
+            PlayerAllyData allyData = serverLevel.getDataStorage().computeIfAbsent(PlayerAllyData::load, PlayerAllyData::create, "player_allies");
+            allyData.removeAlly(user.getUUID(), allyToRemove.getUUID());
+            allyData.removeAlly(allyToRemove.getUUID(), user.getUUID());
         }
     }
 
@@ -3752,17 +3787,62 @@ public class BeyonderUtil {
             playerMobEntity.setIsFlying(false);
             playerMobEntity.setFlySpeed(1.0f);
         }
+        livingEntity.getPersistentData().putInt("LOTMFlying", 0);
+    }
+
+
+    public static void startFlying(LivingEntity livingEntity, float flySpeed, int flyTime) {
+        if (livingEntity instanceof Player pPlayer) {
+            Abilities playerAbilities = pPlayer.getAbilities();
+            if (!pPlayer.isCreative()) {
+                playerAbilities.mayfly = true;
+                playerAbilities.flying = true;
+                playerAbilities.setFlyingSpeed(flySpeed);
+            }
+            pPlayer.onUpdateAbilities();
+            if (livingEntity instanceof ServerPlayer serverPlayer) {
+                serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
+            }
+        } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+            playerMobEntity.setIsFlying(true);
+            playerMobEntity.setFlySpeed(flySpeed);
+        }
+        livingEntity.getPersistentData().putInt("LOTMFlying", flyTime);
+        livingEntity.getPersistentData().putFloat("LOTMFlySpeed", flySpeed);
+    }
+
+    public static void flyingTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        if (!livingEntity.level().isClientSide()) {
+            CompoundTag tag = livingEntity.getPersistentData();
+            int flyTime = tag.getInt("LOTMFlying");
+            float flySpeed = tag.getFloat("LOTMFlySpeed");
+            if (flyTime >= 1) {
+                tag.putInt("LOTMFlying", flyTime - 1);
+                if (livingEntity instanceof Player pPlayer) {
+                    Abilities playerAbilities = pPlayer.getAbilities();
+                    if (!pPlayer.isCreative()) {
+                        playerAbilities.mayfly = true;
+                        playerAbilities.setFlyingSpeed(flySpeed);
+                    }
+                    pPlayer.onUpdateAbilities();
+                    if (livingEntity instanceof ServerPlayer serverPlayer) {
+                        serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
+                    }
+                } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+                    playerMobEntity.setIsFlying(true);
+                    playerMobEntity.setFlySpeed(flySpeed);
+                }
+            } else {
+                stopFlying(livingEntity);
+            }
+        }
     }
 
     public static boolean canFly(LivingEntity livingEntity) {
         if (livingEntity instanceof Player player) {
-            if (player.getAbilities().mayfly = true) {
-                return true;
-            }
-        } else if (livingEntity instanceof PlayerMobEntity playerMobEntity && playerMobEntity.getIsFlying()) {
-            return true;
-        }
-        return false;
+            return player.getAbilities().mayfly;
+        } else return livingEntity instanceof PlayerMobEntity playerMobEntity && playerMobEntity.getIsFlying();
     }
 
     public static boolean canSeal(LivingEntity owner, LivingEntity target) {
@@ -3770,9 +3850,7 @@ public class BeyonderUtil {
             int sequence = BeyonderUtil.getSequence(owner);
             int targetSequence = BeyonderUtil.getSequence(target);
             if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(target, BeyonderClassInit.APPRENTICE.get(), 3)) {
-                if (targetSequence < sequence) {
-                    return false;
-                }
+                return targetSequence >= sequence;
             }
         }
 

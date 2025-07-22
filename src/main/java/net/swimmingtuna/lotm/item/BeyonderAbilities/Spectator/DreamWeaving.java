@@ -111,6 +111,8 @@ public class DreamWeaving extends SimpleAbilityItem {
             if (deathTimer == 1) {
                 cleanupBossEffects(entity);
                 entity.remove(Entity.RemovalReason.DISCARDED);
+                entity.kill();
+                entity.setRemoved(Entity.RemovalReason.DISCARDED);
             }
         }
     }
@@ -138,8 +140,6 @@ public class DreamWeaving extends SimpleAbilityItem {
                     mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
                     mob.setTarget(entity);
                     mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);
-
-                    // Mark boss entities for special handling
                     if (isBossEntity(mob)) {
                         mob.getPersistentData().putBoolean("dreamWeavingBoss", true);
                     }

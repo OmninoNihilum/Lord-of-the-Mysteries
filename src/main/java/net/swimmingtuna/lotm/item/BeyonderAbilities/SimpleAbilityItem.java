@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -78,6 +79,13 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
 
     public boolean checkAll(LivingEntity living) {
+        if (living instanceof Player player && player.getCooldowns().isOnCooldown(this)) {
+            return false;
+        } else {
+            if (living.getPersistentData().getInt("abilityCooldownFor" + this.getDescription().getString()) >= 1) {
+                return false;
+            }
+        }
         boolean itemCheckPassed = true;
         boolean isKeybindUse = !(living.getItemInHand(InteractionHand.MAIN_HAND).is(this) || living.getItemInHand(InteractionHand.OFF_HAND).is(this));
         if (!isKeybindUse && living instanceof Player) {
@@ -396,8 +404,15 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
 
-    public static boolean checkIfCanUseAbility(LivingEntity livingEntity) {
+    public boolean checkIfCanUseAbility(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            if (livingEntity instanceof Player player && player.getCooldowns().isOnCooldown(this)) {
+                return false;
+            } else {
+                if (livingEntity.getPersistentData().getInt("abilityCooldownFor" + this.getDescription().getString()) >= 1) {
+                    return false;
+                }
+            }
             boolean shouldntActiveCalamity = true;
             boolean allowBeyonderAbilitiesNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
             if (!allowBeyonderAbilitiesNearSpawn) {

@@ -65,11 +65,6 @@ public class TestItem extends SimpleAbilityItem {
         if (!player.level().isClientSide()) {
             BeyonderUtil.setPathway(interactionTarget, BeyonderClassInit.SAILOR.get());
             BeyonderUtil.setSequence(interactionTarget, 5);
-            player.sendSystemMessage(Component.literal("WORKED ON " + interactionTarget.getName().getString()));
-            if (BeyonderUtil.getPathway(interactionTarget) != null) {
-                player.sendSystemMessage(Component.literal("RAVAGER IS NOW " + BeyonderUtil.getPathwayName(BeyonderUtil.getPathway(interactionTarget))));
-                player.sendSystemMessage(Component.literal("RAVAGER IS NOW " + BeyonderUtil.getSequence(interactionTarget)));
-            }
         }
         return InteractionResult.SUCCESS;
     }
@@ -85,6 +80,7 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
+            /*
             MinecraftServer server = livingEntity.getServer();
             if (server != null && livingEntity instanceof Player pPlayer) {
                 if (pPlayer.level().dimension() == Level.OVERWORLD) {
@@ -103,6 +99,8 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
+
+             */
         }
         return InteractionResult.SUCCESS;
     }

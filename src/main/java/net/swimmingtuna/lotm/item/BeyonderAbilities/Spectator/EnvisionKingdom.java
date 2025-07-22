@@ -67,12 +67,12 @@ public class EnvisionKingdom extends SimpleAbilityItem {
             int mindscapeAbilities = tag.getInt("mindscapeAbilities");
             if (mindscapeAbilities >= 1) {
                 BeyonderUtil.setSpirituality(livingEntity, BeyonderUtil.getMaxSpirituality(livingEntity));
-                if (!tag.getBoolean("CAN_FLY")) {
+                if (!tag.getBoolean("CanFly")) {
                     livingEntity.getPersistentData().putInt("dreamIntoReality", 3);
-                    BeyonderUtil.startFlying(player, 0.1f);
+                    BeyonderUtil.startFlying(player, 0.1f, 20);
                 }
             }
-            if (mindscapeAbilities == 1 && !tag.getBoolean("CAN_FLY")) {
+            if (mindscapeAbilities == 1 && !tag.getBoolean("CanFly")) {
                 livingEntity.getPersistentData().putInt("dreamIntoReality", 1);
                 BeyonderUtil.stopFlying(player);
             }

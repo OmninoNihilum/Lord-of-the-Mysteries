@@ -47,7 +47,7 @@ public class LevelRendererMixin {
     )
     private float scaleMoonSize(float original) {
         // Scale moon size by 3x
-        return original * 3.0F;
+        return original * 2.5F;
     }
 
     @Inject(

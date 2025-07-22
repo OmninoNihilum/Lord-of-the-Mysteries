@@ -17,6 +17,7 @@
     "MixinPotionItem",
     "MixinSplashPotionItem",
     "MobAttackMixin",
+    "ScaleOfDropCancellationMixin",
     "ServerLevelMixin",
     "ServerPlayerMixin",
     "ServerPlayNetworkDesyncFixMixin",

@@ -52,7 +52,7 @@ public class Symbolization extends SimpleAbilityItem {
                 pPlayer.displayClientMessage(Component.literal("You are currently " + (isNowSymbolized ? "" : "NOT ") + "symbolized").withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.BOLD), true);
             }
             if (isNowSymbolized) {
-                BeyonderUtil.startFlying(player, 0.15f);
+                BeyonderUtil.startFlying(player, 0.15f, 20);
                 BeyonderUtil.setInvisible(player, true, 10);
             } else {
                 BeyonderUtil.stopFlying(player);
@@ -66,6 +66,7 @@ public class Symbolization extends SimpleAbilityItem {
         LivingEntity living = event.getEntity();
         if (!living.level().isClientSide() && living.getPersistentData().getBoolean("planeswalkerSymbolization")) {
             CompoundTag tag = living.getPersistentData();
+            BeyonderUtil.startFlying(living, 0.15f, 20);
             if (BeyonderUtil.getSpirituality(living) < 10) {
                 BeyonderUtil.setInvisible(living, false, 0);
                 tag.putBoolean("planeswalkerSymbolization", false);

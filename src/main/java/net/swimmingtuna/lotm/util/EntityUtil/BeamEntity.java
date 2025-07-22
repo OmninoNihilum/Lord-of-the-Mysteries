@@ -540,8 +540,10 @@ public abstract class BeamEntity extends LOTMProjectile {
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        return distance < 1024;
+        return true;
     }
+
+
 
     private void update() {
         if (this.getOwner() instanceof LivingEntity owner) {
@@ -660,5 +662,17 @@ public abstract class BeamEntity extends LOTMProjectile {
         }
 
         return null;
+    }
+
+    @Override
+    public @NotNull AABB getBoundingBoxForCulling() {
+        return new AABB(
+                this.getX() - 3000,
+                this.getY() - 3000,
+                this.getZ() - 3000,
+                this.getX() + 3000,
+                this.getY() + 3000,
+                this.getZ() + 3000
+        );
     }
 }

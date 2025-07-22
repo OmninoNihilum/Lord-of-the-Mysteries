@@ -85,12 +85,12 @@ public class Gigantification extends SimpleAbilityItem {
                 tag.putBoolean("handOfGodGiant", true);
                 tag.putBoolean("warriorGiant", false);
                 tag.putBoolean("twilightGiant", false);
-                scaleData.setTargetScale(scaleToSet * 2);
+                scaleData.setTargetScale(Math.min(18,scaleToSet * 2));
             } else if (sequence == 0) {
                 tag.putBoolean("handOfGodGiant", false);
                 tag.putBoolean("warriorGiant", false);
                 tag.putBoolean("twilightGiant", true);
-                scaleData.setTargetScale(scaleToSet * 3);
+                scaleData.setTargetScale(Math.min(25,scaleToSet * 3));
             }
         }
     }

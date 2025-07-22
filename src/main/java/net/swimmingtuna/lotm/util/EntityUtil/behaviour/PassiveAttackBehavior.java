@@ -84,7 +84,7 @@ public class PassiveAttackBehavior<E extends LivingEntity> extends ExtendedBehav
                         BrainUtils.setMemory(entity.getBrain(), MemoryModuleType.ATTACK_TARGET, target);
                     }
                 }
-                if (beyonderEntity.getCreator() != null) {
+                if (beyonderEntity.getCreator() != null && beyonderEntity.getIsClone()) {
                     LivingEntity livingEntity = beyonderEntity.getCreator();
                     LivingEntity lastHurtMob = livingEntity.getLastHurtMob();
 

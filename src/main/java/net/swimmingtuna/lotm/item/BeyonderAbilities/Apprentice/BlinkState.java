@@ -59,7 +59,7 @@ public class BlinkState extends SimpleAbilityItem {
                 BeyonderUtil.stopFlying(player);
                 tag.putInt("doorBlinkStateDistance", 0);
             } else {
-                BeyonderUtil.startFlying(player, 0.2f);
+                BeyonderUtil.startFlying(player, 0.2f, 20);
             }
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Blink State Turned " + (blinkState ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
@@ -87,6 +87,7 @@ public class BlinkState extends SimpleAbilityItem {
                 } else if (livingEntity instanceof Mob) {
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SPEED, 20, 5, false, false);
                 }
+                BeyonderUtil.startFlying(livingEntity, 0.2f, 20);
                 if (tag.getInt("doorBlinkStateX1") != 0 && tag.getInt("doorBlinkStateX2") != 0) {
                     int x1 = tag.getInt("doorBlinkStateX1");
                     int y1 = tag.getInt("doorBlinkStateY1");

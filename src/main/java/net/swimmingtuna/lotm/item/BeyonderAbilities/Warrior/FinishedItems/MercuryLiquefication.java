@@ -116,7 +116,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             if (livingEntity.tickCount % 20 == 0) {
                 livingEntity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 1, false, false));
             }
-            BeyonderUtil.startFlying(livingEntity, 0.1f);
+            BeyonderUtil.startFlying(livingEntity, 0.1f, 20);
         }
         if (!livingEntity.level().isClientSide()) {
             if (tag.getInt("mercuryLiqueficationCooldown") >= 1) {

@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -104,14 +105,18 @@ public class DreamIntoReality extends SimpleAbilityItem {
         //DREAM INTO REALITY
         boolean canFly = livingEntity.getPersistentData().getBoolean("CanFly");
         if (!canFly) {
+            LOTM.LOGGER.info("CANT FLY");
             return;
         }
         if (BeyonderUtil.getSpirituality(livingEntity) >= 15) {
+            LOTM.LOGGER.info("SPIRITUALITY REQUIREMENTS MET");
             if (livingEntity.tickCount % 2 == 0) {
+                BeyonderUtil.startFlying(livingEntity, 0.1f, 10);
                 BeyonderUtil.useSpirituality(livingEntity, 10);
             }
         }
         if (BeyonderUtil.getSpirituality(livingEntity) <= 15) {
+            LOTM.LOGGER.info("SPIRITUALITY REQUIREMENTS NOT MET");
             DreamIntoReality.stopFlying(livingEntity);
         }
         if (BeyonderUtil.getSequence(livingEntity) == 2) {
