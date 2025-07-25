@@ -154,4 +154,21 @@ public class DragonBreathEntity extends BeamEntity {
         player.level().addFreshEntity(dragonBreath);
     }
 
+    public static void  shootDragonBreathLarge(LivingEntity player, int power, double x, double y, double z) {
+        DragonBreathEntity dragonBreath = new DragonBreathEntity(player, power);
+        dragonBreath.setDestroyBlocks(true);
+        dragonBreath.teleportTo(x,y+1,z);
+        if (player instanceof Mob) {
+            dragonBreath.setDamage(power * 0.25f);
+        } else {
+            dragonBreath.setDamage(power * 0.5f);
+        }
+        dragonBreath.setSize(3);
+        dragonBreath.setIsDragonbreath(true);
+        dragonBreath.setFrenzyTime((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.DRAGON_BREATH.get()));
+        dragonBreath.setDuration(12);
+        dragonBreath.setRange(200);
+        player.level().addFreshEntity(dragonBreath);
+    }
+
 }

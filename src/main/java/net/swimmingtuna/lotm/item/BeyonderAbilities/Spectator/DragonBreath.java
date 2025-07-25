@@ -27,12 +27,15 @@ public class DragonBreath extends SimpleAbilityItem {
 
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
+        if (!player.level().isClientSide()) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            useSpirituality(player);
+            addCooldown(player);
+            dragonbreath(player);
+            return InteractionResult.SUCCESS;
         }
-        useSpirituality(player);
-        addCooldown(player);
-        dragonbreath(player);
         return InteractionResult.SUCCESS;
     }
 

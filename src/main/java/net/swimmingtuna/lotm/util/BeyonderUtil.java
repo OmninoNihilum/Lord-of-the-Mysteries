@@ -896,7 +896,6 @@ public class BeyonderUtil {
 
         if ((hasEntityInteraction || hasBlockInteraction) && !hasGeneralAbility) {
             if (successfulUse) {
-                // Use spirituality and add cooldown if it's a SimpleAbilityItem
                 if (ability instanceof SimpleAbilityItem simpleAbility) {
                     simpleAbility.useSpirituality(player);
                     simpleAbility.addCooldown(player);
@@ -908,28 +907,23 @@ public class BeyonderUtil {
             }
         } else if (!hasEntityInteraction && !hasBlockInteraction) {
             InteractionResult result = ability.useAbility(player.level(), player, hand);
-
-            // Use spirituality and add cooldown if it's a SimpleAbilityItem and ability was used
             if (result != InteractionResult.PASS && ability instanceof SimpleAbilityItem simpleAbility) {
-                simpleAbility.useSpirituality(player);
+                //simpleAbility.useSpirituality(player);
                 simpleAbility.addCooldown(player);
             }
 
             player.displayClientMessage(Component.literal("Used: " + itemName).withStyle(getStyle(player)), true);
         } else if (successfulUse) {
-            // Use spirituality and add cooldown if it's a SimpleAbilityItem
             if (ability instanceof SimpleAbilityItem simpleAbility) {
-                simpleAbility.useSpirituality(player);
+                //simpleAbility.useSpirituality(player);
                 simpleAbility.addCooldown(player);
             }
 
             player.displayClientMessage(Component.literal("Used: " + itemName).withStyle(getStyle(player)), true);
         } else {
             InteractionResult result = ability.useAbility(player.level(), player, hand);
-
-            // Use spirituality and add cooldown if it's a SimpleAbilityItem and ability was used
             if (result != InteractionResult.PASS && ability instanceof SimpleAbilityItem simpleAbility) {
-                simpleAbility.useSpirituality(player);
+                //simpleAbility.useSpirituality(player);
                 simpleAbility.addCooldown(player);
             }
 

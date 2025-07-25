@@ -1,10 +1,12 @@
 package net.swimmingtuna.lotm.events;
 
 import com.mojang.blaze3d.shaders.FogShape;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -125,6 +127,10 @@ public class KeyClientEvents {
                     }
                 }
             }
+            if (KeyBinding.ABILITY_KEY_CLEAR.consumeClick()) {
+                ClientAbilityCombinationData.resetKeysClicked();
+                player.displayClientMessage(Component.literal("_ _ _ _ _").withStyle(ChatFormatting.BOLD), true);
+            }
         }
 
         @OnlyIn(Dist.CLIENT)
@@ -166,6 +172,7 @@ public class KeyClientEvents {
             //event.register(KeyBinding.SPIRIT_WORLD_TRAVERSAL);
             event.register(KeyBinding.ABILITY_KEY_O);
             event.register(KeyBinding.ABILITY_KEY_X);
+            event.register(KeyBinding.ABILITY_KEY_CLEAR);
         }
     }
 

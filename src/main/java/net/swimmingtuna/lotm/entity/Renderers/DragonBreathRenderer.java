@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.entity.Model.DragonBreathModel;
@@ -37,6 +36,7 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
     public DragonBreathRenderer(EntityRendererProvider.Context pContext) {
         super(pContext);
+
         this.model = new DragonBreathModel(pContext.bakeLayer(DragonBreathModel.LAYER));
     }
 
@@ -45,10 +45,8 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
         this.clearerView = Minecraft.getInstance().player == pEntity.getOwner() &&
                 Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
 
-        // Use angle interpolation that handles wrapping correctly
-        float yaw = lerpAngle(pEntity.prevYaw, pEntity.renderYaw, pPartialTick) * Mth.RAD_TO_DEG;
-        float pitch = lerpAngle(pEntity.prevPitch, pEntity.renderPitch, pPartialTick) * Mth.RAD_TO_DEG;
-
+        float yaw = (pEntity.prevYaw + (pEntity.renderYaw - pEntity.prevYaw) * pPartialTick) * Mth.RAD_TO_DEG;
+        float pitch = (pEntity.prevPitch + (pEntity.renderPitch - pEntity.prevPitch) * pPartialTick) * Mth.RAD_TO_DEG;
         Vector3f color = null;
         if (pEntity.causesFire()) {
             color = ParticleColors.FIRE_YELLOW;
@@ -78,61 +76,22 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
             double posX = pEntity.xo + (pEntity.getX() - pEntity.xo) * pPartialTick;
             double posY = pEntity.yo + (pEntity.getY() - pEntity.yo) * pPartialTick;
             double posZ = pEntity.zo + (pEntity.getZ() - pEntity.zo) * pPartialTick;
-            Vec3 startPos = new Vec3(posX, posY, posZ);
-            Vec3 endPos = new Vec3(collidePosX, collidePosY, collidePosZ);
-            Vec3 direction = endPos.subtract(startPos);
-            float length = (float) direction.length();
+            float length = (float) Math.sqrt(Math.pow(collidePosX - posX, 2) + Math.pow(collidePosY - posY, 2) + Math.pow(collidePosZ - posZ, 2));
             int frame = Mth.floor((pEntity.animation - 1 + pPartialTick) * 2);
             if (frame < 0) {
                 frame = pEntity.getFrames() * 2;
             }
+
+            // Important: Don't create a new scale context - use the existing scaled context
             pPoseStack.pushPose();
             pPoseStack.translate(0.0F, (pEntity.getBbHeight() / 2.0F) - 0.5F, 0.0F);
             VertexConsumer beam = pBuffer.getBuffer(LOTMRenderTypes.glow(TEXTURE));
             float brightness = 1.0F - ((float) pEntity.getTime() / (pEntity.getCharge() + pEntity.getDuration() + pEntity.getFrames()));
-            this.renderBeamWithDirection(length, direction.normalize(), frame, pPoseStack, beam, brightness, pPackedLight, entitySize);
+            this.renderBeam(length, yaw, pitch, frame, pPoseStack, beam, brightness, pPackedLight, entitySize);
             pPoseStack.popPose();
         }
 
-        pPoseStack.popPose();
-    }
-
-    /**
-     * Properly interpolates angles handling the wrap-around case (359° -> 1°)
-     */
-    private float lerpAngle(float from, float to, float partialTick) {
-        float delta = to - from;
-
-        // Handle wrap-around by choosing the shorter path
-        if (delta > Math.PI) {
-            delta -= 2 * Math.PI;
-        } else if (delta < -Math.PI) {
-            delta += 2 * Math.PI;
-        }
-
-        return from + delta * partialTick;
-    }
-
-    /**
-     * Renders the beam using a direction vector for stable orientation
-     */
-    private void renderBeamWithDirection(float length, Vec3 direction, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float entitySize) {
-        if (length < 0.01f) return; // Avoid rendering extremely short beams
-
-        poseStack.pushPose();
-        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-
-        // Calculate stable yaw and pitch from direction vector
-        double horizontalLength = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
-        float yaw = (float) Math.toDegrees(Math.atan2(-direction.x, direction.z));
-        float pitch = (float) Math.toDegrees(Math.atan2(-direction.y, horizontalLength));
-
-        // Apply rotations in stable order
-        poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
-        poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-
-        this.drawCube(length, frame, poseStack, consumer, brightness, packedLight, entitySize);
-        poseStack.popPose();
+        pPoseStack.popPose(); // Pop the main scale
     }
 
     private void drawCube(float length, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float scale) {
@@ -177,6 +136,17 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, length, scaledRadius, minU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, scaledRadius, maxU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, -scaledRadius, maxU, minV, brightness, packedLight);
+    }
+
+    private void renderBeam(float length, float yaw, float pitch, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float entitySize) {
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(yaw - 90.0F));
+        poseStack.mulPose(Axis.XN.rotationDegrees(pitch));
+
+        this.drawCube(length, frame, poseStack, consumer, brightness, packedLight, entitySize);
+
+        poseStack.popPose();
     }
 
     public void drawVertex(Matrix4f matrix4f, Matrix3f matrix3f, VertexConsumer consumer, float x, float y, float z, float u, float v, float brightness, int packedLight) {

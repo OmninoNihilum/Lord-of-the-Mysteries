@@ -555,7 +555,6 @@ public class ModEvents {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
                 attacked.getPersistentData().putInt("inCombat", 300);
                 attacker.getPersistentData().putInt("inCombat", 300);
-                PsychologicalInvisibility.psychologicalInvisibilityAttack(event);
                 DoorMirage.doorMirageAttackEvent(event);
                 BlinkAfterimage.travelerBlinkPassive(event);
                 CompoundTag tag = attacked.getPersistentData();
@@ -664,6 +663,7 @@ public class ModEvents {
         DamageSource source = event.getSource();
         Entity entitySource = source.getEntity();
         if (!event.getEntity().level().isClientSide()) {
+            PsychologicalInvisibility.psychologicalInvisibilityAttack(event);
             Teleportation.teleportationHurtEvent(event);
             BeyonderUtil.ageHandlerHurt(event);
             GuardianBoxEntity.guardianHurtEvent(event);

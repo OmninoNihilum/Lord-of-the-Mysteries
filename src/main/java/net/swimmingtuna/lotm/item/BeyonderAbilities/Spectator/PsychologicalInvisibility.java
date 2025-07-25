@@ -19,6 +19,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -39,37 +40,37 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
     }
 
     @Override
-    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        if (!checkAll(player)) {
+    public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
+        if (!checkAll(livingEntity)) {
             return InteractionResult.FAIL;
         }
-        psychologicalInvisibilityAbility(player);
-        if (ClientShouldntRenderInvisibilityData.getShouldntRender(player.getUUID())) {
-            addCooldown(player);
+        psychologicalInvisibilityAbility(livingEntity);
+        if (ClientShouldntRenderInvisibilityData.getShouldntRender(livingEntity.getUUID())) {
+            addCooldown(livingEntity);
         }
         return InteractionResult.SUCCESS;
     }
 
-    private static void psychologicalInvisibilityAbility(LivingEntity player) {
-        if (!player.level().isClientSide()) {
-            CompoundTag tag = player.getPersistentData();
+    private static void psychologicalInvisibilityAbility(LivingEntity livingEntity) {
+        if (!livingEntity.level().isClientSide()) {
+            CompoundTag tag = livingEntity.getPersistentData();
             boolean newState = !tag.getBoolean("psychologicalInvisibility");
             if (newState) {
-                for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(50))) {
-                    if (mob.getTarget() == player) {
+                for (Mob mob : livingEntity.level().getEntitiesOfClass(Mob.class, livingEntity.getBoundingBox().inflate(50))) {
+                    if (mob.getTarget() == livingEntity) {
                         mob.setTarget(null);
                     }
                 }
-                if (player instanceof Player pPlayer) {
-                    BeyonderUtil.setInvisible(player, true, 30);
+                if (livingEntity instanceof Player pPlayer) {
+                    BeyonderUtil.setInvisible(livingEntity, true, 30);
                     pPlayer.displayClientMessage(Component.literal("You are now invisible").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                 }
                 tag.putBoolean("psychologicalInvisibility", true);
             } else {
-                if (player instanceof Player pPlayer) {
+                if (livingEntity instanceof Player pPlayer) {
                     pPlayer.displayClientMessage(Component.literal("You are now visible").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.RED), true);
                 }
-                removePsychologicalInvisibilityEffect(player);
+                removePsychologicalInvisibilityEffect(livingEntity);
                 tag.putBoolean("psychologicalInvisibility", false);
             }
 
@@ -148,7 +149,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
     }
 
 
-    public static void psychologicalInvisibilityAttack(LivingAttackEvent event) {
+    public static void psychologicalInvisibilityAttack(LivingHurtEvent event) {
         LivingEntity entity = event.getEntity();
         if (!entity.level().isClientSide()) {
             if (entity.getPersistentData().getBoolean("psychologicalInvisibility")) {

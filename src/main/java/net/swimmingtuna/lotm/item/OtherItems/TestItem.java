@@ -18,8 +18,10 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DragonBreath;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
@@ -65,6 +67,7 @@ public class TestItem extends SimpleAbilityItem {
         if (!player.level().isClientSide()) {
             BeyonderUtil.setPathway(interactionTarget, BeyonderClassInit.SAILOR.get());
             BeyonderUtil.setSequence(interactionTarget, 5);
+            DragonBreathEntity.shootDragonBreathLarge(interactionTarget, 30, interactionTarget.getX(), interactionTarget.getY(), interactionTarget.getZ());
         }
         return InteractionResult.SUCCESS;
     }
