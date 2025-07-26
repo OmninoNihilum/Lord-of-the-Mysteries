@@ -65,28 +65,11 @@ public class SpearOfDawn extends SwordItem implements GeoItem {
                     }
                 }
             }
-
-            if (livingEntity instanceof Mob mob && !level.isClientSide()) {
-                if (mob.getMainHandItem().getItem() instanceof SpearOfDawn && mob.getTarget() != null) {
-                    if (livingEntity.tickCount % 100 == 0) {
-                        if (BeyonderUtil.getSpirituality(mob) >= 25) {
-                            ItemStack originalItem = mob.getPersistentData().contains("originalMainHand") ? ItemStack.of(mob.getPersistentData().getCompound("originalMainHand")) : ItemStack.EMPTY;
-                            throwSpear(level, mob);
-                            if (!originalItem.isEmpty()) {
-                                mob.setItemInHand(InteractionHand.MAIN_HAND, originalItem);
-                                mob.getPersistentData().remove("originalMainHand");
-                            } else {
-                                mob.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                            }
-                        }
-                    }
-                }
-            }
         }
         super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
-    private void throwSpear(Level level, LivingEntity thrower) {
+    public static void throwSpear(Level level, LivingEntity thrower) {
         if (!level.isClientSide) {
             SpearOfDawnEntity spearOfDawn = new SpearOfDawnEntity(EntityInit.SPEAR_OF_DAWN_ENTITY.get(), level);
             Vec3 lookVec = thrower.getLookAngle().normalize().scale(10);
@@ -95,6 +78,19 @@ public class SpearOfDawn extends SwordItem implements GeoItem {
             spearOfDawn.hurtMarked = true;
             spearOfDawn.teleportTo(thrower.getX(), thrower.getY() + thrower.getEyeHeight(), thrower.getZ());
             BeyonderUtil.setScale(spearOfDawn, BeyonderUtil.getDamage(thrower).get(ItemInit.SPEAROFDAWN.get()));
+            level.addFreshEntity(spearOfDawn);
+        }
+    }
+
+    public static void throwSpearMob(Level level, LivingEntity thrower) {
+        if (!level.isClientSide) {
+            SpearOfDawnEntity spearOfDawn = new SpearOfDawnEntity(EntityInit.SPEAR_OF_DAWN_ENTITY.get(), level);
+            Vec3 lookVec = thrower.getLookAngle().normalize().scale(10);
+            spearOfDawn.setDeltaMovement(lookVec);
+            spearOfDawn.setOwner(thrower);
+            spearOfDawn.hurtMarked = true;
+            spearOfDawn.teleportTo(thrower.getX(), thrower.getY() + thrower.getEyeHeight(), thrower.getZ());
+            BeyonderUtil.setScale(spearOfDawn, BeyonderUtil.getDamage(thrower).get(ItemInit.SPEAROFDAWN.get()) * 0.6f);
             level.addFreshEntity(spearOfDawn);
         }
     }

@@ -25,8 +25,5 @@ public class KeyBinding {
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, KEY_CATEGORY_LOTM);
     public static final KeyMapping ABILITY_KEY_CLEAR = new KeyMapping(ABILITY_KEY_2, KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, KEY_CATEGORY_LOTM);
-
-
-
 }
 

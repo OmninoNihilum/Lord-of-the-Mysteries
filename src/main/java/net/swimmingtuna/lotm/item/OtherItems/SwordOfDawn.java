@@ -65,17 +65,6 @@ public class SwordOfDawn extends SwordItem implements GeoItem {
                     }
                 }
             }
-
-            if (livingEntity instanceof Mob mob && !level.isClientSide()) {
-                if (mob.getMainHandItem().getItem() instanceof SwordOfDawn && mob.getTarget() != null) {
-                    if (livingEntity.tickCount % 200 == 0) {
-                        if (BeyonderUtil.getSpirituality(mob) >= 350) {
-                            HurricaneOfLightEntity.summonHurricaneOfLightDawn(mob);
-                            BeyonderUtil.useSpirituality(mob, 1000 - (BeyonderUtil.getSequence(mob) * 115));
-                        }
-                    }
-                }
-            }
         }
         super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }

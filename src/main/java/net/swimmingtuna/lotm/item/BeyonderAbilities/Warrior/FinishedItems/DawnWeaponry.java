@@ -19,9 +19,11 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.entity.HurricaneOfLightEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.item.OtherItems.SpearOfDawn;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ModArmorMaterials;
 import org.jetbrains.annotations.NotNull;
@@ -41,13 +43,15 @@ public class DawnWeaponry extends SimpleAbilityItem {
         if (!checkAll(player)) {
             return InteractionResult.FAIL;
         }
-        addCooldown(player);
+        if (player instanceof Player) {
+            addCooldown(player);
+        }
         useSpirituality(player);
         dawnWeaponry(player);
         return InteractionResult.SUCCESS;
     }
 
-    public static void dawnWeaponry(LivingEntity livingEntity) {
+    public void dawnWeaponry(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
             CompoundTag tag = livingEntity.getPersistentData();
             ItemStack sword = createSword(ItemInit.SWORDOFDAWN.get().getDefaultInstance());
@@ -70,36 +74,14 @@ public class DawnWeaponry extends SimpleAbilityItem {
                         }
                     }
                 }
-            } else if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
-                livingEntity.getPersistentData().putInt("dawnWeaponryTick", 3);
-            }
-        }
-    }
-
-    public static void dawnWeaponryTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity livingEntity = event.getEntity();
-        if (livingEntity instanceof Mob mob && mob.getPersistentData().getInt("dawnWeaponryTick") >= 1) {
-            mob.getPersistentData().putInt("dawnWeaponryTick", mob.getPersistentData().getInt("dawnWeaponryTick") - 1);
-            ItemStack sword = createSword(ItemInit.SWORDOFDAWN.get().getDefaultInstance());
-            ItemStack spear = createSpear(ItemInit.SPEAROFDAWN.get().getDefaultInstance());
-            ItemStack originalMainHand = mob.getMainHandItem().copy();
-            if (!originalMainHand.isEmpty()) {
-                CompoundTag originalItemTag = new CompoundTag();
-                originalMainHand.save(originalItemTag);
-                mob.getPersistentData().put("originalMainHand", originalItemTag);
-            }
-            if (mob.getTarget() != null && mob.getPersistentData().getInt("dawnWeaponryTick") == 1) {
-                if (mob.getPersistentData().getBoolean("dawnWeaponrySilverSword")) {
-                    ItemStack silverSword = createSword(ItemInit.SWORDOFSILVER.get().getDefaultInstance());
-                    mob.setItemSlot(EquipmentSlot.MAINHAND, silverSword);
-                    mob.getPersistentData().putBoolean("dawnWeaponrySilverSword", false);
+            } else if (livingEntity instanceof Mob mob) {
+                float random = BeyonderUtil.getPositiveRandomInRange(2);
+                if (random >= 2) {
+                    SpearOfDawn.throwSpearMob(mob.level(), mob);
                 } else {
-                    if (mob.getTarget().distanceTo(mob) >= 20) {
-                        mob.setItemSlot(EquipmentSlot.MAINHAND, spear);
-                    } else {
-                        mob.setItemSlot(EquipmentSlot.MAINHAND, sword);
-                    }
+                    HurricaneOfLightEntity.summonHurricaneOfLightDawnMob(mob);
                 }
+                addCooldown(livingEntity,this, 400);
             }
         }
     }

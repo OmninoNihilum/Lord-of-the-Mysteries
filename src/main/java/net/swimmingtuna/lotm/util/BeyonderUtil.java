@@ -26,6 +26,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -2526,6 +2527,7 @@ public class BeyonderUtil {
     }
 
 
+
     public static void addSpirituality(LivingEntity living, int spirituality) { //marked
         if (!living.level().isClientSide()) {
             if (living instanceof Player player) {
@@ -3298,14 +3300,14 @@ public class BeyonderUtil {
         }
     }
 
-    public static float getRandomInRange(float range) {
+    public static float getRandomInRange(float range) { //If I put 4, it can return -4,-3,-2,-1,0,1,2,3,3.9999
         float random = (float) Math.random();
         return (random * 2 * range) - range;
     }
 
-    public static float getPositiveRandomInRange(float range) {
+    public static float getPositiveRandomInRange(float range) { //If I put 4, it can return 0,1,2,3,3.9999
         float random = (float) Math.random();
-        return (random * random);
+        return (range * random);
     }
 
     public static void destroyBlocksInSphere(Entity entity, BlockPos hitPos, double radius, float damage) {

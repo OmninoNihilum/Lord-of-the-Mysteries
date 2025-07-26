@@ -7,6 +7,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -188,7 +190,9 @@ public class BeyonderEntityData extends SavedData {
                 if (pathway != null) {
                     if (BeyonderUtil.getSpirituality(living) < BeyonderUtil.getMaxSpirituality(living)) {
                         int sequence = BeyonderUtil.getSequence(living);
-                        BeyonderUtil.addSpirituality(living, pathway.spiritualityRegen().get(sequence) * 20);
+                        RandomSource random = living.getRandom();
+                        double increase = (Mth.nextDouble(random, 0.1, 1.0) * (pathway.spiritualityRegen().get(sequence) * 1.5f)) / 5;
+                        BeyonderUtil.addSpirituality(living, (int) increase);
                     }
                     CompoundTag persistentData = living.getPersistentData();
                     List<String> keysToDecrement = new ArrayList<>();

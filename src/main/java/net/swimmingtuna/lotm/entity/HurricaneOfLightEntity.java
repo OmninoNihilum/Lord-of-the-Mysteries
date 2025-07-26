@@ -126,6 +126,19 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
         }
     }
 
+    public static void summonHurricaneOfLightDawnMob(LivingEntity livingEntity) {
+        if (!livingEntity.level().isClientSide()) {
+            int sequence = BeyonderUtil.getSequence(livingEntity);
+            HurricaneOfLightEntity hurricaneOfLightEntity = new HurricaneOfLightEntity(livingEntity.level(), livingEntity, 0, 0, 0);
+            hurricaneOfLightEntity.setHurricaneRadius((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.6f));
+            hurricaneOfLightEntity.setHurricaneHeight((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.6f));
+            hurricaneOfLightEntity.setHurricaneLifecount(300 - (sequence * 20));
+            hurricaneOfLightEntity.setHurricaneDestroy(true);
+            hurricaneOfLightEntity.setHurricaneMov(livingEntity.getLookAngle().scale(0.5f).toVector3f());
+            livingEntity.level().addFreshEntity(hurricaneOfLightEntity);
+        }
+    }
+
     public static void summonHurricaneOfLightDeity(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(livingEntity);

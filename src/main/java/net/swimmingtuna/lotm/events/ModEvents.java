@@ -400,7 +400,6 @@ public class ModEvents {
                 //mob ticks
                 MatterAccelerationBlocks.matterAccelerationBlocksMobTick(event);
                 BeyonderEntityData.regenerateSpirituality(event);
-                DawnWeaponry.dawnWeaponryTick(event);
 
                 //regular ticks
                 PsychologicalInvisibility.psychologicalInvisibilityTick(event);
@@ -979,6 +978,7 @@ public class ModEvents {
                     if (pathwayString != null) {
                         BeyonderClass pathway = BeyonderUtil.getPathway(living);
                         if (pathway != null) {
+                            BeyonderUtil.setSpirituality(living, BeyonderUtil.getMaxSpirituality(living));
                             BeyonderHolder.updateMaxHealthModifier(living, pathway.maxHealth().get(BeyonderUtil.getSequence(living)));
                         }
                     }

@@ -63,7 +63,7 @@ public class CreateConcealedBundle extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, transform a bundle in your off-hand in a special mystical item, containing a pocket dimension which can start many materials"));
+        tooltipComponents.add(Component.literal("Upon use, transform a bundle in your off-hand into a special mystical item, containing a pocket dimension which can store many materials"));
         tooltipComponents.add(Component.literal("Be careful, as the bag will break and all items will be lost after a certain amount of uses.").withStyle(ChatFormatting.RED));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("300").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
