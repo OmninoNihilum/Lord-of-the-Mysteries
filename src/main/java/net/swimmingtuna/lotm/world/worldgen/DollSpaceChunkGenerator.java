@@ -17,6 +17,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -33,15 +34,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-public class ConcealedSpaceChunkGenerator extends ChunkGenerator {
-    public static final Codec<ConcealedSpaceChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+
+public class DollSpaceChunkGenerator extends ChunkGenerator {
+
+    public static final Codec<DollSpaceChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(g -> g.biomeSource),
             BlockState.CODEC.fieldOf("fill_block").forGetter(g -> g.fillBlock)
-    ).apply(instance, ConcealedSpaceChunkGenerator::new));
-    public static final ResourceLocation ID = new ResourceLocation(LOTM.MOD_ID, "concealed_space");
+    ).apply(instance, DollSpaceChunkGenerator::new));
+
+    public static final ResourceLocation ID = new ResourceLocation(LOTM.MOD_ID, "doll_space");
+
     private static final int FILL_HEIGHT = 100;
     private final BlockState fillBlock;
-    public ConcealedSpaceChunkGenerator(BiomeSource source, BlockState fillBlock) {
+
+    public DollSpaceChunkGenerator(BiomeSource source, BlockState fillBlock) {
         super(source);
         if (fillBlock == null) {
             throw new IllegalArgumentException("Fill block is null!");
@@ -49,11 +55,10 @@ public class ConcealedSpaceChunkGenerator extends ChunkGenerator {
         this.fillBlock = fillBlock;
     }
 
-    public ConcealedSpaceChunkGenerator(BiomeSource source) {
+    public DollSpaceChunkGenerator(BiomeSource source){
         super(source);
-        this.fillBlock = BlockInit.VOID_BLOCK.get().defaultBlockState();
+        this.fillBlock = Blocks.GOLD_BLOCK.defaultBlockState();
     }
-
 
     @Override
     protected Codec<? extends ChunkGenerator> codec() {

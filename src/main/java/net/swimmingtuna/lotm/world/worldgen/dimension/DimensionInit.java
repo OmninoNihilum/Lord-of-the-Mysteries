@@ -18,6 +18,7 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.world.worldgen.ConcealedSpaceChunkGenerator;
+import net.swimmingtuna.lotm.world.worldgen.DollSpaceChunkGenerator;
 
 import java.util.List;
 import java.util.OptionalLong;
@@ -45,6 +46,13 @@ public class DimensionInit {
             new ResourceLocation(LOTM.MOD_ID, "concealed_space"));
     public static final ResourceKey<DimensionType> CONCEALED_SPACE_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
             new ResourceLocation(LOTM.MOD_ID, "concealed_space_type"));
+
+    public static final ResourceKey<LevelStem> DOLL_SPACE_KEY = ResourceKey.create(Registries.LEVEL_STEM,
+            new ResourceLocation(LOTM.MOD_ID, "doll_space"));
+    public static final ResourceKey<Level> DOLL_SPACE_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION,
+            new ResourceLocation(LOTM.MOD_ID, "doll_space"));
+    public static final ResourceKey<DimensionType> DOLL_SPACE_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,
+            new ResourceLocation(LOTM.MOD_ID, "doll_space_type"));
 
     public static void bootstrapTypeSpiritWorld(BootstapContext<DimensionType> context) {
         context.register(SPIRIT_WORLD_TYPE, new DimensionType(
@@ -94,18 +102,18 @@ public class DimensionInit {
         );
 
         BiomeSource fixedSource = new FixedBiomeSource(biomeRegistry.getOrThrow(Biomes.PLAINS));
-        ConcealedSpaceChunkGenerator customGenerator = new ConcealedSpaceChunkGenerator(
-                fixedSource,
-                BlockInit.VOID_BLOCK.get().defaultBlockState()
-        );
+        ConcealedSpaceChunkGenerator concealedGenerator = new ConcealedSpaceChunkGenerator(fixedSource);
+        DollSpaceChunkGenerator dollGenerator = new DollSpaceChunkGenerator(fixedSource);
 
-        LevelStem stemConcealed = new LevelStem(dimTypes.getOrThrow(DimensionInit.CONCEALED_SPACE_TYPE), customGenerator);
+        LevelStem stemConcealed = new LevelStem(dimTypes.getOrThrow(DimensionInit.CONCEALED_SPACE_TYPE), concealedGenerator);
+        LevelStem stemDoll = new LevelStem(dimTypes.getOrThrow(DimensionInit.DOLL_SPACE_TYPE), dollGenerator);
         LevelStem stemSpirit = new LevelStem(dimTypes.getOrThrow(DimensionInit.SPIRIT_WORLD_TYPE), noiseBasedChunkGenerator);
         LevelStem stemExiled = new LevelStem(dimTypes.getOrThrow(DimensionInit.EXILED_DIMENSION_TYPE), noiseBasedChunkGenerator);
 
         context.register(SPIRIT_WORLD_KEY, stemSpirit);
         context.register(EXILED_DIMENSION_KEY, stemExiled);
         context.register(CONCEALED_SPACE_KEY, stemConcealed);
+        context.register(DOLL_SPACE_KEY, stemDoll);
     }
 
     public static void bootstrapTypeExiledDimension(BootstapContext<DimensionType> context) {
@@ -129,6 +137,25 @@ public class DimensionInit {
 
     public static void bootstrapTypeConcealedSpace(BootstapContext<DimensionType> context) {
         context.register(CONCEALED_SPACE_TYPE, new DimensionType(
+                OptionalLong.empty(), // Don't fix time
+                true,  // hasSkylight
+                false, // hasCeiling
+                false, // ultraWarm
+                false,  // natural
+                1.0,   // coordinateScale
+                true,  // bedWorks
+                false,  // respawnAnchorWorks
+                0,   // minY
+                384,   // height
+                384,   // logicalHeight
+                BlockTags.INFINIBURN_OVERWORLD,
+                BuiltinDimensionTypes.OVERWORLD_EFFECTS,
+                0.0f,  // ambientLight
+                new DimensionType.MonsterSettings(false, false, ConstantInt.of(0), 0)));
+    }
+
+    public static void bootstrapTypeDollSpace(BootstapContext<DimensionType> context) {
+        context.register(DOLL_SPACE_TYPE, new DimensionType(
                 OptionalLong.empty(), // Don't fix time
                 true,  // hasSkylight
                 false, // hasCeiling

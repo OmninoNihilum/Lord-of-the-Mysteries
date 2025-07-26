@@ -23,6 +23,9 @@ import java.util.Set;
 
 public class DollStructureRenderer implements IItemRenderer {
 
+    private static final Direction[] DIRECTIONS = Direction.values();
+    private static final BlockPos.MutableBlockPos MUTABLE_POS = new BlockPos.MutableBlockPos();
+
     @Override
     public void renderItem(ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
         ListTag structureList = stack.getOrCreateTag().getList("StructureBlocks", Tag.TAG_COMPOUND);
@@ -91,7 +94,7 @@ public class DollStructureRenderer implements IItemRenderer {
 
             poseStack.pushPose();
             poseStack.translate(x, y, z);
-            dispatcher.renderSingleBlock(state, poseStack, buffer, light, overlay);
+            dispatcher.renderSingleBlock(state, poseStack, buffer, 0xF000F0, overlay);
             poseStack.popPose();
         }
 
@@ -99,8 +102,9 @@ public class DollStructureRenderer implements IItemRenderer {
     }
 
     private boolean isExposed(BlockPos pos, Set<BlockPos> positions) {
-        for (Direction dir : Direction.values()) {
-            if (!positions.contains(pos.relative(dir))) {
+        for (Direction dir : DIRECTIONS) {
+            MUTABLE_POS.setWithOffset(pos, dir);
+            if (!positions.contains(MUTABLE_POS)) {
                 return true;
             }
         }

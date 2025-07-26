@@ -77,7 +77,7 @@ public class Doll extends Item {
                         ((ServerPlayer) trapped).setGameMode(GameType.SPECTATOR);
                         DollUtils.setIsDoll(trapped, true);
                     } else {
-                        stack.shrink(1);
+                        stack.setCount(0);
                     }
                 }
             }

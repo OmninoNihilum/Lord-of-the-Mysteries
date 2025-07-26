@@ -4,8 +4,13 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -19,10 +24,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.OtherItems.Doll;
@@ -31,16 +44,27 @@ import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.CleanupDimensionalSightPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
+import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Miniaturize extends SimpleAbilityItem {
+    private static final Set<Block> BLOCKED_BLOCKS = new HashSet<>();
+
+    static {
+        BLOCKED_BLOCKS.add(Blocks.BEDROCK);
+        BLOCKED_BLOCKS.add(BlockInit.VOID_BLOCK.get());
+        BLOCKED_BLOCKS.add(BlockInit.REAL_VOID_BLOCK.get());
+    }
+
     public Miniaturize(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 2, 1500, 1200);
     }
-
 
     @Override
     public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
@@ -159,16 +183,130 @@ public class Miniaturize extends SimpleAbilityItem {
         }
     }
 
-    public void miniaturizeArea(LivingEntity user, int range) {
-        ItemStack doll = DollStructure.createWithCapturedStructure(user, range);
+    public void miniaturizeArea(LivingEntity user, int radius) {
+        MinecraftServer server = user.getServer();
 
+        if (server == null) return;
+
+        ResourceKey<Level> dimensionKey = DimensionInit.DOLL_SPACE_LEVEL_KEY;
+        ServerLevel level = server.getLevel(dimensionKey);
+
+        BlockPos origin = user.blockPosition();
+
+        double radiusSquared = radius * radius;
+
+        BlockPos destination;
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        int attempts = 0;
+
+        //find clean space for miniaturizing
+        outer:
+        while (true) {
+            BlockPos center = new BlockPos(
+                    ThreadLocalRandom.current().nextInt(-100000, 100001),
+                    50,
+                    ThreadLocalRandom.current().nextInt(-100000, 100001)
+            );
+
+            for (int dx = -radius * 2; dx <= radius * 2; dx++) {
+                for (int dy = -radius * 2; dy <= radius * 2; dy++) {
+                    for (int dz = -radius * 2; dz <= radius * 2; dz++) {
+                        int x = center.getX() + dx;
+                        int y = center.getY() + dy;
+                        int z = center.getZ() + dz;
+
+                        ChunkAccess chunk = level.getChunk(x >> 4, z >> 4, ChunkStatus.FULL, true);
+                        if (chunk == null) continue;
+
+                        mutablePos.set(x, y, z);
+                        BlockState state = chunk.getBlockState(mutablePos);
+
+                        if (!state.is(Blocks.GOLD_BLOCK)) {
+                            attempts++;
+                            if (attempts >= 1000) {
+                                if (user instanceof Player player)
+                                    player.displayClientMessage(Component.literal("It wasn't possible to find any safe space to miniaturize"), false);
+                                return;
+                            }
+                            continue outer;
+                        }
+                    }
+                }
+            }
+
+            destination = center;
+            break;
+        }
+
+        //break the blocks
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = - radius; dy <= radius; dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    int x = destination.getX() + dx;
+                    int y = destination.getY() + dy;
+                    int z = destination.getZ() + dz;
+                    mutablePos.set(x, y, z);
+                    level.destroyBlock(mutablePos, false);
+                }
+            }
+        }
+
+        //create item
         if (user instanceof Player player) {
+            ItemStack doll = DollStructure.createWithCapturedStructure(user, radius);
+            CompoundTag tag = doll.getOrCreateTag();
+
+            tag.putInt("centerX", destination.getX());
+            tag.putInt("centerY", destination.getY());
+            tag.putInt("centerZ", destination.getZ());
+            tag.putInt("radius", radius);
+
             boolean added = player.getInventory().add(doll);
 
             if (!added || !doll.isEmpty()) {
                 ItemEntity itemEntity = player.drop(doll, false);
                 if (itemEntity != null) {
                     itemEntity.setNoPickUpDelay();
+                }
+            }
+        }
+
+        //get the blocks around the user
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    double distanceSquared = x * x + y * y + z * z;
+                    if (distanceSquared > radiusSquared) continue;
+
+                    BlockPos sourcePos = origin.offset(x, y, z);
+                    BlockState sourceState = user.level().getBlockState(sourcePos);
+
+                    if (sourceState.isAir() || BLOCKED_BLOCKS.contains(sourceState.getBlock())) continue;
+
+                    BlockPos destPos = destination.offset(x, y, z);
+
+                    CompoundTag beTag = null;
+                    BlockEntity sourceBE = user.level().getBlockEntity(sourcePos);
+                    if (sourceBE != null) {
+                        beTag = sourceBE.saveWithFullMetadata();
+                        if (sourceBE instanceof net.minecraft.world.Container container) {
+                            container.clearContent();
+                        }
+                    }
+
+                    level.setBlock(destPos, sourceState, 3);
+
+                    if (beTag != null) {
+                        BlockEntity destBE = level.getBlockEntity(destPos);
+                        if (destBE != null) {
+                            beTag.putInt("x", destPos.getX());
+                            beTag.putInt("y", destPos.getY());
+                            beTag.putInt("z", destPos.getZ());
+                            destBE.load(beTag);
+                        }
+                    }
+
+                    user.level().removeBlock(sourcePos, false);
                 }
             }
         }
