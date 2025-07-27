@@ -17,7 +17,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -28,7 +27,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -62,7 +60,6 @@ import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.AllyMaker;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -200,7 +197,12 @@ public class ModEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
-        BeyonderUtil.leftClickEmpty(event.getEntity());
+        BeyonderUtil.leftClick(event.getEntity());
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+        BeyonderUtil.leftClick(event.getEntity());
     }
 
     @SubscribeEvent
@@ -266,18 +268,6 @@ public class ModEvents {
         }
     }
 
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        BeyonderUtil.leftClickBlock(event.getEntity());
-//        Player player = event.getEntity();
-//        ItemStack heldItem = player.getMainHandItem();
-//
-//        if (heldItem.isEmpty() || !(heldItem.getItem() instanceof BeyonderAbilityUser)) {
-//            return;
-//        }
-
-    }
 
     @SubscribeEvent
     public static void onPlayerTickClient(TickEvent.PlayerTickEvent event) {
