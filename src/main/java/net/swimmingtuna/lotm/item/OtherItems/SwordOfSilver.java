@@ -18,7 +18,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.swimmingtuna.lotm.entity.SilverLightEntity;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSword;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.Renderer.SwordOfSilverRenderer;
+import net.swimmingtuna.lotm.networking.packet.SwordOfSilverC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoItem;
@@ -32,11 +35,16 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SwordOfSilver extends SwordItem implements GeoItem {
+public class SwordOfSilver extends EmptyLeftClickHandlerSword implements GeoItem {
 
 
     public SwordOfSilver(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
+    }
+
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new SwordOfSilverC2S();
     }
 
 

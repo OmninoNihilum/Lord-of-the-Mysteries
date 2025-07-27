@@ -7,9 +7,11 @@ import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+
 import java.util.function.Supplier;
 
-public class DawnWeaponryLeftClickC2S {
+public class DawnWeaponryLeftClickC2S implements EmptyLeftClickType {
     public DawnWeaponryLeftClickC2S() {
 
     }

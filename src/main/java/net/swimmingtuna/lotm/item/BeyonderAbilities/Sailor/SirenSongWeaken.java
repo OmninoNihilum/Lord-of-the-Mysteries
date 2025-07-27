@@ -11,13 +11,17 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class SirenSongWeaken extends SimpleAbilityItem {
+public class SirenSongWeaken extends EmptyLeftClickHandlerSkillP {
 
     public SirenSongWeaken(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 5, 300, 600);
@@ -80,5 +84,10 @@ public class SirenSongWeaken extends SimpleAbilityItem {
             return 30;
         }
         return 0;
+    }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.SIREN_SONG_HARM.get()));
     }
 }

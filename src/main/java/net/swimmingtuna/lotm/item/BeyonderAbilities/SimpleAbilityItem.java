@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public abstract class SimpleAbilityItem extends Item implements Ability {
+public abstract class SimpleAbilityItem extends Item implements Ability{
     protected final Supplier<? extends BeyonderClass> requiredClass;
     protected final int requiredSequence;
     protected final int requiredSpirituality;
@@ -467,4 +467,6 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
         int getScribedAbilitiesCount();
     }
+
+
 }

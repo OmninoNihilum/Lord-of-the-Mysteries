@@ -16,7 +16,10 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.ScribeCopyAbilityC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ScribeRecording.ScribeMenu;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ScribeAbilities extends SimpleAbilityItem {
+public class ScribeAbilities extends EmptyLeftClickHandlerSkill {
 
 
     public ScribeAbilities(Properties properties) {
@@ -124,5 +127,10 @@ public class ScribeAbilities extends SimpleAbilityItem {
             livingEntity.getPersistentData().putBoolean("acceptCopiedAbility", true);
         }
         return 0;
+    }
+
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new ScribeCopyAbilityC2S();
     }
 }

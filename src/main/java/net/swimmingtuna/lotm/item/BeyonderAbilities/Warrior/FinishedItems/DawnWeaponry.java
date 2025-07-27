@@ -18,12 +18,12 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.HurricaneOfLightEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
 import net.swimmingtuna.lotm.item.OtherItems.SpearOfDawn;
+import net.swimmingtuna.lotm.networking.packet.DawnWeaponryLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ModArmorMaterials;
 import org.jetbrains.annotations.NotNull;
@@ -31,9 +31,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DawnWeaponry extends SimpleAbilityItem {
 
-
+public class DawnWeaponry extends EmptyLeftClickHandlerSkill {
     public DawnWeaponry(Properties properties) {
         super(properties, BeyonderClassInit.WARRIOR, 6, 0, 20);
     }
@@ -81,7 +80,7 @@ public class DawnWeaponry extends SimpleAbilityItem {
                 } else {
                     HurricaneOfLightEntity.summonHurricaneOfLightDawnMob(mob);
                 }
-                addCooldown(livingEntity,this, 400);
+                addCooldown(livingEntity, this, 400);
             }
         }
     }
@@ -209,12 +208,18 @@ public class DawnWeaponry extends SimpleAbilityItem {
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("WARRIOR_ABILITY", ChatFormatting.YELLOW);
     }
+
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (target != null) {
             return 60;
         }
         return 0;
+    }
+
+    @Override
+    public DawnWeaponryLeftClickC2S getleftClickEmpty() {
+        return new DawnWeaponryLeftClickC2S();
     }
 }
 

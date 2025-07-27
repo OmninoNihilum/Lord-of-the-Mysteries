@@ -9,13 +9,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MonsterDomainTeleporation;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-public class MonsterLeftClickC2S {
+public class MonsterLeftClickC2S implements EmptyLeftClickType {
     public MonsterLeftClickC2S() {
 
     }

@@ -20,7 +20,10 @@ import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.MatterAccelerationBlockC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +31,7 @@ import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
 
-public class MatterAccelerationBlocks extends SimpleAbilityItem {
+public class MatterAccelerationBlocks extends EmptyLeftClickHandlerSkill {
 
     public MatterAccelerationBlocks(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 0, 2000, 1200);
@@ -313,5 +316,10 @@ public class MatterAccelerationBlocks extends SimpleAbilityItem {
             return 100;
         }
         return 0;
+    }
+
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new MatterAccelerationBlockC2S();
     }
 }

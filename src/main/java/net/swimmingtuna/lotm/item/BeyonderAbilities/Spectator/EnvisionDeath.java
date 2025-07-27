@@ -14,14 +14,17 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class EnvisionDeath extends SimpleAbilityItem {
+public class EnvisionDeath extends EmptyLeftClickHandlerSkillP {
 
     public EnvisionDeath(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 0, 2000, 2400);
@@ -81,4 +84,9 @@ public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         return 15;
     }
 }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.ENVISION_HEALTH.get()));
+    }
 }

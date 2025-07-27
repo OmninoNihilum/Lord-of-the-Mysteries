@@ -4,10 +4,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 
 import java.util.function.Supplier;
 
-public class ConsciousnessStrollC2S {
+public class ConsciousnessStrollC2S implements EmptyLeftClickType {
     public ConsciousnessStrollC2S() {
 
     }

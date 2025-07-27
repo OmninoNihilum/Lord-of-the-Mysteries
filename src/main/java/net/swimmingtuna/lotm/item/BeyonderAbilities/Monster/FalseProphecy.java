@@ -22,16 +22,20 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.FalseProphecyLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.EmptyStackException;
 import java.util.List;
 
-public class FalseProphecy extends SimpleAbilityItem {
+public class FalseProphecy extends EmptyLeftClickHandlerSkill {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
     public FalseProphecy(Properties properties) {
@@ -364,4 +368,8 @@ public class FalseProphecy extends SimpleAbilityItem {
         return 0;
     }
 
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new FalseProphecyLeftClickC2S();
+    }
 }

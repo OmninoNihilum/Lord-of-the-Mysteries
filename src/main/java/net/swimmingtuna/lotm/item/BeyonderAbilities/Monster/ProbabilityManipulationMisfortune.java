@@ -20,7 +20,10 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ProbabilityManipulationMisfortune extends SimpleAbilityItem {
+public class ProbabilityManipulationMisfortune extends EmptyLeftClickHandlerSkillP {
 
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
@@ -205,4 +208,8 @@ public class ProbabilityManipulationMisfortune extends SimpleAbilityItem {
         return 0;
     }
 
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item,  new ItemStack(ItemInit.PROBABILITYINFINITEFORTUNE.get()));
+    }
 }

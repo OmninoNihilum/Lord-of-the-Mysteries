@@ -12,13 +12,17 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BeamOfTwilight extends SimpleAbilityItem {
+public class BeamOfTwilight extends EmptyLeftClickHandlerSkillP {
 
 
     public BeamOfTwilight(Properties properties) {
@@ -74,6 +78,11 @@ public class BeamOfTwilight extends SimpleAbilityItem {
             return 90;
         }
         return 0;
+    }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.AURAOFTWILIGHT.get()));
     }
 }
 

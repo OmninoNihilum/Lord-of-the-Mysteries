@@ -25,7 +25,10 @@ import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.MonsterCalamityIncarnationLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +38,7 @@ import virtuoel.pehkui.api.ScaleTypes;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class MonsterCalamityIncarnation extends SimpleAbilityItem {
+public class MonsterCalamityIncarnation extends EmptyLeftClickHandlerSkill {
     public MonsterCalamityIncarnation(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 3, 700, 900);
     }
@@ -325,4 +328,8 @@ public class MonsterCalamityIncarnation extends SimpleAbilityItem {
         return 0;
     }
 
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new MonsterCalamityIncarnationLeftClickC2S();
+    }
 }

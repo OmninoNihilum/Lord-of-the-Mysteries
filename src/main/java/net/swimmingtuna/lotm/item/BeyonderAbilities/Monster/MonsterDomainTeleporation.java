@@ -14,13 +14,16 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.MonsterLeftClickC2S;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class MonsterDomainTeleporation extends SimpleAbilityItem {
+public class MonsterDomainTeleporation extends EmptyLeftClickHandlerSkill {
 
     public MonsterDomainTeleporation(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 3, 300, 200);
@@ -69,4 +72,8 @@ public class MonsterDomainTeleporation extends SimpleAbilityItem {
         return 0;
     }
 
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new MonsterLeftClickC2S();
+    }
 }

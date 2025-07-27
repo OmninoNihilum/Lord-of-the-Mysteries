@@ -22,10 +22,13 @@ import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Blink;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MatterAccelerationSelf extends SimpleAbilityItem {
+public class MatterAccelerationSelf extends EmptyLeftClickHandlerSkillP {
 
     public MatterAccelerationSelf(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 0, 0, 300);
@@ -224,5 +227,10 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             return 70;
         }
         return 0;
+    }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.MATTER_ACCELERATION_BLOCKS.get()));
     }
 }

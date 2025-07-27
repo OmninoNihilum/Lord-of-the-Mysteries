@@ -15,14 +15,17 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.LeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Hurricane extends SimpleAbilityItem {
+public class Hurricane extends EmptyLeftClickHandlerSkill {
 
     public Hurricane(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 4, 1000, 1800);
@@ -100,5 +103,10 @@ public class Hurricane extends SimpleAbilityItem {
             return 2;
         }
         return 0;
+    }
+
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new LeftClickC2S();
     }
 }

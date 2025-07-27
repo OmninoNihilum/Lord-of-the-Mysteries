@@ -33,8 +33,11 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.CustomFallingBlockEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ToggleDistanceC2S;
 import net.swimmingtuna.lotm.networking.packet.UpdateEntityLocationS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
@@ -47,7 +50,7 @@ import java.util.UUID;
 import static net.swimmingtuna.lotm.util.BeyonderUtil.getCustomFallingBlockFromUUID;
 import static net.swimmingtuna.lotm.util.BeyonderUtil.getLivingEntityFromUUID;
 
-public class InvisibleHand extends SimpleAbilityItem {
+public class InvisibleHand extends EmptyLeftClickHandlerSkill {
     public InvisibleHand(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0);
     }
@@ -314,5 +317,10 @@ public class InvisibleHand extends SimpleAbilityItem {
             return 80;
         }
         return 0;
+    }
+
+    @Override
+    public EmptyLeftClickType getleftClickEmpty() {
+        return new ToggleDistanceC2S();
     }
 }

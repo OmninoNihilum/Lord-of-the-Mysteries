@@ -14,14 +14,17 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class EnvisionHealth extends SimpleAbilityItem {
+public class EnvisionHealth extends EmptyLeftClickHandlerSkillP {
 
     public EnvisionHealth(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 0, 0, 600);
@@ -70,5 +73,10 @@ public class EnvisionHealth extends SimpleAbilityItem {
         } else {
             return 25;
         }
+    }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.ENVISION_LIFE.get()));
     }
 }

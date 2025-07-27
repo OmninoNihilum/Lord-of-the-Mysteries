@@ -15,14 +15,18 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.world.worlddata.WorldFortuneValue;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ProbabilityManipulationWorldFortune extends SimpleAbilityItem {
+public class ProbabilityManipulationWorldFortune extends EmptyLeftClickHandlerSkillP {
 
     public ProbabilityManipulationWorldFortune(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 0, 1500, 600);
@@ -107,4 +111,8 @@ public class ProbabilityManipulationWorldFortune extends SimpleAbilityItem {
         return 0;
     }
 
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.PROBABILITYMISFORTUNEINCREASE.get()));
+    }
 }

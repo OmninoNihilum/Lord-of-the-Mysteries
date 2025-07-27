@@ -20,7 +20,10 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class TrickEscapeTrick extends SimpleAbilityItem {
+public class TrickEscapeTrick extends EmptyLeftClickHandlerSkillP {
     private static final int MIN_TELEPORT_Y = -60; // Minimum Y level to prevent void teleportation
 
     public TrickEscapeTrick(Properties properties) {
@@ -323,5 +326,10 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
             return 0;
         }
         return 0;
+    }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKFLASH.get()));
     }
 }

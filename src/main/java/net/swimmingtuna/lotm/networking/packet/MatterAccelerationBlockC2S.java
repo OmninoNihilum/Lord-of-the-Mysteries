@@ -16,13 +16,14 @@ import net.swimmingtuna.lotm.entity.EndStoneEntity;
 import net.swimmingtuna.lotm.entity.NetherrackEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationBlocks;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.Comparator;
 import java.util.function.Supplier;
 
-public class MatterAccelerationBlockC2S {
+public class MatterAccelerationBlockC2S implements EmptyLeftClickType {
     public MatterAccelerationBlockC2S() {
 
     }

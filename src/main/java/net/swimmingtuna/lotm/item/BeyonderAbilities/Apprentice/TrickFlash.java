@@ -14,14 +14,18 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.FlashEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TrickFlash extends SimpleAbilityItem {
+public class TrickFlash extends EmptyLeftClickHandlerSkillP {
 
     public TrickFlash(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 35, 300);
@@ -76,5 +80,10 @@ public class TrickFlash extends SimpleAbilityItem {
             return (int) (100 - (target.distanceTo(livingEntity) * 10));
         }
         return 0;
+    }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKLOUDNOISE.get()));
     }
 }

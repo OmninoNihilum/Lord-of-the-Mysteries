@@ -270,12 +270,12 @@ public class ModEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         BeyonderUtil.leftClickBlock(event.getEntity());
-        Player player = event.getEntity();
-        ItemStack heldItem = player.getMainHandItem();
-
-        if (heldItem.isEmpty() || !(heldItem.getItem() instanceof BeyonderAbilityUser)) {
-            return;
-        }
+//        Player player = event.getEntity();
+//        ItemStack heldItem = player.getMainHandItem();
+//
+//        if (heldItem.isEmpty() || !(heldItem.getItem() instanceof BeyonderAbilityUser)) {
+//            return;
+//        }
 
     }
 

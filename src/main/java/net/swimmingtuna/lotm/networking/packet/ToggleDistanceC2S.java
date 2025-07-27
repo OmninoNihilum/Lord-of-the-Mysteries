@@ -3,30 +3,34 @@ package net.swimmingtuna.lotm.networking.packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 
 import java.util.function.Supplier;
 
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.InvisibleHand.setDistanceBoolean;
 
-public class ToggleDistanceC2S {
-    public  ToggleDistanceC2S(){}
+public class ToggleDistanceC2S implements EmptyLeftClickType {
+    public ToggleDistanceC2S() {
+    }
 
-    public ToggleDistanceC2S(FriendlyByteBuf buf){
+    public ToggleDistanceC2S(FriendlyByteBuf buf) {
 
     }
 
-    public void toByte(FriendlyByteBuf buf){
+    public void toByte(FriendlyByteBuf buf) {
 
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx){
+    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
-            if (player != null) {
-                setDistanceBoolean(player);
-            }
+            if (player == null) return;
+
+            setDistanceBoolean(player);
+
         });
         ctx.get().setPacketHandled(true);
+        return true;
     }
 
 }

@@ -17,7 +17,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EnvisionBarrier extends SimpleAbilityItem {
+public class EnvisionBarrier extends EmptyLeftClickHandlerSkillP {
 
     private final Map<BlockPos, BlockState> replacedBlocks = new HashMap<>();
     private final List<BlockPos> replacedAirBlocks = new ArrayList<>();
@@ -151,5 +154,10 @@ public class EnvisionBarrier extends SimpleAbilityItem {
             return 100;
         }
         return 0;
+    }
+
+    @Override
+    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.ENVISION_DEATH.get()));
     }
 }
