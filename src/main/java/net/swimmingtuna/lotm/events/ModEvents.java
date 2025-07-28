@@ -203,6 +203,7 @@ public class ModEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         BeyonderUtil.leftClick(event.getEntity());
+        event.setCanceled(true);
     }
 
     @SubscribeEvent
