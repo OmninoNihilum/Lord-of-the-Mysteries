@@ -26,6 +26,7 @@ import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.core.PlayerCapability;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.EntityCapabilityStatusPacket;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.SimpleEntityCapabilityStatusPacket;
+import nihilum.lotm.tweaks.Attributes.MonsterAttributes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -107,6 +108,11 @@ public class BeyonderHolder extends PlayerCapability {
             this.player.getPersistentData().putInt("wormOfStar", 0);
         }
         updateTracking();
+
+        var speedAttr = this.player.getAttribute(Attributes.MOVEMENT_SPEED);
+        if(speedAttr != null){
+            MonsterAttributes.applySpeedModifier(speedAttr, sequence);
+        }
 
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
 

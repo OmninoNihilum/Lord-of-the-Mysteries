@@ -66,6 +66,7 @@ public class BeyonderCommand {
                                             persistentData.remove(REGISTERED_ABILITIES_KEY);
                                         }
                                     }
+
                                     holder.setPathwayAndSequence(result, level);
 
                                     String sequenceName = result.sequenceNames().get(level);

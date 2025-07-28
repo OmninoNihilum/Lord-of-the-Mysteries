@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -12,7 +13,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -140,6 +140,8 @@ import static net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit.SPIRI
 public class ModEvents {
     private static final Map<Item, Integer> abilityCooldowns = new HashMap<>();
 
+    private static final ResourceLocation location = new ResourceLocation(LOTM.MOD_ID, "custom_stats");
+
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
         ServerLevel level = event.getServer().getLevel(Level.OVERWORLD);
@@ -151,7 +153,6 @@ public class ModEvents {
             );
         }
     }
-
 
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
@@ -202,9 +203,12 @@ public class ModEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        BeyonderUtil.leftClick(event.getEntity());
-        event.setCanceled(true);
+        if(event.getEntity().getMainHandItem().getItem() instanceof SimpleAbilityItem) {
+            BeyonderUtil.leftClick(event.getEntity());
+            event.setCanceled(true);
+        }
     }
+
 
     //Runes cant be used, so this event is redundant
 //    @SubscribeEvent
@@ -296,24 +300,29 @@ public class ModEvents {
         }
     }
 
+
+
     @SubscribeEvent
     public static void onPlayerTickServer(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
-        Style style = BeyonderUtil.getStyle(player);
-        CompoundTag tag = player.getPersistentData();
+
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+
         if (!(player.level() instanceof ServerLevel serverLevel)) return;
+
         int sequence = holder.getSequence();
         if (player.level().isClientSide() || event.phase != TickEvent.Phase.START) {
             return;
         }
+
         if (!player.level().isClientSide() && holder.currentClassMatches(BeyonderClassInit.MONSTER) && sequence <= 9 && player.tickCount % 5 == 0) {
             MonsterClass.checkForProjectiles(player);
         }
-        if (!player.level().isClientSide() && player.tickCount % 20 == 0) {
-            //boolean x = ClientAntiConcealmentData.getAntiConceal();
-            //player.sendSystemMessage(Component.literal("value is " + x));
-        }
+
+//        if (!player.level().isClientSide() && player.tickCount % 20 == 0) {
+//            //boolean x = ClientAntiConcealmentData.getAntiConceal();
+//            //player.sendSystemMessage(Component.literal("value is " + x));
+//        }
 
         if (player instanceof ServerPlayer serverPlayer) {
             if (player.tickCount % 20 == 0) {
@@ -329,6 +338,7 @@ public class ModEvents {
                 BeyonderUtil.setCooldown(serverPlayer, currentCooldown);
             }
         }
+
         BeyonderUtil.copyAbilityTick(player);
         BeyonderUtil.abilityCooldownsServerTick(event);
         DollUtils.dollPlayerTick(player);
