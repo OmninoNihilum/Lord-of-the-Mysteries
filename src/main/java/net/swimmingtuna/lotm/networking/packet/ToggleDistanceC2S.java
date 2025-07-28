@@ -3,13 +3,13 @@ package net.swimmingtuna.lotm.networking.packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 
 import java.util.function.Supplier;
 
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.InvisibleHand.setDistanceBoolean;
 
-public class ToggleDistanceC2S implements EmptyLeftClickType {
+public class ToggleDistanceC2S implements LeftClickType {
     public ToggleDistanceC2S() {
     }
 

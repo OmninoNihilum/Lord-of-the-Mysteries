@@ -21,8 +21,8 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.TravelerWaypointC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class TravelersDoorWaypoint extends EmptyLeftClickHandlerSkill {
+public class TravelersDoorWaypoint extends LeftClickHandlerSkill {
 
     public TravelersDoorWaypoint(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 5, 300, 20);
@@ -264,7 +264,7 @@ public class TravelersDoorWaypoint extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new TravelerWaypointC2S();
     }
 }

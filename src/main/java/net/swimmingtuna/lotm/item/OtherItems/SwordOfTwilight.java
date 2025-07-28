@@ -25,8 +25,8 @@ import net.swimmingtuna.lotm.entity.SwordOfTwilightEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSword;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSword;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.Renderer.SwordOfTwilightRenderer;
 import net.swimmingtuna.lotm.networking.packet.SwordOfTwilightC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -49,7 +49,7 @@ import java.util.function.Consumer;
 
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.SilverSwordManifestation.findClosestEmptySlot;
 
-public class SwordOfTwilight extends EmptyLeftClickHandlerSword implements GeoItem {
+public class SwordOfTwilight extends LeftClickHandlerSword implements GeoItem {
 
 
     public SwordOfTwilight(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
@@ -270,7 +270,7 @@ public class SwordOfTwilight extends EmptyLeftClickHandlerSword implements GeoIt
 
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new SwordOfTwilightC2S();
     }
 }

@@ -17,8 +17,8 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkillP;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TrickBlackCurtain extends EmptyLeftClickHandlerSkillP {
+public class TrickBlackCurtain extends LeftClickHandlerSkillP {
     public TrickBlackCurtain(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 25, 140);
     }
@@ -96,7 +96,7 @@ public class TrickBlackCurtain extends EmptyLeftClickHandlerSkillP {
     }
 
     @Override
-    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+    public <T> LeftClickType getleftClickEmpty(T item) {
         return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKBURNING.get()));
     }
 }

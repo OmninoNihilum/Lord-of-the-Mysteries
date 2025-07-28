@@ -20,9 +20,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.beyonder.WarriorClass;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.networking.packet.GigantificationC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +31,7 @@ import virtuoel.pehkui.api.ScaleTypes;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Gigantification extends EmptyLeftClickHandlerSkill {
+public class Gigantification extends LeftClickHandlerSkill {
 
 
     public Gigantification(Properties properties) {
@@ -229,7 +228,7 @@ public class Gigantification extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new GigantificationC2S();
     }
 }

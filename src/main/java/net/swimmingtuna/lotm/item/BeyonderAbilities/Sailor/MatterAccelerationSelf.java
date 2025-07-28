@@ -22,8 +22,8 @@ import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Blink;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkillP;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
@@ -38,7 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MatterAccelerationSelf extends EmptyLeftClickHandlerSkillP {
+public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
 
     public MatterAccelerationSelf(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 0, 0, 300);
@@ -230,7 +230,7 @@ public class MatterAccelerationSelf extends EmptyLeftClickHandlerSkillP {
     }
 
     @Override
-    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+    public <T> LeftClickType getleftClickEmpty(T item) {
         return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.MATTER_ACCELERATION_BLOCKS.get()));
     }
 }

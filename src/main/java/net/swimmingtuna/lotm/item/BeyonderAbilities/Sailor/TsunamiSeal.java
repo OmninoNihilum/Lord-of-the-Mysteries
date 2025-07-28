@@ -19,8 +19,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkillP;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TsunamiSeal extends EmptyLeftClickHandlerSkillP {
+public class TsunamiSeal extends LeftClickHandlerSkillP {
 
     public TsunamiSeal(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 4, 1100, 1800);
@@ -252,7 +252,7 @@ public class TsunamiSeal extends EmptyLeftClickHandlerSkillP {
     }
 
     @Override
-    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+    public <T> LeftClickType getleftClickEmpty(T item) {
         return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TSUNAMI.get()));
     }
 }

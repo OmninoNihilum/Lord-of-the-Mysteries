@@ -11,11 +11,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkillP;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -24,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class EnvisionDeath extends EmptyLeftClickHandlerSkillP {
+public class EnvisionDeath extends LeftClickHandlerSkillP {
 
     public EnvisionDeath(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 0, 2000, 2400);
@@ -86,7 +85,7 @@ public int getPriority(LivingEntity livingEntity, LivingEntity target) {
 }
 
     @Override
-    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+    public <T> LeftClickType getleftClickEmpty(T item) {
         return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.ENVISION_HEALTH.get()));
     }
 }

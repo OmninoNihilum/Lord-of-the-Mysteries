@@ -6,11 +6,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class MisfortuneManipulationLeftClickC2S implements EmptyLeftClickType {
+public class MisfortuneManipulationLeftClickC2S implements LeftClickType {
     public MisfortuneManipulationLeftClickC2S() {
 
     }

@@ -4,12 +4,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 
-import javax.swing.border.EmptyBorder;
 import java.util.function.Supplier;
 
-public class FalseProphecyLeftClickC2S implements EmptyLeftClickType {
+public class FalseProphecyLeftClickC2S implements LeftClickType {
     public FalseProphecyLeftClickC2S() {
 
     }

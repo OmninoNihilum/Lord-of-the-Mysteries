@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.HurricaneOfLightEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
 import net.swimmingtuna.lotm.item.OtherItems.SpearOfDawn;
 import net.swimmingtuna.lotm.networking.packet.DawnWeaponryLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 
-public class DawnWeaponry extends EmptyLeftClickHandlerSkill {
+public class DawnWeaponry extends LeftClickHandlerSkill {
     public DawnWeaponry(Properties properties) {
         super(properties, BeyonderClassInit.WARRIOR, 6, 0, 20);
     }

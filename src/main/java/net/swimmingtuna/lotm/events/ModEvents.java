@@ -206,18 +206,19 @@ public class ModEvents {
         event.setCanceled(true);
     }
 
-    @SubscribeEvent
-    public static void craftEvent(PlayerEvent.ItemCraftedEvent event) {
-        Player player = event.getEntity();
-        if (!player.level().isClientSide()) {
-            if (!(BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.WARRIOR.get(), 4))) {
-                if (event.getCrafting().getItem() == ItemInit.LIGHTNINGRUNE.get() || event.getCrafting().getItem() == ItemInit.CONFUSIONRUNE.get() || event.getCrafting().getItem() == ItemInit.FLAMERUNE.get() || event.getCrafting().getItem() == ItemInit.WITHERRUNE.get() || event.getCrafting().getItem() == ItemInit.FREEZERUNE.get()) {
-                    event.setCanceled(true);
-                    player.sendSystemMessage(Component.literal("You aren't the correct pathway and/or sequence to be able to craft this.").withStyle(ChatFormatting.RED));
-                }
-            }
-        }
-    }
+    //Runes cant be used, so this event is redundant
+//    @SubscribeEvent
+//    public static void craftEvent(PlayerEvent.ItemCraftedEvent event) {
+//        Player player = event.getEntity();
+//        if (!player.level().isClientSide()) {
+//            if (!(BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.WARRIOR.get(), 4))) {
+//                if (event.getCrafting().getItem() == ItemInit.LIGHTNINGRUNE.get() || event.getCrafting().getItem() == ItemInit.CONFUSIONRUNE.get() || event.getCrafting().getItem() == ItemInit.FLAMERUNE.get() || event.getCrafting().getItem() == ItemInit.WITHERRUNE.get() || event.getCrafting().getItem() == ItemInit.FREEZERUNE.get()) {
+//                    event.setCanceled(true);
+//                    player.sendSystemMessage(Component.literal("You aren't the correct pathway and/or sequence to be able to craft this.").withStyle(ChatFormatting.RED));
+//                }
+//            }
+//        }
+//    }
 
     @SubscribeEvent
     public static void mobEffectEvent(MobEffectEvent.Added event) {
@@ -232,14 +233,15 @@ public class ModEvents {
             //    entity.removeEffect(currentEffect.getEffect());
             //    entity.addEffect(reducedEffect);
             //}
-            CalamityEnhancementData data = CalamityEnhancementData.getInstance(serverLevel);
-            int chaosLevel = data.getCalamityEnhancement();
-            if (chaosLevel != 1) {
-                MobEffectInstance mobEffectInstance = event.getEffectInstance();
-                if (mobEffectInstance.getAmplifier() <= 5) {
-                    //BeyonderUtil.applyMobEffect(entity, mobEffectInstance.getEffect(), mobEffectInstance.getDuration(), mobEffectInstance.getAmplifier() * chaosLevel, mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
-                }
-            }
+            //          CalamityEnhancementData data = CalamityEnhancementData.getInstance(serverLevel);
+//            int chaosLevel = data.getCalamityEnhancement();
+//            if (chaosLevel != 1) {
+//                MobEffectInstance mobEffectInstance = event.getEffectInstance();
+//                if (mobEffectInstance.getAmplifier() <= 5) {
+//                    //BeyonderUtil.applyMobEffect(entity, mobEffectInstance.getEffect(), mobEffectInstance.getDuration(), mobEffectInstance.getAmplifier() * chaosLevel, mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
+//                }
+//            }
+
             if (event.getEffectInstance().getEffect() == ModEffects.NOREGENERATION.get()) {
                 entity.getPersistentData().putInt("noRegenerationEffectHealth", (int) entity.getHealth());
             }
@@ -527,7 +529,6 @@ public class ModEvents {
             SailorClass.sailorProjectileLightning(event);
         }
     }
-
 
 
     @SubscribeEvent

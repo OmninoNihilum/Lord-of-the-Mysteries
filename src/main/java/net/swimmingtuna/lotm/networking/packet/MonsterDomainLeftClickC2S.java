@@ -5,13 +5,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfDecay;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfProvidence;
 
 import java.util.function.Supplier;
 
-public class MonsterDomainLeftClickC2S implements EmptyLeftClickType {
+public class MonsterDomainLeftClickC2S implements LeftClickType {
     public MonsterDomainLeftClickC2S() {
 
     }

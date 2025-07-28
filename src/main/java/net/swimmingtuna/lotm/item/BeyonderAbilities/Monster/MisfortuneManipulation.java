@@ -32,8 +32,8 @@ import net.swimmingtuna.lotm.entity.TornadoEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.MisfortuneManipulationLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -49,7 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class MisfortuneManipulation extends EmptyLeftClickHandlerSkill {
+public class MisfortuneManipulation extends LeftClickHandlerSkill {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
     public MisfortuneManipulation(Properties properties) {
@@ -346,7 +346,7 @@ public class MisfortuneManipulation extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new MisfortuneManipulationLeftClickC2S();
     }
 }

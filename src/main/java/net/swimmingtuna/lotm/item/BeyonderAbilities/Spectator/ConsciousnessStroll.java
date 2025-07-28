@@ -17,8 +17,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.ConsciousnessStrollC2S;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ConsciousnessStroll extends EmptyLeftClickHandlerSkill {
+public class ConsciousnessStroll extends LeftClickHandlerSkill {
 
     public ConsciousnessStroll (Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 3, 300, 400);
@@ -112,7 +112,7 @@ public class ConsciousnessStroll extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new ConsciousnessStrollC2S();
     }
 }

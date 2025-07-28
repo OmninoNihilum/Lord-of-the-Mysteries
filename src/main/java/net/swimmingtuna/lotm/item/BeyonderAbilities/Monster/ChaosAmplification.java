@@ -14,8 +14,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.CalamityEnhancementLeftClickC2S;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ChaosAmplification extends EmptyLeftClickHandlerSkill {
+public class ChaosAmplification extends LeftClickHandlerSkill {
 
     public ChaosAmplification(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 1, 2000, 1200);
@@ -89,7 +89,7 @@ public class ChaosAmplification extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new CalamityEnhancementLeftClickC2S();
     }
 }

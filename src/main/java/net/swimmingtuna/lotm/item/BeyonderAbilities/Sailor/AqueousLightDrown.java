@@ -19,8 +19,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.AqueousLightEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkillP;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class AqueousLightDrown extends EmptyLeftClickHandlerSkillP {
+public class AqueousLightDrown extends LeftClickHandlerSkillP {
 
     public AqueousLightDrown(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 7, 75, 300);
@@ -182,7 +182,7 @@ public class AqueousLightDrown extends EmptyLeftClickHandlerSkillP {
     }
 
     @Override
-    public <T> EmptyLeftClickType getleftClickEmpty(T item) {
+    public <T> LeftClickType getleftClickEmpty(T item) {
         return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.AQUEOUS_LIGHT_PUSH.get()));
     }
 }

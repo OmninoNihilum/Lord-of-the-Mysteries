@@ -6,15 +6,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.networking.packet.LeftClickC2S;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BeyonderAbilityUser extends EmptyLeftClickHandlerSkill {
+public class BeyonderAbilityUser extends LeftClickHandlerSkill {
     public BeyonderAbilityUser(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 9, 0, 0);
     }
@@ -28,7 +28,7 @@ public class BeyonderAbilityUser extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new LeftClickC2S();
     }
 }

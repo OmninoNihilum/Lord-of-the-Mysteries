@@ -4,11 +4,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class UpdateItemInHandC2S implements EmptyLeftClickType {
+public class UpdateItemInHandC2S implements LeftClickType {
     private final int activeSlot;
     private final ItemStack newItem;
 

@@ -22,9 +22,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.networking.packet.SealingLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
@@ -33,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Sealing extends EmptyLeftClickHandlerSkill {
+public class Sealing extends LeftClickHandlerSkill {
     public Sealing(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 2, 3000, 1500);
     }
@@ -143,7 +142,7 @@ public class Sealing extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new SealingLeftClickC2S();
     }
 }

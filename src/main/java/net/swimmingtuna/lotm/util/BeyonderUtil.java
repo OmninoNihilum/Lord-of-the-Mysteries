@@ -108,9 +108,9 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.CycleOfFate.r
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility.removePsychologicalInvisibilityEffect;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.TwilightFreeze.removeTwilightFreezeEffect;
 
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSword;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkillP;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSword;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkillP;
 
 public class BeyonderUtil {
 
@@ -1134,36 +1134,34 @@ public class BeyonderUtil {
     }
 
 
-    private static void handleEmptyLeftClickSkill(EmptyLeftClickHandlerSkill item) {
+    private static void handleEmptyLeftClickSkill(LeftClickHandlerSkill item) {
         LOTMNetworkHandler.sendToServer(item.getleftClickEmpty());
     }
 
-    private static void handleEmptyLeftClickItem(EmptyLeftClickHandlerSword item) {
+    private static void handleEmptyLeftClickItem(LeftClickHandlerSword item) {
         LOTMNetworkHandler.sendToServer(item.getleftClickEmpty());
     }
 
-    private static void handleEmptyLeftClickSkill(EmptyLeftClickHandlerSkillP item, Integer slot) {
+    private static void handleEmptyLeftClickSkill(LeftClickHandlerSkillP item, Integer slot) {
         LOTMNetworkHandler.sendToServer(item.getleftClickEmpty(slot));
     }
 
     public static void leftClick(Player pPlayer) {
-        Style style = BeyonderUtil.getStyle(pPlayer);
         ItemStack heldItem = pPlayer.getMainHandItem();
         int activeSlot = pPlayer.getInventory().selected;
-        boolean isMultiplayer = Minecraft.getInstance().hasSingleplayerServer() && !Minecraft.getInstance().getSingleplayerServer().isPublished();
 
-        if (ClientLeftclickCooldownData.getCooldown() > 0) {
+        if (ClientLeftclickCooldownData.getCooldown() > 0)
             return;
-        }
+
         LOTMNetworkHandler.sendToServer(new RequestCooldownSetC2S());
         if (!heldItem.isEmpty()) {
 
-            if (heldItem.getItem() instanceof EmptyLeftClickHandlerSword) {
-                handleEmptyLeftClickItem((EmptyLeftClickHandlerSword) heldItem.getItem());
-            } else if (heldItem.getItem() instanceof EmptyLeftClickHandlerSkillP) {
-                handleEmptyLeftClickSkill((EmptyLeftClickHandlerSkillP) heldItem.getItem(), activeSlot);
+            if (heldItem.getItem() instanceof LeftClickHandlerSword) {
+                handleEmptyLeftClickItem((LeftClickHandlerSword) heldItem.getItem());
+            } else if (heldItem.getItem() instanceof LeftClickHandlerSkillP) {
+                handleEmptyLeftClickSkill((LeftClickHandlerSkillP) heldItem.getItem(), activeSlot);
             } else {
-                handleEmptyLeftClickSkill((EmptyLeftClickHandlerSkill) heldItem.getItem());
+                handleEmptyLeftClickSkill((LeftClickHandlerSkill) heldItem.getItem());
             }
 
             if (heldItem.getItem() instanceof DeathKnell) {

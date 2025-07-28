@@ -22,8 +22,8 @@ import net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.MonsterDomainLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DomainOfDecay extends EmptyLeftClickHandlerSkill {
+public class DomainOfDecay extends LeftClickHandlerSkill {
     public static final BooleanProperty LIT = BooleanProperty.create("lit");
 
     public DomainOfDecay(Properties properties) {
@@ -136,7 +136,7 @@ public class DomainOfDecay extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new MonsterDomainLeftClickC2S();
     }
 }

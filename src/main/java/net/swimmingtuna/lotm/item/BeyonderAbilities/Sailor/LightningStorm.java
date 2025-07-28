@@ -16,8 +16,8 @@ import net.swimmingtuna.lotm.entity.LightningEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickHandlerSkill;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.EmptyLeftClick.EmptyLeftClickType;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickHandlerSkill;
+import nihilum.lotm.tweaks.LeftClickhandlers.LeftClickType;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.LeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class LightningStorm extends EmptyLeftClickHandlerSkill {
+public class LightningStorm extends LeftClickHandlerSkill {
 
     public LightningStorm(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 3, 1000, 600);
@@ -167,7 +167,7 @@ public class LightningStorm extends EmptyLeftClickHandlerSkill {
     }
 
     @Override
-    public EmptyLeftClickType getleftClickEmpty() {
+    public LeftClickType getleftClickEmpty() {
         return new LeftClickC2S();
     }
 }
