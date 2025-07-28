@@ -40,7 +40,8 @@ public class BeyonderHolder extends PlayerCapability {
     private static final UUID HEALTH_MODIFIER_UUID = UUID.fromString("a3a90fac-39d0-4b75-9990-8211f70e0a0f");
     private final RandomSource random;
     private int currentSequence = -1;
-    @Nullable private BeyonderClass currentClass = null;
+    @Nullable
+    private BeyonderClass currentClass = null;
     private int mentalStrength = 0;
     private int divination = 0;
     private int antiDivination = 0;
@@ -109,10 +110,7 @@ public class BeyonderHolder extends PlayerCapability {
         }
         updateTracking();
 
-        var speedAttr = this.player.getAttribute(Attributes.MOVEMENT_SPEED);
-        if(speedAttr != null){
-            MonsterAttributes.applySpeedModifier(speedAttr, sequence);
-        }
+        MonsterAttributes.applyAllModifiers(player, sequence);
 
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
 
