@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -89,6 +90,8 @@ public class BeyonderHolder extends PlayerCapability {
         LOTMNetworkHandler.sendToPlayer(new ClearAbilitiesS2C(), (ServerPlayer) player);
         updateTracking();
 
+        MonsterAttributes.cleanAll(player);
+
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
     }
 
@@ -110,7 +113,7 @@ public class BeyonderHolder extends PlayerCapability {
         }
         updateTracking();
 
-        MonsterAttributes.applyAllModifiers(player, sequence);
+        MonsterAttributes.applyAll(player, sequence);
 
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
 
@@ -198,6 +201,8 @@ public class BeyonderHolder extends PlayerCapability {
             updateTracking();
 
             LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
+
+            MonsterAttributes.applyAll(player, currentSequence);
         }
     }
 

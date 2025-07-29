@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -26,6 +27,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -85,6 +87,7 @@ import net.swimmingtuna.lotm.util.effect.NoRegenerationEffect;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
+import nihilum.lotm.tweaks.HighSpeedCamera.HighSpeedCamera;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -297,10 +300,9 @@ public class ModEvents {
                     player.displayClientMessage(Component.literal("_ _ _ _ _").withStyle(ChatFormatting.BOLD), true);
                 }
             }
+            
         }
     }
-
-
 
     @SubscribeEvent
     public static void onPlayerTickServer(TickEvent.PlayerTickEvent event) {
@@ -323,6 +325,18 @@ public class ModEvents {
 //            //boolean x = ClientAntiConcealmentData.getAntiConceal();
 //            //player.sendSystemMessage(Component.literal("value is " + x));
 //        }
+
+        Vec3 motion = player.getDeltaMovement();
+
+        double speed = player.getAttributeValue(Attributes.MOVEMENT_SPEED) * 0.1;
+        double horizontalSpeed = Math.sqrt(motion.x * motion.x + motion.z * motion.z);
+
+        if (horizontalSpeed < speed * 0.9) {
+            // Apply extra horizontal momentum to compensate
+            Vec3 look = player.getLookAngle();
+            Vec3 boost = new Vec3(look.x * speed, 0, look.z * speed);
+            player.setDeltaMovement(motion.add(boost.x * 0.5, 0, boost.z * 0.5)); // scale to avoid overboost
+        }
 
         if (player instanceof ServerPlayer serverPlayer) {
             if (player.tickCount % 20 == 0) {

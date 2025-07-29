@@ -85,8 +85,8 @@ public class BeyonderCommand {
                             BeyonderUtil.removeTags(context.getSource().getPlayerOrException());
                             scaleData.setScale(1);
                             Abilities playerAbilities = player.getAbilities();
-                            playerAbilities.setFlyingSpeed(0.05F);
-                            playerAbilities.setWalkingSpeed(0.1F);
+                            //playerAbilities.setFlyingSpeed(0.05F);
+                            //playerAbilities.setWalkingSpeed(0.1F);
                             player.onUpdateAbilities();
                             if (player instanceof ServerPlayer serverPlayer) {
                                 serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));

@@ -112,9 +112,9 @@ public class MonsterClass implements BeyonderClass {
 //                    if (player.getMainHandItem().getItem() instanceof SwordItem) {
 //                        applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, speed + 1, true, true);
 //                    }
-                    if (player.getMainHandItem().getItem() instanceof AxeItem) {
-                        applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
-                    }
+//                    if (player.getMainHandItem().getItem() instanceof AxeItem) {
+//                        applyMobEffect(player, MobEffects.DAMAGE_BOOST, 60, strength + 1, true, true);
+//                    }
                     if (player.getMainHandItem().getItem() instanceof PickaxeItem || player.getMainHandItem().getItem() instanceof ShovelItem) {
                         applyMobEffect(player, MobEffects.DIG_SPEED, 60, 1, true, true);
                     }
