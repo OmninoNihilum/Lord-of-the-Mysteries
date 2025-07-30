@@ -14,6 +14,7 @@ public class BaseAttributes {
     protected static final UUID speedID = UUID.fromString("1cd27c58-f3e8-46d9-8990-44a9f14dfc28");
     protected static final UUID attackID = UUID.fromString("b29d4a1d-20c5-42aa-a984-1c4bc77ccdad");
     protected static final UUID nightVisionID = UUID.fromString("12cd2ed8-a4f6-4e78-945d-f10e4559aa2e");
+    protected static final UUID fireResistanceID = UUID.fromString("9dbc9d39-a22b-445d-85c9-265ca4bd26b6");
 
     protected static void clean(AttributeInstance attr, UUID id){
         if(attr.getModifier(id) != null)
@@ -34,5 +35,6 @@ public class BaseAttributes {
         clean(Objects.requireNonNull(player.getAttribute(Attributes.ATTACK_DAMAGE)), attackID);
 
         clean(Objects.requireNonNull(player.getAttribute(ModAttributes.NIGHT_VISION.get())), nightVisionID);
+        clean(Objects.requireNonNull(player.getAttribute(ModAttributes.FIRE_RESISTANCE.get())), fireResistanceID);
     }
 }

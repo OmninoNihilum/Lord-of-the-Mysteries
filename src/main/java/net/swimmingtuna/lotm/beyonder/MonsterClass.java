@@ -200,7 +200,7 @@ public class MonsterClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
                 //applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
                 //applyMobEffect(player, MobEffects.NIGHT_VISION, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
+                //applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.JUMP, 300, 1, false, false);
                 speed = 1;
                 resistance = 0;
@@ -211,7 +211,7 @@ public class MonsterClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
                 //applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
                 //applyMobEffect(player, MobEffects.NIGHT_VISION, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
+                //applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.WATER_BREATHING, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.JUMP, 300, 1, false, false);
                 speed = 2;
@@ -223,7 +223,7 @@ public class MonsterClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
                 //applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
                 //applyMobEffect(player, MobEffects.NIGHT_VISION, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
+                //applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.WATER_BREATHING, 300, 2, false, false);
                 applyMobEffect(player, MobEffects.JUMP, 300, 1, false, false);
                 speed = 2;
@@ -235,7 +235,7 @@ public class MonsterClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
                 //applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
                 //applyMobEffect(player, MobEffects.NIGHT_VISION, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
+                //applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.WATER_BREATHING, 300, 2, false, false);
                 applyMobEffect(player, MobEffects.JUMP, 300, 1, false, false);
                 speed = 2;
@@ -247,7 +247,7 @@ public class MonsterClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
                 //applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
                 //applyMobEffect(player, MobEffects.NIGHT_VISION, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
+                //applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.WATER_BREATHING, 300, 2, false, false);
                 applyMobEffect(player, MobEffects.JUMP, 300, 1, false, false);
                 speed = 3;
@@ -259,7 +259,7 @@ public class MonsterClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
                // applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 4, false, false);
                 //applyMobEffect(player, MobEffects.NIGHT_VISION, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
+                //applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.WATER_BREATHING, 300, 2, false, false);
                 applyMobEffect(player, MobEffects.JUMP, 300, 1, false, false);
                 speed = 3;
@@ -271,7 +271,7 @@ public class MonsterClass implements BeyonderClass {
                 applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
                 //applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 4, false, false);
                 //applyMobEffect(player, MobEffects.NIGHT_VISION, 300, 0, false, false);
-                applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
+                //applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 1, false, false);
                 applyMobEffect(player, MobEffects.WATER_BREATHING, 300, 2, false, false);
                 applyMobEffect(player, MobEffects.JUMP, 300, 1, false, false);
                 speed = 3;

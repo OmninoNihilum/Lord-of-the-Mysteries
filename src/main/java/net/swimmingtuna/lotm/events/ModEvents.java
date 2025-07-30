@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -214,7 +215,7 @@ public class ModEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if(event.getEntity().getMainHandItem().getItem() instanceof SimpleAbilityItem) {
+        if (event.getEntity().getMainHandItem().getItem() instanceof SimpleAbilityItem) {
             BeyonderUtil.leftClick(event.getEntity());
             event.setCanceled(true);
         }
@@ -572,6 +573,17 @@ public class ModEvents {
                 event.setCanceled(true);
             }
         }
+
+        if(attacked instanceof Player player){
+            var source = event.getSource();
+            if(player.getAttributeValue(ModAttributes.FIRE_RESISTANCE.get()) == 3
+                    && (source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.IN_FIRE)
+                    || source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.LAVA))) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
         if (attacker != null) {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
                 attacked.getPersistentData().putInt("inCombat", 300);
@@ -684,6 +696,27 @@ public class ModEvents {
         DamageSource source = event.getSource();
         Entity entitySource = source.getEntity();
         if (!event.getEntity().level().isClientSide()) {
+
+            if (entity instanceof Player player) {
+                int resLevel = (int) player.getAttributeValue(ModAttributes.FIRE_RESISTANCE.get());
+                if (resLevel > 0) {
+                    switch (resLevel) {
+                        case 3:
+                            if (source.is(DamageTypes.LAVA)) {
+                                event.setAmount(0);
+                            }
+                        case 2:
+                            if (source.is(DamageTypes.HOT_FLOOR))
+                                event.setAmount(0);
+                        case 1:
+                            if (source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.IN_FIRE))
+                                event.setAmount(0);
+                            break;
+                    }
+                    return;
+                }
+            }
+
             PsychologicalInvisibility.psychologicalInvisibilityAttack(event);
             Teleportation.teleportationHurtEvent(event);
             BeyonderUtil.ageHandlerHurt(event);
@@ -1051,6 +1084,8 @@ public class ModEvents {
     public static void onRenderWorld(RenderLevelStageEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
+
+        if (mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get()) == 1.0) return;
 
         float rawBoost = Math.max((float) ModAttributes.NIGHT_VISION.get().getDefaultValue(),
                 (float) mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get()));

@@ -12,8 +12,10 @@ public class MonsterAttributes extends BaseAttributes {
             = List.of(0.1, 0.08, 0.06, 0.06, 0.06, 0.04, 0.04, 0.02, 0.02, 0.0);
     private static final List<Double> attackList
             = List.of(16.0 ,12.0, 12.0, 9.0, 9.0, 6.0, 6.0, 3.0, 3.0, 0.0);
-    private static final List<Double> nightVision
+    private static final List<Double> nightVisionList
             = List.of(5.0 ,4.0, 3.5, 3.0, 2.5, 2.0, 2.0, 1.5, 1.5, 1.0);
+    private static  final List<Double> fireResistanceList =
+            List.of(3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0);
 
     public static void applyAll(Player player, int seq){
         //apply(player.getAttribute(Attributes.MAX_HEALTH), healthBoostID, , "HealthBoost");
@@ -21,7 +23,9 @@ public class MonsterAttributes extends BaseAttributes {
         apply(player.getAttribute(Attributes.ATTACK_DAMAGE), attackID, attackList.get(seq), "AttackBoost");
 
         apply(player.getAttribute(ModAttributes.NIGHT_VISION.get()),
-                nightVisionID, nightVision.get(seq), "NightVision");
+                nightVisionID, nightVisionList.get(seq), "NightVision");
+        apply(player.getAttribute(ModAttributes.FIRE_RESISTANCE.get()),
+                fireResistanceID, fireResistanceList.get(seq), "FireResistance");
 
     }
 }
