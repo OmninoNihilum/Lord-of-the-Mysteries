@@ -1,6 +1,10 @@
 package net.swimmingtuna.lotm.events;
 
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -14,6 +18,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -87,10 +92,11 @@ import net.swimmingtuna.lotm.util.effect.NoRegenerationEffect;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
-import nihilum.lotm.tweaks.HighSpeedCamera.HighSpeedCamera;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import net.minecraftforge.client.event.*;
 
 import static net.swimmingtuna.lotm.beyonder.WarriorClass.newWarriorDamageNegation;
 import static net.swimmingtuna.lotm.beyonder.WarriorClass.twilightTick;
@@ -139,11 +145,12 @@ import static net.swimmingtuna.lotm.util.effect.BattleHypnotismEffect.battleHypn
 import static net.swimmingtuna.lotm.util.effect.StunEffect.livingNoMoveEffect;
 import static net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit.SPIRIT_WORLD_LEVEL_KEY;
 
+
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
 public class ModEvents {
     private static final Map<Item, Integer> abilityCooldowns = new HashMap<>();
 
-    private static final ResourceLocation location = new ResourceLocation(LOTM.MOD_ID, "custom_stats");
+    private static double originalGamma = -1;
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
@@ -177,6 +184,7 @@ public class ModEvents {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientAbilityCombinationData.clientSideLoginHandling();
         }
+
         Player player = event.getEntity();
         if (!player.level().isClientSide()) {
             BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
@@ -278,7 +286,6 @@ public class ModEvents {
         }
     }
 
-
     @SubscribeEvent
     public static void onPlayerTickClient(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
@@ -300,7 +307,6 @@ public class ModEvents {
                     player.displayClientMessage(Component.literal("_ _ _ _ _").withStyle(ChatFormatting.BOLD), true);
                 }
             }
-            
         }
     }
 
@@ -1020,9 +1026,11 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void addAttributes(EntityAttributeCreationEvent event) {
-        event.put(EntityInit.PLAYER_MOB_ENTITY.get(), AttributeSupplier.builder().add(ModAttributes.NIGHTMARE.get()).build());
+        event.put(EntityInit.PLAYER_MOB_ENTITY.get(), AttributeSupplier.builder()
+                .add(ModAttributes.NIGHTMARE.get())
+                //.add(ModAttributes.NIGHT_VISION.get())
+                .build());
     }
-
 
     @SubscribeEvent
     public static void onEntityChangeTarget(LivingChangeTargetEvent event) {
@@ -1037,5 +1045,23 @@ public class ModEvents {
         if (!event.getEntity().level().isClientSide()) {
             PlayerMobSequenceData.onEntityLeaveLevel(event); //add it to do the sequence and pathway stuff
         }
+    }
+
+    @SubscribeEvent
+    public static void onRenderWorld(RenderLevelStageEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) return;
+
+        float rawBoost = Math.max((float) ModAttributes.NIGHT_VISION.get().getDefaultValue(),
+                (float) mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get()));
+        float lightFactor = 1.0F - (mc.level.getMaxLocalRawBrightness(mc.player.blockPosition()) / 15.0F);
+        float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        RenderSystem.setShaderColor(boost, boost, boost, 1.0F);
+
+        RenderSystem.disableBlend();
     }
 }

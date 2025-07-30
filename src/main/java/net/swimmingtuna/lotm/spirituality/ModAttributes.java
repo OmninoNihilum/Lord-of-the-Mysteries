@@ -20,7 +20,8 @@ public class ModAttributes {
             ()-> new RangedAttribute("attribute.lotm.armorinvisibility",0.0D,0.0D,10).setSyncable(true));
     public static final RegistryObject<Attribute> DIR = ATTRIBUTES.register("dreamintoreality",
             ()-> new RangedAttribute("attribute.lotm.dreamintoreality",1.0D,0.0D,10).setSyncable(true));
-
+    public static final RegistryObject<Attribute> NIGHT_VISION = ATTRIBUTES.register("night_vision",
+            ()-> new RangedAttribute("attribute.lotm.night_vision",1.0D,1.0D,5).setSyncable(true));
 
 
 

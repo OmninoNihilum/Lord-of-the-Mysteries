@@ -17,6 +17,7 @@ public class AttributeAdder {
         addToPlayer(event, ModAttributes.SOUL_BODY);
         addToPlayer(event, ModAttributes.NIGHTMARE);
         addToPlayer(event, ModAttributes.ARMORINVISIBLITY);
+        addToPlayer(event, ModAttributes.NIGHT_VISION);
     }
 
     @SafeVarargs
