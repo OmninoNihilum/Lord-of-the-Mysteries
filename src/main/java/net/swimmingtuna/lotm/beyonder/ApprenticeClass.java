@@ -91,10 +91,10 @@ public class ApprenticeClass implements BeyonderClass {
         return List.of(34, 22, 16, 12, 10, 8, 6, 5, 3, 2);
     }
 
-    @Override
-    public List<Double> maxHealth() {
-        return List.of(45.0, 40.0, 40.0, 35.0, 32.0, 28.0, 28.0, 23.0, 20.0, 20.0);
-    }
+//    @Override
+//    public List<Double> maxHealth() {
+//        return List.of(45.0, 40.0, 40.0, 35.0, 32.0, 28.0, 28.0, 23.0, 20.0, 20.0);
+//    }
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {

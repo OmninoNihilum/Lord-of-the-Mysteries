@@ -272,6 +272,7 @@ public class ModEvents {
     public static void mobEffectEvent(MobEffectEvent.Remove event) {
         if (!event.getEntity().level().isClientSide()) {
             LivingEntity livingEntity = event.getEntity();
+
             if (event.getEffect() == ModEffects.BATTLEHYPNOTISM.get() && livingEntity instanceof Mob mob && mob.getTarget() != null && !(mob.getTarget() instanceof Player)) {
                 int playersFound = 0;
                 for (Player player : mob.level().getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(12))) {
@@ -1003,7 +1004,7 @@ public class ModEvents {
                 }
             }
             if (holder.getCurrentClass() != null && holder.getSequence() != -1) {
-                BeyonderHolder.updateMaxHealthModifier(player, holder.getCurrentClass().maxHealth().get(sequence));
+                holder.getCurrentClass().applyAllModifiers(player, holder.getSequence());
                 player.setHealth(player.getMaxHealth());
             }
             if (!persistentData.contains("keysClicked")) {
@@ -1029,7 +1030,7 @@ public class ModEvents {
                         BeyonderClass pathway = BeyonderUtil.getPathway(living);
                         if (pathway != null) {
                             BeyonderUtil.setSpirituality(living, BeyonderUtil.getMaxSpirituality(living));
-                            BeyonderHolder.updateMaxHealthModifier(living, pathway.maxHealth().get(BeyonderUtil.getSequence(living)));
+                            pathway.applyAllModifiers((Player) living, BeyonderUtil.getSequence(living));
                         }
                     }
                 }

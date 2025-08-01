@@ -56,7 +56,6 @@ public class BeyonderPotion extends Item {
             holder.setPathwayAndSequence(beyonderClassSupplier.get(), sequence);
             level.playSound(null, player.getOnPos(), SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.5f, level.random.nextFloat() * 0.1F + 0.9F);
             player.sendSystemMessage(Component.translatable("item.lotm.beholder_potion.alert", holder.getCurrentClass().sequenceNames().get(holder.getSequence())).withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD));
-            player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(beyonderClassSupplier.get().maxHealth().get(sequence));
             if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }

@@ -136,7 +136,7 @@ public class DreamWeaving extends SimpleAbilityItem {
                 Mob mob = mobEntityType.create(level);
                 if (mob != null) {
                     spawnEntityInRadius(mob, level, x, y, z);
-                    BeyonderHolder.updateMaxHealthModifier(mob, 551);
+                    //BeyonderHolder.updateMaxHealthModifier(mob, 551);
                     mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
                     mob.setTarget(entity);
                     mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);

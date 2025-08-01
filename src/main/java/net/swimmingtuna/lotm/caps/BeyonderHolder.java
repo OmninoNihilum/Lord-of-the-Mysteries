@@ -105,7 +105,6 @@ public class BeyonderHolder extends PlayerCapability {
         this.divination = this.currentClass.divination().get(this.currentSequence);
         this.antiDivination = this.currentClass.antiDivination().get(this.currentSequence);
         this.spiritualityRegen = this.currentClass.spiritualityRegen().get(this.currentSequence);
-        updateMaxHealthModifier(this.player, this.currentClass.maxHealth().get(sequence));
         this.player.setHealth(this.player.getMaxHealth());
         if (newClass == BeyonderClassInit.APPRENTICE.get() && sequence <= 4) {
             this.player.getPersistentData().putInt("wormOfStar", BeyonderUtil.maxWormAmount(this.player));
@@ -299,17 +298,6 @@ public class BeyonderHolder extends PlayerCapability {
         return this.currentClass == beyonderClass;
     }
 
-    public static void updateMaxHealthModifier(@Nullable LivingEntity player, double maxHealth) {
-        if (player == null) return;
-        @Nullable AttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
-        if (healthAttribute == null) return;
-        if (healthAttribute.getModifier(HEALTH_MODIFIER_UUID) != null) {
-            healthAttribute.removeModifier(HEALTH_MODIFIER_UUID);
-        }
-        AttributeModifier healthModifier = new AttributeModifier(HEALTH_MODIFIER_UUID, "Beyonder Class Health Modifier", maxHealth - 20.0, AttributeModifier.Operation.ADDITION);
-        healthAttribute.addPermanentModifier(healthModifier);
-        player.setHealth(player.getMaxHealth());
-    }
 
     public static void resetMaxHealthModifier(@Nullable LivingEntity player) {
         if (player == null) return;

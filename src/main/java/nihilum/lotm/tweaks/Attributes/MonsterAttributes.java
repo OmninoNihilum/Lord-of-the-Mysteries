@@ -8,6 +8,8 @@ import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import java.util.List;
 
 public class MonsterAttributes extends BaseAttributes {
+    private  static  final List<Double> healthList
+            = List.of(60.0, 45.0, 40.0, 40.0, 35.0, 25.0, 25.0, 25.0, 20.0, 20.0);
     private static final List<Double> speedList
             = List.of(0.1, 0.08, 0.06, 0.06, 0.06, 0.04, 0.04, 0.02, 0.02, 0.0);
     private static final List<Double> attackList
@@ -28,7 +30,7 @@ public class MonsterAttributes extends BaseAttributes {
             = List.of(1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     public static void applyAll(Player player, int seq){
-        //apply(player.getAttribute(Attributes.MAX_HEALTH), healthBoostID, , "HealthBoost");
+        apply(player.getAttribute(Attributes.MAX_HEALTH), healthBoostID, healthList.get(seq), "HealthBoost");
         apply(player.getAttribute(Attributes.MOVEMENT_SPEED), speedID, speedList.get(seq), "SpeedBoost");
         apply(player.getAttribute(Attributes.ATTACK_DAMAGE), attackID, attackList.get(seq), "AttackBoost");
 

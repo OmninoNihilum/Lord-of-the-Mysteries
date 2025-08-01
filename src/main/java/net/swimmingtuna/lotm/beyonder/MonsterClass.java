@@ -102,10 +102,6 @@ public class MonsterClass implements BeyonderClass {
             return List.of(50, 33, 25, 15, 12, 9, 7, 6, 4, 3);
     }
 
-    @Override
-    public List<Double> maxHealth() {
-        return List.of(60.0, 45.0, 40.0, 40.0, 35.0, 25.0, 25.0, 25.0, 20.0, 20.0);
-    }
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {

@@ -92,11 +92,6 @@ public class SpectatorClass implements BeyonderClass {
     }
 
     @Override
-    public List<Double> maxHealth() {
-        return List.of(45.0, 40.0, 40.0, 35.0, 32.0, 28.0, 28.0, 23.0, 20.0, 20.0);
-    }
-
-    @Override
     public void tick(LivingEntity player, int sequenceLevel) {
         if (!player.level().isClientSide()) {
             if (player instanceof Player pPlayer) {

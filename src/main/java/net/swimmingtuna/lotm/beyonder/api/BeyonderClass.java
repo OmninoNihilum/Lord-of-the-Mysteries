@@ -20,8 +20,6 @@ public interface BeyonderClass {
 
     List<Integer> spiritualityRegen();
 
-    List<Double> maxHealth();
-
     void tick(LivingEntity player, int sequence);
 
     Multimap<Integer, Item> getItems();

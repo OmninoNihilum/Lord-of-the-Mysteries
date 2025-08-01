@@ -57,10 +57,6 @@ public class CriminalClass implements BeyonderClass {
         return List.of(34, 22, 16, 12, 10, 8, 6, 5, 3, 2);
     }
 
-    @Override
-    public List<Double> maxHealth() {
-        return List.of(350.0, 250.0, 186.0, 136.0, 96.0, 66.0, 54.0, 48.0, 28.0, 22.0);
-    }
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {

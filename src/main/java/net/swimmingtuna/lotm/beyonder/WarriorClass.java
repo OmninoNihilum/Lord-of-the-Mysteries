@@ -83,10 +83,6 @@ public class WarriorClass implements BeyonderClass {
         return List.of(52, 34, 26, 17, 12, 8, 7, 6, 4, 3);
     }
 
-    @Override
-    public List<Double> maxHealth() {
-        return List.of(70.0, 68.0, 65.0, 60.0, 50.0, 42.0, 32.0, 28.0, 28.0, 25.0);
-    }
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {

@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class BaseAttributes {
-    //protected static final UUID healthBoostID = UUID.fromString("a3a90fac-39d0-4b75-9990-8211f70e0a0f");
+    protected static final UUID healthBoostID = UUID.fromString("a3a90fac-39d0-4b75-9990-8211f70e0a0f");
     protected static final UUID speedID = UUID.fromString("1cd27c58-f3e8-46d9-8990-44a9f14dfc28");
     protected static final UUID attackID = UUID.fromString("b29d4a1d-20c5-42aa-a984-1c4bc77ccdad");
     protected static final UUID nightVisionID = UUID.fromString("12cd2ed8-a4f6-4e78-945d-f10e4559aa2e");
@@ -34,7 +34,7 @@ public class BaseAttributes {
     }
 
     public static void cleanAll(Player player){
-        //clean(Objects.requireNonNull(player.getAttribute(Attributes.MAX_HEALTH)), healthBoostID);
+        clean(Objects.requireNonNull(player.getAttribute(Attributes.MAX_HEALTH)), healthBoostID);
 
         clean(Objects.requireNonNull(player.getAttribute(Attributes.MOVEMENT_SPEED)), speedID);
         clean(Objects.requireNonNull(player.getAttribute(Attributes.ATTACK_DAMAGE)), attackID);
