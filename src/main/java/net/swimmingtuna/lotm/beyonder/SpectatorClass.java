@@ -71,6 +71,11 @@ public class SpectatorClass implements BeyonderClass {
     }
 
     @Override
+    public void applyAllModifiers(Player player, int seq) {
+
+    }
+
+    @Override
     public List<Integer> spiritualityLevels() {
         return List.of(25000, 10000, 6000, 3000, 1800, 800, 500, 350, 175, 125);
     }

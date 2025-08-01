@@ -71,6 +71,11 @@ public class ApprenticeClass implements BeyonderClass {
     }
 
     @Override
+    public void applyAllModifiers(Player player, int seq) {
+
+    }
+
+    @Override
     public List<Integer> spiritualityLevels() {
         return List.of(30000, 12000, 7000, 3500, 2300, 900, 550, 400, 225, 150);
     }

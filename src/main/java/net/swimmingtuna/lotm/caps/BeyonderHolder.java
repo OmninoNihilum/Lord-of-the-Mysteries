@@ -27,6 +27,7 @@ import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.core.PlayerCapability;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.EntityCapabilityStatusPacket;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.SimpleEntityCapabilityStatusPacket;
+import nihilum.lotm.tweaks.Attributes.BaseAttributes;
 import nihilum.lotm.tweaks.Attributes.MonsterAttributes;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,7 +91,7 @@ public class BeyonderHolder extends PlayerCapability {
         LOTMNetworkHandler.sendToPlayer(new ClearAbilitiesS2C(), (ServerPlayer) player);
         updateTracking();
 
-        MonsterAttributes.cleanAll(player);
+        BaseAttributes.cleanAll(player);
 
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
     }
@@ -113,7 +114,7 @@ public class BeyonderHolder extends PlayerCapability {
         }
         updateTracking();
 
-        MonsterAttributes.applyAll(player, sequence);
+        newClass.applyAllModifiers(player, sequence);
 
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
 
@@ -202,7 +203,7 @@ public class BeyonderHolder extends PlayerCapability {
 
             LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
 
-            MonsterAttributes.applyAll(player, currentSequence);
+            currentClass.applyAllModifiers(player, currentSequence);
         }
     }
 

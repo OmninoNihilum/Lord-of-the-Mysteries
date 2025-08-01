@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -34,6 +35,11 @@ public class BardClass implements BeyonderClass {
     @Override
     public List<Integer> divination() {
         return List.of(20, 15, 13, 9, 5, 2, 1, 1, 1, 1);
+    }
+
+    @Override
+    public void applyAllModifiers(Player player, int seq) {
+
     }
 
     @Override
