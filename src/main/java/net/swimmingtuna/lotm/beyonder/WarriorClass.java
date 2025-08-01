@@ -64,7 +64,7 @@ public class WarriorClass implements BeyonderClass {
 
     @Override
     public void applyAllModifiers(Player player, int seq) {
-        
+
     }
 
     @Override

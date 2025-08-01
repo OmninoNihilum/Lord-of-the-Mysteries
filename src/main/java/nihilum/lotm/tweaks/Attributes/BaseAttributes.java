@@ -21,12 +21,12 @@ public class BaseAttributes {
     protected static final UUID armorToughnessID = UUID.fromString("d41c5348-216e-4c94-a0fd-8bc5eb4da8ca");
     protected static final UUID waterBreathingID = UUID.fromString("52900b28-d96b-489b-b5dd-83e3d7f15443");
 
-    protected static void clean(AttributeInstance attr, UUID id){
+    public static void clean(AttributeInstance attr, UUID id){
         if(attr.getModifier(id) != null)
             attr.removeModifier(id);
     }
 
-    protected static <T> void apply(AttributeInstance attr, UUID id, Double value, String name){
+    public static void apply(AttributeInstance attr, UUID id, Double value, String name){
         clean(attr, id);
 
         attr.addPermanentModifier(new AttributeModifier(

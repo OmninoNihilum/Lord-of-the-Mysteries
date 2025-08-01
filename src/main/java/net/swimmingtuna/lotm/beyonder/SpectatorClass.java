@@ -34,6 +34,7 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
+import nihilum.lotm.tweaks.Attributes.SpectatorAttributes;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -72,7 +73,7 @@ public class SpectatorClass implements BeyonderClass {
 
     @Override
     public void applyAllModifiers(Player player, int seq) {
-
+        SpectatorAttributes.applyAll(player, seq);
     }
 
     @Override
@@ -105,42 +106,6 @@ public class SpectatorClass implements BeyonderClass {
             } else {
                 if (player.tickCount % 200 == 0) {
                     BeyonderUtil.applyMobEffect(player, MobEffects.INVISIBILITY, 50, 1, false, false);
-                }
-            }
-            if (player.tickCount % 80 == 0) {
-                if (sequenceLevel >= 0) {
-                    player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 30 * 20, -1, false, false));
-                }
-                if (sequenceLevel == 6) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 5) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 4) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 3) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 2) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-
-                } else if (sequenceLevel == 1) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-
-                } else if (sequenceLevel == 0) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
                 }
             }
         }
