@@ -21,6 +21,7 @@ import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import nihilum.lotm.tweaks.Attributes.WarriorAttributes;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -64,7 +65,7 @@ public class WarriorClass implements BeyonderClass {
 
     @Override
     public void applyAllModifiers(Player player, int seq) {
-
+        WarriorAttributes.applyAll(player, seq);
     }
 
     @Override
@@ -142,98 +143,6 @@ public class WarriorClass implements BeyonderClass {
                     }
                 } else {
                     applyRandomWeaponEffects(player, sequenceLevel);
-                }
-            }
-            if (player.tickCount % 60 == 0) {
-                if (sequenceLevel == 9) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    speed = 1;
-                    strength = 0;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 8) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 0;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 7) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 1;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 6) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 2;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 5) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 2;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 4) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 3) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 2) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 1) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 0) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
                 }
             }
         }
