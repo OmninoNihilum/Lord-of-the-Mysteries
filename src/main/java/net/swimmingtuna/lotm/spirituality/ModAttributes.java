@@ -24,6 +24,8 @@ public class ModAttributes {
             ()-> new RangedAttribute("attribute.lotm.night_vision",1.0D,1.0D,5).setSyncable(true));
     public static final RegistryObject<Attribute> FIRE_RESISTANCE = ATTRIBUTES.register("fire_resistance",
             ()-> new RangedAttribute("attribute.lotm.fire_resistance",0.0D,0.0D,3).setSyncable(true));
+    public static final RegistryObject<Attribute> JUMP_BOOST = ATTRIBUTES.register("jump_boost",
+            ()-> new RangedAttribute("attribute.lotm.jump_boost",0.0D,0.0D,10).setSyncable(true));
 
 
 

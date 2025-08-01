@@ -1,29 +1,25 @@
 package net.swimmingtuna.lotm.events;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -33,6 +29,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -146,12 +144,12 @@ import static net.swimmingtuna.lotm.util.effect.BattleHypnotismEffect.battleHypn
 import static net.swimmingtuna.lotm.util.effect.StunEffect.livingNoMoveEffect;
 import static net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit.SPIRIT_WORLD_LEVEL_KEY;
 
+import net.minecraft.world.level.ClipContext;
+import nihilum.lotm.tweaks.Attributes.NightVisionLightHandler;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
 public class ModEvents {
     private static final Map<Item, Integer> abilityCooldowns = new HashMap<>();
-
-    private static double originalGamma = -1;
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
@@ -333,17 +331,6 @@ public class ModEvents {
 //            //player.sendSystemMessage(Component.literal("value is " + x));
 //        }
 
-        Vec3 motion = player.getDeltaMovement();
-
-        double speed = player.getAttributeValue(Attributes.MOVEMENT_SPEED) * 0.1;
-        double horizontalSpeed = Math.sqrt(motion.x * motion.x + motion.z * motion.z);
-
-        if (horizontalSpeed < speed * 0.9) {
-            // Apply extra horizontal momentum to compensate
-            Vec3 look = player.getLookAngle();
-            Vec3 boost = new Vec3(look.x * speed, 0, look.z * speed);
-            player.setDeltaMovement(motion.add(boost.x * 0.5, 0, boost.z * 0.5)); // scale to avoid overboost
-        }
 
         if (player instanceof ServerPlayer serverPlayer) {
             if (player.tickCount % 20 == 0) {
@@ -574,9 +561,9 @@ public class ModEvents {
             }
         }
 
-        if(attacked instanceof Player player){
+        if (attacked instanceof Player player) {
             var source = event.getSource();
-            if(player.getAttributeValue(ModAttributes.FIRE_RESISTANCE.get()) == 3
+            if (player.getAttributeValue(ModAttributes.FIRE_RESISTANCE.get()) == 3
                     && (source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.IN_FIRE)
                     || source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.LAVA))) {
                 event.setCanceled(true);
@@ -678,6 +665,8 @@ public class ModEvents {
         LivingEntity entity = event.getEntity();
         if (!entity.level().isClientSide()) {
             CompoundTag tag = entity.getPersistentData();
+
+
             int falseProphecyBeneficial = tag.getInt("beneficialFalseProphecyJump");
             int falseProphecyHarmful = tag.getInt("harmfulFalseProphecyJump");
             if (falseProphecyBeneficial >= 1) {
@@ -1085,12 +1074,17 @@ public class ModEvents {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
 
-        if (mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get()) == 1.0) return;
+        float boost = (float) mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get());
 
-        float rawBoost = Math.max((float) ModAttributes.NIGHT_VISION.get().getDefaultValue(),
-                (float) mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get()));
-        float lightFactor = 1.0F - (mc.level.getMaxLocalRawBrightness(mc.player.blockPosition()) / 15.0F);
-        float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;
+        if (boost == 1.0) return;
+
+        float totalLight =  mc.level.getRawBrightness(mc.player.blockPosition(), 0);
+                //NightVisionLightHandler.getLigthLevelInFov(mc.level, mc.player);
+
+        if(totalLight > 6 && NightVisionLightHandler.checkDay(mc.level)) return;
+
+        //float lightFactor = 1.0F - totalLight / 15.0F;
+        //float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -1099,4 +1093,14 @@ public class ModEvents {
 
         RenderSystem.disableBlend();
     }
+
+    @SubscribeEvent
+    public static void onPlayerJump(LivingEvent.LivingJumpEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+
+        player.setDeltaMovement(player.getDeltaMovement().
+                add(0, player.getAttributeValue(ModAttributes.JUMP_BOOST.get()), 0));
+    }
+
+
 }

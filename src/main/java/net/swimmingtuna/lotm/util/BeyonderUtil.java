@@ -1156,13 +1156,14 @@ public class BeyonderUtil {
         LOTMNetworkHandler.sendToServer(new RequestCooldownSetC2S());
         if (!heldItem.isEmpty()) {
 
-            if (heldItem.getItem() instanceof LeftClickHandlerSword) {
-                handleEmptyLeftClickItem((LeftClickHandlerSword) heldItem.getItem());
-            } else if (heldItem.getItem() instanceof LeftClickHandlerSkillP) {
-                handleEmptyLeftClickSkill((LeftClickHandlerSkillP) heldItem.getItem(), activeSlot);
-            } else {
-                handleEmptyLeftClickSkill((LeftClickHandlerSkill) heldItem.getItem());
-            }
+            var item = heldItem.getItem();
+            if(item instanceof LeftClickHandlerSkill neededItem)
+                handleEmptyLeftClickSkill(neededItem);
+            else if(item instanceof LeftClickHandlerSkillP neededItem)
+                handleEmptyLeftClickSkill(neededItem, activeSlot);
+            else if(item instanceof LeftClickHandlerSword neededItem)
+                handleEmptyLeftClickItem(neededItem);
+
 
             if (heldItem.getItem() instanceof DeathKnell) {
                 LOTMNetworkHandler.sendToServer(new DeathKnellLeftClickC2S());
