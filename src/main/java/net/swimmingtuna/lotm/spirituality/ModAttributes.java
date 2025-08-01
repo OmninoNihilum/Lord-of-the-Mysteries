@@ -21,11 +21,13 @@ public class ModAttributes {
     public static final RegistryObject<Attribute> DIR = ATTRIBUTES.register("dreamintoreality",
             ()-> new RangedAttribute("attribute.lotm.dreamintoreality",1.0D,0.0D,10).setSyncable(true));
     public static final RegistryObject<Attribute> NIGHT_VISION = ATTRIBUTES.register("night_vision",
-            ()-> new RangedAttribute("attribute.lotm.night_vision",1.0D,1.0D,5).setSyncable(true));
+            ()-> new RangedAttribute("attribute.lotm.night_vision",1.0D,1.0D,4).setSyncable(true));
     public static final RegistryObject<Attribute> FIRE_RESISTANCE = ATTRIBUTES.register("fire_resistance",
             ()-> new RangedAttribute("attribute.lotm.fire_resistance",0.0D,0.0D,3).setSyncable(true));
     public static final RegistryObject<Attribute> JUMP_BOOST = ATTRIBUTES.register("jump_boost",
             ()-> new RangedAttribute("attribute.lotm.jump_boost",0.0D,0.0D,10).setSyncable(true));
+    public static final RegistryObject<Attribute> WATER_BREATHING = ATTRIBUTES.register("water_breathing",
+            ()-> new RangedAttribute("attribute.lotm.water_breathing",0.0D,0.0D,1).setSyncable(true));
 
 
 

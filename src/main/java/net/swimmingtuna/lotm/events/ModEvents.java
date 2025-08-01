@@ -322,6 +322,12 @@ public class ModEvents {
             return;
         }
 
+        if (player.isUnderWater()) {
+            if (player.getAttributeValue(ModAttributes.WATER_BREATHING.get()) == 1.0) {
+                player.setAirSupply(300);
+            }
+        }
+
         if (!player.level().isClientSide() && holder.currentClassMatches(BeyonderClassInit.MONSTER) && sequence <= 9 && player.tickCount % 5 == 0) {
             MonsterClass.checkForProjectiles(player);
         }
@@ -1078,10 +1084,10 @@ public class ModEvents {
 
         if (boost == 1.0) return;
 
-        float totalLight =  mc.level.getRawBrightness(mc.player.blockPosition(), 0);
-                //NightVisionLightHandler.getLigthLevelInFov(mc.level, mc.player);
+        float totalLight = mc.level.getRawBrightness(mc.player.blockPosition(), 0);
+        //NightVisionLightHandler.getLigthLevelInFov(mc.level, mc.player);
 
-        if(totalLight > 6 && NightVisionLightHandler.checkDay(mc.level)) return;
+        if (totalLight > 6 && NightVisionLightHandler.checkDay(mc.level)) return;
 
         //float lightFactor = 1.0F - totalLight / 15.0F;
         //float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;

@@ -18,7 +18,8 @@ public class BaseAttributes {
     protected static final UUID fireResistanceID = UUID.fromString("9dbc9d39-a22b-445d-85c9-265ca4bd26b6");
     protected static final UUID jumpID = UUID.fromString("d745714c-cdc4-4e4e-bb24-50d07c46f853");
     protected static final UUID armorID = UUID.fromString("66c23c87-9e2b-4823-8b04-58fe34f9ad9d");
-    protected static  final UUID armorToughnessID = UUID.fromString("d41c5348-216e-4c94-a0fd-8bc5eb4da8ca");
+    protected static final UUID armorToughnessID = UUID.fromString("d41c5348-216e-4c94-a0fd-8bc5eb4da8ca");
+    protected static final UUID waterBreathingID = UUID.fromString("52900b28-d96b-489b-b5dd-83e3d7f15443");
 
     protected static void clean(AttributeInstance attr, UUID id){
         if(attr.getModifier(id) != null)
@@ -43,6 +44,6 @@ public class BaseAttributes {
         clean(Objects.requireNonNull(player.getAttribute(ModAttributes.NIGHT_VISION.get())), nightVisionID);
         clean(Objects.requireNonNull(player.getAttribute(ModAttributes.FIRE_RESISTANCE.get())), fireResistanceID);
         clean(Objects.requireNonNull(player.getAttribute(ModAttributes.JUMP_BOOST.get())), jumpID);
-
+        clean(Objects.requireNonNull(player.getAttribute(ModAttributes.WATER_BREATHING.get())), waterBreathingID);
     }
 }

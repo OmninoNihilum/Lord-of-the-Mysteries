@@ -13,16 +13,19 @@ public class MonsterAttributes extends BaseAttributes {
     private static final List<Double> attackList
             = List.of(16.0 ,12.0, 12.0, 9.0, 9.0, 6.0, 6.0, 3.0, 3.0, 0.0);
     private static final List<Double> nightVisionList
-            = List.of(4.0 ,4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0);
+            = List.of(3.0 ,3.0, 3.0, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0);
     private static  final List<Double> fireResistanceList =
             List.of(3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0);
     private static final List<Double> jumpList
             = List.of(0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.055, 0.055, 0.055);
 
     private static final List<Double> armorList
-            = List.of(20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0, 4.0, 0.0);
+            = List.of(20.0, 18.0, 15.0, 12.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     private static final List<Double> armorToughnessList
-            = List.of(12.0, 8.0, 8.0, 6.0, 6.0, 4.0, 3.0, 3.0, 2.0, 0.0);
+            = List.of(12.0, 8.0, 8.0, 6.0, 6.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+    private static final List<Double> waterBreathingList
+            = List.of(1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     public static void applyAll(Player player, int seq){
         //apply(player.getAttribute(Attributes.MAX_HEALTH), healthBoostID, , "HealthBoost");
@@ -39,6 +42,7 @@ public class MonsterAttributes extends BaseAttributes {
                 fireResistanceID, fireResistanceList.get(seq), "FireResistance");
         apply(player.getAttribute(ModAttributes.JUMP_BOOST.get()),
                 jumpID, jumpList.get(seq), "JumpBoost");
-
+        apply(player.getAttribute(ModAttributes.WATER_BREATHING.get()),
+                waterBreathingID, waterBreathingList.get(seq), "WaterBreathingBoost");
     }
 }
