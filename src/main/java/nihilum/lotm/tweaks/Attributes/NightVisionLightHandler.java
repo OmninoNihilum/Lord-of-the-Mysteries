@@ -86,7 +86,7 @@ public class NightVisionLightHandler {
     public static boolean checkDay(Level world){
         if(world.isDay()){
             long time = world.getDayTime() % 24000L;
-            return time >= 0 && time < 13000;
+            return (time >= 0 && time < 13000) || time >= 22500;
         }
         return false;
     }

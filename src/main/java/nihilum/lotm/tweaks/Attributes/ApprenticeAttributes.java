@@ -11,14 +11,14 @@ public class ApprenticeAttributes extends BaseAttributes{
     private static final List<Double> healthList =
             List.of(45.0, 40.0, 40.0, 35.0, 32.0, 28.0, 28.0, 23.0, 20.0, 20.0);
     private static final List<Double> speedList
-            = List.of(0.11, 0.1, 0.08, 0.07, 0.07, 0.06, 0.04, 0.00, 0.0, 0.0);
+            = List.of(0.09, 0.08, 0.08, 0.07, 0.07, 0.06, 0.04, 0.00, 0.0, 0.0);
     private static final List<Double> attackList
             = List.of(10.0 ,9.0, 8.0, 8.0, 8.0, 6.0, 6.0, 0.0, 0.0, 0.0);
     private static final List<Double> jumpList
-            = List.of(0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.055, 0.00, 0.0, 0.0);
+            = List.of(0.125, 0.125, 0.125, 0.055, 0.055, 0.055, 0.0, 0.0, 0.0, 0.0);
 
     private static final List<Double> digSpeedList
-            = List.of(4.0, 3.0, 3.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+            = List.of(3.0, 2.0, 2.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
     public static void applyAll(LivingEntity entity, int seq){
         apply(entity.getAttribute(Attributes.MAX_HEALTH), healthBoostID, healthList.get(seq) - 20.0,

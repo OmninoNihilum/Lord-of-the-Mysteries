@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -1090,12 +1091,13 @@ public class ModEvents {
 
         if (boost == 1.0) return;
 
-        float totalLight = mc.level.getRawBrightness(mc.player.blockPosition(), 0);
         //NightVisionLightHandler.getLigthLevelInFov(mc.level, mc.player);
 
-        if (totalLight > 6 && NightVisionLightHandler.checkDay(mc.level)) return;
+        if (mc.level.getRawBrightness(mc.player.blockPosition(), 0) > 6
+                && NightVisionLightHandler.checkDay(mc.level)) return;
+        if(mc.level.getBrightness(LightLayer.BLOCK, mc.player.blockPosition()) != 0) return;
 
-        //float lightFactor = 1.0F - totalLight / 15.0F;
+        //float lightFactor = 1.0F -  / 15.0F;
         //float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;
 
         RenderSystem.enableBlend();
