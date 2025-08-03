@@ -741,5 +741,4 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             entity.oAttackAnim = originalOAttackAnim;
         }
     }
-
 }

@@ -45,7 +45,6 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
 
@@ -161,7 +160,7 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                 }
                 if (paralysis >= 1) {
                     paralysisDuration = paralysisDuration + enhancement;
-                    interactionTarget.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), paralysisDuration * 10, 1, false, false));
+                    BeyonderUtil.applyParalysis(interactionTarget, paralysisDuration * 10);
                 }
                 if (unequipArmor >= 1) {
                     if (interactionTarget instanceof Player pPlayer) {
@@ -301,7 +300,7 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                     calamityBreezeCounter++;
                     for (LivingEntity living : interactionTarget.level().getEntitiesOfClass(LivingEntity.class, interactionTarget.getBoundingBox().inflate((calamityBreezeCounter * 5) + (enhancement * 5)))) {
                         if (livingEntity != player) {
-                            living.addEffect(new MobEffectInstance(ModEffects.STUN.get(), calamityBreezeCounter * 10));
+                            BeyonderUtil.applyStun(living, calamityBreezeCounter * 10);
                             living.hurt(BeyonderUtil.genericSource(interactionTarget, living), 4);
                             living.setTicksFrozen(calamityBreezeCounter * 10);
                         }

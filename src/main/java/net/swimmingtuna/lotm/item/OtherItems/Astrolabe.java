@@ -29,7 +29,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.entity.SpaceRiftEntity;
+import net.swimmingtuna.lotm.entity.SpatialCageEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.PositionUtils;
@@ -75,29 +78,33 @@ public class Astrolabe extends Item {
 
     public static void astrolabeChatMessage(ServerChatEvent event) {
         ServerPlayer player = event.getPlayer();
-        if (!player.level().isClientSide() && player.getMainHandItem().getItem() == ItemInit.ASTROLABE.get()) {
-            String message = event.getMessage().getString().toLowerCase();
+        String message = event.getMessage().getString();
+
+        // Check if player is holding astrolabe OR message starts with "Position: "
+        boolean holdingAstrolabe = !player.level().isClientSide() && player.getMainHandItem().getItem() == ItemInit.ASTROLABE.get();
+        boolean hasPositionPrefix = message.startsWith("Position: ");
+
+        if (holdingAstrolabe || hasPositionPrefix) {
+            String searchQuery;
+
+            if (hasPositionPrefix) {
+                searchQuery = message.substring(10).toLowerCase();
+            } else {
+                searchQuery = message.toLowerCase();
+            }
             CompoundTag tag = player.getPersistentData();
             boolean foundResource = false;
-            String resourceKey = message.replace(' ', '_');
+            String resourceKey = searchQuery.replace(' ', '_');
             int maxDistance = (int) (BeyonderUtil.getDivination(player) * 30.0);
             ResourceLocation resourceLocation;
 
             try {
                 resourceLocation = new ResourceLocation(resourceKey);
-
-                // Handle block searching using PositionUtils
                 if (ForgeRegistries.BLOCKS.containsKey(resourceLocation)) {
                     foundResource = true;
                     Block targetBlock = ForgeRegistries.BLOCKS.getValue(resourceLocation);
                     ServerLevel level = (ServerLevel) player.level();
-
-                    // Use PositionUtils to find the nearest block
-                    BlockPos nearestBlockPos = PositionUtils.getNearestBlock(
-                            level,
-                            player,
-                            Collections.singletonList(targetBlock.asItem()),
-                            maxDistance / 40.0
+                    BlockPos nearestBlockPos = PositionUtils.getNearestBlock(level, player, Collections.singletonList(targetBlock.asItem()), maxDistance / 40.0
                     );
 
                     if (nearestBlockPos != null) {
@@ -110,7 +117,7 @@ public class Astrolabe extends Item {
                                         .withStyle(ChatFormatting.GREEN)));
                         BeyonderUtil.useSpirituality(player, maxDistance * 3);
                     } else {
-                        player.sendSystemMessage(Component.literal("No " + targetBlock.getName() + " found"));
+                        player.sendSystemMessage(Component.literal("No " + targetBlock.getName().getString() + " found").withStyle(ChatFormatting.RED));
                     }
                 }
 
@@ -148,8 +155,7 @@ public class Astrolabe extends Item {
                                 .append(Component.literal(nearestX + ", " + nearestY + ", " + nearestZ)
                                         .withStyle(ChatFormatting.GREEN)));
                     } else {
-                        player.sendSystemMessage(Component.literal("No " + entityType.getDescription().getString() + " found within range")
-                                .withStyle(ChatFormatting.RED));
+                        player.sendSystemMessage(Component.literal("No " + entityType.getDescription().getString() + " found within range").withStyle(ChatFormatting.RED));
                     }
                 }
 
@@ -158,8 +164,8 @@ public class Astrolabe extends Item {
                 if (server != null) {
                     List<ServerPlayer> players = server.getPlayerList().getPlayers();
                     for (ServerPlayer targetPlayer : players) {
-                        if (message.contains(targetPlayer.getGameProfile().getName().toLowerCase())) {
-                            foundResource = handlePlayerDivination(player, targetPlayer, message, tag, maxDistance);
+                        if (searchQuery.contains(targetPlayer.getGameProfile().getName().toLowerCase())) {
+                            foundResource = handlePlayerDivination(player, targetPlayer, searchQuery, tag, maxDistance, hasPositionPrefix);
                             if (foundResource) break;
                         }
                     }
@@ -167,7 +173,7 @@ public class Astrolabe extends Item {
 
                 // Handle biome searching
                 if (!foundResource) {
-                    foundResource = handleBiomeSearch(player, message, maxDistance);
+                    foundResource = handleBiomeSearch(player, searchQuery, maxDistance);
                 }
 
                 // Handle structure searching
@@ -176,7 +182,7 @@ public class Astrolabe extends Item {
                 }
 
                 if (!foundResource) {
-                    player.sendSystemMessage(Component.literal("No divination target found with " + message)
+                    player.sendSystemMessage(Component.literal("No divination target found with " + searchQuery)
                             .withStyle(ChatFormatting.RED));
                 } else {
                     BeyonderUtil.useSpirituality(player, maxDistance * 2);
@@ -189,8 +195,7 @@ public class Astrolabe extends Item {
         }
     }
 
-    private static boolean handlePlayerDivination(ServerPlayer player, ServerPlayer targetPlayer, String message,
-                                                  CompoundTag tag, int maxDistance) {
+    private static boolean handlePlayerDivination(ServerPlayer player, ServerPlayer targetPlayer, String message, CompoundTag tag, int maxDistance, boolean position) {
         boolean spatialIntegration = true;
         if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(targetPlayer, BeyonderClassInit.APPRENTICE.get(), 3)) {
             if (BeyonderUtil.getSequence(player) != 0 && BeyonderUtil.getSequence(player) != 1) {
@@ -212,9 +217,7 @@ public class Astrolabe extends Item {
                     " is too far away or has anti-divination too high for you"));
             return true;
         }
-
         int amountToCorrupt = (BeyonderUtil.getSequence(player) - BeyonderUtil.getSequence(targetPlayer) * 25);
-
         if (message.contains("sequence")) {
             handleSequenceDivination(player, targetPlayer, tag, amountToCorrupt);
         } else if (message.contains("location") || message.contains("coordinates")) {
@@ -229,7 +232,25 @@ public class Astrolabe extends Item {
                 message.contains("unluck") || message.contains("misfortune")) {
             handleLuckDivination(player, targetPlayer, tag, amountToCorrupt);
         }
-
+        if (position) {
+            handleLocationDivination(player, targetPlayer, tag, 0);
+            if (message.toLowerCase().contains("tear")) {
+                SpaceRiftEntity rift = new SpaceRiftEntity(EntityInit.SPACE_RIFT_ENTITY.get(), targetPlayer.level());
+                rift.setOwner(player);
+                rift.teleportTo(targetPlayer.getX(), targetPlayer.getY(), targetPlayer.getZ());
+                BeyonderUtil.setScale(rift, 6 - BeyonderUtil.getSequence(player));
+                rift.setMaxLife((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.SPATIAL_TEARING.get()));
+                targetPlayer.level().addFreshEntity(rift);
+            } else if (message.toLowerCase().contains("to me")) {
+                Level destination = player.level();
+                BeyonderUtil.teleportEntity(targetPlayer, destination, player.getX(), player.getY(), player.getZ());
+            } else if (message.toLowerCase().contains("to them")) {
+                Level destination = targetPlayer.level();
+                BeyonderUtil.teleportEntity(player, destination, targetPlayer.getX(), targetPlayer.getY(), targetPlayer.getZ());
+            } else if (message.toLowerCase().contains("seal")) {
+                SpatialCageEntity.setSealed(targetPlayer, player, BeyonderUtil.getSequence(player) - 1, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.SPATIAL_CAGE.get()));
+            }
+        }
         BeyonderUtil.useSpirituality(player, maxDistance * 5);
         return true;
     }
@@ -253,8 +274,6 @@ public class Astrolabe extends Item {
         int targetX = (int) targetPlayer.getX();
         int targetY = (int) targetPlayer.getY();
         int targetZ = (int) targetPlayer.getZ();
-        player.sendSystemMessage(Component.literal(targetPlayer.getName().getString() + "'s location is " +
-                targetPlayer.level().dimension().toString() + ": " + targetX + ", " + targetY + ", " + targetZ));
     }
 
     private static void handleInventoryDivination(ServerPlayer player, ServerPlayer targetPlayer, CompoundTag tag, int amountToCorrupt) {

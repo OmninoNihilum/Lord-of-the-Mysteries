@@ -161,7 +161,7 @@ public class SirenSongHarm extends SimpleAbilityItem {
         if (sirenSongStun % 20 == 0 && sirenSongStun != 0) {
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.SIREN_SONG_STUN.get())))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
-                    entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 19 - (sequence * 2), 2, false, false));
+                    BeyonderUtil.applyParalysis(entity, 19 - (sequence * 2));
                 }
             }
         }

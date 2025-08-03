@@ -78,14 +78,14 @@ public class TrickTumble extends SimpleAbilityItem {
                     Vec3 movement = livingEntity.getDeltaMovement();
                     if (BeyonderUtil.getSequence(living) >= 5) {
                         if (livingEntity.onGround()) {
-                            BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
-                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                            BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
                             livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
                             livingEntity.hurtMarked = true;
                         }
                     } else {
-                        BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
-                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                        BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
+                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.TUMBLE.get(), (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.TRICKTUMBLE.get()), 1, false, false);
                         livingEntity.setDeltaMovement(Math.min(3, movement.x * 1.5f), movement.y(), Math.min(3, movement.z() * 1.5f));
                         livingEntity.hurtMarked = true;
                     }

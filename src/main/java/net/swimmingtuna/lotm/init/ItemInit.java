@@ -398,7 +398,7 @@ public class ItemInit {
     public static final RegistryObject<Item> SPACE_FRAGMENTATION = ITEMS.register("space_fragmentation",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> GRAVITY_MANIPULATION = ITEMS.register("gravitymanipulation",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new GravityManipulation(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_SEAL = ITEMS.register("spatialseal",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_LOCK_ON = ITEMS.register("spatiallockon",
@@ -600,11 +600,11 @@ public class ItemInit {
             () -> new Astrolabe(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> WORM_OF_STAR = ITEMS.register("wormofstar",
             () -> new WormOfStar(new Item.Properties().stacksTo(LOTM.getMaxStackCount())));
-    public static final RegistryObject<Item> FORCED_UPDATE_ITEM = ITEMS.register("forced_update_item_6",
+    public static final RegistryObject<Item> FORCED_UPDATE_ITEM = ITEMS.register("forced_update_item_4",
             () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> FORCED_UPDATE_ITEM_2 = ITEMS.register("forced_update_item_1",
+    public static final RegistryObject<Item> FORCED_UPDATE_ITEM_2 = ITEMS.register("forced_update_item_5",
             () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> FORCED_UPDATE_ITEM_3 = ITEMS.register("forced_update_item_5",
+    public static final RegistryObject<Item> FORCED_UPDATE_ITEM_3 = ITEMS.register("forced_update_item_6",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOLL = ITEMS.register("doll",
             Doll::new);

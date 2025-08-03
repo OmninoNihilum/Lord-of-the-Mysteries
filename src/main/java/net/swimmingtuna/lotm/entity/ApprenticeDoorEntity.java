@@ -24,7 +24,6 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.CustomEntityDataSerializers;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -209,7 +208,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                                 Random random = new Random();
                                 livingEntity.getPersistentData().putInt("exileDoorMob", random.nextInt(3));
                                 livingEntity.teleportTo(0, livingEntity.getY() + 110, 0);
-                                BeyonderUtil.applyMobEffect(livingEntity, ModEffects.STUN.get(), 400, 1, false, false);
+                                BeyonderUtil.applyStun(livingEntity, 400);
                             }
                         }
                     }

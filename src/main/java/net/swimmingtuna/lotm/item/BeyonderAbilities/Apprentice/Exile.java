@@ -37,7 +37,6 @@ import net.swimmingtuna.lotm.init.BiomeInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import org.jetbrains.annotations.NotNull;
 
@@ -197,7 +196,7 @@ public class Exile extends SimpleAbilityItem {
                         } else if (nextInt > 35) {
                             livingEntity.getDeltaMovement().add(0, 5,0);
                         } else if (nextInt > 20) {
-                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.STUN.get(), 20, 1, true, true);
+                            BeyonderUtil.applyStun(livingEntity, 20);
                         } else {
                             tag.putInt("luckDoubleDamage", tag.getInt("luckDoubleDamage") + 1);
                             if (livingEntity instanceof Player player) {

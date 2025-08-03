@@ -49,6 +49,10 @@ public class AquaticLifeManipulation extends SimpleAbilityItem {
             if (aquaticEntities.isEmpty()) {
                 return;
             }
+            if (sequence <= 2) {
+                player.sendSystemMessage(Component.literal("You can't use this ability anymore, it's been updated to Rain Eyes.").withStyle(ChatFormatting.RED));
+                return;
+            }
             LivingEntity nearestAquaticEntity = aquaticEntities.stream().min(Comparator.comparingDouble(player::distanceTo)).orElse(null);
             List<Player> nearbyPlayers = nearestAquaticEntity.level().getEntitiesOfClass(Player.class, nearestAquaticEntity.getBoundingBox().inflate(200 - (sequence * 20)));
             Player nearestPlayer = nearbyPlayers.stream().filter(nearbyPlayer -> nearbyPlayer != player).min(Comparator.comparingDouble(nearestAquaticEntity::distanceTo)).orElse(null);

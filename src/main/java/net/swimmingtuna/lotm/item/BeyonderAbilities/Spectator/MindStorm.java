@@ -23,7 +23,6 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -86,7 +85,7 @@ public class MindStorm extends SimpleAbilityItem {
             if (BeyonderUtil.getDreamIntoReality(player) == 2) {
                 damage = (int) ((int) (float) 1.5 * BeyonderUtil.getDamage(player).get(ItemInit.MIND_STORM.get()));
             }
-            interactionTarget.addEffect(new MobEffectInstance(ModEffects.AWE.get(), (int) (duration * 0.5), 1, false, false));
+            BeyonderUtil.applyAwe(player, duration / 2);
             interactionTarget.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
             interactionTarget.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 1, false, false));
             BeyonderUtil.applyMentalDamage(player, interactionTarget, damage);

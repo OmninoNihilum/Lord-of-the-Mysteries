@@ -104,7 +104,7 @@ public class VolcanicEruption extends SimpleAbilityItem {
 
     public static void volcanicEruptionTarget(LivingEntity living, LivingEntity target) {
         if (!living.level().isClientSide()) {
-            target.getPersistentData().putInt("volcanicEruption", (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.VOLCANIC_ERUPTION.get()));
+            target.getPersistentData().putInt("volcanicEruption", (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.VOLCANIC_ERUPTION.get()) * 2);
         }
     }
 

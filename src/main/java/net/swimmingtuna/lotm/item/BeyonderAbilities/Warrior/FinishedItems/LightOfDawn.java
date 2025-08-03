@@ -131,8 +131,10 @@ public class LightOfDawn extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (livingEntity.getMaxHealth() / livingEntity.getHealth() < 0.7) {
+        if (livingEntity.getHealth() < livingEntity.getMaxHealth() / 2) {
             return 80;
+        } else if (livingEntity.getHealth() < livingEntity.getMaxHealth()) {
+            return 20;
         }
         return 0;
     }

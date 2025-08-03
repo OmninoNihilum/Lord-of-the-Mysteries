@@ -21,7 +21,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -131,7 +130,7 @@ public class TsunamiSeal extends SimpleAbilityItem {
                 tag.putInt("sailorSeal", sealCounter - 1);
                 if (sealCounter % 20 == 0) {
                     entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 40, 1, false, false));
-                    entity.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 40, 3, false, false));
+                    BeyonderUtil.applyStun(entity, 40);
                 }
             }
             if (sealCounter == 1) {

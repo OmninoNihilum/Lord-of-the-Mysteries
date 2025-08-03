@@ -245,18 +245,18 @@ public class AbilityRegisterCommand {
                 } else if (sequence == 7) {
                     excecuteAbilityCommand(context, "/abilityput XOOXX lotm:mindreading");
                     excecuteAbilityCommand(context, "/abilityput XXXXX lotm:awe");
-                    excecuteAbilityCommand(context, "/abilityput XXXOX lotm:frenzy");
+                    excecuteAbilityCommand(context, "/abilityput OOOOX lotm:frenzy");
                     excecuteAbilityCommand(context, "/abilityput OOOXO lotm:placate");
                 } else if (sequence == 6) {
                     excecuteAbilityCommand(context, "/abilityput XOOXX lotm:mindreading");
                     excecuteAbilityCommand(context, "/abilityput XXXXX lotm:awe");
-                    excecuteAbilityCommand(context, "/abilityput XXXOX lotm:frenzy");
+                    excecuteAbilityCommand(context, "/abilityput OOOOX lotm:frenzy");
                     excecuteAbilityCommand(context, "/abilityput OOOXO lotm:placate");
                     excecuteAbilityCommand(context, "/abilityput OOOXX lotm:psychologicalinvisibility");
                 } else if (sequence == 5) {
                     excecuteAbilityCommand(context, "/abilityput XOOXX lotm:mindreading");
                     excecuteAbilityCommand(context, "/abilityput XXXXX lotm:awe");
-                    excecuteAbilityCommand(context, "/abilityput XXXOX lotm:frenzy");
+                    excecuteAbilityCommand(context, "/abilityput OOOOX lotm:frenzy");
                     excecuteAbilityCommand(context, "/abilityput OOOXO lotm:placate");
                     excecuteAbilityCommand(context, "/abilityput OOOXX lotm:psychologicalinvisibility");
                     excecuteAbilityCommand(context, "/abilityput OOOOO lotm:dreamwalking");
@@ -465,11 +465,10 @@ public class AbilityRegisterCommand {
                     excecuteAbilityCommand(context, "/abilityput XOOOO lotm:sonicboom");
                     excecuteAbilityCommand(context, "/abilityput OOOOX lotm:lightningbranch");
                     excecuteAbilityCommand(context, "/abilityput OOXXO lotm:thunderclap");
-                    excecuteAbilityCommand(context, "/abilityput XOXOX lotm:lightningball");
                     excecuteAbilityCommand(context, "/abilityput OOXXX lotm:extremecoldness");
                     excecuteAbilityCommand(context, "/abilityput XOOXO lotm:raineyes");
                     excecuteAbilityCommand(context, "/abilityput OXOOX lotm:volcaniceruption");
-                    excecuteAbilityCommand(context, "/abilityput XOXXX lotm:lightningballabsorb");
+                    excecuteAbilityCommand(context, "/abilityput XOXOX lotm:lightningballabsorb");
                     excecuteAbilityCommand(context, "/abilityput OOOXO lotm:sailorlightningtravel");
                     excecuteAbilityCommand(context, "/abilityput XXOOO lotm:staroflightning");
                     excecuteAbilityCommand(context, "/abilityput XOXXO lotm:lightningredirection");
@@ -489,7 +488,7 @@ public class AbilityRegisterCommand {
                     excecuteAbilityCommand(context, "/abilityput OOXXX lotm:extremecoldness");
                     excecuteAbilityCommand(context, "/abilityput XOOXO lotm:raineyes");
                     excecuteAbilityCommand(context, "/abilityput OXOOX lotm:volcaniceruption");
-                    excecuteAbilityCommand(context, "/abilityput XOXXX lotm:lightningballabsorb");
+                    excecuteAbilityCommand(context, "/abilityput XOXOX lotm:lightningballabsorb");
                     excecuteAbilityCommand(context, "/abilityput OOOXO lotm:sailorlightningtravel");
                     excecuteAbilityCommand(context, "/abilityput XXOOO lotm:staroflightning");
                     excecuteAbilityCommand(context, "/abilityput XOXXO lotm:lightningredirection");

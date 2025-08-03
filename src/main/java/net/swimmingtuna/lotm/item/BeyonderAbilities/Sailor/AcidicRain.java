@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -48,7 +49,7 @@ public class AcidicRain extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, summons acidic rain around you."));
+        tooltipComponents.add(Component.literal("Upon use, summons acidic rain around you. This rain will hurt, poison, and rapidly break down armor of those around."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("175").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("25 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -74,6 +75,9 @@ public class AcidicRain extends SimpleAbilityItem {
                     continue;
                 }
                 entity.hurt(BeyonderUtil.genericSource(livingEntity, entity), BeyonderUtil.getDamage(livingEntity).get(ItemInit.ACIDIC_RAIN.get()) / 4);
+                if (entity instanceof Player player) {
+                    damagePlayerArmor(player, (int) (radius1 / 2));
+                }
                 if (entity.hasEffect(MobEffects.POISON)) {
                     int poisonAmp = entity.getEffect(MobEffects.POISON).getAmplifier();
                     if (poisonAmp == 0) {
@@ -101,6 +105,24 @@ public class AcidicRain extends SimpleAbilityItem {
 
         if (acidicRain > 300) {
             livingEntity.getPersistentData().putInt("sailorAcidicRain", 0);
+        }
+    }
+
+    private static void damagePlayerArmor(Player player, int damageAmount) {
+        ItemStack[] armorSlots = {
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET)
+        };
+
+        // Damage each armor piece
+        for (ItemStack armorPiece : armorSlots) {
+            if (!armorPiece.isEmpty() && armorPiece.isDamageableItem()) {
+                armorPiece.hurtAndBreak(damageAmount, player, (p) -> {
+
+                });
+            }
         }
     }
 

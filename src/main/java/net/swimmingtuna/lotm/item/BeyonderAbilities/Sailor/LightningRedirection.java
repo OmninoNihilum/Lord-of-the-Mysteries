@@ -3,6 +3,7 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -19,6 +20,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -109,6 +111,7 @@ public class LightningRedirection extends SimpleAbilityItem {
                 double bestDotProduct = 0.98;
                 Vec3 eyePosition = living.getEyePosition();
                 Vec3 lookVector = living.getLookAngle();
+
                 for (LivingEntity target : possibleTargets) {
                     Vec3 toEntity = target.getEyePosition().subtract(eyePosition).normalize();
                     double dotProduct = toEntity.dot(lookVector);
@@ -120,10 +123,36 @@ public class LightningRedirection extends SimpleAbilityItem {
                         }
                     }
                 }
+                BlockPos targetBlockPos = null;
+                if (bestTarget == null) {
+                    double maxDistance = (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.LIGHTNING_REDIRECTION.get());
+                    BlockHitResult blockHit = living.level().clip(new ClipContext(
+                            eyePosition,
+                            eyePosition.add(lookVector.scale(maxDistance)),
+                            ClipContext.Block.COLLIDER,
+                            ClipContext.Fluid.NONE,
+                            living
+                    ));
+
+                    if (blockHit.getType() == HitResult.Type.BLOCK) {
+                        BlockPos hitPos = blockHit.getBlockPos();
+                        BlockState blockState = living.level().getBlockState(hitPos);
+                        if (!blockState.isAir() && blockState.isSolidRender(living.level(), hitPos)) {
+                            targetBlockPos = hitPos;
+                        }
+                    }
+                }
+
                 AABB aabb = new AABB(living.getX() - 175, living.getY() - 75, living.getZ() - 175, living.getX() + 175, living.getY() + 300, living.getZ() + 175);
                 for (LightningEntity lightning : living.level().getEntitiesOfClass(LightningEntity.class, aabb)) {
                     if (bestTarget != null && lightning.getTargetEntity() != bestTarget && !BeyonderUtil.areAllies(bestTarget, living)) {
                         lightning.setTargetEntity(bestTarget);
+                        if (lightning.getNoUp()) {
+                            lightning.setNoUp(false);
+                        }
+                    } else if (bestTarget == null && targetBlockPos != null) {
+                        lightning.setTargetEntity(null);
+                        lightning.teleportTo(targetBlockPos.getX() + 0.5, targetBlockPos.getY() + 1, targetBlockPos.getZ() + 0.5);
                         if (lightning.getNoUp()) {
                             lightning.setNoUp(false);
                         }
@@ -132,6 +161,8 @@ public class LightningRedirection extends SimpleAbilityItem {
                 for (LightningBolt lightning : living.level().getEntitiesOfClass(LightningBolt.class, aabb)) {
                     if (bestTarget != null && lightning.getOnPos() != bestTarget.getOnPos()) {
                         lightning.teleportTo(bestTarget.getX(), bestTarget.getY(), bestTarget.getZ());
+                    } else if (bestTarget == null && targetBlockPos != null && lightning.getOnPos() != targetBlockPos) {
+                        lightning.teleportTo(targetBlockPos.getX() + 0.5, targetBlockPos.getY() + 1, targetBlockPos.getZ() + 0.5);
                     }
                 }
             }

@@ -23,7 +23,6 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -82,7 +81,7 @@ public class StormSeal extends SimpleAbilityItem {
                 tag.putInt("inStormSeal", stormSeal - 1);
                 if (entity.tickCount % 10 == 0) {
                     entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20, 0, false, false));
-                    entity.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 20, 0, false, false));
+                    BeyonderUtil.applyStun(entity, 20);
                 }
                 if (stormSeal % 20 == 0) {
                     if (entity instanceof Player player) {

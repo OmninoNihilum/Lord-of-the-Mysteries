@@ -12,12 +12,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
-import net.swimmingtuna.lotm.caps.BeyonderHolder;
-import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
-import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -274,6 +272,51 @@ public class WarriorClass implements BeyonderClass {
         return ChatFormatting.DARK_RED;
     }
 
+    public static void warriorAttackEvent(LivingAttackEvent event){
+        LivingEntity livingEntity = event.getEntity();
+        DamageSource source = event.getSource();
+        Entity entitySource = source.getEntity();
+        boolean isBeyonder = entitySource instanceof LivingEntity living && BeyonderUtil.isBeyonder(living);
+        if (!livingEntity.level().isClientSide()) {
+            if (entitySource instanceof Projectile projectile && projectile.getOwner() != null) {
+                entitySource = projectile.getOwner();
+            }
+            boolean isGiant = livingEntity.getPersistentData().getBoolean("warriorGiant");
+            boolean isHoGGiant = livingEntity.getPersistentData().getBoolean("handOfGodGiant");
+            boolean isTwilightGiant = livingEntity.getPersistentData().getBoolean("twilightGiant");
+            boolean isPhysical = BeyonderUtil.isPhysicalDamage(source);
+            boolean isSupernatural = BeyonderUtil.isSupernaturalDamage(source);
+            float originalAmount = event.getAmount();
+            int sequence = BeyonderUtil.getSequence(livingEntity);
+            boolean isWarrior = BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.WARRIOR.get());
+            if (hasFullSilverArmor(livingEntity) && originalAmount <= 25) {
+                event.setCanceled(true);
+            }
+            if (isWarrior && isPhysical) {
+                if (sequence == 6 && isGiant && originalAmount <= 5) {
+                    event.setCanceled(true);
+                } else if (sequence == 5 && isGiant && originalAmount <= 7) {
+                    event.setCanceled(true);
+                } else if (sequence == 4 && isGiant && originalAmount <= 10) {
+                    event.setCanceled(true);
+                } else if ((sequence == 3 || sequence == 2) && isGiant && originalAmount <= 15) {
+                    event.setCanceled(true);
+                } else if (sequence == 1 && isHoGGiant && originalAmount <= 20) {
+                    event.setCanceled(true);
+                } else if (sequence == 0 && isHoGGiant && originalAmount <= 25) {
+                    event.setCanceled(true);
+                }
+            }
+            if (isWarrior && isSupernatural) {
+                if (sequence == 1 && isHoGGiant && originalAmount <= 20) {
+                    event.setCanceled(true);
+                } else if (sequence == 0 && isTwilightGiant && originalAmount <= 25) {
+                    event.setCanceled(true);
+                }
+            }
+        }
+    }
+
 
     public static void newWarriorDamageNegation(LivingHurtEvent event) {
         LivingEntity livingEntity = event.getEntity();
@@ -281,6 +324,9 @@ public class WarriorClass implements BeyonderClass {
         Entity entitySource = source.getEntity();
         boolean isBeyonder = entitySource instanceof LivingEntity living && BeyonderUtil.isBeyonder(living);
         if (!livingEntity.level().isClientSide()) {
+            if (entitySource instanceof Projectile projectile && projectile.getOwner() != null) {
+                entitySource = projectile.getOwner();
+            }
             boolean isGiant = livingEntity.getPersistentData().getBoolean("warriorGiant");
             boolean isHoGGiant = livingEntity.getPersistentData().getBoolean("handOfGodGiant");
             boolean isTwilightGiant = livingEntity.getPersistentData().getBoolean("twilightGiant");
@@ -288,34 +334,25 @@ public class WarriorClass implements BeyonderClass {
             boolean isSupernatural = BeyonderUtil.isSupernaturalDamage(source);
             float originalAmount = event.getAmount();
             float amount = originalAmount;
-            int sequence = -1;
+            int sequence = -BeyonderUtil.getSequence(livingEntity);
 
             // Track damage reduction multipliers
             float physicalReduction = 0.0f;
             float supernaturalReduction = 0.0f;
-
-            if (livingEntity instanceof Player player) {
-                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-                sequence = holder.getSequence();
-            } else if (livingEntity instanceof PlayerMobEntity player) {
-                sequence = player.getCurrentSequence();
-            }
             boolean isWarrior = BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.WARRIOR.get());
-            if (hasFullSilverArmor(livingEntity) && originalAmount <= 25) {
-                event.setAmount(0);
-                return;
-            }
+            //if (hasFullSilverArmor(livingEntity) && originalAmount <= 25) {
+            //    event.setAmount(0);
+            //    return;
+            //}
 
             if (hasFullDawnArmor(livingEntity)) {
-                if (livingEntity.tickCount % 2 == 0) {
-                    BeyonderUtil.useSpirituality(livingEntity, 2);
-                }
                 float maxDamageAmount = isBeyonder ? 10 - (sequence) : 5 - ((float) sequence / 2);
                 if (originalAmount <= maxDamageAmount) {
                     physicalReduction += 0.75f;
                     supernaturalReduction += 0.75f;
                 }
             }
+            /*
             if (isWarrior && isPhysical) {
                 if (sequence == 6 && isGiant && originalAmount <= 5) {
                     event.setAmount(0);
@@ -346,10 +383,13 @@ public class WarriorClass implements BeyonderClass {
                     return;
                 }
             }
+
+             */
             if (hasFullSilverArmor(livingEntity)) {
                 physicalReduction += 0.5f;
                 supernaturalReduction += 0.2f;
             } else if (hasFullDawnArmor(livingEntity) && isSupernatural) {
+
                 supernaturalReduction += (0.4f) - (sequence * 0.05f);
             }
             if (isWarrior) {
@@ -440,6 +480,9 @@ public class WarriorClass implements BeyonderClass {
             float maxReduction = Math.max(0.25f, Math.min(0.7f, (10 - sequence) * 0.075f));
             if (livingEntity instanceof Mob) {
                 maxReduction = Math.max(0.13f, Math.min(0.3f, (10 - sequence) * 0.07f));
+            }
+            if (entitySource instanceof Mob) {
+                maxReduction *= 0.5f;
             }
             if (isPhysical) {
                 float finalReduction = Math.min(physicalReduction, maxReduction);

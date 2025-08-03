@@ -68,27 +68,29 @@ public class RoarEntity extends AbstractHurtingProjectile {
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
-        if (!this.level().isClientSide()) {
+        if (!this.level().isClientSide() && this.getOwner() != null) {
             Entity entity = result.getEntity();
-            ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
-            if (entity instanceof Projectile) {
-                float explosionRadius = 3 * scaleData.getScale();
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
-            }
-            if (entity instanceof LivingEntity livingEntity) {
-                if (getOwner() != null && getOwner() instanceof LivingEntity owner) {
-                    if (!BeyonderUtil.areAllies(livingEntity, owner) && livingEntity != owner) {
-                        livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), (int) (20 * scaleData.getScale()));
-                        float explosionRadius = 3 * scaleData.getScale();
-                        this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
-                    }
-                } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), (int) (20 * scaleData.getScale()));
+            if (entity.distanceTo(this) < 5) {
+                ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
+                if (entity instanceof Projectile) {
                     float explosionRadius = 3 * scaleData.getScale();
-                    this.level().explode(this, this.getX(), this.getY(), this.getZ(), explosionRadius, Level.ExplosionInteraction.TNT);
+                    BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), explosionRadius, explosionRadius);
                 }
+                if (entity instanceof LivingEntity livingEntity) {
+                    if (getOwner() != null && getOwner() instanceof LivingEntity owner) {
+                        if (!BeyonderUtil.areAllies(livingEntity, owner) && livingEntity != owner) {
+                            livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), (int) (20 * scaleData.getScale()));
+                            float explosionRadius = 3 * scaleData.getScale();
+                            BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), explosionRadius, explosionRadius);
+                        }
+                    } else {
+                        livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), (int) (20 * scaleData.getScale()));
+                        float explosionRadius = 3 * scaleData.getScale();
+                        BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), explosionRadius, explosionRadius);
+                    }
+                }
+                this.discard();
             }
-            this.discard();
         }
     }
 
@@ -165,10 +167,18 @@ public class RoarEntity extends AbstractHurtingProjectile {
             float damage = 10.0F * scaleData.getScale();
             float explosionRadius = 1.5f * scaleData.getScale();
             for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(explosionRadius))) {
-                if (entity != this.getOwner()) {
-                    roarExplode(damage / 2, this.getOnPos(), BeyonderUtil.getScale(this));
-                    this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 10.0f, 1.5f);
-                    this.discard();
+                if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
+                    if (entity != this.getOwner()) {
+                        int sequence = BeyonderUtil.getSequence(owner);
+                        int hitSequence = BeyonderUtil.getSequence(entity);
+                        if (hitSequence > sequence + 2) {
+                            roarExplode(damage / 2, this.getOnPos(), BeyonderUtil.getScale(this));
+                            this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 10.0f, 1.5f);
+                            this.discard();
+                        } else if (this.tickCount % 5 == 0) {
+                            entity.hurt(BeyonderUtil.explosionSource(owner, entity), damage / 3);
+                        }
+                    }
                 }
             }
 

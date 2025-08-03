@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,7 +24,6 @@ import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateDragonBreathS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.RotationUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -247,8 +245,8 @@ public abstract class BeamEntity extends LOTMProjectile {
                             }
                         }
                     }
-                    if (entity instanceof LivingEntity livingEntity && getIsDragonBreath() && this.getOwner() != null && this.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity)) {
-                        livingEntity.addEffect(new MobEffectInstance(ModEffects.FRENZY.get(), getFrenzyTime(), 1, false, false));
+                    if (entity instanceof LivingEntity livingEntity && getIsDragonBreath() && this.getOwner() != null && this.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity) && this.tickCount >= this.getCharge() + this.getDuration() - 20) {
+                        BeyonderUtil.applyFrenzy(livingEntity, this.getFrenzyTime());
                     }
 
                     if (this.causesFire()) {

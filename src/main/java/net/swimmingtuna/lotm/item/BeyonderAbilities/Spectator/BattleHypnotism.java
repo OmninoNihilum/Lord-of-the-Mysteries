@@ -5,8 +5,8 @@ import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,15 +22,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.swimmingtuna.lotm.caps.BeyonderHolder;
-import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -50,7 +46,7 @@ public class BattleHypnotism extends SimpleAbilityItem {
                 if (!checkAll(user)) {
                     return InteractionResult.FAIL;
                 }
-                makesEntitiesAttackEachOther(user, user.level(), pContext.getClickedPos(), BeyonderUtil.getSequence(user), BeyonderUtil.getDreamIntoReality(user));
+                makesEntitiesAttackEachOther(user, user.level(), pContext.getClickedPos());
                 return InteractionResult.SUCCESS;
             }
         } else {
@@ -60,26 +56,49 @@ public class BattleHypnotism extends SimpleAbilityItem {
             }
             useSpirituality(player);
             addCooldown(player);
-            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-            makesEntitiesAttackEachOther(player, player.level(), pContext.getClickedPos(), holder.getSequence(), BeyonderUtil.getDreamIntoReality(player));
+            makesEntitiesAttackEachOther(player, player.level(), pContext.getClickedPos());
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS;
     }
 
-    private void makesEntitiesAttackEachOther(LivingEntity player, Level level, BlockPos targetPos, int sequence, int dir) {
+    @Override
+    public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
-            int duration = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.BATTLE_HYPNOTISM.get());
-            AABB boundingBox = new AABB(targetPos).inflate((double) duration / 20);
-            level.getEntitiesOfClass(LivingEntity.class, boundingBox, LivingEntity::isAlive).forEach(livingEntity -> {
-                if (livingEntity != player) {
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            addCooldown(player);
+            useSpirituality(player);
+            makesEntitiesAttackEachOther(player, player.level(), interactionTarget.getOnPos());
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    private void makesEntitiesAttackEachOther(LivingEntity player, Level level, BlockPos targetPos) {
+        if (!player.level().isClientSide()) {
+            if (player instanceof Player) {
+                int duration = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.BATTLE_HYPNOTISM.get());
+                AABB boundingBox = new AABB(targetPos).inflate((double) duration / 20);
+                level.getEntitiesOfClass(LivingEntity.class, boundingBox, LivingEntity::isAlive).forEach(livingEntity -> {
+                    if (livingEntity != player) {
+                        BeyonderUtil.applyBattleHypnotism(livingEntity, duration);
+                    }
+                });
+            } else {
+                LivingEntity playerTarget = null;
+                int duration = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.BATTLE_HYPNOTISM.get());
+                for (LivingEntity livingEntity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(duration))) {
                     if (livingEntity instanceof Player) {
-                        livingEntity.addEffect(new MobEffectInstance(ModEffects.BATTLEHYPNOTISM.get(), duration, (int) duration / 20, false, false));
-                    } else {
-                        livingEntity.addEffect(new MobEffectInstance(ModEffects.BATTLEHYPNOTISM.get(), duration, 0, false, false));
+                        playerTarget = livingEntity;
+                    }
+                    if (livingEntity instanceof Mob mob) {
+                        if (playerTarget != null) {
+                            mob.setTarget(playerTarget);
+                        }
                     }
                 }
-            });
+            }
         }
     }
 
@@ -113,19 +132,6 @@ public class BattleHypnotism extends SimpleAbilityItem {
         return attributeBuilder.build();
     }
 
-    public static void untargetMobs(LivingEvent.LivingTickEvent event) {
-        LivingEntity entity = event.getEntity();
-        if (!entity.level().isClientSide() && entity instanceof Mob mob) {
-            if (mob.hasEffect(ModEffects.BATTLEHYPNOTISM.get())) {
-                MobEffectInstance instance = mob.getEffect(ModEffects.BATTLEHYPNOTISM.get());
-                assert instance != null;
-                int duration = instance.getDuration();
-                if (duration <= 5 && mob.getTarget() instanceof Mob) {
-                    mob.setTarget(null);
-                }
-            }
-        }
-    }
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);

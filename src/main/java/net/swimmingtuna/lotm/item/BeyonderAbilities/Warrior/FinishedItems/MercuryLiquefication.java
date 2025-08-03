@@ -32,7 +32,6 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.MercuryLiqueficationC2S;
 import net.swimmingtuna.lotm.networking.packet.SendDustParticleS2C;
-import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderInvisibilityPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ModArmorMaterials;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -42,7 +41,6 @@ import virtuoel.pehkui.api.ScaleTypes;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.SilverArmory.createEnchantedArmor;
 
@@ -95,6 +93,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
                 BeyonderUtil.useSpirituality(livingEntity, 10);
             }
             BeyonderUtil.setInvisible(livingEntity, true, 20);
+            livingEntity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20, 1, false, false));
             Vec3 lookVec = livingEntity.getLookAngle();
             Random random = new Random();
             float scale = ScaleTypes.BASE.getScaleData(livingEntity).getScale();
@@ -137,6 +136,7 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             tag.putInt("mercuryLiqueficationTrapped", trapped - 1);
             livingEntity.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
             livingEntity.addEffect(new MobEffectInstance(ModEffects.ABILITY_WEAKNESS.get(), 5, 1, true, true));
+            livingEntity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 1, true, true));
             livingEntity.setDeltaMovement(0, 0, 0);
             livingEntity.hurtMarked = true;
             float scale = ScaleTypes.BASE.getScaleData(livingEntity).getScale();
@@ -148,7 +148,6 @@ public class MercuryLiquefication extends SimpleAbilityItem {
             double posY = livingEntity.getY() + offsetY;
             double posZ = livingEntity.getZ() + offsetZ;
             int particleCount = Math.max(10, (int) (10 * Math.sqrt(scale)));
-            livingEntity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 1, true, true));
             for (int i = 0; i < particleCount; i++) {
                 LOTMNetworkHandler.sendToAllPlayers(new SendDustParticleS2C(0.75f, 0.75f, 0.75f, scale, posX, posY, posZ, 0, 0, 0));
             }

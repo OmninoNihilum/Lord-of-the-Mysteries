@@ -12,7 +12,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 
 import java.util.Map;
 
@@ -86,8 +85,7 @@ public class FreezeEnchantment extends Enchantment {
                 EnchantmentHelper.setEnchantments(enchantments, weapon);
                 int sequence = BeyonderUtil.getSequence(livingAttacker);
                 if (pTarget instanceof LivingEntity living) {
-                    BeyonderUtil.applyMobEffect(living, ModEffects.PARALYSIS.get(), 60, 1, true, true);
-                }
+                    BeyonderUtil.applyParalysis(living, 60);                }
             }
         }
     }

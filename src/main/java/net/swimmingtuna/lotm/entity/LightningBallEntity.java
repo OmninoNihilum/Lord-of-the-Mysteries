@@ -24,7 +24,6 @@ import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.List;
-import java.util.Random;
 
 public class LightningBallEntity extends AbstractHurtingProjectile {
     private static final EntityDataAccessor<Boolean> DATA_DANGEROUS = SynchedEntityData.defineId(LightningBallEntity.class, EntityDataSerializers.BOOLEAN);
@@ -183,7 +182,6 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
             }
         }
         if (!this.level().isClientSide() && y && this.tickCount <= 40 && owner != null) {
-            Vec3 playerPos = new Vec3(owner.getX(), owner.getY(), owner.getZ());
             for (Entity entity : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(100))) {
                 if (entity instanceof LightningEntity lightningEntity) {
                     if (lightningEntity.getSpeed() != 10.5f && lightningEntity.getLastPos() != null) {
@@ -231,7 +229,7 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
             float scale = ScaleTypes.BASE.getScaleData(this).getScale();
             if (isExploding) {
                 if (lightningArea <= 1) {
-                    explodeLightningBallBlock(this.getOnPos(), Math.min(50,2 * scale), scale); // Adjust as needed for final explosion
+                    explodeLightningBallBlock(this.getOnPos(), Math.min(50, 2 * scale), scale);
                     this.discard();
                 }
                 BlockPos centerPos = this.blockPosition();
@@ -325,17 +323,13 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
             }
             lightningPos = lightningPos.above();
             LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
-            Random random = new Random();
-            if (random.nextInt(20) == 0) {
-                List<LivingEntity> entities = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(adjustedRadius));
-                if (!entities.isEmpty() && this.random.nextInt(20) == 0) {
-                    LivingEntity randomEntity = entities.get(this.random.nextInt(entities.size()));
-                    lightningBolt.moveTo(randomEntity.getOnPos().getCenter());
-                } else {
-                    lightningBolt.moveTo(Vec3.atBottomCenterOf(lightningPos));
-                }
+            List<LivingEntity> entities = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(adjustedRadius));
+            if (!entities.isEmpty()) {
+                LivingEntity randomEntity = entities.get(this.random.nextInt(entities.size()));
+                lightningBolt.moveTo(randomEntity.getOnPos().getCenter());
+            } else {
+                lightningBolt.moveTo(Vec3.atBottomCenterOf(lightningPos));
             }
-            lightningBolt.moveTo(Vec3.atBottomCenterOf(lightningPos));
             lightningBolt.setVisualOnly(false);
             lightningBolt.setDamage(15);
             this.level().addFreshEntity(lightningBolt);

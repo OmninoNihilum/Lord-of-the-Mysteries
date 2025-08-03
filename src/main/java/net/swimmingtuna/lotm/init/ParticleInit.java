@@ -16,6 +16,8 @@ public class ParticleInit {
             PARTICLE_TYPES.register("null_particle", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> DOOR =
             PARTICLE_TYPES.register("door", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> GRAVITY =
+            PARTICLE_TYPES.register("gravity_particle", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> BLACK_CURTAIN =
             PARTICLE_TYPES.register("black_curtain", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> VOID_BREAK_PARTICLE =

@@ -15,9 +15,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -28,7 +26,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -45,10 +42,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.swimmingtuna.lotm.LOTM;
-import net.swimmingtuna.lotm.beyonder.ApprenticeClass;
-import net.swimmingtuna.lotm.beyonder.MonsterClass;
-import net.swimmingtuna.lotm.beyonder.SailorClass;
-import net.swimmingtuna.lotm.beyonder.SpectatorClass;
+import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
@@ -66,7 +60,9 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamWalking;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.Prophecy;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
 import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderCharacteristic;
 import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
@@ -83,8 +79,6 @@ import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
 import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerMobSequenceData;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
-import net.swimmingtuna.lotm.util.effect.NoRegenerationEffect;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
@@ -131,12 +125,9 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamWeavin
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionBarrier.envisionBarrier;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionKingdom.envisionKingdom;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.ManipulateMovement.manipulateMovement;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.MentalPlague.mentalPlague;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.Nightmare.nightmareTick;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.Gigantification.warriorGiant;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.WarriorDangerSense.warriorDangerSense;
-import static net.swimmingtuna.lotm.util.effect.BattleHypnotismEffect.battleHypnotismTickCheck;
-import static net.swimmingtuna.lotm.util.effect.StunEffect.livingNoMoveEffect;
 import static net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit.SPIRIT_WORLD_LEVEL_KEY;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
@@ -208,8 +199,15 @@ public class ModEvents {
         Player player = event.getEntity();
         if (!player.level().isClientSide()) {
             if (!(BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.WARRIOR.get(), 4))) {
-                if (event.getCrafting().getItem() == ItemInit.LIGHTNINGRUNE.get() || event.getCrafting().getItem() == ItemInit.CONFUSIONRUNE.get() || event.getCrafting().getItem() == ItemInit.FLAMERUNE.get() || event.getCrafting().getItem() == ItemInit.WITHERRUNE.get() || event.getCrafting().getItem() == ItemInit.FREEZERUNE.get()) {
-                    event.setCanceled(true);
+                ItemStack craftedItem = event.getCrafting();
+                if (craftedItem.getItem() == ItemInit.LIGHTNINGRUNE.get() || craftedItem.getItem() == ItemInit.CONFUSIONRUNE.get() || craftedItem.getItem() == ItemInit.FLAMERUNE.get() || craftedItem.getItem() == ItemInit.WITHERRUNE.get() || craftedItem.getItem() == ItemInit.FREEZERUNE.get()) {
+                    for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                        ItemStack slot = player.getInventory().getItem(i);
+                        if (slot.getItem() == craftedItem.getItem()) {
+                            player.getInventory().removeItem(i, 1);
+                            break;
+                        }
+                    }
                     player.sendSystemMessage(Component.literal("You aren't the correct pathway and/or sequence to be able to craft this.").withStyle(ChatFormatting.RED));
                 }
             }
@@ -237,10 +235,7 @@ public class ModEvents {
                     //BeyonderUtil.applyMobEffect(entity, mobEffectInstance.getEffect(), mobEffectInstance.getDuration(), mobEffectInstance.getAmplifier() * chaosLevel, mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
                 }
             }
-            if (event.getEffectInstance().getEffect() == ModEffects.NOREGENERATION.get()) {
-                entity.getPersistentData().putInt("noRegenerationEffectHealth", (int) entity.getHealth());
-            }
-            if (!event.getEntity().level().isClientSide() && event.getEntity().hasEffect(ModEffects.BENEFICIAL_EFFECTS_BLOCKER.get())) {
+            if (!event.getEntity().level().isClientSide() && BeyonderUtil.hasBeneficialEffectBlocker(event.getEntity())) {
                 MobEffect addedEffect = event.getEffectInstance().getEffect();
                 if (addedEffect.getCategory() == MobEffectCategory.BENEFICIAL) {
                     entity.removeEffect(addedEffect);
@@ -252,17 +247,7 @@ public class ModEvents {
     @SubscribeEvent
     public static void mobEffectEvent(MobEffectEvent.Remove event) {
         if (!event.getEntity().level().isClientSide()) {
-            LivingEntity livingEntity = event.getEntity();
-            if (event.getEffect() == ModEffects.BATTLEHYPNOTISM.get() && livingEntity instanceof Mob mob && mob.getTarget() != null && !(mob.getTarget() instanceof Player)) {
-                int playersFound = 0;
-                for (Player player : mob.level().getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(12))) {
-                    playersFound++;
-                    mob.setTarget(player);
-                }
-                if (playersFound == 0) {
-                    mob.setTarget(null);
-                }
-            }
+
         }
     }
 
@@ -402,6 +387,7 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                GravityManipulation.gravityManipulationTickEvent(event);
                 PsychologicalInvisibility.psychologicalInvisibilityTick(event);
                 Sealing.sealingTick(event);
                 Symbolization.symbolizationTick(event);
@@ -418,7 +404,6 @@ public class ModEvents {
                 TrickTelekenisis.trickMasterTelekenisisPassive(event);
                 Prophecy.prophecyTick(event);
                 SpectatorClass.prophecyTickEvent(event);
-                battleHypnotismTickCheck(event);
                 dreamIntoReality(livingEntity);
                 acidicRainTick(livingEntity);
                 lightningStorm(livingEntity);
@@ -476,11 +461,9 @@ public class ModEvents {
                 GuardianBoxEntity.decrementGuardianTimer(livingEntity);
                 EyeOfDemonHunting.eyeTick(event);
                 EyeOfDemonHunting.demonHunterAntiConcealment(event);
-                livingNoMoveEffect(event);
                 WintryBlade.wintryBladeTick(event);
                 warriorGiant(livingEntity);
                 DeathKnell.deathKnellNegativeTick(livingEntity);
-                BattleHypnotism.untargetMobs(event);
                 ProbabilityManipulationInfiniteMisfortune.testEvent(event);
                 probabilityManipulationWorld(livingEntity);
                 CycleOfFate.cycleOfFateTickEvent(event);
@@ -489,7 +472,6 @@ public class ModEvents {
                 MisfortuneManipulation.livingTickMisfortuneManipulation(event);
                 FalseProphecy.falseProphecyTick(livingEntity);
                 AuraOfChaos.auraOfChaos(event);
-                NoRegenerationEffect.preventRegeneration(livingEntity);
                 MisfortuneRedirection.misfortuneLivingTickEvent(event);
                 PsycheStorm.psycheStormTick(event);
                 AuraOfGlory.auraOfGloryAndTwilightTick(event);
@@ -506,7 +488,6 @@ public class ModEvents {
                 AqueousLightDrown.aqueousLightDrownTick(event);
                 matterAccelerationEntities(livingEntity);
                 ExtremeColdness.extremeColdnessTick(event);
-                mentalPlague(livingEntity);
                 StormSeal.stormSealTick(event);
                 AqueousLightDrown.lightTickEvent(livingEntity);
                 TsunamiSeal.sealTick(event);
@@ -544,6 +525,7 @@ public class ModEvents {
         LivingEntity attacked = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (!attacked.level().isClientSide()) {
+            WarriorClass.warriorAttackEvent(event);
             Symbolization.symbolizationAttack(event);
             ApprenticeClass.apprenticeAttackEvent(event);
             if (BeyonderUtil.isCreative(attacked)) {
@@ -552,6 +534,10 @@ public class ModEvents {
         }
         if (attacker != null) {
             if (!attacked.level().isClientSide() && !attacker.level().isClientSide()) {
+                if (attacker.getPersistentData().getInt("dreamWeavingDeathTimer") >= 1 && attacker instanceof LivingEntity livingAttacker) {
+                    attacker.hurt(event.getSource(), event.getAmount() * 3);
+                    BeyonderUtil.applyMentalDamage(livingAttacker, attacked, 2);
+                }
                 attacked.getPersistentData().putInt("inCombat", 300);
                 attacker.getPersistentData().putInt("inCombat", 300);
                 DoorMirage.doorMirageAttackEvent(event);
@@ -833,6 +819,7 @@ public class ModEvents {
                 boolean dropCharacteristic = level.getLevelData().getGameRules().getBoolean(GameRuleInit.SHOULD_DROP_CHARACTERISTIC);
                 boolean fateReincarnation = livingEntity.getPersistentData().getInt("monsterReincarnationCounter") >= 1;
                 if (dropCharacteristic) {
+                    LOTM.sendMessageToAllPlayers("SECOND CHECK WORKED");
                     if (!safetyNet) {
                         ItemStack stack = new ItemStack(ItemInit.BEYONDER_CHARACTERISTIC.get());
                         if (fateReincarnation) {

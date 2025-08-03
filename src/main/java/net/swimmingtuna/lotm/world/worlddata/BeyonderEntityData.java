@@ -191,7 +191,7 @@ public class BeyonderEntityData extends SavedData {
                     if (BeyonderUtil.getSpirituality(living) < BeyonderUtil.getMaxSpirituality(living)) {
                         int sequence = BeyonderUtil.getSequence(living);
                         RandomSource random = living.getRandom();
-                        double increase = (Mth.nextDouble(random, 0.1, 1.0) * (pathway.spiritualityRegen().get(sequence) * 1.5f)) / 5;
+                        double increase = ((Mth.nextDouble(random, 0.1, 1.0) * (pathway.spiritualityRegen().get(sequence) * 1.5f)) / 5) * 20.0;
                         BeyonderUtil.addSpirituality(living, (int) increase);
                     }
                     CompoundTag persistentData = living.getPersistentData();

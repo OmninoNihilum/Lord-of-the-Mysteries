@@ -13,7 +13,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -40,7 +39,7 @@ public class ManipulateEmotion extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, all entities around you that are being manipulated hurt themself for great damage"));
+        tooltipComponents.add(Component.literal("Upon use, all entities around you that are being manipulated hurt themself for great damage, corresponding to their max health."));
         tooltipComponents.add(Component.literal("Left Click for Manipulate Movement"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Minute").withStyle(ChatFormatting.YELLOW)));
@@ -53,9 +52,14 @@ public class ManipulateEmotion extends SimpleAbilityItem {
         if (!player.level().isClientSide()) {
             float damage = (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MANIPULATE_EMOTION.get());
             for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(250))) {
-                if (entity != player && entity.hasEffect(ModEffects.MANIPULATION.get()) && !BeyonderUtil.areAllies(player, entity)) {
-                    entity.hurt(BeyonderUtil.genericSource(player, entity), Math.min(entity.getMaxHealth() / 3, damage));
-                    entity.removeEffect(ModEffects.MANIPULATION.get());
+                if (entity != player && BeyonderUtil.hasManipulation(entity) && !BeyonderUtil.areAllies(player, entity)) {
+                    int sequence = BeyonderUtil.getSequence(player);
+                    int newSequence = 4;
+                    if (sequence == 0) {
+                        newSequence = 1;
+                    }
+                    entity.hurt(BeyonderUtil.genericSource(player, entity), Math.min(entity.getMaxHealth() / 3, damage * (5 - newSequence)));
+                    BeyonderUtil.removeManipulation(entity);
                 }
             }
         }
@@ -67,7 +71,7 @@ public class ManipulateEmotion extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null && target.hasEffect(ModEffects.MANIPULATION.get())) {
+        if (target != null && BeyonderUtil.hasManipulation(target)) {
             return 100;
         }
         return 0;

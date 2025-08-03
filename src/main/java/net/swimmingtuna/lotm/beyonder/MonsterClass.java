@@ -39,7 +39,6 @@ import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.SendParticleS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -155,7 +154,7 @@ public class MonsterClass implements BeyonderClass {
                         applyMobEffect(player, MobEffects.REGENERATION, 60, regen + 1, true, true);
                     }
                     if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
-                        applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
+                        applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 2, true, true);
                     }
                 }
             } else {
@@ -359,7 +358,7 @@ public class MonsterClass implements BeyonderClass {
                 for (LivingEntity livingEntity : pPlayer.level().getEntitiesOfClass(LivingEntity.class, pPlayer.getBoundingBox().inflate(50))) {
                     if (livingEntity != pPlayer) {
                         if (livingEntity.getPersistentData().getInt("attackedMonster") >= 1) {
-                            livingEntity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60, 1, false, false));
+                            BeyonderUtil.applyParalysis(livingEntity, 60);
                             livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, 2, true, true));
                             livingEntity.getPersistentData().putInt("attackedMonster", 0);
                             pPlayer.getPersistentData().putInt("luckAttackerPoisoned", pPlayer.getPersistentData().getInt("luckAttackerPoisoned") - 1);
@@ -379,8 +378,7 @@ public class MonsterClass implements BeyonderClass {
                             if (living != null) {
                                 mob.setTarget(living);
                             } else
-                                mob.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60, 1, false, false));
-                        }
+                                BeyonderUtil.applyParalysis(mob, 60);                        }
                         pPlayer.getPersistentData().putInt("luckIgnoreMobs", pPlayer.getPersistentData().getInt("luckIgnoreMobs") - 1);
                     }
                 }

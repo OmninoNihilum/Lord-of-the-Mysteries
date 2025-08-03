@@ -24,7 +24,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -159,7 +158,7 @@ public class ExtremeColdness extends SimpleAbilityItem {
                     entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 3, false, false));
                 }
                 if (affectedBySailorExtremeColdness >= 20) {
-                    entity.addEffect(new MobEffectInstance(ModEffects.AWE.get(), 100, 1, false, false));
+                    BeyonderUtil.applyAwe(entity, 100);
                     tag.putInt("affectedBySailorExtremeColdness", 0);
                     if (causer == null) {
                         entity.hurt(BeyonderUtil.freezeSource(entity, entity), BeyonderUtil.getDamage(entity).get(ItemInit.EXTREME_COLDNESS.get()) / 4);

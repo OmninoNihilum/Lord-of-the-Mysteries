@@ -33,7 +33,10 @@ import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
+
+import static net.swimmingtuna.lotm.util.BeyonderUtil.findSurfaceY;
 
 public class SailorLightning extends SimpleAbilityItem {
 
@@ -64,7 +67,7 @@ public class SailorLightning extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Shoots out a lightning bolt in the direction you look"));
+        tooltipComponents.add(Component.literal("Shoots out a lightning bolt in the direction you look, or on the targetted block or entity."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("200 for blocks/entities, 120 when using on air").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("~1 second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(BeyonderClassInit.SAILOR.get()));
@@ -164,6 +167,38 @@ public class SailorLightning extends SimpleAbilityItem {
 
     public static void lightningHigh(LivingEntity livingEntity, Level level) {
         if (!level.isClientSide()) {
+            List<LivingEntity> nearbyEntities = BeyonderUtil.getNonAlliesNearby(livingEntity, 75);
+            List<LivingEntity> validTargets = new ArrayList<>();
+            int lowestSequence = Integer.MAX_VALUE;
+            for (LivingEntity living : nearbyEntities) {
+                int sequence = BeyonderUtil.getSequence(living);
+                if (sequence == -1 || sequence == 10) {
+                    continue;
+                }
+                if (sequence < lowestSequence) {
+                    lowestSequence = sequence;
+                    validTargets.clear();
+                    validTargets.add(living);
+                } else if (sequence == lowestSequence) {
+                    validTargets.add(living);
+                }
+            }
+            double targetX, targetZ;
+            if (!validTargets.isEmpty()) {
+                LivingEntity target = validTargets.get((int) (Math.random() * validTargets.size()));
+                targetX = target.getX();
+                targetZ = target.getZ();
+            } else {
+                targetX = livingEntity.getX() + ((Math.random() * 150) - 75);
+                targetZ = livingEntity.getZ() + ((Math.random() * 150) - 75);
+            }
+            double surfaceY = findSurfaceY(livingEntity, targetX, targetZ, livingEntity.level().dimension());
+            if (surfaceY == -1) {
+                targetX = livingEntity.getX() + ((Math.random() * 150) - 75);
+                targetZ = livingEntity.getZ() + ((Math.random() * 150) - 75);
+                surfaceY = livingEntity.getY();
+            }
+
             float speed = 10.0f;
             LightningEntity lightningEntity = new LightningEntity(EntityInit.LIGHTNING_ENTITY.get(), level);
             lightningEntity.setSpeed(speed);
@@ -173,7 +208,7 @@ public class SailorLightning extends SimpleAbilityItem {
             lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
             lightningEntity.setDamage((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SAILOR_LIGHTNING.get()));
             lightningEntity.setOwner(livingEntity);
-            lightningEntity.teleportTo(livingEntity.getX() + ((Math.random() * 150) - 75), livingEntity.getY() + 60, livingEntity.getZ() + ((Math.random() * 150) - 75));
+            lightningEntity.teleportTo(targetX, surfaceY + 60, targetZ);
             level.addFreshEntity(lightningEntity);
         }
     }

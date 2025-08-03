@@ -5,7 +5,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -15,7 +14,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -47,7 +45,7 @@ public class Awe extends SimpleAbilityItem {
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.AWE.get());
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
-                    entity.addEffect((new MobEffectInstance(ModEffects.AWE.get(), damage, 1, false, false)));
+                    BeyonderUtil.applyAwe(livingEntity, damage);
                     BeyonderUtil.applyMentalDamage(livingEntity, entity, (float) damage / 10);
                 }
             }

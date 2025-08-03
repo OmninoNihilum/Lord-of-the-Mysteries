@@ -18,7 +18,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedUtils;

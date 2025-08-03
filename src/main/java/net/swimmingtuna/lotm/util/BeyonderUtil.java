@@ -26,7 +26,6 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -114,6 +113,7 @@ import java.util.function.Predicate;
 import static net.swimmingtuna.lotm.commands.BeyonderRecipeCommand.executeRecipeCommand;
 import static net.swimmingtuna.lotm.init.DamageTypeInit.MENTAL_DAMAGE;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.CycleOfFate.removeCycleEffect;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.MentalPlague.applyEffectsAndDamage;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility.removePsychologicalInvisibilityEffect;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.TwilightFreeze.removeTwilightFreezeEffect;
 
@@ -409,8 +409,10 @@ public class BeyonderUtil {
             }
             if (sequence <= 7) {
                 abilityNames.add(ItemInit.AWE.get());
-                abilityNames.add(ItemInit.FRENZY.get());
                 abilityNames.add(ItemInit.PLACATE.get());
+            }
+            if (sequence == 7 || sequence == 6 || sequence == 5) {
+                abilityNames.add(ItemInit.FRENZY.get());
             }
             if (sequence <= 6) {
                 abilityNames.add(ItemInit.PSYCHOLOGICAL_INVISIBILITY.get());
@@ -423,7 +425,6 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.DREAM_WALKING.get());
             }
             if (sequence <= 4) {
-                abilityNames.remove(ItemInit.FRENZY.get());
                 abilityNames.add(ItemInit.APPLY_MANIPULATION.get());
                 abilityNames.add(ItemInit.MANIPULATE_MOVEMENT.get());
                 abilityNames.add(ItemInit.MANIPULATE_FONDNESS.get());
@@ -490,11 +491,13 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.ROAR.get());
             }
             if (sequence <= 3) {
-                abilityNames.add(ItemInit.AQUATIC_LIFE_MANIPULATION.get());
                 abilityNames.add(ItemInit.LIGHTNING_STORM.get());
                 abilityNames.add(ItemInit.LIGHTNING_BRANCH.get());
                 abilityNames.add(ItemInit.SONIC_BOOM.get());
                 abilityNames.add(ItemInit.THUNDER_CLAP.get());
+            }
+            if (sequence == 3) {
+                abilityNames.add(ItemInit.AQUATIC_LIFE_MANIPULATION.get());
             }
             if (sequence <= 2) {
                 abilityNames.add(ItemInit.RAIN_EYES.get());
@@ -749,9 +752,9 @@ public class BeyonderUtil {
             return;
         }
 
-        if (player.hasEffect(ModEffects.STUN.get())) {
+        if (BeyonderUtil.hasStun(player)) {
             player.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " +
-                            (int) Objects.requireNonNull(player.getEffect(ModEffects.STUN.get())).getDuration() / 20 + " seconds.")
+                            (int) (player.getPersistentData().getInt("LOTMStun")) / 20 + " seconds.")
                     .withStyle(ChatFormatting.RED));
             return;
         }
@@ -995,9 +998,9 @@ public class BeyonderUtil {
             MisfortuneManipulation.livingUseAbilityMisfortuneManipulation(livingEntity);
             CompoundTag tag = livingEntity.getPersistentData();
             if (livingEntity.getMainHandItem().getItem() instanceof SimpleAbilityItem) {
-                if (livingEntity.hasEffect(ModEffects.STUN.get())) {
+                if (hasStun(livingEntity)) {
                     if (livingEntity instanceof Player) {
-                        livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " + (int) Objects.requireNonNull(livingEntity.getEffect(ModEffects.STUN.get())).getDuration() / 20 + " seconds.").withStyle(ChatFormatting.RED));
+                        livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " + (int) livingEntity.getPersistentData().getInt("LOTMStun") / 20 + " seconds.").withStyle(ChatFormatting.RED));
                     }
                     return false;
                 } else if (tag.getInt("cantUseAbility") >= 1) {
@@ -1036,7 +1039,7 @@ public class BeyonderUtil {
                 return true;
             }
         }
-
+        
         // If entity targeting failed, try block targeting
         Vec3 blockReachVector = eyePosition.add(lookVector.x * blockReach, lookVector.y * blockReach, lookVector.z * blockReach);
         BlockHitResult blockHit = player.level().clip(new ClipContext(
@@ -1702,7 +1705,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.LIGHTNING_REDIRECTION.get(), applyAbilityStrengthened((187.5f - (sequence * 90)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.LIGHTNING_STORM.get(), applyAbilityStrengthened((750.0f - (sequence * 120)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MATTER_ACCELERATION_BLOCKS.get(), applyAbilityStrengthened((15.0f - sequence * 1.5f) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.MATTER_ACCELERATION_ENTITIES.get(), applyAbilityStrengthened((450.0f - (sequence * 120)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.MATTER_ACCELERATION_ENTITIES.get(), applyAbilityStrengthened((200.0f - (sequence * 60)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MATTER_ACCELERATION_SELF.get(), applyAbilityStrengthened((180.0f - (sequence * 45)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.RAGING_BLOWS.get(), applyAbilityStrengthened((15.0f - (sequence * 1.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.RAIN_EYES.get(), applyAbilityStrengthened((750.0f - (sequence * 75)) / abilityWeakness, abilityStrengthened));
@@ -1857,6 +1860,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKTELEKENISIS.get(), applyAbilityStrengthened((75.0f - (sequence * 9.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKTUMBLE.get(), applyAbilityStrengthened((120.0f - (sequence * 13.5f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.TRICKWIND.get(), applyAbilityStrengthened((150 - (sequence * 15.0f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.GRAVITY_MANIPULATION.get(), applyAbilityStrengthened((500.0f - sequence * 150) / abilityWeakness, abilityStrengthened));
         return damageMap;
     }
 
@@ -1974,9 +1978,9 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_9_potion ingredients 2 cataclysm:kobolediator_skull mowziesmobs:sol_visage aquamirae:fin arphex:roach_nymph arphex:fly_appendage");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_8_potion ingredients 2 faded_conquest_2:summon_blocknight alexsmobs:warped_muscle iceandfire:sea_serpent_fang minecraft:prismarine_shard mutantmonsters:endersoul_hand");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_7_potion ingredients 2 eeeabsmobs:heart_of_pagan mowziesmobs:ice_crystal aquamirae:abyssal_amethyst arphex:abyssal_shard faded_conquest_2:keyof_pestilence");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_6_potion ingredients 2 cataclysm:monstrous_horn illageandspillage:spellbound_book arphex:oversized_stinger minecraft:white_banner bosses_of_mass_destruction:void_thorn");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_6_potion ingredients 2 cataclysm:monstrous_horn illageandspillage:spellbound_book arphex:oversized_stinger illageandspillage:totem_of_banishment bosses_of_mass_destruction:void_thorn");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_5_potion ingredients 2 soulsweapons:essence_of_eventide aquamirae:frozen_key soulsweapons:darkin_blade arphex:void_geode_shard cataclysm:gauntlet_of_guard");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_4_potion ingredients 2 macabre:baal_heart alexscaves:tectonic_shard cataclysm:abyssal_egg alexscaves:immortal_embryo terramity:belt_of_the_gnome_king");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_4_potion ingredients 2 macabre:baal_heart alexscaves:tectonic_shard cataclysm:abyssal_egg alexscaves:immortal_embryo terramity:music_sheet_of_the_gnome_king");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_3_potion ingredients 1 soulsweapons:essence_of_luminescence arphex:void_geode cataclysm:essence_of_the_storm");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_2_potion ingredients 1 terramity:music_sheet_of_the_legendary_super_sniffer soulsweapons:lord_soul_night_prowler minecraft:lightning_rod");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:diamond_block");
@@ -1996,9 +2000,9 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_9_potion ingredients 2 mowziesmobs:sol_visage zoniex:deathly_onyx mowziesmobs:wrought_axe macabre:rattails born_in_chaos_v1:fangofthe_hound_leader");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_8_potion ingredients 2 aether:silver_dungeon_key iceandfire:hydra_fang terramity:spiteful_soul mutantmonsters:hulk_hammer macabre:blindbaloon_item");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_7_potion ingredients 2 aether:gold_dungeon_key bosses_of_mass_destruction:blazing_eye macabre:mortis_essence arphex:scarab_seal bosses_of_mass_destruction:obsidian_heart");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_6_potion ingredients 2 awakened_bosses:herobrine_nugget macabre:rootofinfestation legendary_monsters:lava_eaters_skin born_in_chaos_v1:soul_cutlass minecraft:white_banner");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_6_potion ingredients 2 awakened_bosses:herobrine_nugget macabre:rootofinfestation legendary_monsters:lava_eaters_skin born_in_chaos_v1:soul_cutlass illageandspillage:totem_of_banishment");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_5_potion ingredients 2 soulsweapons:chaos_crown soulsweapons:lord_soul_rose arphex:void_geode_shard cataclysm:witherite_ingot cataclysm:gauntlet_of_guard");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_4_potion ingredients 2 alexscaves:tectonic_shard macabre:valamon_heart eeeabsmobs:guardian_core sleepy_hollows:lootbag terramity:belt_of_the_gnome_king");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_4_potion ingredients 2 alexscaves:tectonic_shard macabre:valamon_heart eeeabsmobs:guardian_core sleepy_hollows:lootbag terramity:music_sheet_of_the_gnome_king");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_3_potion ingredients 1 terramity:perish_staff arphex:abyssal_crystal cataclysm:essence_of_the_storm");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_day_stalker minecraft:clock");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:gold_block");
@@ -2527,7 +2531,6 @@ public class BeyonderUtil {
     }
 
 
-
     public static void addSpirituality(LivingEntity living, int spirituality) { //marked
         if (!living.level().isClientSide()) {
             if (living instanceof Player player) {
@@ -2843,6 +2846,9 @@ public class BeyonderUtil {
                         livingEntity.kill();
                     } else {
                         livingEntity.die(livingEntity.damageSources().mobAttack(living));
+                        if (livingEntity != null) {
+                            livingEntity.kill();
+                        }
                     }
                     livingEntity.sendSystemMessage(Component.literal("You died due to aging."));
                 }
@@ -2862,23 +2868,23 @@ public class BeyonderUtil {
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 20, 4, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DIG_SLOWDOWN, 20, 3, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WITHER, 20, 5, true, true);
-                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.NOREGENERATION.get(), 20, 1, true, true);
+                    BeyonderUtil.applyNoRegeneration(livingEntity, 20);
                 } else if (eightyPercent) {
                     BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 20, 2, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, 20, 3, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 20, 4, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DIG_SLOWDOWN, 20, 3, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WITHER, 20, 4, true, true);
-                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.NOREGENERATION.get(), 20, 1, true, true);
+                    BeyonderUtil.applyNoRegeneration(livingEntity, 20);
                 } else if (seventyPercent) {
                     BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 20, 1, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, 20, 3, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 20, 3, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DIG_SLOWDOWN, 20, 2, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WITHER, 20, 3, true, true);
-                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.NOREGENERATION.get(), 20, 1, true, true);
+                    BeyonderUtil.applyNoRegeneration(livingEntity, 20);
                 } else if (sixtyPercent) {
-                    BeyonderUtil.applyMobEffect(livingEntity, ModEffects.NOREGENERATION.get(), 20, 1, true, true);
+                    BeyonderUtil.applyNoRegeneration(livingEntity, 20);
                     BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 20, 1, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, 20, 3, true, true);
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 20, 3, true, true);
@@ -3404,7 +3410,7 @@ public class BeyonderUtil {
             if (!(heldItem.getItem() instanceof SimpleAbilityItem simpleAbilityItem)) {
                 return;
             }
-            if (livingEntity.hasEffect(ModEffects.STUN.get())) {
+            if (hasStun(livingEntity)) {
                 return;
             }
             if (!SimpleAbilityItem.checkAll(livingEntity, simpleAbilityItem.getRequiredPathway(),
@@ -3618,6 +3624,7 @@ public class BeyonderUtil {
             tag.putInt("wormOfStar", 0);
             tag.remove("separateEntitySequence");
             tag.remove("separateEntityPathway");
+            tag.putBoolean("windManipulationSense", false);
             if (livingEntity instanceof ServerPlayer serverPlayer) {
                 LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(0), serverPlayer);
             }
@@ -3635,13 +3642,22 @@ public class BeyonderUtil {
 
     public static List<LivingEntity> getNonAlliesNearby(LivingEntity living, float inflation) {
         List<LivingEntity> nonAllies = new ArrayList<>();
-        for (LivingEntity livingEntity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(inflation))) {
-            if (!areAllies(living, livingEntity) && living != livingEntity) {
-                nonAllies.add(livingEntity);
-            }
+        for (LivingEntity entity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(inflation))) {
+            if (!isEntityAlly(living, entity) && living != entity)
+                nonAllies.add(entity);
         }
         return nonAllies;
     }
+
+    public static List<Entity> getNonAllyEntitiesNearby(LivingEntity living, float inflation) {
+        List<Entity> nonAllies = new ArrayList<>();
+        for (Entity entity : living.level().getEntitiesOfClass(Entity.class, living.getBoundingBox().inflate(inflation))) {
+            if (!isEntityAlly(living, entity))
+                nonAllies.add(entity);
+        }
+        return nonAllies;
+    }
+
 
     public static boolean isEntityAlly(LivingEntity living, Entity possibleAlly) {
         if (possibleAlly instanceof LivingEntity livingAlly) {
@@ -3657,6 +3673,12 @@ public class BeyonderUtil {
     public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
         if (living.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0, 0, 0, 0, 0);
+        }
+    }
+
+    public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ, double velocityX, double velocityY, double velocityZ) {
+        if (living.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0, velocityX, velocityY, velocityZ, 1.0);
         }
     }
 
@@ -3807,34 +3829,6 @@ public class BeyonderUtil {
         livingEntity.getPersistentData().putFloat("LOTMFlySpeed", flySpeed);
     }
 
-    public static void flyingTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity livingEntity = event.getEntity();
-        if (!livingEntity.level().isClientSide()) {
-            CompoundTag tag = livingEntity.getPersistentData();
-            int flyTime = tag.getInt("LOTMFlying");
-            float flySpeed = tag.getFloat("LOTMFlySpeed");
-            if (flyTime >= 1) {
-                tag.putInt("LOTMFlying", flyTime - 1);
-                if (livingEntity instanceof Player pPlayer) {
-                    Abilities playerAbilities = pPlayer.getAbilities();
-                    if (!pPlayer.isCreative()) {
-                        playerAbilities.mayfly = true;
-                        playerAbilities.setFlyingSpeed(flySpeed);
-                    }
-                    pPlayer.onUpdateAbilities();
-                    if (livingEntity instanceof ServerPlayer serverPlayer) {
-                        serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
-                    }
-                } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
-                    playerMobEntity.setIsFlying(true);
-                    playerMobEntity.setFlySpeed(flySpeed);
-                }
-            } else {
-                stopFlying(livingEntity);
-            }
-        }
-    }
-
     public static boolean canFly(LivingEntity livingEntity) {
         if (livingEntity instanceof Player player) {
             return player.getAbilities().mayfly;
@@ -3976,11 +3970,11 @@ public class BeyonderUtil {
     }
 
     public static boolean isStunned(LivingEntity living) {
-        if (living.hasEffect(ModEffects.PARALYSIS.get())) {
+        if (BeyonderUtil.hasParalysis(living)) {
             return true;
-        } else if (living.hasEffect(ModEffects.STUN.get())) {
+        } else if (BeyonderUtil.hasStun(living)) {
             return true;
-        } else if (living.hasEffect(ModEffects.AWE.get())) {
+        } else if (BeyonderUtil.hasAwe(living)) {
             return true;
         }
         return false;
@@ -4021,4 +4015,343 @@ public class BeyonderUtil {
         return (living instanceof Player player && (player.isCreative() || player.isSpectator()));
     }
 
+    public static void applyAwe(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMAwe");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMAwe", duration);
+        }
+    }
+
+    public static boolean hasAwe(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMAwe") >= 1;
+    }
+
+    public static void applyFrenzy(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMFrenzy");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMFrenzy", duration);
+        }
+    }
+
+    public static boolean hasFrenzy(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMFrenzy") >= 1;
+    }
+
+    public static void applyStun(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMStun");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMStun", duration);
+        }
+    }
+
+    public static boolean hasStun(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMStun") >= 1;
+    }
+
+    public static void applyBleeding(LivingEntity living, int duration, int amplifier) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMBleeding");
+        int currentAmplifier = tag.getInt("LOTMBleedingAmplifier");
+
+        if (currentDuration == 0) {
+            tag.putInt("LOTMBleeding", duration);
+            tag.putInt("LOTMBleedingAmplifier", amplifier);
+        } else if (currentAmplifier < amplifier) {
+            tag.putInt("LOTMBleeding", duration);
+            tag.putInt("LOTMBleedingAmplifier", amplifier);
+        } else if (currentAmplifier == amplifier && duration >= currentDuration) {
+            tag.putInt("LOTMBleeding", duration);
+            tag.putInt("LOTMBleedingAmplifier", amplifier);
+        }
+    }
+
+    public static boolean hasBleeding(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMBleeding") >= 1;
+    }
+
+    public static void applyBattleHypnotism(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMBattleHypnotism");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMBattleHypnotism", duration);
+        }
+    }
+
+    public static boolean hasBattleHypnotism(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMBattleHypnotism") >= 1;
+    }
+
+    public static void applyManipulation(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMManipulation");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMManipulation", duration);
+        }
+    }
+
+    public static boolean hasManipulation(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMManipulation") >= 1;
+    }
+
+    public static void applyMentalPlague(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMMentalPlague");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMMentalPlague", duration);
+        }
+    }
+
+    public static boolean hasMentalPlague(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMMentalPlague") >= 1;
+    }
+
+    public static void applyParalysis(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMParalysis");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMParalysis", duration);
+        }
+    }
+
+    public static boolean hasParalysis(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMParalysis") >= 1;
+    }
+
+    public static void applyNoRegeneration(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMNoRegeneration");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMNoRegeneration", duration);
+        }
+        tag.putInt("noRegenerationEffectHealth", (int) living.getHealth());
+    }
+
+    public static boolean hasNoRegeneration(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMNoRegeneration") >= 1;
+    }
+
+    public static void applyBeneficialEffectBlocker(LivingEntity living, int duration) {
+        CompoundTag tag = living.getPersistentData();
+        int currentDuration = tag.getInt("LOTMBeneficialEffectBlocker");
+        if (currentDuration == 0 || duration >= currentDuration) {
+            tag.putInt("LOTMBeneficialEffectBlocker", duration);
+        }
+    }
+
+    public static boolean hasBeneficialEffectBlocker(LivingEntity living) {
+        return living.getPersistentData().getInt("LOTMBeneficialEffectBlocker") >= 1;
+    }
+
+    public static void removeAwe(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMAwe", 0);
+    }
+
+    public static void removeFrenzy(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMFrenzy", 0);
+    }
+
+    public static void removeStun(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMStun", 0);
+    }
+
+    public static void removeBleeding(LivingEntity living) {
+        CompoundTag tag = living.getPersistentData();
+        tag.putInt("LOTMBleeding", 0);
+        tag.putInt("LOTMBleedingAmplifier", 0);
+    }
+
+    public static void removeBattleHypnotism(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMBattleHypnotism", 0);
+    }
+
+    public static void removeManipulation(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMManipulation", 0);
+    }
+
+    public static void removeMentalPlague(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMMentalPlague", 0);
+    }
+
+    public static void removeParalysis(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMParalysis", 0);
+    }
+
+    public static void removeNoRegeneration(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMNoRegeneration", 0);
+    }
+
+    public static void removeBeneficialEffectBlocker(LivingEntity living) {
+        living.getPersistentData().putInt("LOTMBeneficialEffectBlocker", 0);
+    }
+
+
+    public static void effectTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        CompoundTag tag = livingEntity.getPersistentData();
+        if (!livingEntity.level().isClientSide()) {
+            int awe = tag.getInt("LOTMAwe");
+            int frenzy = tag.getInt("LOTMFrenzy");
+            int stun = tag.getInt("LOTMStun");
+            int bleeding = tag.getInt("LOTMBleeding");
+            int bleedingAmp = tag.getInt("LOTMBleedingAmplifier");
+            int battleHypnotism = tag.getInt("LOTMBattleHypnotism");
+            int manipulation = tag.getInt("LOTMManipulation");
+            int mentalPlague = tag.getInt("LOTMMentalPlague");
+            int paralysis = tag.getInt("LOTMParalysis");
+            int noRegeneration = tag.getInt("LOTMNoRegeneration");
+            int beneficialEffectBlocker = tag.getInt("LOTMBeneficialEffectBlocker");
+            if (awe > 1) {
+                tag.putInt("LOTMAwe", awe - 1);
+                double x = livingEntity.getX();
+                double y = livingEntity.getY();
+                double z = livingEntity.getZ();
+                livingEntity.teleportTo(x, y, z);
+                livingEntity.setDeltaMovement(0, 0, 0);
+                livingEntity.hurtMarked = true;
+            }
+
+            if (frenzy >= 1) {
+                tag.putInt("LOTMFrenzy", frenzy - 1);
+                double x = livingEntity.getX() + Math.random() * 0.2 - 0.1;
+                double y = livingEntity.getY();
+                double z = livingEntity.getZ() + Math.random() * 0.2 - 0.1;
+
+                double deltaX = Math.random() * 0.25 + (Math.random() - 1.072) * 0.25;
+                double deltaY = 0;
+                double deltaZ = Math.random() * 0.25 + (Math.random() - 1.055) * 0.25;
+
+                AABB targetBoundingBox = new AABB(x, y, z, x + livingEntity.getBbWidth(), y + livingEntity.getBbHeight(), z + livingEntity.getBbWidth());
+                if (!livingEntity.level().noCollision(livingEntity, targetBoundingBox)) {
+                    Vec3 newPos = livingEntity.position().add(deltaX, deltaY, deltaZ);
+                    if (livingEntity.level().noCollision(livingEntity, livingEntity.getBoundingBox().move(newPos))) {
+                        x = newPos.x;
+                        y = newPos.y;
+                        z = newPos.z;
+                    }
+                }
+                livingEntity.setDeltaMovement(livingEntity.getDeltaMovement().add(Math.random() * 0.25 + (Math.random() - 1.072) * 0.25, 0, Math.random() * 0.25 + (Math.random() - 1.055) * 0.25));
+                livingEntity.setSprinting(true);
+                livingEntity.hurtMarked = true;
+                if (livingEntity instanceof Player player && livingEntity.getRandom().nextFloat() > 0.5f && livingEntity.onGround()) {
+                    player.jumpFromGround();
+                }
+            }
+
+            if (stun >= 1) {
+                tag.putInt("LOTMStun", stun - 1);
+                double x = livingEntity.getX();
+                double y = livingEntity.getY();
+                double z = livingEntity.getZ();
+                livingEntity.teleportTo(x, y, z);
+                livingEntity.setDeltaMovement(0, 0, 0);
+                livingEntity.hurtMarked = true;
+            }
+
+            if (bleeding >= 1) {
+                tag.putInt("LOTMBleeding", bleeding - 1);
+                if (livingEntity.tickCount % 5 == 0) {
+                    livingEntity.hurt(livingEntity.damageSources().cramming(), bleedingAmp);
+                }
+            }
+
+            if (battleHypnotism >= 1) {
+                if (livingEntity.tickCount % 3 == 0) {
+                    for (Mob mob : livingEntity.level().getEntitiesOfClass(Mob.class, livingEntity.getBoundingBox().inflate(20 * 2))) {
+                        if (mob != livingEntity) {
+                            mob.setTarget(livingEntity);
+                        }
+                    }
+                    if (!(livingEntity instanceof Player)) {
+                        livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 1, 2));
+                    }
+                }
+                if (battleHypnotism == 1) {
+                    if (livingEntity instanceof Mob mob && mob.getTarget() != null && !(mob.getTarget()instanceof Player)) {
+                        int playersFound = 0;
+                        for (Player player : mob.level().getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(12))) {
+                            playersFound++;
+                            mob.setTarget(player);
+                        }
+                        if (playersFound == 0) {
+                            mob.setTarget(null);
+                        }
+                    }
+                    tag.putInt("LOTMBattleHypnotism",  0);
+                }
+                if (battleHypnotism <= 5) {
+                    if (livingEntity instanceof Mob mob) {
+                        if (hasBattleHypnotism(mob)) {
+                            if (mob.getTarget() instanceof Mob) {
+                                mob.setTarget(null);
+                            }
+                        }
+                    }
+                }
+                tag.putInt("LOTMBattleHypnotism", battleHypnotism - 1);
+            }
+
+            if (manipulation >= 1) {
+                tag.putInt("LOTMManipulation", manipulation - 1);
+            }
+
+            if (mentalPlague >= 1) {
+                if (mentalPlague == 1) {
+                    for (LivingEntity entity1 : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(50))) {
+                        applyEffectsAndDamage(entity1);
+                    }
+                    applyEffectsAndDamage(livingEntity);
+                }
+                tag.putInt("LOTMMentalPlague", mentalPlague - 1);
+            }
+
+            if (paralysis >= 1) {
+                tag.putInt("LOTMParalysis", paralysis - 1);
+                double x = livingEntity.getX();
+                double y = livingEntity.getY();
+                double z = livingEntity.getZ();
+                livingEntity.teleportTo(x, y, z);
+                livingEntity.setDeltaMovement(0, 0, 0);
+                livingEntity.hurtMarked = true;
+            }
+
+            if (noRegeneration >= 1) {
+                tag.putInt("LOTMNoRegeneration", noRegeneration - 1);
+            }
+
+            if (beneficialEffectBlocker >= 1) {
+                tag.putInt("LOTMBeneficialEffectBlocker", beneficialEffectBlocker - 1);
+            }
+
+
+            if (hasStun(livingEntity) || hasParalysis(livingEntity) || hasAwe(livingEntity)) {
+                if (livingEntity instanceof Player) {
+                    return;
+                }
+                livingEntity.setDeltaMovement(0, livingEntity.getDeltaMovement().y, 0);
+                if (livingEntity instanceof Mob mob) {
+                    mob.getNavigation().stop();
+
+                }
+            }
+            if (livingEntity instanceof Mob mob && mob.getTarget() != null && mob.getTarget().is(livingEntity)) {
+                for (LivingEntity living : mob.level().getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(10))) {
+                    if (living instanceof Player && !BeyonderUtil.areAllies(mob, living)) {
+                        mob.setTarget(living);
+                    }
+                }
+            }
+            if (hasNoRegeneration(livingEntity)) {
+                int x = livingEntity.getPersistentData().getInt("noRegenerationEffectHealth");
+                if (livingEntity.getHealth() < x) {
+                    livingEntity.getPersistentData().putInt("noRegenerationEffectHealth", (int) livingEntity.getHealth());
+                }
+                if (livingEntity.getHealth() > x) {
+                    livingEntity.setHealth(x);
+                }
+            }
+        }
+    }
 }

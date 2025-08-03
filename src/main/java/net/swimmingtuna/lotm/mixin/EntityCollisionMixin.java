@@ -16,5 +16,8 @@ public abstract class EntityCollisionMixin {
         if (entity instanceof LivingEntity living && living.getPersistentData().contains("mercuryArmor")) {
             cir.setReturnValue(vec3);
         }
+        if (entity.getPersistentData().getInt("matterAccelerationEntitiesTimer") >= 1) {
+            cir.setReturnValue(vec3);
+        }
     }
 }

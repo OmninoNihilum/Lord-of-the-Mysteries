@@ -95,6 +95,7 @@ public class ClientEventsEntity {
     public static void registerParticleProvidersEvent(final RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ParticleInit.DOOR.get(), DoorParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.ACIDRAIN_PARTICLE.get(), AcidRainParticle.Provider::new);
+        event.registerSpriteSet(ParticleInit.GRAVITY.get(), GravityParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), PlayerTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.MOB_TRAIL_PARTICLE.get(), MobTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.NULL_PARTICLE.get(), NullParticle.Provider::new);

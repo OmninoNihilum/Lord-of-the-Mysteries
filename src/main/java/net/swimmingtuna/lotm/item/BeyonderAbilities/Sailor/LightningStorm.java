@@ -88,7 +88,13 @@ public class LightningStorm extends SimpleAbilityItem {
                     lightningEntity.setOwner(livingEntity);
                     lightningEntity.setMentalDamage(lightningEntity.getMentalDamage());
                     lightningEntity.setNoUp(true);
-                    lightningEntity.teleportTo(x1 + ((Math.random() * 300) - (double) 300 / 2), y1 + 130, z1 + ((Math.random() * 300) - (double) 300 / 2));
+                    float random = BeyonderUtil.getPositiveRandomInRange(8);
+                    if (random > 6) {
+                        lightningEntity.teleportTo(livingEntity.getX(), livingEntity.getY() + 130, livingEntity.getZ());
+                        lightningEntity.setTargetPos(livingEntity.getOnPos().getCenter());
+                    } else {
+                        lightningEntity.teleportTo(x1 + ((Math.random() * 300) - (double) 300 / 2), y1 + 130, z1 + ((Math.random() * 300) - (double) 300 / 2));
+                    }
                     livingEntity.level().addFreshEntity(lightningEntity);
                 }
                 if (tyrantVer >= 1) {

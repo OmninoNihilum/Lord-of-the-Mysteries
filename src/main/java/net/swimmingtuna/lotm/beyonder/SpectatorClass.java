@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -139,6 +141,38 @@ public class SpectatorClass implements BeyonderClass {
                 }
             }
         }
+    }
+
+    @Override
+    public SimpleContainer getAbilityItemsContainer(int sequenceLevel) {
+        SimpleContainer container = new SimpleContainer(45);
+        Map<Integer, List<ItemStack>> orderedItems = new LinkedHashMap<>();
+        for (int i = 9; i >= sequenceLevel; i--) {
+            orderedItems.put(i, new ArrayList<>());
+        }
+
+        Multimap<Integer, Item> items = getItems();
+        for (Map.Entry<Integer, Item> entry : items.entries()) {
+            int level = entry.getKey();
+            Item item = entry.getValue();
+
+            if (level >= sequenceLevel) {
+                if (item == ItemInit.FRENZY.get() && sequenceLevel < 5) {
+                    continue;
+                }
+                orderedItems.get(level).add(item.getDefaultInstance());
+            }
+        }
+
+        int slotIndex = 0;
+        for (int i = 9; i >= sequenceLevel; i--) {
+            List<ItemStack> levelItems = orderedItems.get(i);
+            for (ItemStack stack : levelItems) {
+                container.setItem(slotIndex++, stack);
+            }
+        }
+
+        return container;
     }
 
 
@@ -463,7 +497,7 @@ public class SpectatorClass implements BeyonderClass {
             if (plague == 1) {
                 for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(80))) {
                     BeyonderUtil.applyMobEffect(living, MobEffects.WITHER, 500, 5, true, true);
-                    BeyonderUtil.applyMobEffect(living, ModEffects.NOREGENERATION.get(), 300, 1, true, true);
+                    BeyonderUtil.applyNoRegeneration(living, 300);
                     BeyonderUtil.applyMobEffect(living, MobEffects.WEAKNESS, 500, 3, true, true);
                     BeyonderUtil.applyMobEffect(living, MobEffects.CONFUSION, 300, 1, true, true);
                 }
@@ -498,7 +532,7 @@ public class SpectatorClass implements BeyonderClass {
                 float flySpeed = tag.getFloat("LOTMFlySpeed");
                 if (flyTime >= 1) {
                     tag.putInt("LOTMFlying", flyTime - 1);
-                    if (livingEntity instanceof Player pPlayer) {
+                    if (livingEntity instanceof Player pPlayer ) {
                         Abilities playerAbilities = pPlayer.getAbilities();
                         if (!pPlayer.isCreative()) {
                             playerAbilities.mayfly = true;
@@ -513,7 +547,10 @@ public class SpectatorClass implements BeyonderClass {
                         playerMobEntity.setFlySpeed(flySpeed);
                     }
                 } else {
-                    stopFlying(livingEntity);
+                    boolean x = livingEntity instanceof Player player && (player.isCreative() || player.isSpectator());
+                    if (!x) {
+                        stopFlying(livingEntity);
+                    }
                 }
             }
             boolean hasSpectatorDemise = entity.hasEffect(ModEffects.SPECTATORDEMISE.get());

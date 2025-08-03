@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -23,12 +22,10 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulati
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public abstract class SimpleAbilityItem extends Item implements Ability {
@@ -431,9 +428,9 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
             MisfortuneManipulation.livingUseAbilityMisfortuneManipulation(livingEntity);
             CompoundTag tag = livingEntity.getPersistentData();
             if (livingEntity.getMainHandItem().getItem() instanceof SimpleAbilityItem) {
-                if (livingEntity.hasEffect(ModEffects.STUN.get())) {
+                if (BeyonderUtil.hasStun(livingEntity)) {
                     if (livingEntity instanceof Player) {
-                        livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " + (int) Objects.requireNonNull(livingEntity.getEffect(ModEffects.STUN.get())).getDuration() / 20 + " seconds.").withStyle(ChatFormatting.RED));
+                        livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " + (int) livingEntity.getPersistentData().getInt("LOTMStun") / 20 + " seconds.").withStyle(ChatFormatting.RED));
                     }
                     return false;
                 } else if (tag.getInt("cantUseAbility") >= 1) {

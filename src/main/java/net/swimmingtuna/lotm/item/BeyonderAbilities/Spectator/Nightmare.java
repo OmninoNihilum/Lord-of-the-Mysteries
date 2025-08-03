@@ -127,7 +127,9 @@ public class Nightmare extends SimpleAbilityItem {
                     } else {
                         style = ChatFormatting.DARK_RED;
                     }
-                    livingEntity.sendSystemMessage(Component.literal(name + "'s nightmare value is " + tag.getInt("NightmareTimer") + " / 300").withStyle(style));
+                    if (sequence + 2 <= entitySequence) {
+                        livingEntity.sendSystemMessage(Component.literal(name + "'s nightmare value is " + tag.getInt("NightmareTimer") + " / 300").withStyle(style));
+                    }
                 } else {
                     tag.putInt("NightmareTimer", 0);
                     if (living instanceof Player) {

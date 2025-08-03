@@ -92,13 +92,13 @@ public class Prophecy extends SimpleAbilityItem {
             if (prophecy == 8) {
                 if (interactionTarget instanceof  Player) {
                     if (BeyonderUtil.getDreamIntoReality(player) > 1) {
-                        interactionTarget.addEffect(new MobEffectInstance(ModEffects.FRENZY.get(), 40, 1, false, false));
+                        BeyonderUtil.applyFrenzy(interactionTarget, 40);
                     }
                     interactionTarget.getPersistentData().putInt("prophesizeDemise", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.PROPHECY.get()) * 70);
                     interactionTarget.addEffect(new MobEffectInstance(ModEffects.SPECTATORDEMISE.get(), 600, 1, false, false));
                 } else {
                     interactionTarget.addEffect(new MobEffectInstance(MobEffects.WITHER, 500, 6, false, false));
-                    interactionTarget.addEffect(new MobEffectInstance(ModEffects.NOREGENERATION.get(), 300, 1, false, false));
+                    BeyonderUtil.applyNoRegeneration(interactionTarget, 300);
                 }
             }
         }
@@ -227,8 +227,8 @@ public class Prophecy extends SimpleAbilityItem {
                 if (livingEntity.tickCount % 10 == 0) {
                     for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 5))) {
                         if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
+                            BeyonderUtil.applyNoRegeneration(living, 100);
                             BeyonderUtil.applyMobEffect(living, MobEffects.WITHER, 200, 5, true, true);
-                            BeyonderUtil.applyMobEffect(living, ModEffects.NOREGENERATION.get(), 100, 1, true, true);
                             BeyonderUtil.applyMobEffect(living, MobEffects.WEAKNESS, 200, 3, true, true);
                             BeyonderUtil.applyMobEffect(living, MobEffects.CONFUSION, 100, 1, true, true);
                         }

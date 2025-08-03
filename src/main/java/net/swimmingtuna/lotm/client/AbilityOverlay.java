@@ -6,7 +6,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilitiesData;
 import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCooldownData;
 

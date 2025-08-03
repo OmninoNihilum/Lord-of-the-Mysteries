@@ -28,7 +28,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,7 +74,7 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
                     } else if (randomInt == 1) {
                         float duration = (float) (100 + (misfortune * 5) * enhancement);
                         entity.addEffect(new MobEffectInstance(MobEffects.WITHER, (int) duration, 4, false, false));
-                        entity.addEffect(new MobEffectInstance(ModEffects.NOREGENERATION.get(), (int) (duration * 0.75), 1, false, false));
+                        BeyonderUtil.applyNoRegeneration(entity, (int) (duration * 0.75));
                         entity.hurt(BeyonderUtil.mentalSource(player.level(), player, entity), (float) misfortune / 2);
                     } else {
                         int duration = (int) ((5) + (misfortune / 2) + (enhancement * 3));

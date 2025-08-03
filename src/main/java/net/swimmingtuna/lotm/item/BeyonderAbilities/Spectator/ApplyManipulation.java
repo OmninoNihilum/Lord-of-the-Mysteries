@@ -6,7 +6,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -21,7 +20,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -42,7 +40,7 @@ public class ApplyManipulation extends SimpleAbilityItem {
             }
             useSpirituality(player);
             addCooldown(player);
-            if (!interactionTarget.hasEffect(ModEffects.MANIPULATION.get())) {
+            if (!BeyonderUtil.hasManipulation(player)) {
                 applyManipulation(interactionTarget, player);
             } else {
                 player.sendSystemMessage(Component.literal("You're already manipulating " + interactionTarget.getName().getString()).withStyle(BeyonderUtil.getStyle(player)));
@@ -82,10 +80,8 @@ public class ApplyManipulation extends SimpleAbilityItem {
 
     private static void applyManipulation(LivingEntity interactionTarget, LivingEntity player) {
         if (!player.level().isClientSide()) {
-            if (!interactionTarget.hasEffect(ModEffects.MANIPULATION.get())) {
-                interactionTarget.addEffect(new MobEffectInstance(ModEffects.MANIPULATION.get(), 600, 1, false, false));
-                player.sendSystemMessage(Component.literal("Manipulating " + interactionTarget.getName().getString()).withStyle(BeyonderUtil.getStyle(player)));
-            }
+            BeyonderUtil.applyManipulation(interactionTarget, 600);
+            player.sendSystemMessage(Component.literal("Manipulating " + interactionTarget.getName().getString()).withStyle(BeyonderUtil.getStyle(player)));
         }
     }
 
@@ -96,7 +92,7 @@ public class ApplyManipulation extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity user, LivingEntity target) {
-        if (target != null && !target.hasEffect(ModEffects.MANIPULATION.get())) {
+        if (target != null && !BeyonderUtil.hasManipulation(target)) {
             return 35;
         }
         return 0;

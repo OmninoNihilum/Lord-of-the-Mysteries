@@ -31,7 +31,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worlddata.WorldFortuneValue;
 import net.swimmingtuna.lotm.world.worlddata.WorldMisfortuneData;
@@ -134,9 +133,9 @@ public class CorruptionAndLuckHandler {
                 }
                 if (corruption >= 80 && livingEntity.tickCount % 200 == 0) {
                     if (Math.random() <= .50) {
-                        livingEntity.addEffect(new MobEffectInstance(ModEffects.FRENZY.get(), 40, 2, true, true));
+                        BeyonderUtil.applyFrenzy(livingEntity, 40);
                     } else {
-                        livingEntity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 40, 2, true, true));
+                        BeyonderUtil.applyParalysis(livingEntity, 40);
                     }
                 }
                 boolean low = tag.getBoolean("corruptedEntityLow");
@@ -1081,13 +1080,13 @@ public class CorruptionAndLuckHandler {
                             if (isSequence3Monster(entity)) {
                                 return;
                             } else {
-                                entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60 + (calamityEnhancement * 15), 1, false, false));
+                                BeyonderUtil.applyParalysis(entity, 60 + (calamityEnhancement * 15));
                                 entity.setTicksFrozen(60 + (calamityEnhancement * 15));
                             }
                         } else if (isSequence3Monster(livingEntity)) {
                             return;
                         } else {
-                            livingEntity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60 + (calamityEnhancement * 15), 1, false, false));
+                            BeyonderUtil.applyParalysis(livingEntity, 60 + (calamityEnhancement * 15));
                             livingEntity.setTicksFrozen(60 + (calamityEnhancement * 15));
                         }
                     }
@@ -1383,12 +1382,12 @@ public class CorruptionAndLuckHandler {
             }
             if (paralysis == 1) {
                 if (isMonster(livingEntity) && sequence <= 6 && sequence >= 4) {
-                    livingEntity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 5 + (calamityEnhancement), 0, false, false));
+                    BeyonderUtil.applyParalysis(livingEntity, 5 + calamityEnhancement);
                     livingEntity.sendSystemMessage(Component.literal("How unlucky, you tripped!").withStyle(ChatFormatting.BOLD));
                 } else if (isSequence3Monster(livingEntity)) {
                     tag.putInt("luckParalysis", 0);
                 } else {
-                    livingEntity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 10 + (calamityEnhancement * 3), 0, false, false));
+                    BeyonderUtil.applyParalysis(livingEntity, 10 + (calamityEnhancement * 3));
                     livingEntity.sendSystemMessage(Component.literal("How unlucky, you tripped!").withStyle(ChatFormatting.BOLD));
                     tag.putInt("luckParalysis", 0);
                 }

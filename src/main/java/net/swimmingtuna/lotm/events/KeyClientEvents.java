@@ -11,14 +11,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
@@ -26,7 +24,6 @@ import net.swimmingtuna.lotm.util.ClientData.*;
 import net.swimmingtuna.lotm.util.KeyBinding;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
-import org.jetbrains.annotations.Nullable;
 
 import static net.swimmingtuna.lotm.networking.packet.ForceLookPacketS2C.setPlayerRotation;
 

@@ -33,11 +33,16 @@ public class MercuryLiqueficationC2S {
             if (player == null) return;
             CompoundTag tag = player.getPersistentData();
             boolean currentState = tag.getBoolean("mercuryLiquefication");
-            float damage = BeyonderUtil.getDamage(player).get(ItemInit.MERCURYLIQUEFICATION.get());
             Level level = player.level();
             if (!level.isClientSide() && currentState && BeyonderUtil.getSequence(player) <= 2 && player.getMainHandItem().isEmpty()) {
+                float damage = BeyonderUtil.getDamage(player).get(ItemInit.MERCURYLIQUEFICATION.get());
                 for (LivingEntity livingEntity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(damage * 5.0f))) {
-                    if (livingEntity != player && !BeyonderUtil.areAllies(player, livingEntity)) {
+                        if (livingEntity == player) {
+                            continue;
+                        }
+                        if (BeyonderUtil.areAllies(livingEntity, player)) {
+                            continue;
+                        }
                         MercuryEntity mercuryEntity = new MercuryEntity(EntityInit.MERCURY_ENTITY.get(), level);
                         mercuryEntity.setSpeed(Math.max(1, (int) damage / 4));
                         mercuryEntity.setHarmTime((int) damage * 25);
@@ -47,7 +52,6 @@ public class MercuryLiqueficationC2S {
                         level.addFreshEntity(mercuryEntity);
                         player.setHealth(Math.max(1, player.getHealth() - 0.5f));
                     }
-                }
             }
         });
         return true;

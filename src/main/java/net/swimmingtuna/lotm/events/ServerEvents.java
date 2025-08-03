@@ -18,13 +18,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -474,7 +471,7 @@ public class ServerEvents {
                 if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
                     BlockPos playerPos = player.blockPosition();
                     Vec3 lookPos = player.getLookAngle().scale(5);
-                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y() - 2, (int) lookPos.z()));
+                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), -2, (int) lookPos.z()));
                     BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
                     level.setBlock(targetPos, dimensionalSightState, 3);
                     level.getServer().execute(() -> {

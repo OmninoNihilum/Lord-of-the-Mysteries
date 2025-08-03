@@ -143,15 +143,15 @@ public class Gigantification extends SimpleAbilityItem {
             float scale = 1.0f;
             int sequence = BeyonderUtil.getSequence(livingEntity);
             if (sequence == 6) {
-                scale = 1.3f;
+                scale = 1.8f;
             } else if (sequence == 5) {
-                scale = 1.5f;
+                scale = 1.9f;
             } else if (sequence == 4) {
-                scale = 1.5f;
+                scale = 2.3f;
             } else if (sequence == 3) {
                 scale = 2.0f;
             } else if (sequence == 2) {
-                scale = 2.3f;
+                scale = 2.5f;
             } else if (sequence == 1) {
                 scale = 2.3f;
             } else if (sequence == 0) {

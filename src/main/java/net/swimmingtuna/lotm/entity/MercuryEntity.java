@@ -67,7 +67,17 @@ public class MercuryEntity extends AbstractHurtingProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         if (!this.level().isClientSide() && result.getEntity() instanceof LivingEntity livingEntity) {
-            livingEntity.getPersistentData().putInt("mercuryLiqueficationTrapped", getHarmtime());
+            boolean x = true;
+            if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
+                if (this.tickCount <= 40) {
+                    if (livingEntity == owner) {
+                        x = false;
+                    }
+                }
+            }
+            if (x) {
+                livingEntity.getPersistentData().putInt("mercuryLiqueficationTrapped", getHarmtime());
+            }
         }
     }
 

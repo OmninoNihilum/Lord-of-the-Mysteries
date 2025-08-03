@@ -16,7 +16,6 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.swimmingtuna.lotm.LOTM;
-import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.world.worldgen.ConcealedSpaceChunkGenerator;
 import net.swimmingtuna.lotm.world.worldgen.DollSpaceChunkGenerator;
 

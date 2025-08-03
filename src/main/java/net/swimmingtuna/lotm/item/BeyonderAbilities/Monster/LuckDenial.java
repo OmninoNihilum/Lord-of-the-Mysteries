@@ -22,7 +22,6 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -90,7 +89,7 @@ public class LuckDenial extends SimpleAbilityItem {
                 tag.putDouble("luckDenialTimer", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()));
                 tag.putDouble("luckDenialLuck", luck);
             }
-            BeyonderUtil.applyMobEffect(interactionTarget, ModEffects.BENEFICIAL_EFFECTS_BLOCKER.get(), (int) beneficialEffectBlocker, 1, true, true);
+            BeyonderUtil.applyBeneficialEffectBlocker(interactionTarget, (int) beneficialEffectBlocker);
         }
     }
 

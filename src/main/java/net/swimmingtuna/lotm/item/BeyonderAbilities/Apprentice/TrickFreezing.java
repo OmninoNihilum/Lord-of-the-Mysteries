@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -29,7 +28,6 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -64,7 +62,7 @@ public class TrickFreezing extends SimpleAbilityItem {
 
     public static void freezeEntity(LivingEntity livingEntity, LivingEntity target) {
         if (!livingEntity.level().isClientSide() && !target.level().isClientSide()) {
-            target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()), 2, false, false));
+            BeyonderUtil.applyParalysis(target, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()));
             if (target.level() instanceof ServerLevel serverLevel) {
                 Vec3 sourcePos = livingEntity.position().add(0, livingEntity.getBbHeight() * 0.5, 0);
                 Vec3 targetPos = target.position().add(0, target.getBbHeight() * 0.5, 0);
@@ -89,7 +87,7 @@ public class TrickFreezing extends SimpleAbilityItem {
             DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
                 for (LivingEntity living : BeyonderUtil.checkEntitiesInLocation(livingEntity, (float) (damage ), (float) dimensionalSightTileEntity.getScryTarget().getX(), (float) dimensionalSightTileEntity.getScryTarget().getY(), (float) dimensionalSightTileEntity.getScryTarget().getZ())) {
-                    living.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) damage / 3, 2, false, false));
+                    BeyonderUtil.applyParalysis(living, damage / 3);
                 }
                 Level level = dimensionalSightTileEntity.getScryTarget().level();
                 BlockPos centerPos = dimensionalSightTileEntity.getScryTarget().blockPosition();
@@ -107,7 +105,7 @@ public class TrickFreezing extends SimpleAbilityItem {
             }
             for (LivingEntity living : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(damage))) {
                 if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
-                    living.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()) / 3, 2, false, false));
+                    BeyonderUtil.applyParalysis(living,(int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKFREEZING.get()));
                 }
             }
             Level level = livingEntity.level();

@@ -2,10 +2,6 @@ package net.swimmingtuna.lotm.item.OtherItems;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -21,12 +17,8 @@ import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DragonBreath;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
-
-import java.util.Set;
 
 public class TestItem extends SimpleAbilityItem {
 

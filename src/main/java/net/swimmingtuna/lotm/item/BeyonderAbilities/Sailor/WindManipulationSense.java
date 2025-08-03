@@ -48,8 +48,11 @@ public class WindManipulationSense extends SimpleAbilityItem {
             }
             int sequence = BeyonderUtil.getSequence(player);
             double radius = 100 - (sequence * 10);
-            for (Player otherPlayer : player.level().getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(radius))) {
+            for (LivingEntity otherPlayer : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius))) {
                 if (otherPlayer == player) {
+                    continue;
+                }
+                if (!(otherPlayer instanceof Player) && BeyonderUtil.getPathway(otherPlayer) != null) {
                     continue;
                 }
                 Vec3 directionToPlayer = otherPlayer.position().subtract(player.position()).normalize();
@@ -125,7 +128,7 @@ public class WindManipulationSense extends SimpleAbilityItem {
                 verticalDirection = "at the same level as";
             }
 
-            String message = otherPlayer.getName().getString() + " is " + horizontalDirection + " and " + verticalDirection + " you.";
+            String message = otherPlayer.getName().getString() + " is " + horizontalDirection + " and " + verticalDirection + " you and " + (int) otherPlayer.distanceTo(livingEntity) + " blocks away." ;
             if (livingEntity.tickCount % 140 == 0) {
                 livingEntity.sendSystemMessage(Component.literal(message).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE));
             }

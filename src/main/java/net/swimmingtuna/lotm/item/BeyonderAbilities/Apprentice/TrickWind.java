@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -77,7 +78,7 @@ public class TrickWind extends SimpleAbilityItem {
                     }
                 }
             } else {
-                for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
+                for (Entity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
                     Vec3 playerPos = player.position();
                     Vec3 entityPos = entity.position();
                     Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
@@ -121,17 +122,17 @@ public class TrickWind extends SimpleAbilityItem {
                     }
                 }
             } else {
-                for (LivingEntity entity : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
+                for (LivingEntity living : BeyonderUtil.getNonAlliesNearby(player, BeyonderUtil.getDamage(player).get(ItemInit.TRICKWIND.get()))) {
                     Vec3 playerPos = player.position();
-                    Vec3 entityPos = entity.position();
+                    Vec3 entityPos = living.position();
                     Vec3 toEntityVector = entityPos.subtract(playerPos).normalize();
                     double dotProduct = playerLookVector.dot(toEntityVector);
                     double angle = Math.acos(dotProduct);
                     if (angle <= fovAngle) {
                         Vec3 direction = playerPos.subtract(entityPos).normalize();
                         int factor = 10 - BeyonderUtil.getSequence(player);
-                        entity.setDeltaMovement(entity.getDeltaMovement().add(direction.scale(-factor)));
-                        entity.hurtMarked = true;
+                        living.setDeltaMovement(living.getDeltaMovement().add(direction.scale(-factor)));
+                        living.hurtMarked = true;
                     }
                 }
             }

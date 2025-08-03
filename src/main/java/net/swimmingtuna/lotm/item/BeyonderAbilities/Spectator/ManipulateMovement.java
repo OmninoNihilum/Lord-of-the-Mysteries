@@ -24,7 +24,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -62,7 +61,7 @@ public class ManipulateMovement extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, all living entities 150 blocks around you that are manipulated have their thoughts manipulated to move towards the clicked location"));
+        tooltipComponents.add(Component.literal("Upon use, all living entities 150 blocks around you that are manipulated have their thoughts manipulated to move towards the clicked location. You have to click a block again with this ability to reset the block, making nearby manipulated entities not want to go there automatically."));
         tooltipComponents.add(Component.literal("Left Click for Manipulate Fondness"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("200").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("30 Seconds").withStyle(ChatFormatting.YELLOW)));
@@ -104,8 +103,8 @@ public class ManipulateMovement extends SimpleAbilityItem {
         if (!livingEntity.getPersistentData().getBoolean("manipulateMovementBoolean")) {
             return;
         }
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(250))) {
-            if (!entity.hasEffect(ModEffects.MANIPULATION.get())) {
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(180))) {
+            if (!BeyonderUtil.hasManipulation(entity)) {
                 continue;
             }
             int targetX = livingEntity.getPersistentData().getInt("manipulateMovementX");
@@ -113,7 +112,7 @@ public class ManipulateMovement extends SimpleAbilityItem {
             int targetZ = livingEntity.getPersistentData().getInt("manipulateMovementZ");
 
             if (entity.distanceToSqr(targetX, targetY, targetZ) <= 8) {
-                entity.removeEffect(ModEffects.MANIPULATION.get());
+                BeyonderUtil.removeManipulation(livingEntity);
                 continue;
             }
 
@@ -177,7 +176,7 @@ public class ManipulateMovement extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null && target.hasEffect(ModEffects.MANIPULATION.get())) {
+        if (target != null && BeyonderUtil.hasManipulation(livingEntity)) {
             return (int) (100 - (target.distanceTo(livingEntity)));
         }
         return 0;

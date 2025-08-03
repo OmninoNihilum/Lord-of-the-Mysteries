@@ -12,7 +12,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,7 +28,6 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
@@ -347,7 +345,7 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 this.level().addFreshEntity(lightningEntity);}
                 for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(getTornadoRadius() * 1.5))) {
                     if (entity != this.getOwner() && this.tickCount % 40 == 0) {
-                        entity.addEffect(new MobEffectInstance(ModEffects.STUN.get(), 10,1,false,false));
+                        BeyonderUtil.applyStun(entity, 10);
                     }
                 }
             }

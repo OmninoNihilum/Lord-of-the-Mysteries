@@ -151,7 +151,6 @@ public class SpamClass {
                 "River of Eternal Darkness",
                 "Sefirah Castle",
                 "Chaos Sea",
-                "Sequence One isn't the End",
                 "Klein Moretti",
                 "Leodoro",
                 "Amanises",
@@ -2793,20 +2792,33 @@ public class SpamClass {
         Random random = new Random();
         CompoundTag tag = pPlayer.getPersistentData();
         double corruption = tag.getDouble("corruption");
-        int randomNumber = random.nextInt(25) + 1;
+        double corruptionMultiplier = 1;
+        int sequence = BeyonderUtil.getSequence(pPlayer);
+        if (sequence <= 4) {
+            if (sequence == 4) {
+                corruptionMultiplier *= 0.8;
+            } else if (sequence == 3) {
+                corruptionMultiplier *= 0.5;
+            } else if (sequence == 2) {
+                corruptionMultiplier *= 0.2;
+            } else {
+                corruptionMultiplier = 0;
+            }
+        }
+        int randomNumber = random.nextInt(80) + 1;
         if (randomNumber <= 1) {
+            tag.putDouble("corruption", corruption + (30 * corruptionMultiplier));
             int index = RANDOM.nextInt(monsterCorruptedWhispers().size());
             pPlayer.displayClientMessage(Component.literal(monsterCorruptedWhispers().get(index)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_RED),true);
         } else if (randomNumber <= 5) {
-            //tag.putDouble("corruption", corruption + 4);
+            tag.putDouble("corruption", corruption + (13 * corruptionMultiplier));
             int index = RANDOM.nextInt(monsterSemiCorruptedWhispers().size());
             pPlayer.displayClientMessage(Component.literal(monsterSemiCorruptedWhispers().get(index)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.RED),true);
         } else if (randomNumber <= 12) {
-            //tag.putDouble("corruption", corruption + 15);
+            tag.putDouble("corruption", corruption + (5 * corruptionMultiplier));
             int index = RANDOM.nextInt(monsterSlightyCorruptedWhispers().size());
             pPlayer.displayClientMessage(Component.literal(monsterSlightyCorruptedWhispers().get(index)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GRAY),true);
         } else {
-            //tag.putDouble("corruption", corruption + 40);
             int index = RANDOM.nextInt(monsterNonCorruptedWhispers().size());
             pPlayer.displayClientMessage(Component.literal(monsterNonCorruptedWhispers().get(index)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE),true);
         }

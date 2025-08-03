@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,7 +26,6 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -106,13 +104,17 @@ public class Frenzy extends SimpleAbilityItem {
     private void frenzy(LivingEntity player, Level level, BlockPos targetPos) {
         if (!player.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(player);
+            if (sequence <= 4) {
+                player.sendSystemMessage(Component.literal("You can't use this ability anymore, it's been updated to Dragon Breath.").withStyle(ChatFormatting.RED));
+                return;
+            }
             double radius = BeyonderUtil.getDamage(player).get(ItemInit.FRENZY.get());
             float damage = (float) (40 - (sequence * 3));
             int duration = (int) (radius * 18);
             AABB boundingBox = new AABB(targetPos).inflate(radius);
             level.getEntitiesOfClass(LivingEntity.class, boundingBox, LivingEntity::isAlive).forEach(livingEntity -> {
                 if (livingEntity != player && !BeyonderUtil.areAllies(player, livingEntity)) {
-                    livingEntity.addEffect(new MobEffectInstance(ModEffects.FRENZY.get(), duration, 1, false, false));
+                    BeyonderUtil.applyFrenzy(livingEntity, duration);
                     BeyonderUtil.applyMentalDamage(player, livingEntity, damage);
                 }
             });

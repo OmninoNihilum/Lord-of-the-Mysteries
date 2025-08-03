@@ -10,7 +10,6 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -97,7 +96,7 @@ public class WintryBlade extends SwordItem {
                         livingEntity.setTicksFrozen(200);
                     } else {
                         livingEntity.setTicksFrozen(200);
-                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.STUN.get(), 200, 0, true, true);
+                        BeyonderUtil.applyStun(livingEntity, 200);
                     }
                 }
                 if (y >= 1) {
@@ -114,7 +113,7 @@ public class WintryBlade extends SwordItem {
                         BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, 200, 4, true, true);
                         livingEntity.setTicksFrozen(200);
                     } else {
-                        BeyonderUtil.applyMobEffect(livingEntity, ModEffects.STUN.get(), 999999999, 0, true, true);
+                        BeyonderUtil.applyStun(livingEntity, 9999999);
                         livingEntity.setTicksFrozen(200);
                     }
                 }

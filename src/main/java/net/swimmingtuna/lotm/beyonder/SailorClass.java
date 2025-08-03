@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -29,7 +31,10 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SailorClass implements BeyonderClass {
     public static int dolhpinsGrace;
@@ -271,6 +276,42 @@ public class SailorClass implements BeyonderClass {
             haste = 5;
         }
     }
+
+    @Override
+    public SimpleContainer getAbilityItemsContainer(int sequenceLevel) {
+        SimpleContainer container = new SimpleContainer(45);
+        Map<Integer, List<ItemStack>> orderedItems = new LinkedHashMap<>();
+        for (int i = 9; i >= sequenceLevel; i--) {
+            orderedItems.put(i, new ArrayList<>());
+        }
+
+        Multimap<Integer, Item> items = getItems();
+        for (Map.Entry<Integer, Item> entry : items.entries()) {
+            int level = entry.getKey();
+            Item item = entry.getValue();
+
+            if (level >= sequenceLevel) {
+                if (item == ItemInit.AQUATIC_LIFE_MANIPULATION.get() && sequenceLevel < 3) {
+                    continue;
+                }
+                if (item == ItemInit.LIGHTNING_BALL.get() && sequenceLevel < 2) {
+                    continue;
+                }
+                orderedItems.get(level).add(item.getDefaultInstance());
+            }
+        }
+
+        int slotIndex = 0;
+        for (int i = 9; i >= sequenceLevel; i--) {
+            List<ItemStack> levelItems = orderedItems.get(i);
+            for (ItemStack stack : levelItems) {
+                container.setItem(slotIndex++, stack);
+            }
+        }
+
+        return container;
+    }
+
 
     @Override
     public Multimap<Integer, Item> getItems() {

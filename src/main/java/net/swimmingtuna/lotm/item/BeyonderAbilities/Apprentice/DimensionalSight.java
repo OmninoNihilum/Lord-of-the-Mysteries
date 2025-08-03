@@ -87,7 +87,7 @@ DimensionalSight extends SimpleAbilityItem {
                     server.execute(() -> {
                         BlockPos playerPos = livingEntity.blockPosition();
                         Vec3 lookPos = livingEntity.getLookAngle().scale(5);
-                        BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y() - 2, (int) lookPos.z()));
+                        BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), -2, (int) lookPos.z()));
                         BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
                         level.setBlock(targetPos, dimensionalSightState, 3);
                         BlockEntity blockEntity = level.getBlockEntity(targetPos);

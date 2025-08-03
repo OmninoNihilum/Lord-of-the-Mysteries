@@ -25,7 +25,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -229,7 +228,7 @@ public class FalseProphecy extends SimpleAbilityItem {
             if (tag.getInt("falseProphecyStandHarmful") >= 100) {
                 tag.putInt("falseProphecyStandHarmful", 0);
                 tag.putInt("harmfulFalseProphecyStand", 0);
-                BeyonderUtil.applyMobEffect(livingEntity, ModEffects.BLEEDING.get(), 400, 7, false, false);
+                BeyonderUtil.applyBleeding(livingEntity, 400, 7);
                 BeyonderUtil.applyMobEffect(livingEntity, MobEffects.BLINDNESS, 400, 5, false, false);
                 BeyonderUtil.applyMobEffect(livingEntity, MobEffects.HARM, 400, 10, false, false);
                 BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 400, 4, false, false);

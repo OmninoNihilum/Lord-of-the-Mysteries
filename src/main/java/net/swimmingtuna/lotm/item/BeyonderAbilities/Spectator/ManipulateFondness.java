@@ -16,7 +16,6 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -53,13 +52,13 @@ public class ManipulateFondness extends SimpleAbilityItem {
     private static void manipulateFondness(LivingEntity player) {
         if (!player.level().isClientSide()) {
             for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(250))) {
-                if (entity != player && entity.hasEffect(ModEffects.MANIPULATION.get()) && !BeyonderUtil.areAllies(player, entity)) {
-                    entity.addEffect(new MobEffectInstance(ModEffects.BATTLEHYPNOTISM.get(),(int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MANIPULATE_FONDNESS.get()), 1, false, false));
+                if (entity != player && BeyonderUtil.hasManipulation(entity) && !BeyonderUtil.areAllies(player, entity)) {
+                    BeyonderUtil.applyBattleHypnotism(entity, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MANIPULATE_FONDNESS.get()));
                     for (Mob mob : entity.level().getEntitiesOfClass(Mob.class, entity.getBoundingBox().inflate(50))) {
                         mob.setTarget(entity);
                         mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200, 1, false, false));
                     }
-                    entity.removeEffect(ModEffects.MANIPULATION.get());
+                    BeyonderUtil.removeManipulation(entity);
                 }
             }
         }
@@ -72,7 +71,7 @@ public class ManipulateFondness extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         int mobTotalHP = 0;
-        if (target != null && target.hasEffect(ModEffects.MANIPULATION.get())) {
+        if (target != null && BeyonderUtil.hasManipulation(target)) {
             int sequence = BeyonderUtil.getSequence(livingEntity);
             double dreamIntoReality = BeyonderUtil.getDreamIntoReality(livingEntity);
             for (Mob mob : target.level().getEntitiesOfClass(Mob.class, target.getBoundingBox().inflate((20 - sequence) * dreamIntoReality))) {

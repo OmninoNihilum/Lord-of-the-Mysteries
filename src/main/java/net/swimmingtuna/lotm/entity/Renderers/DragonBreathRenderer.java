@@ -141,7 +141,7 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
     private void renderBeam(float length, float yaw, float pitch, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float entitySize) {
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(yaw - 90.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(yaw));
         poseStack.mulPose(Axis.XN.rotationDegrees(pitch));
 
         this.drawCube(length, frame, poseStack, consumer, brightness, packedLight, entitySize);

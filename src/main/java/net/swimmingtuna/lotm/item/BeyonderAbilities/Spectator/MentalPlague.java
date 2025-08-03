@@ -23,7 +23,6 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -50,7 +49,7 @@ public class MentalPlague extends SimpleAbilityItem {
 
     public void mentalPlauge(LivingEntity interactionTarget) {
         if (!interactionTarget.level().isClientSide()) {
-            interactionTarget.addEffect(new MobEffectInstance(ModEffects.MENTALPLAGUE.get(), 620, 1));
+            BeyonderUtil.applyMentalPlague(interactionTarget, 601);
         }
     }
 
@@ -84,24 +83,7 @@ public class MentalPlague extends SimpleAbilityItem {
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
-    public static void mentalPlague(LivingEntity entity) {
-        //MENTAL PLAGUE
-        int mentalPlagueTimer = entity.getPersistentData().getInt("MentalPlagueTimer");
-        if (entity.hasEffect(ModEffects.MENTALPLAGUE.get())) {
-            mentalPlagueTimer++;
-
-            if (mentalPlagueTimer >= 600) {
-                for (LivingEntity entity1 : entity.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(50))) {
-                    applyEffectsAndDamage(entity1);
-                }
-                applyEffectsAndDamage(entity);
-                mentalPlagueTimer = 0;
-            }
-        }
-        entity.getPersistentData().putInt("MentalPlagueTimer", mentalPlagueTimer);
-    }
-
-    private static void applyEffectsAndDamage(LivingEntity entity) {
+    public static void applyEffectsAndDamage(LivingEntity entity) {
         entity.addEffect(new MobEffectInstance(MobEffects.POISON, 400, 2, false, false));
         entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 400, 1, false, false));
         entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 400, 1, false, false));

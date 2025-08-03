@@ -27,7 +27,6 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -58,7 +57,7 @@ public class TrickElectricShock extends SimpleAbilityItem {
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
                 int amountToStun = (int) (float) BeyonderUtil.getDamage(dimensionalSightTileEntity.getScryTarget()).get(ItemInit.TRICKELECTRICSHOCK.get());
                 player.sendSystemMessage(Component.literal("You shocked and stunned your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
-                BeyonderUtil.applyMobEffect(dimensionalSightTileEntity.getScryTarget(), ModEffects.STUN.get(), amountToStun * 4, 1, false, false);
+                BeyonderUtil.applyStun(dimensionalSightTileEntity.getScryTarget(), amountToStun * 4);
             } else {
                 CompoundTag tag = player.getPersistentData();
                 boolean electricShock = tag.getBoolean("trickmasterElectricShock");
@@ -94,7 +93,7 @@ public class TrickElectricShock extends SimpleAbilityItem {
                     int amount = 20 - (sequence * 2);
                     int amountToStun = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKELECTRICSHOCK.get());
                     BeyonderUtil.useSpirituality(livingEntity, amount);
-                    BeyonderUtil.applyMobEffect(livingTarget, ModEffects.AWE.get(), amountToStun, 1, false, false);
+                    BeyonderUtil.applyAwe(livingEntity, amountToStun);
                 }
             }
         }

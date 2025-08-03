@@ -19,7 +19,6 @@ import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -96,9 +95,9 @@ public class SymphonyOfHatred extends Item {
                         }
                     }
                     if (random.nextInt(3) == 0) {
-                        BeyonderUtil.applyMobEffect(living, ModEffects.FRENZY.get(), 100, 1, true, true);
+                        BeyonderUtil.applyFrenzy(living, 100);
                     } else if (random.nextInt(3) == 1) {
-                        BeyonderUtil.applyMobEffect(living, ModEffects.FRENZY.get(), 50, 1, true, true);
+                        BeyonderUtil.applyFrenzy(living, 50);
                     }
                 }
             }

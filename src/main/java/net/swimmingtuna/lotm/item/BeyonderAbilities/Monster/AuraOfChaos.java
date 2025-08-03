@@ -32,7 +32,6 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
 
@@ -149,7 +148,7 @@ public class AuraOfChaos extends SimpleAbilityItem {
                             zombie.setTarget(livingEntity);
                             entity.level().addFreshEntity(zombie);
                         } else if (randomInt >= 40 && randomInt <= 59) {
-                            livingEntity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 30 + (enhancement * 10), 1, false, false));
+                            BeyonderUtil.applyParalysis(livingEntity, 30 + (enhancement * 10));
                         } else if (randomInt >= 20 && randomInt <= 39) {
                             LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, player.level());
                             lightningBolt.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());

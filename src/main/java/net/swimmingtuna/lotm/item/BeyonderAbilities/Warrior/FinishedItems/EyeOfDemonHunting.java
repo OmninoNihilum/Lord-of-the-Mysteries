@@ -138,6 +138,7 @@ public class EyeOfDemonHunting extends SimpleAbilityItem {
                         } else if (pathway == BeyonderClassInit.SEER.get()) {
 
                         } else if (pathway == BeyonderClassInit.APPRENTICE.get()) {
+                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 100, 1, true, true);
 
                         } else if (pathway == BeyonderClassInit.MARAUDER.get()) {
 

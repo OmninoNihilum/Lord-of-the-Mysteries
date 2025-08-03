@@ -35,7 +35,6 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
 
@@ -178,13 +177,13 @@ public class EnableDisableRipple extends SimpleAbilityItem {
                                 if (BeyonderUtil.currentPathwayMatches(entity, BeyonderClassInit.MONSTER.get())) {
                                     int otherSequence = BeyonderUtil.getSequence(entity);
                                     if (otherSequence <= 5 && otherSequence > 3) {
-                                        entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 30 - (sequence * 6), 1, false, false));
+                                        BeyonderUtil.applyParalysis(entity, 30 - (sequence * 6));
                                         entity.setTicksFrozen(60 - (sequence * 12));
                                     } else if (otherSequence <= 3) {
                                         return;
                                     }
                                 }
-                                entity.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60 - (sequence * 12), 1, false, false));
+                                BeyonderUtil.applyParalysis(entity, 60 - (sequence * 12));
                                 entity.setTicksFrozen(60 - (sequence * 12));
                             }
                         }
