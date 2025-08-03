@@ -21,6 +21,7 @@ public class AttributeAdder {
         addToPlayer(event, ModAttributes.FIRE_RESISTANCE);
         addToPlayer(event, ModAttributes.JUMP_BOOST);
         addToPlayer(event, ModAttributes.WATER_BREATHING);
+        addToPlayer(event, ModAttributes.DIG_SPEED);
     }
 
     @SafeVarargs

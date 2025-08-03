@@ -1,6 +1,5 @@
 package nihilum.lotm.tweaks.Attributes;
 
-
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -8,34 +7,35 @@ import net.swimmingtuna.lotm.spirituality.ModAttributes;
 
 import java.util.List;
 
-public class MonsterAttributes extends BaseAttributes {
-    private  static  final List<Double> healthList
-            = List.of(60.0, 45.0, 40.0, 40.0, 35.0, 25.0, 25.0, 25.0, 20.0, 20.0);
+public class SailorAttributes extends BaseAttributes{
+    private static final List<Double> healthList
+            = List.of(80.0, 65.0, 60.0, 50.0, 45.0, 35.0, 30.0, 30.0, 25.0, 23.0);
     private static final List<Double> speedList
-            = List.of(0.1, 0.08, 0.06, 0.06, 0.06, 0.04, 0.04, 0.02, 0.02, 0.0);
+            = List.of(0.1, 0.09, 0.08, 0.07, 0.07, 0.06, 0.05, 0.04, 0.02, 0.01);
     private static final List<Double> attackList
-            = List.of(16.0 ,12.0, 12.0, 9.0, 9.0, 6.0, 6.0, 3.0, 3.0, 0.0);
+            = List.of(18.0 ,16.0, 14.0, 12.0, 10.0, 8.0, 5.0, 4.0, 3.0, 2.0);
+
     private static final List<Double> nightVisionList
-            = List.of(3.0 ,3.0, 3.0, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0);
+            = List.of(3.0 ,3.0, 3.0, 3.0, 2.0, 2.0, 1.5, 1.0, 1.0, 0.5);
     private static  final List<Double> fireResistanceList =
-            List.of(3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0);
+            List.of(3.0, 3.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     private static final List<Double> jumpList
-            = List.of(0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.055, 0.055, 0.055);
+            = List.of(0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.08, 0.08, 0.055);
 
     private static final List<Double> armorList
-            = List.of(20.0, 18.0, 15.0, 12.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            = List.of(20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0, 4.0, 2.0);
     private static final List<Double> armorToughnessList
-            = List.of(12.0, 8.0, 8.0, 6.0, 6.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-
-    private static final List<Double> waterBreathingList
-            = List.of(1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            = List.of(15.0, 13.0, 11.0, 9.0, 8.0, 6.0, 5.0, 4.0, 3.0, 2.0);
 
     private static final List<Double> digSpeedList
-            = List.of(5.0, 4.0, 4.0, 3.0, 3.0, 2.0, 2.0, 1.0, 1.0, 0.0);
+            = List.of(10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0);
+
+    private static final List<Double> waterBreathingList
+            = List.of(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 
     public static void applyAll(LivingEntity entity, int seq){
-        apply(entity.getAttribute(Attributes.MAX_HEALTH), healthBoostID, healthList.get(seq) - 20.0,
-                "HealthBoost");
+        apply(entity.getAttribute(Attributes.MAX_HEALTH), healthBoostID, healthList.get(seq) - 20.0
+                , "HealthBoost");
         apply(entity.getAttribute(Attributes.MOVEMENT_SPEED), speedID, speedList.get(seq), "SpeedBoost");
         apply(entity.getAttribute(Attributes.ATTACK_DAMAGE), attackID, attackList.get(seq), "AttackBoost");
 
@@ -50,10 +50,10 @@ public class MonsterAttributes extends BaseAttributes {
                     fireResistanceID, fireResistanceList.get(seq), "FireResistance");
             apply(entity.getAttribute(ModAttributes.JUMP_BOOST.get()),
                     jumpID, jumpList.get(seq), "JumpBoost");
-            apply(entity.getAttribute(ModAttributes.WATER_BREATHING.get()),
-                    waterBreathingID, waterBreathingList.get(seq), "WaterBreathingBoost");
             apply(entity.getAttribute(ModAttributes.DIG_SPEED.get()),
                     digSpeedID, digSpeedList.get(seq), "DigSpeed");
+            apply(entity.getAttribute(ModAttributes.WATER_BREATHING.get()),
+                    waterBreathingID, waterBreathingList.get(seq), "WaterBreathingBoost");
         }
     }
 }

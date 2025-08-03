@@ -28,6 +28,8 @@ public class ModAttributes {
             ()-> new RangedAttribute("attribute.lotm.jump_boost",0.0D,0.0D,10).setSyncable(true));
     public static final RegistryObject<Attribute> WATER_BREATHING = ATTRIBUTES.register("water_breathing",
             ()-> new RangedAttribute("attribute.lotm.water_breathing",0.0D,0.0D,1).setSyncable(true));
+    public static final RegistryObject<Attribute> DIG_SPEED = ATTRIBUTES.register("dig_speed",
+            ()-> new RangedAttribute("attribute.lotm.dig_speed",1.0D,1.0D,100).setSyncable(true));
 
 
 

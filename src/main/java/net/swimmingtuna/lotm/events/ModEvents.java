@@ -213,9 +213,12 @@ public class ModEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (event.getEntity().getMainHandItem().getItem() instanceof SimpleAbilityItem) {
-            BeyonderUtil.leftClick(event.getEntity());
+        Player player = event.getEntity();
+
+        if (player.getMainHandItem().getItem() instanceof SimpleAbilityItem) {
+            BeyonderUtil.leftClick(player);
             event.setCanceled(true);
+            return;
         }
     }
 
@@ -406,7 +409,9 @@ public class ModEvents {
         LivingEntity livingEntity = event.getEntity();
         CompoundTag tag = livingEntity.getPersistentData();
         Level level = livingEntity.level();
+
         if (level instanceof ServerLevel serverLevel) {
+
             if (tag.getInt("inCombat") >= 1) {
                 tag.putInt("inCombat", tag.getInt("inCombat") - 1);
             }
@@ -1109,5 +1114,14 @@ public class ModEvents {
                 add(0, player.getAttributeValue(ModAttributes.JUMP_BOOST.get()), 0));
     }
 
+    @SubscribeEvent
+    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
+        Player player = event.getEntity();
 
+        float boost = (float) player.getAttributeValue(ModAttributes.DIG_SPEED.get());
+
+        if (boost != 0.0F) {
+            event.setNewSpeed(event.getOriginalSpeed() * boost);
+        }
+    }
 }

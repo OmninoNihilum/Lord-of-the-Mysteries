@@ -1,6 +1,7 @@
 package nihilum.lotm.tweaks.Attributes;
 
 import com.ibm.icu.impl.UPropertyAliases;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -20,6 +21,9 @@ public class BaseAttributes {
     protected static final UUID armorID = UUID.fromString("66c23c87-9e2b-4823-8b04-58fe34f9ad9d");
     protected static final UUID armorToughnessID = UUID.fromString("d41c5348-216e-4c94-a0fd-8bc5eb4da8ca");
     protected static final UUID waterBreathingID = UUID.fromString("52900b28-d96b-489b-b5dd-83e3d7f15443");
+    protected static final UUID dolphinsGraceID = UUID.fromString("bb491edc-944b-4758-839d-793538a4b09a");
+    protected static final UUID digSpeedID = UUID.fromString("b23dc144-8c77-4d09-94b2-2982573812f3");
+
 
     public static void clean(AttributeInstance attr, UUID id){
         if(attr.getModifier(id) != null)
@@ -33,17 +37,18 @@ public class BaseAttributes {
                 id, name, value, AttributeModifier.Operation.ADDITION));
     }
 
-    public static void cleanAll(Player player){
-        clean(Objects.requireNonNull(player.getAttribute(Attributes.MAX_HEALTH)), healthBoostID);
+    public static void cleanAll(LivingEntity entity){
+        clean(Objects.requireNonNull(entity.getAttribute(Attributes.MAX_HEALTH)), healthBoostID);
 
-        clean(Objects.requireNonNull(player.getAttribute(Attributes.MOVEMENT_SPEED)), speedID);
-        clean(Objects.requireNonNull(player.getAttribute(Attributes.ATTACK_DAMAGE)), attackID);
-        clean(Objects.requireNonNull(player.getAttribute(Attributes.ARMOR)), armorID);
-        clean(Objects.requireNonNull(player.getAttribute(Attributes.ARMOR_TOUGHNESS)), armorToughnessID);
+        clean(Objects.requireNonNull(entity.getAttribute(Attributes.MOVEMENT_SPEED)), speedID);
+        clean(Objects.requireNonNull(entity.getAttribute(Attributes.ATTACK_DAMAGE)), attackID);
+        clean(Objects.requireNonNull(entity.getAttribute(Attributes.ARMOR)), armorID);
+        clean(Objects.requireNonNull(entity.getAttribute(Attributes.ARMOR_TOUGHNESS)), armorToughnessID);
 
-        clean(Objects.requireNonNull(player.getAttribute(ModAttributes.NIGHT_VISION.get())), nightVisionID);
-        clean(Objects.requireNonNull(player.getAttribute(ModAttributes.FIRE_RESISTANCE.get())), fireResistanceID);
-        clean(Objects.requireNonNull(player.getAttribute(ModAttributes.JUMP_BOOST.get())), jumpID);
-        clean(Objects.requireNonNull(player.getAttribute(ModAttributes.WATER_BREATHING.get())), waterBreathingID);
+        clean(Objects.requireNonNull(entity.getAttribute(ModAttributes.NIGHT_VISION.get())), nightVisionID);
+        clean(Objects.requireNonNull(entity.getAttribute(ModAttributes.FIRE_RESISTANCE.get())), fireResistanceID);
+        clean(Objects.requireNonNull(entity.getAttribute(ModAttributes.JUMP_BOOST.get())), jumpID);
+        clean(Objects.requireNonNull(entity.getAttribute(ModAttributes.WATER_BREATHING.get())), waterBreathingID);
+        clean(Objects.requireNonNull(entity.getAttribute(ModAttributes.DIG_SPEED.get())), digSpeedID);
     }
 }

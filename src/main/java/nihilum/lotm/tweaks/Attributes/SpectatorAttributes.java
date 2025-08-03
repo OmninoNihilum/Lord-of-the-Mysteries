@@ -1,5 +1,6 @@
 package nihilum.lotm.tweaks.Attributes;
 
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.swimmingtuna.lotm.spirituality.ModAttributes;
@@ -25,21 +26,28 @@ public class SpectatorAttributes extends BaseAttributes{
     private static final List<Double> armorToughnessList
             = List.of(14.0, 12.0, 10.0, 8.0, 8.0, 6.0, 4.0, 0.0, 0.0, 0.0);
 
+    private static final List<Double> digSpeedList
+            = List.of(4.0, 3.0, 3.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
-    public static void applyAll(Player player, int seq){
-        apply(player.getAttribute(Attributes.MAX_HEALTH), healthBoostID, healthList.get(seq) , "HealthBoost");
-        apply(player.getAttribute(Attributes.MOVEMENT_SPEED), speedID, speedList.get(seq), "SpeedBoost");
-        apply(player.getAttribute(Attributes.ATTACK_DAMAGE), attackID, attackList.get(seq), "AttackBoost");
+    public static void applyAll(LivingEntity entity, int seq){
+        apply(entity.getAttribute(Attributes.MAX_HEALTH), healthBoostID, healthList.get(seq) - 20.0,
+                "HealthBoost");
+        apply(entity.getAttribute(Attributes.MOVEMENT_SPEED), speedID, speedList.get(seq), "SpeedBoost");
+        apply(entity.getAttribute(Attributes.ATTACK_DAMAGE), attackID, attackList.get(seq), "AttackBoost");
 
-        apply(player.getAttribute(Attributes.ARMOR), armorID, armorList.get(seq), "ArmorBoost");
-        apply(player.getAttribute(Attributes.ARMOR_TOUGHNESS), armorToughnessID,
+        apply(entity.getAttribute(Attributes.ARMOR), armorID, armorList.get(seq), "ArmorBoost");
+        apply(entity.getAttribute(Attributes.ARMOR_TOUGHNESS), armorToughnessID,
                 armorToughnessList.get(seq), "ArmorToughnessBoost");
 
-        apply(player.getAttribute(ModAttributes.NIGHT_VISION.get()),
-                nightVisionID, nightVisionList.get(seq), "NightVision");
-        apply(player.getAttribute(ModAttributes.FIRE_RESISTANCE.get()),
-                fireResistanceID, fireResistanceList.get(seq), "FireResistance");
-        apply(player.getAttribute(ModAttributes.JUMP_BOOST.get()),
-                jumpID, jumpList.get(seq), "JumpBoost");
+        if(entity instanceof Player) {
+            apply(entity.getAttribute(ModAttributes.NIGHT_VISION.get()),
+                    nightVisionID, nightVisionList.get(seq), "NightVision");
+            apply(entity.getAttribute(ModAttributes.FIRE_RESISTANCE.get()),
+                    fireResistanceID, fireResistanceList.get(seq), "FireResistance");
+            apply(entity.getAttribute(ModAttributes.JUMP_BOOST.get()),
+                    jumpID, jumpList.get(seq), "JumpBoost");
+            apply(entity.getAttribute(ModAttributes.DIG_SPEED.get()),
+                    digSpeedID, digSpeedList.get(seq), "DigSpeed");
+        }
     }
 }
