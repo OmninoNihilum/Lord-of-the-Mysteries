@@ -64,8 +64,8 @@ public class WarriorClass implements BeyonderClass {
     }
 
     @Override
-    public void applyAllModifiers(Player player, int seq) {
-        WarriorAttributes.applyAll(player, seq);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        WarriorAttributes.applyAll(entity, seq);
     }
 
     @Override

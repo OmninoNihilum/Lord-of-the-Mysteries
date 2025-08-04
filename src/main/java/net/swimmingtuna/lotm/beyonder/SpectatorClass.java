@@ -72,8 +72,8 @@ public class SpectatorClass implements BeyonderClass {
     }
 
     @Override
-    public void applyAllModifiers(Player player, int seq) {
-        SpectatorAttributes.applyAll(player, seq);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        SpectatorAttributes.applyAll(entity, seq);
     }
 
     @Override

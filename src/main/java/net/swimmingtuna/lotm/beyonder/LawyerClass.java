@@ -41,7 +41,7 @@ public class LawyerClass implements BeyonderClass {
     }
 
     @Override
-    public void applyAllModifiers(Player player, int seq) {
+    public void applyAllModifiers(LivingEntity entity, int seq) {
 
     }
 

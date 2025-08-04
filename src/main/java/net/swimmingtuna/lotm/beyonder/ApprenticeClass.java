@@ -72,8 +72,8 @@ public class ApprenticeClass implements BeyonderClass {
     }
 
     @Override
-    public void applyAllModifiers(Player player, int seq) {
-        ApprenticeAttributes.applyAll(player, seq);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        ApprenticeAttributes.applyAll(entity, seq);
     }
 
     @Override

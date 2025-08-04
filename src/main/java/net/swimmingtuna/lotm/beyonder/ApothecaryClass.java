@@ -39,7 +39,7 @@ public class ApothecaryClass implements BeyonderClass {
     }
 
     @Override
-    public void applyAllModifiers(Player player, int seq) {
+    public void applyAllModifiers(LivingEntity entity, int seq) {
 
     }
 
@@ -101,4 +101,3 @@ public class ApothecaryClass implements BeyonderClass {
         return ChatFormatting.DARK_GREEN;
     }
 }
-  

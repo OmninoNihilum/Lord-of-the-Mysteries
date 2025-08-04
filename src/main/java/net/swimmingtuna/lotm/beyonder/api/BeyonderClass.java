@@ -55,5 +55,5 @@ public interface BeyonderClass {
 
     List<Integer> divination();
 
-    void applyAllModifiers(Player player, int seq);
+    void applyAllModifiers(LivingEntity entity, int seq);
 }

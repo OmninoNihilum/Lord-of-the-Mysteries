@@ -67,8 +67,8 @@ public class SailorClass implements BeyonderClass {
     }
 
     @Override
-    public void applyAllModifiers(Player player, int seq) {
-        SailorAttributes.applyAll(player, seq);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        SailorAttributes.applyAll(entity, seq);
     }
 
     @Override
@@ -86,10 +86,6 @@ public class SailorClass implements BeyonderClass {
         return List.of(45, 30, 20, 15, 12, 9, 6, 5, 3, 2);
     }
 
-//    @Override
-//    public List<Double> maxHealth() {
-//        return List.of(80.0, 65.0, 60.0, 50.0, 45.0, 35.0, 30.0, 30.0, 25.0, 23.0);
-//    }
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {

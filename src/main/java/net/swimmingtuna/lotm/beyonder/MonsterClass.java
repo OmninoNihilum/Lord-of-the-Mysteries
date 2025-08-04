@@ -83,8 +83,8 @@ public class MonsterClass implements BeyonderClass {
     }
 
     @Override
-    public void applyAllModifiers(Player player, int seq) {
-        MonsterAttributes.applyAll(player, seq);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        MonsterAttributes.applyAll(entity, seq);
     }
 
     @Override
