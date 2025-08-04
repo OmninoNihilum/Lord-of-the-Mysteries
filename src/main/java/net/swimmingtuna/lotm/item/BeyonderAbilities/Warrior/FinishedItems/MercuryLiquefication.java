@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -25,6 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -176,12 +178,20 @@ public class MercuryLiquefication extends SimpleAbilityItem {
     }
 
     public static void equipSilverArmor(LivingEntity user, LivingEntity targetEntity) {
-        if (targetEntity.level().isClientSide()) return;
+        if (targetEntity.level().isClientSide()) {
+            return;
+        }
+        if (user.level().isClientSide()) {
+            return;
+        }
         if (user.getPersistentData().getBoolean("mercuryLiquefication")) {
             if (BeyonderUtil.areAllies(user, targetEntity)) {
+                LOTM.LOGGER.info("1");
                 if (user != targetEntity) {
+                    LOTM.LOGGER.info("2");
                     long currentTime = System.currentTimeMillis();
                     if (currentTime - lastActivationTime >= COOLDOWN_MS) {
+                        LOTM.LOGGER.info("3");
                         CompoundTag tag = targetEntity.getPersistentData();
                         user.getPersistentData().putUUID("mercuryArmor", targetEntity.getUUID());
                         user.getPersistentData().putInt("mercuryArmorForm", 10);
@@ -207,6 +217,8 @@ public class MercuryLiquefication extends SimpleAbilityItem {
                         targetEntity.setItemSlot(EquipmentSlot.FEET, createEnchantedArmor(ItemInit.SILVER_BOOTS.get().getDefaultInstance()));
                     }
                 }
+            } else {
+                LOTM.LOGGER.info(targetEntity.getName().getString() + " AND " + user.getName().getString() + " ARE NOT ALLIES.");
             }
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastActivationTime >= COOLDOWN_MS) {

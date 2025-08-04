@@ -81,12 +81,13 @@ public class LuckDenial extends SimpleAbilityItem {
             double luck = tag.getDouble("luck");
             double misfortune = tag.getDouble("misfortune");
             double beneficialEffectBlocker = BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()) / 5;
+            double damage = BeyonderUtil.getDamage(player).get(ItemInit.MONSTERREBOOT.get());
             if (BeyonderUtil.getSequence(player) <= 2) {
-                tag.putDouble("luckDenialTimer", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()));
+                tag.putDouble("luckDenialTimer", damage * 27);
                 tag.putDouble("luckDenialLuck", luck);
                 tag.putDouble("luckDenialMisfortune", misfortune);
             } else {
-                tag.putDouble("luckDenialTimer", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()));
+                tag.putDouble("luckDenialTimer", damage * 27);
                 tag.putDouble("luckDenialLuck", luck);
             }
             BeyonderUtil.applyBeneficialEffectBlocker(interactionTarget, (int) beneficialEffectBlocker);
@@ -114,6 +115,7 @@ public class LuckDenial extends SimpleAbilityItem {
             }
         }
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("MONSTER_ABILITY", ChatFormatting.GRAY);

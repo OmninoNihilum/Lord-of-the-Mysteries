@@ -269,7 +269,7 @@ public class WarriorClass implements BeyonderClass {
 
     @Override
     public ChatFormatting getColorFormatting() {
-        return ChatFormatting.DARK_RED;
+        return ChatFormatting.YELLOW;
     }
 
     public static void warriorAttackEvent(LivingAttackEvent event){

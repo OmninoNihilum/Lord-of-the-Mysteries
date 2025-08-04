@@ -11,13 +11,20 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class AllyMaker extends Item {
 
@@ -36,6 +43,10 @@ public class AllyMaker extends Item {
                     allyData.removeAlly(pPlayer.getUUID(), pInteractionTarget.getUUID());
                     pPlayer.sendSystemMessage(Component.literal("Removed " + pInteractionTarget.getName().getString() + " as an ally!").withStyle(ChatFormatting.RED));
                 } else {
+                    boolean isNonHostile = !(pInteractionTarget instanceof Enemy);
+                    if (isNonHostile) {
+                        allyData.addAlly(pInteractionTarget.getUUID(), pPlayer.getUUID());
+                    }
                     allyData.addAlly(pPlayer.getUUID(), pInteractionTarget.getUUID());
                     pPlayer.sendSystemMessage(Component.literal("Added " + pInteractionTarget.getName().getString() + " as an ally!").withStyle(ChatFormatting.GREEN));
                 }
@@ -66,5 +77,13 @@ public class AllyMaker extends Item {
         return attributeBuilder.build();
     }
 
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("Use on an entity to ally with them.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN));
+        tooltipComponents.add(Component.literal("To be considered allies as a player, both players must ally each other.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.RED));
+        tooltipComponents.add(Component.literal("If used on a friendly mob, then it automatically adds you to the mob's allies as well.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.BLUE));
+        tooltipComponents.add(Component.literal("You can also use the /ally command for this and more.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.LIGHT_PURPLE));
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
+    }
 }
 

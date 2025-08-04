@@ -34,7 +34,7 @@ public class KeyClientEvents {
         @SubscribeEvent
         public static void onMovementInputUpdate(MovementInputUpdateEvent event) {
             Player player = Minecraft.getInstance().player;
-            if (player != null && player.hasEffect(ModEffects.TUMBLE.get())) {
+            if (player != null && (player.hasEffect(ModEffects.TUMBLE.get()) || ClientShouldntMoveData.getDontMoveTimer() >= 1)) {
                 event.getInput().forwardImpulse = 0;
                 event.getInput().leftImpulse = 0;
                 event.getInput().jumping = false;

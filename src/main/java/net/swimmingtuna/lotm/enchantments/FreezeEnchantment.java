@@ -85,7 +85,8 @@ public class FreezeEnchantment extends Enchantment {
                 EnchantmentHelper.setEnchantments(enchantments, weapon);
                 int sequence = BeyonderUtil.getSequence(livingAttacker);
                 if (pTarget instanceof LivingEntity living) {
-                    BeyonderUtil.applyParalysis(living, 60);                }
+                    BeyonderUtil.applyParalysis(living, 60);
+                }
             }
         }
     }

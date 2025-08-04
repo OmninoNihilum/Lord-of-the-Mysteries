@@ -90,11 +90,10 @@ public class Prophecy extends SimpleAbilityItem {
             CompoundTag tag = player.getPersistentData();
             int prophecy = tag.getInt("spectatorProphecyItem");
             if (prophecy == 8) {
-                if (interactionTarget instanceof  Player) {
+                if (interactionTarget instanceof Player) {
                     if (BeyonderUtil.getDreamIntoReality(player) > 1) {
                         BeyonderUtil.applyFrenzy(interactionTarget, 40);
                     }
-                    interactionTarget.getPersistentData().putInt("prophesizeDemise", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.PROPHECY.get()) * 70);
                     interactionTarget.addEffect(new MobEffectInstance(ModEffects.SPECTATORDEMISE.get(), 600, 1, false, false));
                 } else {
                     interactionTarget.addEffect(new MobEffectInstance(MobEffects.WITHER, 500, 6, false, false));

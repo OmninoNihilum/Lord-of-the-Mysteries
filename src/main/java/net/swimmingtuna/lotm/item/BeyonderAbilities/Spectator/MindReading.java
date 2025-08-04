@@ -94,7 +94,21 @@ public class MindReading extends SimpleAbilityItem {
                 } else {
                     player.sendSystemMessage(Component.literal("The target player's inventory is empty.").withStyle(ChatFormatting.AQUA));
                 }
-
+                if (BeyonderUtil.hasAwe(interactionTarget)) {
+                    player.sendSystemMessage(Component.literal(interactionTarget.getName().getString() + " is Awe'd for " + (int) (interactionTarget.getPersistentData().getInt("LOTMAwe") / 20) + " seconds").withStyle(ChatFormatting.BLUE));
+                }
+                if (BeyonderUtil.hasManipulation(interactionTarget)) {
+                    player.sendSystemMessage(Component.literal(interactionTarget.getName().getString() + " is being manipualted for " + (int) (interactionTarget.getPersistentData().getInt("LOTMManipulation") / 20) + " seconds").withStyle(ChatFormatting.YELLOW));
+                }
+                if (BeyonderUtil.hasFrenzy(interactionTarget)) {
+                    player.sendSystemMessage(Component.literal(interactionTarget.getName().getString() + " is in a Frenzy for " + (int) (interactionTarget.getPersistentData().getInt("LOTMFrenzy") / 20) + " seconds").withStyle(ChatFormatting.GREEN));
+                }
+                if (BeyonderUtil.hasStun(interactionTarget)) {
+                    player.sendSystemMessage(Component.literal(interactionTarget.getName().getString() + " is in a Frenzy for " + (int) (interactionTarget.getPersistentData().getInt("LOTMStun") / 20) + " seconds").withStyle(ChatFormatting.RED));
+                }
+                if (BeyonderUtil.hasMentalPlague(interactionTarget)) {
+                    player.sendSystemMessage(Component.literal(interactionTarget.getName().getString() + " has a mental plague that will go at 1 second left for " + (int) (interactionTarget.getPersistentData().getInt("LOTMMentalPlague") / 20) + " seconds").withStyle(ChatFormatting.GRAY));
+                }
                 if (BeyonderUtil.getDreamIntoReality(player) >= 2) {
                     interactionTarget.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 1, false, false));
                 }

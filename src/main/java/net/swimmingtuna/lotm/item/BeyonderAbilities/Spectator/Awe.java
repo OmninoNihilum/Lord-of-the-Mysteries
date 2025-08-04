@@ -45,7 +45,7 @@ public class Awe extends SimpleAbilityItem {
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.AWE.get());
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {
-                    BeyonderUtil.applyAwe(livingEntity, damage);
+                    BeyonderUtil.applyAwe(entity, damage);
                     BeyonderUtil.applyMentalDamage(livingEntity, entity, (float) damage / 10);
                 }
             }

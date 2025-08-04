@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -37,23 +38,9 @@ public class RainEyes extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
-    public static void rainEyesTick(LivingEntity player) {
-        //RAIN EYES
-        if (!player.level().isRaining()) {
-            return;
-        }
-        if (player.getPersistentData().getBoolean("torrentialDownpour") && player.tickCount % 200 == 0) {
-            for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.RAIN_EYES.get())))) {
-                if (entity != player && entity instanceof Player otherPlayer && otherPlayer.isInWaterOrRain()) {
-                    player.sendSystemMessage(Component.literal(otherPlayer.getName().getString() + "'s location is " + otherPlayer.getX() + ", " + otherPlayer.getY() + ", " + otherPlayer.getZ()).withStyle(ChatFormatting.BOLD));
-                }
-            }
-        }
-    }
-
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, share your senses with the rain, letting you know the location of all players in a huge radius around you every 1 0seconds"));
+        tooltipComponents.add(Component.literal("Upon use, enable or disable your rain eyes. If enabled, any beyonders or players will have their location, sequence, pathway, name, and distance from you shared."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -64,14 +51,14 @@ public class RainEyes extends SimpleAbilityItem {
     public static void rainEyesAbility(LivingEntity player) {
         if (!player.level().isClientSide()) {
             CompoundTag tag = player.getPersistentData();
-            boolean torrentialDownpour = tag.getBoolean("torrentialDownpour");
-            if (torrentialDownpour) {
-                tag.putBoolean("torrentialDownpour", false);
+            boolean rainEyes = tag.getBoolean("rainEyes");
+            if (rainEyes) {
+                tag.putBoolean("rainEyes", false);
                 if (player instanceof Player pPlayer) {
                     pPlayer.displayClientMessage(Component.literal("Rain eyes disabled").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 }
             } else {
-                tag.putBoolean("torrentialDownpour", true);
+                tag.putBoolean("rainEyes", true);
                 if (player instanceof Player pPlayer) {
                     pPlayer.displayClientMessage(Component.literal("Rain eyes enabled").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 }

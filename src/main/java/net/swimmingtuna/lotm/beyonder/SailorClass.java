@@ -3,17 +3,19 @@ package net.swimmingtuna.lotm.beyonder;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -24,6 +26,8 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
@@ -31,10 +35,7 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SailorClass implements BeyonderClass {
     public static int dolhpinsGrace;
@@ -397,12 +398,12 @@ public class SailorClass implements BeyonderClass {
             boolean sailorLightning = player.getPersistentData().getBoolean("SailorLightning");
             if (BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.SAILOR.get()) && BeyonderUtil.getSequence(livingEntity) <= 7 && event.getTarget() instanceof LivingEntity livingTarget && sailorLightning && livingTarget != player) {
                 int sequence = BeyonderUtil.getSequence(livingEntity);
-                double chanceOfDamage = (100.0 - (sequence * 12.5)); // Decrease chance by 12.5% for each level below 9
+                double chanceOfDamage = (100.0 - (sequence * 12.5));
                 if (Math.random() * 100 < chanceOfDamage) {
                     LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, livingTarget.level());
                     lightningBolt.moveTo(livingTarget.getX(), livingTarget.getY(), livingTarget.getZ());
                     lightningBolt.setVisualOnly(false);
-                    lightningBolt.setDamage(Math.max(3,15 - (sequence * 2)));
+                    lightningBolt.setDamage(Math.max(3, 15 - (sequence * 2)));
                     if (BeyonderUtil.getSequence(livingEntity) <= 1) {
                         float amount = 3;
                         if (BeyonderUtil.getSequence(player) == 1) {
@@ -412,6 +413,102 @@ public class SailorClass implements BeyonderClass {
                     }
                     livingTarget.level().addFreshEntity(lightningBolt);
                 }
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void sailorAttackEvent(LivingAttackEvent event) {
+        LivingEntity attacked = event.getEntity();
+        Entity attacker = event.getSource().getEntity();
+        if (attacker != null) {
+            if (!attacked.level().isClientSide() && !attacker.level().isClientSide() && attacker instanceof LivingEntity livingAttacker) {
+                if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(livingAttacker, BeyonderClassInit.SAILOR.get(), 2) && !BeyonderUtil.areAllies(attacked, livingAttacker)) {
+                    for (Mob mob : livingAttacker.level().getEntitiesOfClass(Mob.class, livingAttacker.getBoundingBox().inflate(100))) {
+                        if (mob == attacked) {
+                            continue;
+                        }
+                        if (mob.canBreatheUnderwater() || mob.getNavigation() instanceof WaterBoundPathNavigation || mob instanceof WaterAnimal || mob.getName().getString().toLowerCase().contains("fish")) {
+                            if (mob.getPersistentData().getInt("rainEyesMobAttackTarget") == 0) {
+                                mob.getPersistentData().putInt("rainEyesMobAttackTarget", (int) ((int) (float) BeyonderUtil.getDamage(livingAttacker).get(ItemInit.RAIN_EYES.get()) * 0.75f));
+                                mob.getPersistentData().putUUID("rainEyesMobAttackTargetUUID", attacked.getUUID());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static void rainEyesTickEvent(LivingEvent.LivingTickEvent event) {
+        LivingEntity living = event.getEntity();
+        CompoundTag tag = living.getPersistentData();
+        int rainEyesAttackCounter = living.getPersistentData().getInt("rainEyesMobAttackTarget");
+        if (rainEyesAttackCounter >= 1) {
+            tag.putInt("rainEyesMobAttackTarget", rainEyesAttackCounter - 1);
+            if (tag.contains("rainEyesMobAttackTargetUUID")) {
+                UUID target = tag.getUUID("rainEyesMobAttackTargetUUID");
+                LivingEntity livingTarget = BeyonderUtil.getLivingEntityFromUUID(living.level(), target);
+                if (livingTarget != null && livingTarget.level().dimension() == living.level().dimension()) {
+                    if (livingTarget instanceof Mob mob && mob.getTarget() == null) {
+                        mob.setTarget(livingTarget);
+                    }
+                    Vec3 targetPos = livingTarget.position().add(0, 1, 0);
+                    Vec3 currentPos = living.position();
+                    Vec3 direction = targetPos.subtract(currentPos).normalize();
+                    double speed = 1.2;
+                    Vec3 motion = direction.scale(speed);
+                    if (motion.y < 0.1) {
+                        motion = motion.add(0, 0.2, 0);
+                    }
+                    living.setDeltaMovement(motion);
+                    double distanceToTarget = currentPos.distanceTo(targetPos);
+                    if (living.getHealth() < 20.0f && distanceToTarget < 5) {
+                        explodeMob(living);
+                        return;
+                    } else if (living.getHealth() > 20.0f && distanceToTarget < 4 && living.tickCount % 20 == 0) {
+                        livingTarget.hurt(BeyonderUtil.genericSource(living, livingTarget), (Math.min(50, living.getMaxHealth() / 10)));
+                    }
+                } else if (livingTarget instanceof Mob mob && mob.getTarget() == null) {
+                    mob.setTarget(livingTarget);
+                }
+                BeyonderUtil.sendParticles(living, ParticleTypes.RAIN, living.getX(), living.getY(), living.getZ(), 0, -1, 0);
+            }
+            BeyonderUtil.sendParticles(living, ParticleTypes.RAIN, living.getX(), living.getY(), living.getZ(), 0, -1, 0);
+        }
+    }
+
+    private static void explodeMob(LivingEntity mob) {
+        if (!mob.level().isClientSide()) {
+            mob.level().explode(mob, mob.getX(), mob.getY(), mob.getZ(), 3.0f, Level.ExplosionInteraction.MOB);
+            ServerLevel serverLevel = (ServerLevel) mob.level();
+            Vec3 mobPos = mob.position();
+            for (int i = 0; i < 50; i++) {
+                double x = (Math.random() - 0.5) * 2.0;
+                double y = (Math.random() - 0.5) * 2.0;
+                double z = (Math.random() - 0.5) * 2.0;
+                Vec3 direction = new Vec3(x, y, z).normalize().scale(0.5);
+
+                serverLevel.sendParticles(ParticleTypes.DAMAGE_INDICATOR, mobPos.x, mobPos.y + 1, mobPos.z, 1, direction.x, direction.y, direction.z, 0.3);
+            }
+            for (int i = 0; i < 30; i++) {
+                double x = mobPos.x + (Math.random() - 0.5) * 4.0;
+                double y = mobPos.y + Math.random() * 2.0;
+                double z = mobPos.z + (Math.random() - 0.5) * 4.0;
+                serverLevel.sendParticles(new DustParticleOptions(Vec3.fromRGB24(0xFF0000).toVector3f(), 1.0f), x, y, z, 1, 0, 0, 0, 0);
+            }
+            for (LivingEntity entity : mob.level().getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(4.0 * BeyonderUtil.getScale(mob)))) {
+                if (entity != mob) {
+                    float damage = Math.min(60, mob.getMaxHealth());
+                    entity.hurt(mob.damageSources().lightningBolt(), damage);
+                    entity.invulnerableTime = 3;
+                    entity.hurtTime = 3;
+                    entity.hurtDuration = 3;
+                }
+            }
+            mob.discard();
+            if (mob != null) {
+                mob.kill();
             }
         }
     }

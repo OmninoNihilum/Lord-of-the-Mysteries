@@ -73,10 +73,7 @@ import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
 import net.swimmingtuna.lotm.spirituality.ModAttributes;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.ClientData.ClientAbilityCombinationData;
-import net.swimmingtuna.lotm.util.ClientData.ClientAbilityKeyResetData;
-import net.swimmingtuna.lotm.util.ClientData.ClientFogData;
-import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
+import net.swimmingtuna.lotm.util.ClientData.*;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerMobSequenceData;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
@@ -106,10 +103,9 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake.ear
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.ExtremeColdness.extremeColdness;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Hurricane.hurricane;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.LightningStorm.lightningStorm;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationEntities.matterAccelerationEntities;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationEntities.matterAccelerationEntitiesAndRainEyes;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationSelf.matterAccelerationSelf;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.RagingBlows.ragingBlowsTick;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.RainEyes.rainEyesTick;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.SailorLightningTravel.sailorLightningTravel;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.SirenSongHarm.sirenSongs;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.SirenSongHarm.sirenSongsTick;
@@ -275,6 +271,9 @@ public class ModEvents {
             if (ClientFogData.getFogTimer() >= 1) {
                 ClientFogData.decrementFog();
             }
+            if (ClientShouldntMoveData.getDontMoveTimer() >= 1) {
+                ClientShouldntMoveData.decrementDontMoveTimer();
+            }
             if (player.tickCount % 100 == 0) {
                 //DimensionalSightEntity.debugLoadedChunks();
             }
@@ -387,6 +386,8 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                SailorClass.rainEyesTickEvent(event);
+                BeyonderUtil.effectTick(event);
                 GravityManipulation.gravityManipulationTickEvent(event);
                 PsychologicalInvisibility.psychologicalInvisibilityTick(event);
                 Sealing.sealingTick(event);
@@ -416,7 +417,6 @@ public class ModEvents {
                 sirenSongsTick(livingEntity);
                 matterAccelerationSelf(livingEntity);
                 DivineHandRightEntity.divineHandCooldownDecrease(livingEntity);
-                rainEyesTick(livingEntity);
                 earthquake(livingEntity);
                 hurricane(livingEntity);
                 extremeColdness(livingEntity);
@@ -472,7 +472,6 @@ public class ModEvents {
                 MisfortuneManipulation.livingTickMisfortuneManipulation(event);
                 FalseProphecy.falseProphecyTick(livingEntity);
                 AuraOfChaos.auraOfChaos(event);
-                MisfortuneRedirection.misfortuneLivingTickEvent(event);
                 PsycheStorm.psycheStormTick(event);
                 AuraOfGlory.auraOfGloryAndTwilightTick(event);
                 livingLightningStorm(livingEntity);
@@ -480,13 +479,13 @@ public class ModEvents {
                 LightOfDawn.sunriseGleamTick(event);
                 doubleProphecyDamageHelper(event);
                 MonsterClass.showMonsterParticles(livingEntity);
-                LuckDenial.luckDenial(livingEntity);
+                MonsterClass.luckDenial(livingEntity);
                 MonsterCalamityIncarnation.calamityTickEvent(event);
                 dreamWeaving(livingEntity);
                 LightConcealment.lightConcealmentTick(event);
                 SpectatorClass.demiseTick(event);
                 AqueousLightDrown.aqueousLightDrownTick(event);
-                matterAccelerationEntities(livingEntity);
+                matterAccelerationEntitiesAndRainEyes(livingEntity);
                 ExtremeColdness.extremeColdnessTick(event);
                 StormSeal.stormSealTick(event);
                 AqueousLightDrown.lightTickEvent(livingEntity);
@@ -537,6 +536,9 @@ public class ModEvents {
                 if (attacker.getPersistentData().getInt("dreamWeavingDeathTimer") >= 1 && attacker instanceof LivingEntity livingAttacker) {
                     attacker.hurt(event.getSource(), event.getAmount() * 3);
                     BeyonderUtil.applyMentalDamage(livingAttacker, attacked, 2);
+                }
+                if (attacker instanceof LivingEntity) {
+                    SailorClass.sailorAttackEvent(event);
                 }
                 attacked.getPersistentData().putInt("inCombat", 300);
                 attacker.getPersistentData().putInt("inCombat", 300);

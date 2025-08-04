@@ -1,12 +1,14 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -34,17 +36,9 @@ public class Placate extends SimpleAbilityItem {
             if (!checkAll(player, BeyonderClassInit.SPECTATOR.get(), 7, 125, true)) {
                 return InteractionResult.FAIL;
             }
-            if (BeyonderUtil.getSequence(player) >= 4) {
-                removeHarmfulEffects(interactionTarget);
-                addCooldown(player);
-                useSpirituality(player);
-                return InteractionResult.SUCCESS;
-            } else {
-                halfHarmfulEffects(interactionTarget);
-                addCooldown(player);
-                useSpirituality(player);
-                return InteractionResult.SUCCESS;
-            }
+            placate(player, interactionTarget);
+            addCooldown(player);
+            useSpirituality(player);
         }
         return InteractionResult.SUCCESS;
     }
@@ -54,16 +48,61 @@ public class Placate extends SimpleAbilityItem {
         if (!checkAll(player, BeyonderClassInit.SPECTATOR.get(), 7, 125, true)) {
             return InteractionResult.FAIL;
         }
-        if (BeyonderUtil.getSequence(player) <= 4 || BeyonderUtil.getDreamIntoReality(player) > 1) {
-            removeHarmfulEffects(player);
-            addCooldown(player);
-            useSpirituality(player);
-            return InteractionResult.SUCCESS;
-        } else {
-            halfHarmfulEffects(player);
-            addCooldown(player);
-            useSpirituality(player);
-            return InteractionResult.SUCCESS;
+        placate(player, player);
+        addCooldown(player);
+        useSpirituality(player);
+        return InteractionResult.SUCCESS;
+    }
+
+    public static void placate(LivingEntity player, LivingEntity interactionTarget) {
+        if (!interactionTarget.level().isClientSide()) {
+            CompoundTag tag = interactionTarget.getPersistentData();
+            int awe = tag.getInt("LOTMAwe");
+            int manipulation = tag.getInt("LOTMManipulation");
+            int frenzy = tag.getInt("LOTMFrenzy");
+            int stun = tag.getInt("LOTMStun");
+            int mentalPlague = tag.getInt("LOTMMentalPlague");
+            int sequence = BeyonderUtil.getSequence(player);
+            if (sequence > 5) {
+                if (BeyonderUtil.hasAwe(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMAwe", awe / 2);
+                }
+                if (BeyonderUtil.hasManipulation(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMManipulation", manipulation / 2);
+                }
+                if (BeyonderUtil.hasFrenzy(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMFrenzy", frenzy / 2);
+                }
+                if (BeyonderUtil.hasStun(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMStun", stun / 2);
+                }
+                if (BeyonderUtil.hasMentalPlague(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMMentalPlague", 0);
+                }
+            } else {
+                if (BeyonderUtil.hasAwe(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMAwe", 0);
+                }
+                if (BeyonderUtil.hasManipulation(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMManipulation", 0);
+                }
+                if (BeyonderUtil.hasFrenzy(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMFrenzy", 0);
+                }
+                if (BeyonderUtil.hasStun(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMStun", 0);
+                }
+                if (BeyonderUtil.hasMentalPlague(interactionTarget)) {
+                    interactionTarget.getPersistentData().putInt("LOTMMentalPlague", 0);
+                }
+            }
+            if (sequence == 4 || sequence == 3) {
+                halfHarmfulEffects(interactionTarget);
+            } else if (sequence == 2) {
+                seventyFivePercentHarmfulEffects(interactionTarget);
+            } else if (sequence == 1 || sequence == 0) {
+                removeHarmfulEffects(interactionTarget);
+            }
         }
     }
 
@@ -83,7 +122,6 @@ public class Placate extends SimpleAbilityItem {
     }
 
     public static void halfHarmfulEffects(LivingEntity entity) {
-        // Collect harmful effects to modify later
         if (!entity.level().isClientSide()) {
             List<MobEffectInstance> effectsToModify = new ArrayList<>();
             for (MobEffectInstance effect : entity.getActiveEffects()) {
@@ -92,12 +130,27 @@ public class Placate extends SimpleAbilityItem {
                     effectsToModify.add(effect);
                 }
             }
-            // Modify duration of each collected effect
             for (MobEffectInstance effect : effectsToModify) {
                 MobEffect type = effect.getEffect();
                 int newDuration = (effect.getDuration() + 1) / 2;
+                entity.removeEffect(type);
+                entity.addEffect(new MobEffectInstance(type, newDuration, effect.getAmplifier(), effect.isAmbient(), effect.isVisible()));
+            }
+        }
+    }
 
-                // Remove the current effect and re-add with new duration
+    public static void seventyFivePercentHarmfulEffects(LivingEntity entity) {
+        if (!entity.level().isClientSide()) {
+            List<MobEffectInstance> effectsToModify = new ArrayList<>();
+            for (MobEffectInstance effect : entity.getActiveEffects()) {
+                MobEffect type = effect.getEffect();
+                if (!type.isBeneficial()) {
+                    effectsToModify.add(effect);
+                }
+            }
+            for (MobEffectInstance effect : effectsToModify) {
+                MobEffect type = effect.getEffect();
+                int newDuration = (int) ((effect.getDuration() + 1) * 0.25);
                 entity.removeEffect(type);
                 entity.addEffect(new MobEffectInstance(type, newDuration, effect.getAmplifier(), effect.isAmbient(), effect.isVisible()));
             }

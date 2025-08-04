@@ -93,7 +93,7 @@ public class TrickElectricShock extends SimpleAbilityItem {
                     int amount = 20 - (sequence * 2);
                     int amountToStun = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKELECTRICSHOCK.get());
                     BeyonderUtil.useSpirituality(livingEntity, amount);
-                    BeyonderUtil.applyAwe(livingEntity, amountToStun);
+                    BeyonderUtil.applyAwe(livingTarget, amountToStun);
                 }
             }
         }

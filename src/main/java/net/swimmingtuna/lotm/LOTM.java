@@ -150,7 +150,11 @@ public class LOTM {
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
-            event.accept(ItemInit.TEST_ITEM);
+            event.accept(ItemInit.FREEZERUNE);
+            event.accept(ItemInit.FLAMERUNE);
+            event.accept(ItemInit.LIGHTNINGRUNE);
+            event.accept(ItemInit.WITHERRUNE);
+            event.accept(ItemInit.CONFUSIONRUNE);
             event.accept(ItemInit.ALLY_MAKER);
             event.accept(ItemInit.LIGHTNING_STORM);
             event.accept(ItemInit.ROAR);
@@ -442,11 +446,6 @@ public class LOTM {
             event.accept(BlockInit.LOTM_OAK_LOG);
             event.accept(ItemInit.LUCKBOTTLEITEM);
             event.accept(ItemInit.LUCKYGOLDCOIN);
-            event.accept(ItemInit.FREEZERUNE);
-            event.accept(ItemInit.FLAMERUNE);
-            event.accept(ItemInit.LIGHTNINGRUNE);
-            event.accept(ItemInit.WITHERRUNE);
-            event.accept(ItemInit.CONFUSIONRUNE);
 
             event.accept(BlockInit.VISIONARY_BLACK_STAINED_GLASS_PANE);
             event.accept(BlockInit.VISIONARY_WHITE_STAINED_GLASS_PANE);

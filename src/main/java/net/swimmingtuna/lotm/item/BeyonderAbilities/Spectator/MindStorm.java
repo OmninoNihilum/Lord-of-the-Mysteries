@@ -85,7 +85,7 @@ public class MindStorm extends SimpleAbilityItem {
             if (BeyonderUtil.getDreamIntoReality(player) == 2) {
                 damage = (int) ((int) (float) 1.5 * BeyonderUtil.getDamage(player).get(ItemInit.MIND_STORM.get()));
             }
-            BeyonderUtil.applyAwe(player, duration / 2);
+            BeyonderUtil.applyAwe(interactionTarget, duration / 2);
             interactionTarget.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
             interactionTarget.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 1, false, false));
             BeyonderUtil.applyMentalDamage(player, interactionTarget, damage);

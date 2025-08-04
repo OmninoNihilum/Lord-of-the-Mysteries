@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
+import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateDragonBreathS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -59,6 +60,7 @@ public abstract class BeamEntity extends LOTMProjectile {
     private static final EntityDataAccessor<Integer> FRENZY_TIME = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> DATA_YAW = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_PITCH = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> RANGE = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.INT);
 
     public float prevYaw;
     public float prevPitch;
@@ -83,7 +85,15 @@ public abstract class BeamEntity extends LOTMProjectile {
 
     public abstract int getFrames();
 
-    protected abstract double getRange();
+    public double getRange() {
+        return this.entityData.get(RANGE);
+    }
+
+    public void setRange(int range) {
+        this.entityData.set(RANGE, range);
+    }
+
+
 
     public float getDamage() {
         return this.entityData.get(DAMAGE);
@@ -276,6 +286,7 @@ public abstract class BeamEntity extends LOTMProjectile {
         this.entityData.define(SIZE, 1);
         this.entityData.define(DESTROY_BLOCKS, true);
         this.entityData.define(TWILIGHT, false);
+        this.entityData.define(RANGE, 64);
     }
 
     @Override
@@ -283,6 +294,9 @@ public abstract class BeamEntity extends LOTMProjectile {
         super.readAdditionalSaveData(compound);
         if (compound.contains("damage")) {
             this.setDamage(compound.getFloat("damage"));
+        }
+        if (compound.contains("range")) {
+            this.setRange(compound.getInt("range"));
         }
         if (compound.contains("data_yaw")) {
             this.setYaw(compound.getFloat("data_yaw"));
@@ -318,6 +332,7 @@ public abstract class BeamEntity extends LOTMProjectile {
         compound.putInt("size", this.getSize());
         compound.putBoolean("destroy_blocks", this.getDestroyBlocks());
         compound.putBoolean("twilight", this.getIsTwilight());
+        compound.putInt("range", (int) this.getRange());
     }
 
 

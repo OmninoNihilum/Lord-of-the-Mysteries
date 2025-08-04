@@ -43,7 +43,7 @@ public class LuckDeprivation extends SimpleAbilityItem {
             }
             useSpirituality(player);
             addCooldown(player);
-            giftLuck(interactionTarget, player);
+            depriveLuck(interactionTarget, player);
         }
         return InteractionResult.SUCCESS;
     }
@@ -76,7 +76,7 @@ public class LuckDeprivation extends SimpleAbilityItem {
     }
 
 
-    private static void giftLuck(LivingEntity interactionTarget, LivingEntity player) {
+    public static void depriveLuck(LivingEntity interactionTarget, LivingEntity player) {
         if (!player.level().isClientSide() && !interactionTarget.level().isClientSide()) {
             CompoundTag tag = player.getPersistentData();
             CompoundTag pTag = interactionTarget.getPersistentData();

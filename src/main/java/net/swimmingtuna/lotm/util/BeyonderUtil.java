@@ -51,7 +51,6 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -98,6 +97,7 @@ import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.*;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.ClientData.ClientLeftclickCooldownData;
+import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderHandData;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
@@ -121,12 +121,12 @@ public class BeyonderUtil {
 
     public static final Map<UUID, SimpleAbilityItem> pendingAbilityCopies = new HashMap<>();
 
-    public static Projectile getProjectiles(LivingEntity livingEntity) {
+    public static Projectile getProjectiles(LivingEntity livingEntity, int radius) {
         if (livingEntity.level().isClientSide()) {
             return null;
         }
         Level level = livingEntity.level();
-        AABB boundingBox = livingEntity.getBoundingBox().inflate(50);
+        AABB boundingBox = livingEntity.getBoundingBox().inflate(radius);
         Predicate<Projectile> projectilePredicate = projectile -> {
             if (projectile.tickCount <= 6 || projectile.tickCount >= 100) {
                 return false;
@@ -143,6 +143,28 @@ public class BeyonderUtil {
                 .orElse(null);
     }
 
+    public static boolean isLookingAt(LivingEntity looker, Entity target, double maxAngleDegrees) {
+        Vec3 lookVec = looker.getViewVector(1.0F);
+        Vec3 targetVec = target.position().subtract(looker.position()).normalize();
+
+        double dot = lookVec.dot(targetVec);
+        double angle = Math.acos(dot) * 180.0 / Math.PI;
+
+        return angle <= maxAngleDegrees;
+    }
+
+    public static boolean isLookingTowards2D(LivingEntity looker, Entity target, double maxAngleDegrees) {
+        Vec3 lookVec = looker.getViewVector(1.0F);
+        Vec3 targetVec = target.position().subtract(looker.position());
+        Vec3 lookVec2D = new Vec3(lookVec.x, 0, lookVec.z).normalize();
+        Vec3 targetVec2D = new Vec3(targetVec.x, 0, targetVec.z).normalize();
+
+        double dot = lookVec2D.dot(targetVec2D);
+        double angle = Math.acos(Math.max(-1.0, Math.min(1.0, dot))) * 180.0 / Math.PI;
+
+        return angle <= maxAngleDegrees;
+    }
+
     public static void projectileEvent(LivingEntity living) {
         //PROJECTILE EVENT
         if (living.level().isClientSide) {
@@ -151,30 +173,9 @@ public class BeyonderUtil {
         if (BeyonderUtil.getPathway(living) == null) {
             return;
         }
-        Projectile projectile = BeyonderUtil.getProjectiles(living);
+        Projectile projectile = BeyonderUtil.getProjectiles(living, 50);
         if (projectile == null) return;
         //MATTER ACCELERATION ENTITIES
-        if (projectile.getPersistentData().getInt("matterAccelerationEntities") >= 10) {
-            double movementX = Math.abs(projectile.getDeltaMovement().x());
-            double movementY = Math.abs(projectile.getDeltaMovement().y());
-            double movementZ = Math.abs(projectile.getDeltaMovement().z());
-            if (movementX >= 6 || movementY >= 6 || movementZ >= 6) {
-                BlockPos entityPos = projectile.blockPosition();
-                for (int x = -2; x <= 2; x++) {
-                    for (int y = -2; y <= 2; y++) {
-                        for (int z = -2; z <= 2; z++) {
-                            BlockPos pos = entityPos.offset(x, y, z);
-                            projectile.level().setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-                        }
-                    }
-                }
-                for (LivingEntity livingEntity : projectile.level().getEntitiesOfClass(LivingEntity.class, projectile.getBoundingBox().inflate(5))) {
-                    if (currentPathwayAndSequenceMatches(living, BeyonderClassInit.SAILOR.get(), 0)) {
-                        livingEntity.hurt(BeyonderUtil.lightningSource(living, livingEntity), 40);
-                    }
-                }
-            }
-        }
         LivingEntity target = BeyonderUtil.getTarget(projectile, 75, 0);
         if (target != null) {
             if (BeyonderUtil.currentPathwayAndSequenceMatches(living, BeyonderClassInit.SAILOR.get(), 8) && living.getPersistentData().getBoolean("sailorProjectileMovement")) {
@@ -1039,7 +1040,7 @@ public class BeyonderUtil {
                 return true;
             }
         }
-        
+
         // If entity targeting failed, try block targeting
         Vec3 blockReachVector = eyePosition.add(lookVector.x * blockReach, lookVector.y * blockReach, lookVector.z * blockReach);
         BlockHitResult blockHit = player.level().clip(new ClipContext(
@@ -1063,12 +1064,9 @@ public class BeyonderUtil {
     }
 
     public static Style getStyle(LivingEntity livingEntity) {
-        if (livingEntity instanceof Player player) {
-            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
-            if (holder.getCurrentClass() != null) {
-                return Style.EMPTY.withBold(true).withColor(holder.getCurrentClass().getColorFormatting());
-            }
-            return Style.EMPTY;
+        BeyonderClass pathway = getPathway(livingEntity);
+        if (pathway != null) {
+            return Style.EMPTY.withBold(true).withColor(pathway.getColorFormatting());
         }
         return Style.EMPTY;
     }
@@ -1792,7 +1790,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.MONSTERCALAMITYATTRACTION.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MONSTERDOMAINTELEPORATION.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MONSTERPROJECTILECONTROL.get(), applyAbilityStrengthened((0.0f) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.MONSTERREBOOT.get(), applyAbilityStrengthened((45.0f - (sequence * 7.5f)) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.MONSTERREBOOT.get(), applyAbilityStrengthened((100.0f - (sequence * 10)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYFORTUNE.get(), applyAbilityStrengthened((300.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYEFFECT.get(), applyAbilityStrengthened((300.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.PROBABILITYINFINITEFORTUNE.get(), applyAbilityStrengthened((3000.0f) / abilityWeakness, abilityStrengthened));
@@ -3587,7 +3585,7 @@ public class BeyonderUtil {
             tag.putInt("matterAccelerationBlockTimer", 0);
             tag.putInt("tyrantSelfAcceleration", 0);
             tag.putInt("ragingBlows", 0);
-            tag.putBoolean("torrentialDownpour", false);
+            tag.putBoolean("rainEyes", false);
             tag.putBoolean("sailorProjectileMovement", false);
             tag.putInt("sirenSongHarm", 0);
             tag.putInt("sirenSongWeaken", 0);
@@ -3652,8 +3650,9 @@ public class BeyonderUtil {
     public static List<Entity> getNonAllyEntitiesNearby(LivingEntity living, float inflation) {
         List<Entity> nonAllies = new ArrayList<>();
         for (Entity entity : living.level().getEntitiesOfClass(Entity.class, living.getBoundingBox().inflate(inflation))) {
-            if (!isEntityAlly(living, entity))
+            if (!isEntityAlly(living, entity) && entity != living) {
                 nonAllies.add(entity);
+            }
         }
         return nonAllies;
     }
@@ -3969,6 +3968,10 @@ public class BeyonderUtil {
         LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(choice, living.getUUID(), time));
     }
 
+    public static boolean isInvisible(LivingEntity living) {
+        return ClientShouldntRenderHandData.getShouldntRender(living.getUUID());
+    }
+
     public static boolean isStunned(LivingEntity living) {
         if (BeyonderUtil.hasParalysis(living)) {
             return true;
@@ -4021,6 +4024,9 @@ public class BeyonderUtil {
         if (currentDuration == 0 || duration >= currentDuration) {
             tag.putInt("LOTMAwe", duration);
         }
+        if (living instanceof ServerPlayer serverPlayer) {
+            LOTMNetworkHandler.sendToPlayer(new ClientShouldntMovePacketS2C(duration), serverPlayer);
+        }
     }
 
     public static boolean hasAwe(LivingEntity living) {
@@ -4044,6 +4050,9 @@ public class BeyonderUtil {
         int currentDuration = tag.getInt("LOTMStun");
         if (currentDuration == 0 || duration >= currentDuration) {
             tag.putInt("LOTMStun", duration);
+        }
+        if (living instanceof ServerPlayer serverPlayer) {
+            LOTMNetworkHandler.sendToPlayer(new ClientShouldntMovePacketS2C(duration), serverPlayer);
         }
     }
 
@@ -4113,6 +4122,9 @@ public class BeyonderUtil {
         int currentDuration = tag.getInt("LOTMParalysis");
         if (currentDuration == 0 || duration >= currentDuration) {
             tag.putInt("LOTMParalysis", duration);
+        }
+        if (living instanceof ServerPlayer serverPlayer) {
+            LOTMNetworkHandler.sendToPlayer(new ClientShouldntMovePacketS2C(duration), serverPlayer);
         }
     }
 
@@ -4269,7 +4281,7 @@ public class BeyonderUtil {
                     }
                 }
                 if (battleHypnotism == 1) {
-                    if (livingEntity instanceof Mob mob && mob.getTarget() != null && !(mob.getTarget()instanceof Player)) {
+                    if (livingEntity instanceof Mob mob && mob.getTarget() != null && !(mob.getTarget() instanceof Player)) {
                         int playersFound = 0;
                         for (Player player : mob.level().getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(12))) {
                             playersFound++;
@@ -4279,7 +4291,7 @@ public class BeyonderUtil {
                             mob.setTarget(null);
                         }
                     }
-                    tag.putInt("LOTMBattleHypnotism",  0);
+                    tag.putInt("LOTMBattleHypnotism", 0);
                 }
                 if (battleHypnotism <= 5) {
                     if (livingEntity instanceof Mob mob) {
