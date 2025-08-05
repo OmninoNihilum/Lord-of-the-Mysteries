@@ -79,7 +79,6 @@ public class SailorAttributes extends BaseAttributes {
 
         AttributeInstance waterBreathingAttr = entity.getAttribute(ModAttributes.WATER_BREATHING.get());
         if (waterBreathingAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW WATER BREATHING IS " + waterBreathingList.get(seq));
             apply(waterBreathingAttr, waterBreathingID, waterBreathingList.get(seq), "WaterBreathingBoost");
         }
     }

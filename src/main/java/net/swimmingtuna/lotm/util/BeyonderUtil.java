@@ -1487,7 +1487,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.SEPARATE_WORM_OF_STAR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
-        damageMap.put(ItemInit.SPACE_FRAGMENTATION.get(), applyAbilityStrengthened((80 - sequence * 15.0f) / abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.SPACE_FRAGMENTATION.get(), applyAbilityStrengthened((75 - sequence * 15.0f) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SYMBOLIZATION.get(), applyAbilityStrengthened((160.0f - sequence * 30) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.TELEPORTATION.get(), applyAbilityStrengthened((1.0f - (sequence * 0.015f)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.TRAVELERSDOOR.get(), applyAbilityStrengthened(1.0f + (sequence * 0.1f) * abilityWeakness, abilityStrengthened));
@@ -2321,6 +2321,8 @@ public class BeyonderUtil {
         return false;
     }
 
+
+
     public static List<LivingEntity> getAllies(LivingEntity livingEntity) {
         List<LivingEntity> allyEntities = new ArrayList<>();
         if (livingEntity.level() instanceof ServerLevel serverLevel) {
@@ -2435,6 +2437,10 @@ public class BeyonderUtil {
 
     public static boolean isValidPotionIngredient(Item ingredient) {
         return EFFECT_INGREDIENTS.containsKey(ingredient);
+    }
+
+    public static boolean inCombat(LivingEntity living) {
+        return living.getPersistentData().getBoolean("LOTMinCombat");
     }
 
     public static void createSphereOfParticlesFromCenter(ServerLevel level, Vec3 center, ParticleOptions particleOptions, int particleCount, double travelDistance, float speed) {

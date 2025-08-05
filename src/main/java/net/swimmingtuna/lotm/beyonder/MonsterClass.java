@@ -111,7 +111,6 @@ public class MonsterClass implements BeyonderClass {
 
     @Override
     public void applyAllModifiers(LivingEntity entity, int seq) {
-        LOTM.sendMessageToAllPlayers("CALLED");
         MonsterAttributes.applyAll(entity, seq);
     }
 

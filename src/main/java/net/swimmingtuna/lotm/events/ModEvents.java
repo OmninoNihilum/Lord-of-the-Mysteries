@@ -369,8 +369,8 @@ public class ModEvents {
         CompoundTag tag = livingEntity.getPersistentData();
         Level level = livingEntity.level();
         if (level instanceof ServerLevel serverLevel) {
-            if (tag.getInt("inCombat") >= 1) {
-                tag.putInt("inCombat", tag.getInt("inCombat") - 1);
+            if (tag.getInt("LOTMinCombat") >= 1) {
+                tag.putInt("LOTMinCombat", tag.getInt("LOTMinCombat") - 1);
             }
             if (livingEntity.isUnderWater()) {
                 if (AttributeHelper.getWaterBreathing(livingEntity) == 1.0) {
@@ -381,7 +381,7 @@ public class ModEvents {
             twilightTick(event);
             envisionKingdom(livingEntity, level);
             SwordOfTwilight.twilightSwordTick(event);
-            if (tag.getInt("inTwilight") == 0) {
+            if (tag.getInt("inTwilight") == 0 && tag.getInt("cancelTick") == 0) {
                 //mob ticks
                 MatterAccelerationBlocks.matterAccelerationBlocksMobTick(event);
                 BeyonderEntityData.regenerateSpirituality(event);
@@ -545,8 +545,8 @@ public class ModEvents {
                 if (attacker instanceof LivingEntity) {
                     SailorClass.sailorAttackEvent(event);
                 }
-                attacked.getPersistentData().putInt("inCombat", 300);
-                attacker.getPersistentData().putInt("inCombat", 300);
+                attacked.getPersistentData().putInt("LOTMinCombat", 300);
+                attacker.getPersistentData().putInt("LOTMinCombat", 300);
                 DoorMirage.doorMirageAttackEvent(event);
                 BlinkAfterimage.travelerBlinkPassive(event);
                 CompoundTag tag = attacked.getPersistentData();
@@ -862,7 +862,6 @@ public class ModEvents {
                 boolean dropCharacteristic = level.getLevelData().getGameRules().getBoolean(GameRuleInit.SHOULD_DROP_CHARACTERISTIC);
                 boolean fateReincarnation = livingEntity.getPersistentData().getInt("monsterReincarnationCounter") >= 1;
                 if (dropCharacteristic) {
-                    LOTM.sendMessageToAllPlayers("SECOND CHECK WORKED");
                     if (!safetyNet) {
                         ItemStack stack = new ItemStack(ItemInit.BEYONDER_CHARACTERISTIC.get());
                         if (fateReincarnation) {

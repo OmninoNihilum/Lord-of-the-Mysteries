@@ -193,6 +193,9 @@ public class Teleportation extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (PlayerMobEntity.isCopy(livingEntity)) {
+            return 0;
+        }
         return 0;
     }
 }

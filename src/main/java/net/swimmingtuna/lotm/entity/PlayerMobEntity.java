@@ -252,6 +252,15 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         return false;
     }
 
+    public static boolean isCopy(LivingEntity living) {
+        if (living instanceof PlayerMobEntity playerMob) {
+            if (playerMob.getIsClone() && playerMob.getCreator() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
         super.populateDefaultEquipmentSlots(random, difficulty);
@@ -341,7 +350,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         CompoundTag tag = this.getPersistentData();
         if (!this.level().isClientSide()) {
             if (this.tickCount % 59 == 0) {
-                if (this.getIsClone() && this.getCreator() != null && this.getCreator().isAlive() && !BeyonderUtil.areAllies(this, this.getCreator())) {
+                if (this.getIsClone() && this.getCreator() != null && this.getCreator().isAlive()) {
                     if (!this.getPersistentData().getBoolean("canAttackOwner")) {
                         BeyonderUtil.forceAlly(this, this.getCreator());
                     }
@@ -414,7 +423,10 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
                 this.discard();
             }
             if (this.getRegenSpirituality() && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
-                this.setSpirituality(this.getSpirituality() + this.getCurrentPathway().spiritualityRegen().get(this.getCurrentSequence()));
+                int sequence = this.getCurrentSequence();
+                RandomSource random = this.getRandom();
+                double increase = ((Mth.nextDouble(random, 0.1, 1.0) * (this.getCurrentPathway().spiritualityRegen().get(sequence) * 1.5f)) / 5) * 20.0;
+                BeyonderUtil.addSpirituality(this, (int) increase);
             }
             if (this.getSpirituality() < this.getMaxSpirituality() / 10 && this.tickCount >= 10 && !this.getRegenSpirituality()) {
                 this.remove(RemovalReason.DISCARDED);

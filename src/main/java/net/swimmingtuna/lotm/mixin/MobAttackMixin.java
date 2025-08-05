@@ -28,9 +28,10 @@ public class MobAttackMixin {
         double twilightY = tag.getDouble("twilightManifestationY");
         double twilightZ = tag.getDouble("twilightManifestationZ");
         int inTwilight = tag.getInt("inTwilight");
+        int cancelTick = tag.getInt("cancelTick");
         int unableToUseAbility = tag.getInt("unableToUseAbility");
 
-        if (twilightX != 0 || twilightY != 0 || twilightZ != 0 || inTwilight >= 1 || unableToUseAbility == 1) {
+        if (twilightX != 0 || twilightY != 0 || twilightZ != 0 || inTwilight >= 1 || unableToUseAbility == 1 || cancelTick >= 1) {
             ci.cancel();
         }
     }

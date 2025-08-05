@@ -22,6 +22,7 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -143,6 +144,9 @@ public class TrickElectricShock extends LeftClickHandlerSkillP {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (PlayerMobEntity.isCopy(livingEntity)) {
+            return 0;
+        }
         if (!livingEntity.getPersistentData().getBoolean("trickmasterElectricShock")) {
             return 30;
         }

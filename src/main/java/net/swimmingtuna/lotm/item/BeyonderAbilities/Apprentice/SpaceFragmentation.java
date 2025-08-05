@@ -12,7 +12,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.SpaceFragmentationEntity;
-import net.swimmingtuna.lotm.entity.SpaceRiftEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -23,10 +22,10 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class SpatialFragmentation extends SimpleAbilityItem {
+public class SpaceFragmentation extends SimpleAbilityItem {
 
-    public SpatialFragmentation(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 1, 2500, 900);
+    public SpaceFragmentation(Properties properties) {
+        super(properties, BeyonderClassInit.APPRENTICE, 1, 5000, 1200);
     }
 
     @Override
@@ -43,18 +42,21 @@ public class SpatialFragmentation extends SimpleAbilityItem {
     public static void tearSpace(LivingEntity livingEntity){
         Level level = livingEntity.level();
         if(level.isClientSide) return;
+        int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPACE_FRAGMENTATION.get());
         DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
         if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
             livingEntity.sendSystemMessage(Component.literal("You fragmented space around your dimensional sight target").withStyle(ChatFormatting.AQUA));
             SpaceFragmentationEntity fragment = new SpaceFragmentationEntity(EntityInit.SPACE_FRAGMENTATION_ENTITY.get(), livingEntity.level());
             fragment.setOwner(livingEntity);
+            fragment.setArea(damage);
             LivingEntity scryEntity = dimensionalSightTileEntity.getScryTarget();
             fragment.teleportTo(scryEntity.getX(), scryEntity.getY(), scryEntity.getZ());
             level.addFreshEntity(fragment);
         } else {
             SpaceFragmentationEntity fragment = new SpaceFragmentationEntity(EntityInit.SPACE_FRAGMENTATION_ENTITY.get(), livingEntity.level());
             fragment.setOwner(livingEntity);
-            Vec3 scale = livingEntity.getLookAngle().scale(20);
+            fragment.setArea(damage);
+            Vec3 scale = livingEntity.getLookAngle().scale(40);
             fragment.teleportTo(livingEntity.getX() + scale.x(), livingEntity.getY() + scale.y(), livingEntity.getZ() + scale.z());
             level.addFreshEntity(fragment);
         }
@@ -62,9 +64,9 @@ public class SpatialFragmentation extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, create a tear in space 20 blocks in front of you, sucking in all entities and dealing massive damage to anything caught"));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2500").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("45 Seconds").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Upon use, create a gash in space in front of you. Entities near this gash will be stuck in space and time, unable to move or act until the gash disappears. You can walk into this to split yourself temporarily into 7 distinct entities."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("500").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Minute").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

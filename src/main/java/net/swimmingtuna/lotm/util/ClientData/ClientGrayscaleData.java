@@ -49,7 +49,6 @@ public class ClientGrayscaleData {
 
     public static void decrementDuration() {
         if (duration > 0) {
-            LOTM.LOGGER.info("DURATION IS " + duration);
             duration--;
         }
         if (duration <= 0) {

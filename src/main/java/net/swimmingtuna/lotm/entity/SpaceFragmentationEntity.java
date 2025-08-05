@@ -1,7 +1,11 @@
 package net.swimmingtuna.lotm.entity;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -31,6 +35,8 @@ import java.util.UUID;
 
 public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
+    private static final EntityDataAccessor<Integer> AREA = SynchedEntityData.defineId(SpaceFragmentationEntity.class, EntityDataSerializers.INT);
+
 
     public SpaceFragmentationEntity(EntityType<? extends SpaceFragmentationEntity> entityType, Level level) {
         super(entityType, level);
@@ -92,37 +98,22 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
                         if (uuid.equals(this.getUUID())) {
                             coloredBoxes++;
                             coloredBoxEntity.teleportTo(this.getX(), this.getY() + 5, this.getZ());
-                            if (this.tickCount == 30) {
-                                coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.BLUE);
-                            } else if (this.tickCount == 60) {
-                                coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.PURPLE);
-                            } else if (this.tickCount == 90) {
-                                coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.YELLOW);
-                            } else if (this.tickCount == 120) {
-                                coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.GRAY);
-                            } else if (this.tickCount == 150) {
-                                coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.BLUE);
-                            } else if (this.tickCount == 180) {
-                                coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.GREEN);
-                            } else if (this.tickCount >= 209) {
-                                coloredBoxEntity.discard();
-                            }
                         }
                     }
                 }
             }
             if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
                 if (coloredBoxes == 0) {
-                    int damage = (int) (float) BeyonderUtil.getDamage(owner).get(ItemInit.SPACE_FRAGMENTATION.get());
                     ColoredBoxEntity coloredBoxEntity = new ColoredBoxEntity(EntityInit.COLORED_BOX_ENTITY.get(), this.level());
                     coloredBoxEntity.teleportTo(this.getX(), this.getY() + 5, this.getZ());
+                    coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.GRAY);
                     coloredBoxEntity.setMaxHealth(209);
-                    BeyonderUtil.setScale(coloredBoxEntity, (float) damage / 10);
+                    BeyonderUtil.setScale(coloredBoxEntity, (float) this.getArea() / 5);
                     coloredBoxEntity.getPersistentData().putUUID("createdBySpaceFragmentation", this.getUUID());
                     this.level().addFreshEntity(coloredBoxEntity);
                 }
-                for (Entity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(BeyonderUtil.getDamage(owner).get(ItemInit.SPACE_FRAGMENTATION.get())))) {
-                    if (entity instanceof LivingEntity livingTarget && livingTarget != owner) {
+                for (Entity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(this.getArea() * 0.75f))) {
+                    if (entity instanceof LivingEntity livingTarget && livingTarget != owner && !PlayerMobEntity.isCopy(owner)) {
                         livingTarget.getPersistentData().putInt("cancelTick", 10);
                         BeyonderUtil.applyStun(livingTarget, 10);
                         BeyonderUtil.setGray(livingTarget, 10);
@@ -134,8 +125,6 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
                     }
                     if (entity instanceof LivingEntity living && living == owner && living.distanceTo(this) <= 5 && living.getPersistentData().getInt("spaceFragmentationCopies") == 0) {
                         living.getPersistentData().putInt("spaceFragmentationCopies", 200);
-
-                        // Create all the colored copies
                         PlayerMobEntity playerMobEntityBlack = PlayerMobEntity.playerCopy(living);
                         playerMobEntityBlack.setColorMode(PlayerMobEntity.ColorMode.BLACK);
 
@@ -156,7 +145,6 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
 
                         PlayerMobEntity playerMobEntityGreen = PlayerMobEntity.playerCopy(living);
                         playerMobEntityGreen.setColorMode(PlayerMobEntity.ColorMode.GREEN);
-
                         PlayerMobEntity[] coloredCopies = {
                                 playerMobEntityBlack,
                                 playerMobEntityGray,
@@ -178,6 +166,15 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
                             double newX = playerX + offsetX;
                             double newZ = playerZ + offsetZ;
                             coloredCopies[i].teleportTo(newX, playerY, newZ);
+                            coloredCopies[i].setMaxLife(1000);
+                            if (BeyonderUtil.inCombat(living)) {
+                                coloredCopies[i].setTarget(living.getLastHurtMob());
+                            }
+                            coloredCopies[i].setMaxSpirituality(BeyonderUtil.getMaxSpirituality(living) * 2);
+                            coloredCopies[i].setSpirituality(BeyonderUtil.getMaxSpirituality(living) * 2);
+                            coloredCopies[i].setAttackChance(100);
+                            BeyonderUtil.startFlying(coloredCopies[i], 0.15f, 10000);
+                            BeyonderUtil.forceAlly(living, coloredCopies[i]);
                             owner.level().addFreshEntity(coloredCopies[i]);
                         }
                     }
@@ -186,19 +183,31 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
         }
     }
 
+    public int getArea() {
+        return this.entityData.get(AREA);
+    }
+
+    public void setArea(int area) {
+        this.entityData.set(AREA, area);
+    }
+
     @Override
     protected void defineSynchedData() {
-
+        this.entityData.define(AREA, 10);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compoundTag) {
-
+    protected void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        if (compound.contains("Area")) {
+            this.setArea(compound.getInt("Area"));
+        }
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compoundTag) {
-
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        compound.putInt("Area", this.getArea());
     }
 
     @Override

@@ -59,7 +59,6 @@ public class WarriorAttributes extends BaseAttributes {
         AttributeInstance digSpeedAttr = entity.getAttribute(ModAttributes.DIG_SPEED.get());
         if (digSpeedAttr != null) {
             apply(digSpeedAttr, digSpeedID, digSpeedList.get(seq), "DigSpeed");
-            LOTM.sendMessageToAllPlayers("NEW DIG SPEED IS " + digSpeedList.get(seq));
         }
     }
 }

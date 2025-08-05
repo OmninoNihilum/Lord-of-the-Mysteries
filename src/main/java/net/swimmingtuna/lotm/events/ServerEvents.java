@@ -518,7 +518,7 @@ public class ServerEvents {
                 for (EquipmentSlot slot : EquipmentSlot.values()) {
                     playerMobEntity.setItemSlot(slot, player.getItemBySlot(slot).copy());
                 }
-                if (player.getPersistentData().getInt("inCombat") >= 1) {
+                if (player.getPersistentData().getInt("LOTMinCombat") >= 1) {
                     playerMobEntity.setTarget(player.getLastHurtMob());
                 }
                 playerMobEntity.setCreator(player);
@@ -528,11 +528,11 @@ public class ServerEvents {
                 playerMobEntity.setSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
                 playerMobEntity.setRegenSpirituality(false);
                 playerMobEntity.setAttackChance(100);
-                if (playerMobEntity.distanceTo(player) < 50 && player.getPersistentData().getInt("inCombat") >= 1) {
+                if (playerMobEntity.distanceTo(player) < 50 && player.getPersistentData().getInt("LOTMinCombat") >= 1) {
                     playerMobEntity.setTarget(player.getLastHurtMob());
                 } else {
                     for (LivingEntity living : playerMobEntity.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(30))) {
-                        if (BeyonderUtil.areAllies(living, player) && living.getPersistentData().getInt("inCombat") >= 1) {
+                        if (BeyonderUtil.areAllies(living, player) && living.getPersistentData().getInt("LOTMinCombat") >= 1) {
                             playerMobEntity.setTarget(player.getLastHurtMob());
                         }
                     }
@@ -564,7 +564,7 @@ public class ServerEvents {
                 for (EquipmentSlot slot : EquipmentSlot.values()) {
                     playerMobEntity.setItemSlot(slot, player.getItemBySlot(slot).copy());
                 }
-                if (player.getPersistentData().getInt("inCombat") >= 1) {
+                if (player.getPersistentData().getInt("LOTMinCombat") >= 1) {
                     playerMobEntity.setTarget(player.getLastHurtMob());
                 }
                 playerMobEntity.setCreator(player);

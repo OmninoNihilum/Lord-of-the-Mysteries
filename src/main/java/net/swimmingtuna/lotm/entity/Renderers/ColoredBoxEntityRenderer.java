@@ -20,7 +20,6 @@ import java.util.Map;
 
 public class ColoredBoxEntityRenderer extends EntityRenderer<ColoredBoxEntity> {
 
-    // Color definitions for each mode
     public enum ColorMode {
         GRAY(0.5f, 0.5f, 0.5f),
         BLACK(0.1f, 0.1f, 0.1f),
@@ -43,7 +42,6 @@ public class ColoredBoxEntityRenderer extends EntityRenderer<ColoredBoxEntity> {
     private static final Map<ColorMode, RenderType> RENDER_TYPES = new HashMap<>();
 
     static {
-        // Create render types for each color mode
         for (ColorMode mode : ColorMode.values()) {
             RENDER_TYPES.put(mode, createRenderType(mode.name().toLowerCase()));
         }

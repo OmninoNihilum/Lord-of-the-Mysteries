@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -319,6 +320,9 @@ public class TrickEscapeTrick extends LeftClickHandlerSkillP {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (PlayerMobEntity.isCopy(livingEntity)) {
+            return 0;
+        }
         int maxEscapes = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKESCAPETRICK.get());
         int escapeTrickCount = livingEntity.getPersistentData().getInt("escapeTrickCount");
         if (target == null && escapeTrickCount < maxEscapes) {

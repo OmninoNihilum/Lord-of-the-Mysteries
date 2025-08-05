@@ -391,7 +391,7 @@ public class ItemInit {
 
     //1
     public static final RegistryObject<Item> SPACE_FRAGMENTATION = ITEMS.register("space_fragmentation",
-            () -> new SpatialFragmentation(new Item.Properties().stacksTo(1)));
+            () -> new SpaceFragmentation(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> GRAVITY_MANIPULATION = ITEMS.register("gravitymanipulation",
             () -> new GravityManipulation(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_MAZE = ITEMS.register("spatialmaze",

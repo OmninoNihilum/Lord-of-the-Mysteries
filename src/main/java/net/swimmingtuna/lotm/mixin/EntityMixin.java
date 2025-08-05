@@ -22,11 +22,6 @@ import static net.swimmingtuna.lotm.util.BeyonderUtil.shouldBypassSeal;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow
-    public abstract boolean isFree(double pX, double pY, double pZ);
-
-    @Shadow
-    protected abstract boolean isFree(AABB pBox);
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void onTick(CallbackInfo ci) {
@@ -47,10 +42,16 @@ public abstract class EntityMixin {
                 tag.putDouble("twilightManifestationY", 0);
                 tag.putDouble("twilightManifestationZ", 0);
             }
+            if (cancelTickTimer >= 1) {
+                tag.putInt("cancelTick", cancelTickTimer - 1);
+            }
             double twilightX = tag.getDouble("twilightManifestationX");
             double twilightY = tag.getDouble("twilightManifestationY");
             double twilightZ = tag.getDouble("twilightManifestationZ");
             int inTwilight = tag.getInt("inTwilight");
+            if (entity.isRemoved() || (entity instanceof LivingEntity living && living.isDeadOrDying())) {
+                return;
+            }
             if (twilightX != 0 || twilightY != 0 || twilightZ != 0 || inTwilight >= 1) {
                 if (entity instanceof LivingEntity living) {
                     living.getDeltaMovement().multiply(0, 0, 0);

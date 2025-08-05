@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -139,11 +140,16 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null) {
+        if (PlayerMobEntity.isCopy(livingEntity)) {
+            return 0;
+        }
+        if (target != null && !livingEntity.getPersistentData().getBoolean("trickmasterTelekenisis")) {
             if (livingEntity.getHealth() < target.getHealth()) {
                 return (int) (50 * livingEntity.getHealth() / livingEntity.getMaxHealth());
             }
             return 0;
+        } else if (target == null && livingEntity.getPersistentData().getBoolean("trickmasterTelekenisis")) {
+            return 60;
         }
         return 0;
     }

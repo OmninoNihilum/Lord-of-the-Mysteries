@@ -59,11 +59,7 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
-            LOTM.sendMessageToAllPlayers("JUMP BOOST IS " + AttributeHelper.getJumpBoost(interactionTarget));
-            LOTM.sendMessageToAllPlayers("FIRE RESISTANCE IS " + AttributeHelper.getFireResistance(interactionTarget));
-            LOTM.sendMessageToAllPlayers("NIGHT VISION IS " + AttributeHelper.getNightVision(interactionTarget));
-            LOTM.sendMessageToAllPlayers("DIG SPEED IS " + AttributeHelper.getDigSpeed(interactionTarget));
-            LOTM.sendMessageToAllPlayers("WATER BREATHING BOOST IS " + AttributeHelper.getWaterBreathing(interactionTarget));
+
 
         }
         return InteractionResult.SUCCESS;
