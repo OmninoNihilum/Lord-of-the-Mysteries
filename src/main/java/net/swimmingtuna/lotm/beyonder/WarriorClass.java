@@ -15,7 +15,7 @@ import net.minecraft.world.item.*;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.swimmingtuna.lotm.attributes.WarriorAttributes;
+import net.swimmingtuna.lotm.attributes.PathwayAttributes.WarriorAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;

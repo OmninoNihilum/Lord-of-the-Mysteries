@@ -37,7 +37,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.swimmingtuna.lotm.attributes.MonsterAttributes;
+import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.attributes.PathwayAttributes.MonsterAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
@@ -110,6 +111,7 @@ public class MonsterClass implements BeyonderClass {
 
     @Override
     public void applyAllModifiers(LivingEntity entity, int seq) {
+        LOTM.sendMessageToAllPlayers("CALLED");
         MonsterAttributes.applyAll(entity, seq);
     }
 

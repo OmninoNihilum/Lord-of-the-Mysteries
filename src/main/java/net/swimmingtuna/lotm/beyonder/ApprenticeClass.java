@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.swimmingtuna.lotm.attributes.ApprenticeAttributes;
+import net.swimmingtuna.lotm.attributes.PathwayAttributes.ApprenticeAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -40,8 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static net.swimmingtuna.lotm.util.BeyonderUtil.applyMobEffect;
 
 public class ApprenticeClass implements BeyonderClass {
     @Override

@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.attributes;
 
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.common.ForgeMod;
 
@@ -133,7 +134,7 @@ public class AttributeHelper {
             return;
         }
 
-        var instance = entity.getAttribute(attribute);
+        AttributeInstance instance = entity.getAttribute(attribute);
         if (instance != null) {
             instance.setBaseValue(value);
         }

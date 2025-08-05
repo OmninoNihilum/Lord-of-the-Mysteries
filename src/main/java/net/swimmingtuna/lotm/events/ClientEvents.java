@@ -71,25 +71,28 @@ public class ClientEvents {
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onRenderWorld(RenderLevelStageEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
-        float boost = (float) mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get());
-        if (boost == 1.0) return;
-        //NightVisionLightHandler.getLigthLevelInFov(mc.level, mc.player);
-        if (mc.level.getRawBrightness(mc.player.blockPosition(), 0) > 6 && NightVisionLightHandler.checkDay(mc.level)) {
-            return;
+        if (mc.player.getAttribute(ModAttributes.NIGHT_VISION.get()) != null) {
+            float boost = (float) mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get());
+            if (boost == 1.0) return;
+            //NightVisionLightHandler.getLigthLevelInFov(mc.level, mc.player);
+            if (mc.level.getRawBrightness(mc.player.blockPosition(), 0) > 6 && NightVisionLightHandler.checkDay(mc.level)) {
+                return;
+            }
+            if (mc.level.getBrightness(LightLayer.BLOCK, mc.player.blockPosition()) != 0) {
+                return;
+            }
+            //float lightFactor = 1.0F -  / 15.0F;
+            //float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.setShaderColor(boost, boost, boost, 1.0F);
+            RenderSystem.disableBlend();
         }
-        if(mc.level.getBrightness(LightLayer.BLOCK, mc.player.blockPosition()) != 0) {
-            return;
-        }
-        //float lightFactor = 1.0F -  / 15.0F;
-        //float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShaderColor(boost, boost, boost, 1.0F);
-        RenderSystem.disableBlend();
     }
 
 

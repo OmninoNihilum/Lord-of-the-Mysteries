@@ -111,7 +111,6 @@ public class BeyonderHolder extends PlayerCapability {
         updateTracking();
         newClass.applyAllModifiers(player, sequence);
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
-
     }
 
     public double getMaxSpirituality() {

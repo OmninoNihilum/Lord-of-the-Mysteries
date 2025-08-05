@@ -41,6 +41,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
+import net.swimmingtuna.lotm.attributes.ModAttributes;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
@@ -68,7 +69,6 @@ import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
-import net.swimmingtuna.lotm.attributes.ModAttributes;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ClientData.*;
@@ -226,7 +226,7 @@ public class ModEvents {
             //if (chaosLevel != 1) {
             //    MobEffectInstance mobEffectInstance = event.getEffectInstance();
             //    if (mobEffectInstance.getAmplifier() <= 5) {
-                    //BeyonderUtil.applyMobEffect(entity, mobEffectInstance.getEffect(), mobEffectInstance.getDuration(), mobEffectInstance.getAmplifier() * chaosLevel, mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
+            //BeyonderUtil.applyMobEffect(entity, mobEffectInstance.getEffect(), mobEffectInstance.getDuration(), mobEffectInstance.getAmplifier() * chaosLevel, mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
             //    }
             //}
             if (!event.getEntity().level().isClientSide() && BeyonderUtil.hasBeneficialEffectBlocker(event.getEntity())) {
@@ -519,7 +519,6 @@ public class ModEvents {
     }
 
 
-
     @SubscribeEvent
     public static void attackEvent(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntity();
@@ -651,18 +650,20 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onPlayerJump(LivingEvent.LivingJumpEvent event) {
-        if (!(event.getEntity() instanceof Player player)) return;
-
-        player.setDeltaMovement(player.getDeltaMovement().add(0, player.getAttributeValue(ModAttributes.JUMP_BOOST.get()), 0));
-        player.hurtMarked = true;
+        LivingEntity living = event.getEntity();
+        if (AttributeHelper.getJumpBoost(living) == 0) {
+            return;
+        }
+        living.setDeltaMovement(living.getDeltaMovement().add(0, AttributeHelper.getJumpBoost(event.getEntity()), 0));
+        living.hurtMarked = true;
     }
 
     @SubscribeEvent
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getEntity();
-        float boost = (float) player.getAttributeValue(ModAttributes.DIG_SPEED.get());
-        if (boost != 0.0F) {
-            event.setNewSpeed(event.getOriginalSpeed() * boost);
+        float breakSpeed = (float) AttributeHelper.getDigSpeed(player);
+        if (breakSpeed != 0.0F) {
+            event.setNewSpeed(event.getOriginalSpeed() * breakSpeed);
         }
     }
 
@@ -1008,7 +1009,7 @@ public class ModEvents {
                         BeyonderClass pathway = BeyonderUtil.getPathway(living);
                         if (pathway != null) {
                             BeyonderUtil.setSpirituality(living, BeyonderUtil.getMaxSpirituality(living));
-                            pathway.applyAllModifiers(living,BeyonderUtil.getSequence(living));
+                            pathway.applyAllModifiers(living, BeyonderUtil.getSequence(living));
                         }
                     }
                 }
