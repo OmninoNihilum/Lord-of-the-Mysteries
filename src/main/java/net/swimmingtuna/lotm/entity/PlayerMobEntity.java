@@ -407,9 +407,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
                     tracker.updatePlayerMobPosition(this);
                 }
             }
-            if (this.tickCount == 10 && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
-                BeyonderHolder.updateMaxHealthModifier(this, this.getCurrentPathway().maxHealth().get(getCurrentSequence()));
-            }
+            //if (this.tickCount == 10 && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
+            //    BeyonderHolder.updateMaxHealthModifier(this, this.getCurrentPathway().maxHealth().get(getCurrentSequence()));
+            //}
             if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN) && !shouldIgnoreGamerule()) {
                 this.discard();
             }
@@ -842,9 +842,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             BeyonderHolder.resetMaxHealthModifier(this);
         } else {
             this.entityData.set(PATHWAY, BeyonderUtil.getPathwayName(pathway));
-            if (getCurrentSequence() != -1) {
-                BeyonderHolder.updateMaxHealthModifier(this, pathway.maxHealth().get(getCurrentSequence()));
-            }
+            //if (getCurrentSequence() != -1) {
+            //    BeyonderHolder.updateMaxHealthModifier(this, pathway.maxHealth().get(getCurrentSequence()));
+            //}
         }
     }
 

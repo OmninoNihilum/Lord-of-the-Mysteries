@@ -13,14 +13,18 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class WindManipulationSense extends SimpleAbilityItem {
+public class WindManipulationSense extends LeftClickHandlerSkillP {
 
 
     public WindManipulationSense(Properties properties) {
@@ -153,5 +157,9 @@ public class WindManipulationSense extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.WIND_MANIPULATION_BLADE.get()));
     }
 }

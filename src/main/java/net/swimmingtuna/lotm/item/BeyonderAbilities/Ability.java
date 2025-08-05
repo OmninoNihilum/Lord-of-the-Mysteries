@@ -38,4 +38,6 @@ public interface Ability {
     default int getPriority(LivingEntity user, @Nullable LivingEntity target) {
         return 0;
     }
+
+
 }

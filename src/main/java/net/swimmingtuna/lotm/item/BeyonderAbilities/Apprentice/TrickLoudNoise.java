@@ -19,14 +19,17 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.SoundInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TrickLoudNoise extends SimpleAbilityItem {
+public class TrickLoudNoise extends LeftClickHandlerSkillP {
     public TrickLoudNoise(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 40, 300);
     }
@@ -67,6 +70,7 @@ public class TrickLoudNoise extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, generates a deafening sound, deafening any players around."));
+        tooltipComponents.add(Component.literal("Left click for Trick: Telekenisis"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("40").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -89,5 +93,9 @@ public class TrickLoudNoise extends SimpleAbilityItem {
             return 0;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKTELEKENISIS.get()));
     }
 }

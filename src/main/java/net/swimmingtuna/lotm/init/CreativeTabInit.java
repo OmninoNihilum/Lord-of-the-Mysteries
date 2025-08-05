@@ -18,7 +18,6 @@ public class CreativeTabInit {
                     .title(Component.translatable("creativetab.abilities_tab"))
                     .icon(() -> new ItemStack(ItemInit.ABILITYICONTAB.get()))
                     .displayItems((parameters, event) -> {
-                        event.accept(ItemInit.BEYONDER_ABILITY_USER.get());
                         event.accept(ItemInit.ASTROLABE.get());
                         event.accept(ItemInit.WORM_OF_STAR.get());
                         event.accept(ItemInit.MIND_READING.get());
@@ -44,8 +43,6 @@ public class CreativeTabInit {
                         event.accept(ItemInit.DISCERN.get());
                         event.accept(ItemInit.DREAM_INTO_REALITY.get());
                         event.accept(ItemInit.PROPHECY.get());
-                        event.accept(ItemInit.METEOR_SHOWER.get());
-                        event.accept(ItemInit.METEOR_NO_LEVEL_SHOWER.get());
                         event.accept(ItemInit.ENVISION_BARRIER.get());
                         event.accept(ItemInit.ENVISION_DEATH.get());
                         event.accept(ItemInit.ENVISION_HEALTH.get());

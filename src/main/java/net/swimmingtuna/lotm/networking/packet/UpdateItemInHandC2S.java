@@ -4,10 +4,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class UpdateItemInHandC2S {
+public class UpdateItemInHandC2S implements LeftClickType {
     private final int activeSlot;
     private final ItemStack newItem;
 
@@ -26,14 +27,15 @@ public class UpdateItemInHandC2S {
         buf.writeItem(newItem);
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
+    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
-            if (player != null) {
-                player.getInventory().setItem(activeSlot, newItem);
-            }
+            if (player == null) return;
+            player.getInventory().setItem(activeSlot, newItem);
+
         });
         ctx.get().setPacketHandled(true);
+        return true;
     }
 }
 

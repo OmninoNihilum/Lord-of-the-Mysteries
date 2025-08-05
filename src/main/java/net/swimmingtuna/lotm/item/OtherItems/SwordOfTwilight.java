@@ -26,7 +26,10 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.Renderer.SwordOfTwilightRenderer;
+import net.swimmingtuna.lotm.networking.packet.SwordOfTwilightC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSword;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -46,7 +49,7 @@ import java.util.function.Consumer;
 
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.SilverSwordManifestation.findClosestEmptySlot;
 
-public class SwordOfTwilight extends SwordItem implements GeoItem {
+public class SwordOfTwilight extends LeftClickHandlerSword implements GeoItem {
 
 
     public SwordOfTwilight(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
@@ -265,5 +268,9 @@ public class SwordOfTwilight extends SwordItem implements GeoItem {
         return Rarity.create("DAWN_ITEM", ChatFormatting.GOLD);
     }
 
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new SwordOfTwilightC2S();
+    }
 
 }

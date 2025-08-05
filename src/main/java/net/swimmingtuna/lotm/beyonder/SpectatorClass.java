@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.attributes.SpectatorAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
@@ -88,8 +89,8 @@ public class SpectatorClass implements BeyonderClass {
     }
 
     @Override
-    public List<Double> maxHealth() {
-        return List.of(45.0, 40.0, 40.0, 35.0, 32.0, 28.0, 28.0, 23.0, 20.0, 20.0);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        SpectatorAttributes.applyAll(entity, seq);
     }
 
     @Override
@@ -102,42 +103,6 @@ public class SpectatorClass implements BeyonderClass {
             } else {
                 if (player.tickCount % 200 == 0) {
                     BeyonderUtil.applyMobEffect(player, MobEffects.INVISIBILITY, 50, 1, false, false);
-                }
-            }
-            if (player.tickCount % 80 == 0) {
-                if (sequenceLevel >= 0) {
-                    player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 30 * 20, -1, false, false));
-                }
-                if (sequenceLevel == 6) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 5) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 4) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 3) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-                } else if (sequenceLevel == 2) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-
-                } else if (sequenceLevel == 1) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
-
-                } else if (sequenceLevel == 0) {
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.FIRE_RESISTANCE, 300, 0, false, false);
                 }
             }
         }
@@ -179,7 +144,6 @@ public class SpectatorClass implements BeyonderClass {
     @Override
     public Multimap<Integer, Item> getItems() {
         HashMultimap<Integer, Item> items = HashMultimap.create();
-        items.put(9, ItemInit.BEYONDER_ABILITY_USER.get());
         items.put(9, ItemInit.ALLY_MAKER.get());
         items.put(8, ItemInit.MIND_READING.get());
         items.put(7, ItemInit.AWE.get());

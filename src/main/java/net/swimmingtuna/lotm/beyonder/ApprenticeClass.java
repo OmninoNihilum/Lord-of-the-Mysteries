@@ -26,6 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.swimmingtuna.lotm.attributes.ApprenticeAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -87,9 +88,10 @@ public class ApprenticeClass implements BeyonderClass {
     }
 
     @Override
-    public List<Double> maxHealth() {
-        return List.of(45.0, 40.0, 40.0, 35.0, 32.0, 28.0, 28.0, 23.0, 20.0, 20.0);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        ApprenticeAttributes.applyAll(entity, seq);
     }
+
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {
@@ -97,68 +99,78 @@ public class ApprenticeClass implements BeyonderClass {
             CompoundTag tag = player.getPersistentData();
             int maxWormCount = 0;
             int wormRegenAmount = 0;
-            if (sequenceLevel == 9) {
-            }
-            if (sequenceLevel == 8) {
-            }
-            if (sequenceLevel == 7) {
-            }
-            if (sequenceLevel == 6) {
-                tag.putInt("maxScribedAbilities", 20);
-            }
-            if (sequenceLevel == 5) {
-                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
-                tag.putInt("maxScribedAbilities", 25);
-            }
-            if (sequenceLevel == 4) {
-                maxWormCount = 200;
-                wormRegenAmount = 1;
-                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-                if (player instanceof ServerPlayer serverPlayer) {
-                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                }
-                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
-                tag.putInt("maxScribedAbilities", 30);
-            }
-            if (sequenceLevel == 3) {
-                maxWormCount = 800;
-                wormRegenAmount = 3;
-                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-                if (player instanceof ServerPlayer serverPlayer) {
-                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                }
-                applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 1, false, false);
-                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
-                tag.putInt("maxScribedAbilities", 35);
-            }
-            if (sequenceLevel == 2) {
-                maxWormCount = 4000;
-                wormRegenAmount = 10;
-                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-                if (player instanceof ServerPlayer serverPlayer) {
-                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                }
-                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 1, false, false);
-                tag.putInt("maxScribedAbilities", 40);
-                if(player instanceof Player pPlayer){
-                    ReplicatedEntityUtils.setMaxEntities(pPlayer, 5);
-                    ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 1);
-                }
-            }
-            if (sequenceLevel == 1) {
-                maxWormCount = 16000;
-                wormRegenAmount = 25;
-                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-                if (player instanceof ServerPlayer serverPlayer) {
-                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                }
-                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
-                applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 2, false, false);
-                tag.putInt("maxScribedAbilities", 45);
-                if(player instanceof Player pPlayer){
-                    ReplicatedEntityUtils.setMaxEntities(pPlayer, 10);
-                    ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 4);
-                }
+            switch (sequenceLevel) {
+                case 6:
+                    tag.putInt("maxScribedAbilities", 20);
+                    break;
+                case 5:
+                    tag.putInt("maxScribedAbilities", 25);
+                    break;
+                case 4:
+                    maxWormCount = 200;
+                    wormRegenAmount = 1;
+                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                    }
+                    tag.putInt("maxScribedAbilities", 30);
+                    break;
+                case 3:
+                    maxWormCount = 800;
+                    wormRegenAmount = 3;
+                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                    }
+
+                    tag.putInt("maxScribedAbilities", 35);
+                    break;
+                case 2:
+                    maxWormCount = 4000;
+                    wormRegenAmount = 10;
+                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                    }
+
+                    tag.putInt("maxScribedAbilities", 40);
+                    if (player instanceof Player pPlayer) {
+                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 5);
+                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 1);
+                    }
+                    break;
+                case 1:
+                    maxWormCount = 16000;
+                    wormRegenAmount = 25;
+                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                    }
+
+                    tag.putInt("maxScribedAbilities", 45);
+                    if (player instanceof Player pPlayer) {
+                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 10);
+                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 4);
+                    }
+                    break;
+                case 0:
+                    maxWormCount = 80000;
+                    wormRegenAmount = 100;
+                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
+
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
+                    }
+
+                    tag.putInt("maxScribedAbilities", 50);
+                    if (player instanceof Player pPlayer) {
+                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 20);
+                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 10);
+                    }
+                    break;
             }
             if (sequenceLevel == 0) {
                 maxWormCount = 80000;
@@ -199,8 +211,6 @@ public class ApprenticeClass implements BeyonderClass {
     @Override
     public Multimap<Integer, Item> getItems() {
         HashMultimap<Integer, Item> items = HashMultimap.create();
-
-        items.put(9, ItemInit.BEYONDER_ABILITY_USER.get());
         items.put(9, ItemInit.ALLY_MAKER.get());
         items.put(9, ItemInit.CREATEDOOR.get());
 

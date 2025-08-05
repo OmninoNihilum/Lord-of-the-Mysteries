@@ -1,11 +1,13 @@
 package net.swimmingtuna.lotm.events;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.LightLayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
@@ -14,6 +16,8 @@ import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.attributes.ModAttributes;
+import net.swimmingtuna.lotm.attributes.NightVisionLightHandler;
 import net.swimmingtuna.lotm.client.AbilityOverlay;
 import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
@@ -65,6 +69,27 @@ public class ClientEvents {
         if (ClientGrayscaleData.isActive()) {
             renderGrayscaleUsingGUI(event.getGuiGraphics());
         }
+    }
+
+    @SubscribeEvent
+    public static void onRenderWorld(RenderLevelStageEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) return;
+        float boost = (float) mc.player.getAttributeValue(ModAttributes.NIGHT_VISION.get());
+        if (boost == 1.0) return;
+        //NightVisionLightHandler.getLigthLevelInFov(mc.level, mc.player);
+        if (mc.level.getRawBrightness(mc.player.blockPosition(), 0) > 6 && NightVisionLightHandler.checkDay(mc.level)) {
+            return;
+        }
+        if(mc.level.getBrightness(LightLayer.BLOCK, mc.player.blockPosition()) != 0) {
+            return;
+        }
+        //float lightFactor = 1.0F -  / 15.0F;
+        //float boost = 1.0F + (rawBoost - 1.0F) * lightFactor;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(boost, boost, boost, 1.0F);
+        RenderSystem.disableBlend();
     }
 
 

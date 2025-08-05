@@ -15,15 +15,19 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TrickBlackCurtain extends SimpleAbilityItem {
+public class TrickBlackCurtain extends LeftClickHandlerSkillP {
     public TrickBlackCurtain(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 25, 140);
     }
@@ -71,6 +75,7 @@ public class TrickBlackCurtain extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, generates a curtain of black fog in the direction you are looking."));
+        tooltipComponents.add(Component.literal("Left click for Trick: Burning"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("25").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("7 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -89,5 +94,9 @@ public class TrickBlackCurtain extends SimpleAbilityItem {
             return 20;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKBURNING.get()));
     }
 }

@@ -7,10 +7,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class TravelerWaypointC2S {
+public class TravelerWaypointC2S implements LeftClickType {
     public TravelerWaypointC2S() {
 
     }

@@ -18,12 +18,15 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.ConsciousnessStrollC2S;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ConsciousnessStroll extends SimpleAbilityItem {
+public class ConsciousnessStroll extends LeftClickHandlerSkill {
 
     public ConsciousnessStroll (Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 3, 300, 400);
@@ -106,5 +109,10 @@ public class ConsciousnessStroll extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         return 0;
+    }
+
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new ConsciousnessStrollC2S();
     }
 }

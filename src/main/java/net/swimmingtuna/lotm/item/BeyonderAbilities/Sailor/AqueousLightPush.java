@@ -14,13 +14,16 @@ import net.swimmingtuna.lotm.entity.AqueousLightEntityPush;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class AqueousLightPush extends SimpleAbilityItem {
+public class AqueousLightPush extends LeftClickHandlerSkillP {
 
     public AqueousLightPush(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 7, 50, 60);
@@ -67,5 +70,9 @@ public class AqueousLightPush extends SimpleAbilityItem {
             return 35;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.AQUEOUS_LIGHT_PULL.get()));
     }
 }

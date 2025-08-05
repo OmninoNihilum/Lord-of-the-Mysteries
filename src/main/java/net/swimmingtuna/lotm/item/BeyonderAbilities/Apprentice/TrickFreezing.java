@@ -26,14 +26,17 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TrickFreezing extends SimpleAbilityItem {
+public class TrickFreezing extends LeftClickHandlerSkillP {
     public TrickFreezing(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 70, 300);
     }
@@ -135,6 +138,7 @@ public class TrickFreezing extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         tooltipComponents.add(Component.literal("Upon use, freezes the target for a small amount of time, or if none is selected, freeze all entities/blocks around you."));
+        tooltipComponents.add(Component.literal("Left click for Trick: Loud Noise"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("70").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(getPathwayText(this.requiredClass.get()));
@@ -176,5 +180,9 @@ public class TrickFreezing extends SimpleAbilityItem {
 
     public static boolean isOnSurface(Level level, BlockPos pos) {
         return level.canSeeSky(pos.above()) || !level.getBlockState(pos.above()).isSolid();
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKLOUDNOISE.get()));
     }
 }

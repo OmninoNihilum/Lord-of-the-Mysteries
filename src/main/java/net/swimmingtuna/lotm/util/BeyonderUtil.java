@@ -2,7 +2,6 @@ package net.swimmingtuna.lotm.util;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -59,11 +58,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.swimmingtuna.lotm.LOTM;
@@ -84,20 +81,18 @@ import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Ability;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
-import net.swimmingtuna.lotm.item.OtherItems.SwordOfSilver;
-import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.*;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.ClientData.ClientLeftclickCooldownData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderHandData;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSword;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
@@ -445,8 +440,6 @@ public class BeyonderUtil {
             }
             if (sequence <= 1) {
                 abilityNames.add(ItemInit.PROPHECY.get());
-                abilityNames.add(ItemInit.METEOR_SHOWER.get());
-                abilityNames.add(ItemInit.METEOR_NO_LEVEL_SHOWER.get());
             }
             if (sequence <= 0) {
                 abilityNames.add(ItemInit.ENVISION_BARRIER.get());
@@ -694,7 +687,7 @@ public class BeyonderUtil {
         return abilityNames;
     }
 
-    private static final Map<ChatFormatting, Integer> COLOR_MAP = new HashMap<>();
+    private static final Map<ChatFormatting, Integer> COLOR_MAP = new HashMap<ChatFormatting, Integer>();
     private static final Map<String, BeyonderClass> NAME_TO_BEYONDER = new HashMap<>();
 
     static {
@@ -946,7 +939,7 @@ public class BeyonderUtil {
         }
         if (item instanceof SimpleAbilityItem simpleAbilityItem) {
             if (living instanceof Player) {
-                itemCheckPassed = living.getItemInHand(InteractionHand.MAIN_HAND).is(item) || living.getItemInHand(InteractionHand.MAIN_HAND).is(ItemInit.BEYONDER_ABILITY_USER.get());
+                itemCheckPassed = living.getItemInHand(InteractionHand.MAIN_HAND).is(item);
             }
 
             if (itemCheckPassed) {
@@ -1138,387 +1131,40 @@ public class BeyonderUtil {
         return player.getPersistentData().getInt("leftClickCooldown");
     }
 
-    public static void leftClickEmpty(Player pPlayer) {
-        Style style = BeyonderUtil.getStyle(pPlayer);
-        ItemStack heldItem = pPlayer.getMainHandItem();
-        int activeSlot = pPlayer.getInventory().selected;
-        boolean isMultiplayer = Minecraft.getInstance().hasSingleplayerServer() && !Minecraft.getInstance().getSingleplayerServer().isPublished();
+    private static void handleEmptyLeftClickSkill(LeftClickHandlerSkill item) {
+        LOTMNetworkHandler.sendToServer(item.getleftClickEmpty());
+    }
 
-        if (ClientLeftclickCooldownData.getCooldown() > 0) {
+    private static void handleEmptyLeftClickItem(LeftClickHandlerSword item) {
+        LOTMNetworkHandler.sendToServer(item.getleftClickEmpty());
+    }
+
+    private static void handleEmptyLeftClickSkill(LeftClickHandlerSkillP item, Integer slot) {
+        LOTMNetworkHandler.sendToServer(item.getleftClickEmpty(slot));
+    }
+
+    public static void leftClick(Player pPlayer) {
+        ItemStack heldItem = pPlayer.getMainHandItem();
+        Item item = heldItem.getItem();
+        int activeSlot = pPlayer.getInventory().selected;
+
+        if (ClientLeftclickCooldownData.getCooldown() > 0)
             return;
-        }
+
         LOTMNetworkHandler.sendToServer(new RequestCooldownSetC2S());
         if (!heldItem.isEmpty()) {
-            if (heldItem.getItem() instanceof DawnWeaponry) {
-                LOTMNetworkHandler.sendToServer(new DawnWeaponryLeftClickC2S());
-            }
-            if (heldItem.getItem() instanceof ConsciousnessStroll) {
-                LOTMNetworkHandler.sendToServer(new ConsciousnessStrollC2S());
-            } else if (heldItem.getItem() instanceof SwordOfTwilight) {
-                LOTMNetworkHandler.sendToServer(new SwordOfTwilightC2S());
-            } else if (heldItem.getItem() instanceof Gigantification) {
-                LOTMNetworkHandler.sendToServer(new GigantificationC2S());
-            } else if (heldItem.getItem() instanceof SwordOfSilver) {
-                LOTMNetworkHandler.sendToServer(new SwordOfSilverC2S());
-            } else if (heldItem.getItem() instanceof BeyonderAbilityUser) {
-                LOTMNetworkHandler.sendToServer(new LeftClickC2S()); //DIFFERENT FOR LEFT CLICK BLOCK
-            } else if (heldItem.getItem() instanceof AqueousLightPush) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AQUEOUS_LIGHT_PULL.get())));
-            } else if (heldItem.getItem() instanceof AqueousLightPull) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AQUEOUS_LIGHT_DROWN.get())));
-            } else if (heldItem.getItem() instanceof AqueousLightDrown) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AQUEOUS_LIGHT_PUSH.get())));
-            } else if (heldItem.getItem() instanceof Hurricane) {
-                LOTMNetworkHandler.sendToServer(new LeftClickC2S());
-            } else if (heldItem.getItem() instanceof TrickBurning) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKFREEZING.get())));
-            } else if (heldItem.getItem() instanceof TrickFreezing) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKTUMBLE.get())));
-            } else if (heldItem.getItem() instanceof TrickTumble) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKWIND.get())));
-            } else if (heldItem.getItem() instanceof TrickWind) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKFOG.get())));
-            } else if (heldItem.getItem() instanceof TrickFog) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKELECTRICSHOCK.get())));
-            } else if (heldItem.getItem() instanceof TrickElectricShock) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKTELEKENISIS.get())));
-            } else if (heldItem.getItem() instanceof TrickTelekenisis) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKESCAPETRICK.get())));
-            } else if (heldItem.getItem() instanceof TrickEscapeTrick) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKFLASH.get())));
-            } else if (heldItem.getItem() instanceof TrickFlash) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKLOUDNOISE.get())));
-            } else if (heldItem.getItem() instanceof TrickLoudNoise) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKBLACKCURTAIN.get())));
-            } else if (heldItem.getItem() instanceof TrickBlackCurtain) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TRICKBURNING.get())));
-            } else if (heldItem.getItem() instanceof LightningStorm) {
-                LOTMNetworkHandler.sendToServer(new LeftClickC2S());
-
-            } else if (heldItem.getItem() instanceof MatterAccelerationBlocks) {
-                LOTMNetworkHandler.sendToServer(new MatterAccelerationBlockC2S());
-
-            } else if (heldItem.getItem() instanceof MatterAccelerationEntities) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.MATTER_ACCELERATION_SELF.get())));
-
-            } else if (heldItem.getItem() instanceof MatterAccelerationSelf) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.MATTER_ACCELERATION_BLOCKS.get())));
-
-            } else if (heldItem.getItem() instanceof WindManipulationBlade) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.WIND_MANIPULATION_FLIGHT.get())));
-
-            } else if (heldItem.getItem() instanceof WindManipulationFlight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.WIND_MANIPULATION_SENSE.get())));
-
-            } else if (heldItem.getItem() instanceof WindManipulationSense) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.WIND_MANIPULATION_BLADE.get())));
-
-            } else if (heldItem.getItem() instanceof ApplyManipulation) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.MANIPULATE_EMOTION.get())));
-
-            } else if (heldItem.getItem() instanceof ManipulateEmotion) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.MANIPULATE_MOVEMENT.get())));
-
-            } else if (heldItem.getItem() instanceof ManipulateMovement) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.MANIPULATE_FONDNESS.get())));
-
-            } else if (heldItem.getItem() instanceof ManipulateFondness) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.APPLY_MANIPULATION.get())));
-
-            } else if (heldItem.getItem() instanceof EnvisionBarrier) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.ENVISION_DEATH.get())));
-
-            } else if (heldItem.getItem() instanceof EnvisionDeath) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.ENVISION_HEALTH.get())));
-
-            } else if (heldItem.getItem() instanceof EnvisionHealth) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.ENVISION_LIFE.get())));
-
-            } else if (heldItem.getItem() instanceof EnvisionLife) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.ENVISION_WEATHER.get())));
-
-            } else if (heldItem.getItem() instanceof EnvisionWeather) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.ENVISION_LOCATION.get())));
-
-            } else if (heldItem.getItem() instanceof EnvisionLocation) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.ENVISION_KINGDOM.get())));
-
-            } else if (heldItem.getItem() instanceof EnvisionKingdom) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.ENVISION_BARRIER.get())));
-            } else if (heldItem.getItem() instanceof MeteorShower) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.METEOR_NO_LEVEL_SHOWER.get())));
-
-            } else if (heldItem.getItem() instanceof MeteorNoLevelShower) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.METEOR_SHOWER.get())));
-
-            } else if (heldItem.getItem() instanceof Prophecy) {
-                LOTMNetworkHandler.sendToServer(new ProphesizeLeftClickC2S());
-            } else if (heldItem.getItem() instanceof SirenSongHarm) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.SIREN_SONG_STRENGTHEN.get())));
-
-            } else if (heldItem.getItem() instanceof SirenSongStrengthen) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.SIREN_SONG_STUN.get())));
-
-            } else if (heldItem.getItem() instanceof SirenSongStun) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.SIREN_SONG_WEAKEN.get())));
-            } else if (heldItem.getItem() instanceof SirenSongWeaken) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.SIREN_SONG_HARM.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationFortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYMISFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationMisfortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYINFINITEFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationInfiniteFortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYINFINITEMISFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationInfiniteMisfortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYFORTUNEINCREASE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationWorldFortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYMISFORTUNEINCREASE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationWorldMisfortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYWIPE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationWipe) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYEFFECT.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationImpulse) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationImpulse) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof DivineHandRight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.DIVINEHANDLEFT.get())));
-            } else if (heldItem.getItem() instanceof DivineHandLeft) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.DIVINEHANDRIGHT.get())));
-            } else if (heldItem.getItem() instanceof BeamOfGlory) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AURAOFGLORY.get())));
-            } else if (heldItem.getItem() instanceof AuraOfGlory) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BEAMOFGLORY.get())));
-            } else if (heldItem.getItem() instanceof AuraOfTwilight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TWILIGHTFREEZE.get())));
-            } else if (heldItem.getItem() instanceof TwilightFreeze) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TWILIGHTACCELERATE.get())));
-            } else if (heldItem.getItem() instanceof TwilightAccelerate) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TWILIGHTLIGHT.get())));
-            } else if (heldItem.getItem() instanceof TwilightLight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.GLOBEOFTWILIGHT.get())));
-            } else if (heldItem.getItem() instanceof GlobeOfTwilight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BEAMOFTWILIGHT.get())));
-            } else if (heldItem.getItem() instanceof BeamOfTwilight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AURAOFTWILIGHT.get())));
-            } else if (heldItem.getItem() instanceof Blink) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINKAFTERIMAGE.get())));
-            } else if (heldItem.getItem() instanceof BlinkAfterimage) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
-            } else if (heldItem.getItem() instanceof Tsunami) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TSUNAMI_SEAL.get())));
-            } else if (heldItem.getItem() instanceof TsunamiSeal) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TSUNAMI.get())));
-            } else if (heldItem.getItem() instanceof LuckManipulation) {
-                LOTMNetworkHandler.sendToServer(new LuckManipulationLeftClickC2S());
-            } else if (heldItem.getItem() instanceof MisfortuneManipulation) {
-                LOTMNetworkHandler.sendToServer(new MisfortuneManipulationLeftClickC2S());
-            } else if (heldItem.getItem() instanceof MonsterCalamityIncarnation) {
-                LOTMNetworkHandler.sendToServer(new MonsterCalamityIncarnationLeftClickC2S());
-            } else if (heldItem.getItem() instanceof FalseProphecy) {
-                LOTMNetworkHandler.sendToServer(new FalseProphecyLeftClickC2S());
-            } else if (heldItem.getItem() instanceof ChaosAmplification) {
-                LOTMNetworkHandler.sendToServer(new CalamityEnhancementLeftClickC2S());
-            } else if (heldItem.getItem() instanceof DeathKnell) {
+            if (item instanceof LeftClickHandlerSkill neededItem) {
+                handleEmptyLeftClickSkill(neededItem);
+            } else if(item instanceof LeftClickHandlerSkillP neededItem) {
+                handleEmptyLeftClickSkill(neededItem, activeSlot);
+            } else if (item instanceof LeftClickHandlerSword neededItem) {
+                handleEmptyLeftClickItem(neededItem);
+            } if (heldItem.getItem() instanceof DeathKnell) {
                 LOTMNetworkHandler.sendToServer(new DeathKnellLeftClickC2S());
-            } else if (heldItem.getItem() instanceof DomainOfProvidence || heldItem.getItem() instanceof DomainOfDecay) {
-                LOTMNetworkHandler.sendToServer(new MonsterDomainLeftClickC2S());
-            } else if (heldItem.getItem() instanceof InvisibleHand) {
-                LOTMNetworkHandler.sendToServer(new ToggleDistanceC2S());
-            } else if (heldItem.getItem() instanceof TravelersDoorWaypoint) {
-                LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
-            } else if (heldItem.getItem() instanceof ScribeAbilities) {
-                LOTMNetworkHandler.sendToServer(new ScribeCopyAbilityC2S());
-            }
-            if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
-                LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
-            } else if (heldItem.getItem() instanceof Sealing) {
-                LOTMNetworkHandler.sendToServer(new SealingLeftClickC2S());
             }
         }
     }
 
-    public static void leftClickBlock(Player pPlayer) {
-        ItemStack heldItem = pPlayer.getMainHandItem();
-        int activeSlot = pPlayer.getInventory().selected;
-        if (ClientLeftclickCooldownData.getCooldown() > 0) {
-            return;
-        }
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> BeyonderUtil::requestCooldown);
-
-        if (!heldItem.isEmpty()) {
-            if (heldItem.getItem() instanceof MonsterDomainTeleporation) {
-                LOTMNetworkHandler.sendToServer(new MonsterLeftClickC2S());
-            }
-            if (heldItem.getItem() instanceof ConsciousnessStroll) {
-                LOTMNetworkHandler.sendToServer(new ConsciousnessStrollC2S());
-            }
-            if (heldItem.getItem() instanceof AqueousLightPush) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_PULL.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof AqueousLightPull) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_DROWN.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickBurning) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFREEZING.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickFreezing) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKTUMBLE.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickTumble) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKWIND.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickWind) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFOG.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickFog) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKELECTRICSHOCK.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickElectricShock) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKTELEKENISIS.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickTelekenisis) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKESCAPETRICK.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickEscapeTrick) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKFLASH.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickFlash) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKLOUDNOISE.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickLoudNoise) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKBLACKCURTAIN.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof TrickBlackCurtain) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.TRICKBURNING.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof AqueousLightDrown) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.AQUEOUS_LIGHT_PUSH.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof MatterAccelerationBlocks) {
-                MatterAccelerationBlocks.leftClick(pPlayer);
-            } else if (heldItem.getItem() instanceof MatterAccelerationEntities) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.MATTER_ACCELERATION_SELF.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof MatterAccelerationSelf) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.MATTER_ACCELERATION_BLOCKS.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof WindManipulationBlade) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.WIND_MANIPULATION_FLIGHT.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof WindManipulationFlight) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.WIND_MANIPULATION_SENSE.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof WindManipulationSense) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.WIND_MANIPULATION_BLADE.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof ApplyManipulation) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.MANIPULATE_EMOTION.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof ManipulateEmotion) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.MANIPULATE_MOVEMENT.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof ManipulateMovement) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.MANIPULATE_FONDNESS.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof ManipulateFondness) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.APPLY_MANIPULATION.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof EnvisionBarrier) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.ENVISION_DEATH.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof EnvisionDeath) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.ENVISION_HEALTH.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof EnvisionHealth) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.ENVISION_LIFE.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof EnvisionLife) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.ENVISION_WEATHER.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof EnvisionWeather) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.ENVISION_LOCATION.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof EnvisionLocation) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.ENVISION_KINGDOM.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof EnvisionKingdom) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.ENVISION_BARRIER.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof MeteorShower) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.METEOR_NO_LEVEL_SHOWER.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof MeteorNoLevelShower) {
-                pPlayer.getInventory().setItem(activeSlot, new ItemStack((ItemInit.METEOR_SHOWER.get())));
-                heldItem.shrink(1);
-            } else if (heldItem.getItem() instanceof Prophecy) {
-                LOTMNetworkHandler.sendToServer(new ProphesizeLeftClickC2S());
-            } else if (heldItem.getItem() instanceof LuckManipulation) {
-                LOTMNetworkHandler.sendToServer(new LuckManipulationLeftClickC2S());
-            } else if (heldItem.getItem() instanceof Gigantification) {
-                LOTMNetworkHandler.sendToServer(new GigantificationC2S());
-            } else if (heldItem.getItem() instanceof MisfortuneManipulation) {
-                LOTMNetworkHandler.sendToServer(new MisfortuneManipulationLeftClickC2S());
-            } else if (heldItem.getItem() instanceof MonsterCalamityIncarnation) {
-                LOTMNetworkHandler.sendToServer(new MonsterCalamityIncarnationLeftClickC2S());
-            } else if (heldItem.getItem() instanceof FalseProphecy) {
-                LOTMNetworkHandler.sendToServer(new FalseProphecyLeftClickC2S());
-            } else if (heldItem.getItem() instanceof ChaosAmplification) {
-                LOTMNetworkHandler.sendToServer(new CalamityEnhancementLeftClickC2S());
-            } else if (heldItem.getItem() instanceof DeathKnell) {
-                LOTMNetworkHandler.sendToServer(new DeathKnellLeftClickC2S());
-            } else if (heldItem.getItem() instanceof TravelersDoorWaypoint) {
-                LOTMNetworkHandler.sendToServer(new TravelerWaypointC2S());
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationFortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYMISFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationMisfortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYINFINITEFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationInfiniteFortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYINFINITEMISFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationInfiniteMisfortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYFORTUNEINCREASE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationWorldFortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYMISFORTUNEINCREASE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationWorldMisfortune) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYWIPE.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationWipe) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYEFFECT.get())));
-            } else if (heldItem.getItem() instanceof ProbabilityManipulationImpulse) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.PROBABILITYFORTUNE.get())));
-            } else if (heldItem.getItem() instanceof InvisibleHand) {
-                LOTMNetworkHandler.sendToServer(new ToggleDistanceC2S());
-            } else if (heldItem.getItem() instanceof ScribeAbilities) {
-                LOTMNetworkHandler.sendToServer(new ScribeCopyAbilityC2S());
-
-            } else if (heldItem.getItem() instanceof DivineHandRight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.DIVINEHANDLEFT.get())));
-            } else if (heldItem.getItem() instanceof DivineHandLeft) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.DIVINEHANDRIGHT.get())));
-            } else if (heldItem.getItem() instanceof BeamOfGlory) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AURAOFGLORY.get())));
-            } else if (heldItem.getItem() instanceof AuraOfGlory) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BEAMOFGLORY.get())));
-            } else if (heldItem.getItem() instanceof AuraOfTwilight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TWILIGHTFREEZE.get())));
-            } else if (heldItem.getItem() instanceof TwilightFreeze) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TWILIGHTACCELERATE.get())));
-            } else if (heldItem.getItem() instanceof TwilightAccelerate) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.TWILIGHTLIGHT.get())));
-            } else if (heldItem.getItem() instanceof TwilightLight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.GLOBEOFTWILIGHT.get())));
-            } else if (heldItem.getItem() instanceof GlobeOfTwilight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BEAMOFTWILIGHT.get())));
-            } else if (heldItem.getItem() instanceof BeamOfTwilight) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.AURAOFTWILIGHT.get())));
-            } else if (heldItem.getItem() instanceof Blink) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINKAFTERIMAGE.get())));
-            } else if (heldItem.getItem() instanceof BlinkAfterimage) {
-                LOTMNetworkHandler.sendToServer(new UpdateItemInHandC2S(activeSlot, new ItemStack(ItemInit.BLINK.get())));
-            } else if (heldItem.getItem() instanceof Sealing) {
-                LOTMNetworkHandler.sendToServer(new SealingLeftClickC2S());
-            }
-        }
-    }
 
     public static void requestCooldown() {
         LOTMNetworkHandler.sendToServer(new RequestCooldownSetC2S());
@@ -1751,8 +1397,6 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.MANIPULATE_EMOTION.get(), applyAbilityStrengthened((225.0f - (sequence * 30)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MANIPULATE_FONDNESS.get(), applyAbilityStrengthened((float) (900.0f * dreamIntoReality) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MENTAL_PLAGUE.get(), applyAbilityStrengthened((float) (300.0f / dreamIntoReality) * abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.METEOR_NO_LEVEL_SHOWER.get(), applyAbilityStrengthened((float) ((15.0f + dreamIntoReality * 3) - (6 * sequence)) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.METEOR_SHOWER.get(), applyAbilityStrengthened((float) ((15.0f + dreamIntoReality * 3) - (6 * sequence)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MIND_READING.get(), applyAbilityStrengthened((0.0f), abilityStrengthened));
         damageMap.put(ItemInit.MIND_STORM.get(), applyAbilityStrengthened((45.0f - (sequence * 3)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.NIGHTMARE.get(), applyAbilityStrengthened((60.0f - (sequence * 3)) / abilityWeakness, abilityStrengthened));
@@ -1889,8 +1533,6 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.DISCERN.get());
         abilityNames.add(ItemInit.DREAM_INTO_REALITY.get());
         abilityNames.add(ItemInit.PROPHECY.get());
-        abilityNames.add(ItemInit.METEOR_SHOWER.get());
-        abilityNames.add(ItemInit.METEOR_NO_LEVEL_SHOWER.get());
         abilityNames.add(ItemInit.ENVISION_BARRIER.get());
         abilityNames.add(ItemInit.ENVISION_DEATH.get());
         abilityNames.add(ItemInit.ENVISION_HEALTH.get());

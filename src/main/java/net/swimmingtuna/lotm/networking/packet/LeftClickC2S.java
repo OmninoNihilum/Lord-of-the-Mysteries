@@ -10,10 +10,11 @@ import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Hurricane;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.LightningStorm;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class LeftClickC2S {
+public class LeftClickC2S implements LeftClickType {
     public LeftClickC2S() {
 
     }

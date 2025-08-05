@@ -21,13 +21,16 @@ import net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.MonsterDomainLeftClickC2S;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DomainOfProvidence extends SimpleAbilityItem {
+public class DomainOfProvidence extends LeftClickHandlerSkill {
     public static final BooleanProperty LIT = BooleanProperty.create("lit");
 
     public DomainOfProvidence(Properties properties) {
@@ -112,5 +115,10 @@ public class DomainOfProvidence extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         return 0;
+    }
+
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new MonsterDomainLeftClickC2S();
     }
 }

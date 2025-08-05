@@ -33,7 +33,10 @@ import net.swimmingtuna.lotm.entity.TornadoEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.ProphesizeLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
@@ -44,7 +47,7 @@ import java.util.List;
 import java.util.Random;
 
 
-public class Prophecy extends SimpleAbilityItem {
+public class Prophecy extends LeftClickHandlerSkill {
 
     public Prophecy(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 1, 1500, 1200);
@@ -394,5 +397,9 @@ public class Prophecy extends SimpleAbilityItem {
 
     public static boolean isOnSurface(Level level, BlockPos pos) {
         return level.canSeeSky(pos.above()) || !level.getBlockState(pos.above()).isSolid();
+    }
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new ProphesizeLeftClickC2S();
     }
 }

@@ -26,7 +26,10 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
@@ -35,7 +38,7 @@ import virtuoel.pehkui.api.ScaleTypes;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class GlobeOfTwilight extends SimpleAbilityItem {
+public class GlobeOfTwilight extends LeftClickHandlerSkillP {
 
 
     public GlobeOfTwilight(Properties properties) {
@@ -201,6 +204,10 @@ public class GlobeOfTwilight extends SimpleAbilityItem {
             return 65;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.BEAMOFTWILIGHT.get()));
     }
 }
 

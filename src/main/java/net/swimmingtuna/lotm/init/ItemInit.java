@@ -12,7 +12,6 @@ import net.swimmingtuna.lotm.armor.DawnArmorItem;
 import net.swimmingtuna.lotm.armor.SilverArmorItem;
 import net.swimmingtuna.lotm.item.AllyMaker;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.BeyonderAbilityUser;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.SpiritVision;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
@@ -249,10 +248,6 @@ public class ItemInit {
             () -> new Prophecy(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ENVISION_LIFE = ITEMS.register("envisionlife",
             () -> new EnvisionLife(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> METEOR_SHOWER = ITEMS.register("meteorshower",
-            () -> new MeteorShower(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> METEOR_NO_LEVEL_SHOWER = ITEMS.register("meteorshowernoblockdestruction",
-            () -> new MeteorNoLevelShower(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ENVISION_WEATHER = ITEMS.register("envisionweather",
             () -> new EnvisionWeather(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ENVISION_BARRIER = ITEMS.register("envisionbarrier",
@@ -588,8 +583,6 @@ public class ItemInit {
     //OTHER
     public static final RegistryObject<Item> BEYONDER_CHARACTERISTIC = ITEMS.register("beyondercharacteristics",
             () -> new BeyonderCharacteristic(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> BEYONDER_ABILITY_USER = ITEMS.register("beyonderabilityuser",
-            () -> new BeyonderAbilityUser(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TEST_ITEM = ITEMS.register("testitem",
             () -> new TestItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ALLY_MAKER = ITEMS.register("ally_maker",

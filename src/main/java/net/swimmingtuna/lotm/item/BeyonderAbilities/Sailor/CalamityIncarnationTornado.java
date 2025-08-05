@@ -13,13 +13,16 @@ import net.swimmingtuna.lotm.entity.TornadoEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class CalamityIncarnationTornado extends SimpleAbilityItem {
+public class CalamityIncarnationTornado extends LeftClickHandlerSkillP {
 
 
     public CalamityIncarnationTornado(Properties properties) {
@@ -66,5 +69,9 @@ public class CalamityIncarnationTornado extends SimpleAbilityItem {
             return (int) (80 - livingEntity.getHealth());
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.CALAMITY_INCARNATION_TSUNAMI.get()));
     }
 }

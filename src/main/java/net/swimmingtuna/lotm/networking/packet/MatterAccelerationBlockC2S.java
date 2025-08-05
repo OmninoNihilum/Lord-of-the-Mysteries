@@ -18,11 +18,12 @@ import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationBlocks;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 
 import java.util.Comparator;
 import java.util.function.Supplier;
 
-public class MatterAccelerationBlockC2S {
+public class MatterAccelerationBlockC2S implements LeftClickType {
     public MatterAccelerationBlockC2S() {
 
     }

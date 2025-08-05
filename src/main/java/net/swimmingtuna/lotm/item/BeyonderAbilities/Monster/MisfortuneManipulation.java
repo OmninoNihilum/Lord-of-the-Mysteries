@@ -33,7 +33,10 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.MisfortuneManipulationLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class MisfortuneManipulation extends SimpleAbilityItem {
+public class MisfortuneManipulation extends LeftClickHandlerSkill {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
     public MisfortuneManipulation(Properties properties) {
@@ -340,5 +343,10 @@ public class MisfortuneManipulation extends SimpleAbilityItem {
             return 95;
         }
         return 0;
+    }
+
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new MisfortuneManipulationLeftClickC2S();
     }
 }

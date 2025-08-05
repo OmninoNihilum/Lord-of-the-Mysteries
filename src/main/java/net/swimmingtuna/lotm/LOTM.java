@@ -40,7 +40,7 @@ import net.swimmingtuna.lotm.init.*;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.screen.ConcealedBundleScreen;
 import net.swimmingtuna.lotm.screen.PotionCauldronScreen;
-import net.swimmingtuna.lotm.spirituality.ModAttributes;
+import net.swimmingtuna.lotm.attributes.ModAttributes;
 import net.swimmingtuna.lotm.util.CustomEntityDataSerializers;
 import net.swimmingtuna.lotm.util.PlayerMobs.NameManager;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -190,7 +190,6 @@ public class LOTM {
             event.accept(ItemInit.BATTLE_HYPNOTISM);
             event.accept(ItemInit.PSYCHOLOGICAL_INVISIBILITY);
             event.accept(ItemInit.GUIDANCE);
-            event.accept(ItemInit.BEYONDER_ABILITY_USER);
             event.accept(ItemInit.ALTERATION);
             event.accept(ItemInit.DREAM_WALKING);
             event.accept(ItemInit.NIGHTMARE);
@@ -209,8 +208,6 @@ public class LOTM {
             event.accept(ItemInit.DREAM_INTO_REALITY);
             event.accept(ItemInit.PROPHECY);
             event.accept(ItemInit.ENVISION_LIFE);
-            event.accept(ItemInit.METEOR_SHOWER);
-            event.accept(ItemInit.METEOR_NO_LEVEL_SHOWER);
             event.accept(ItemInit.ENVISION_WEATHER);
             event.accept(ItemInit.ENVISION_BARRIER);
             event.accept(ItemInit.ENVISION_DEATH);

@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -19,7 +20,10 @@ import net.swimmingtuna.lotm.entity.TwilightLightEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
@@ -27,10 +31,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class TwilightLight extends SimpleAbilityItem {
+public class TwilightLight extends LeftClickHandlerSkillP {
 
 
-    public TwilightLight(Properties properties) {
+    public TwilightLight(Item.Properties properties) {
         super(properties, BeyonderClassInit.WARRIOR, 0, 0, 2000);
     }
 
@@ -133,6 +137,11 @@ public class TwilightLight extends SimpleAbilityItem {
             return 100;
         }
         return 0;
+    }
+
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.GLOBEOFTWILIGHT.get()));
     }
 }
 

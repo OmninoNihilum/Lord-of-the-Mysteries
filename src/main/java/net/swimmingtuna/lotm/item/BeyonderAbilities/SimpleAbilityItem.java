@@ -93,7 +93,6 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
         boolean isKeybindUse = !(living.getItemInHand(InteractionHand.MAIN_HAND).is(this) || living.getItemInHand(InteractionHand.OFF_HAND).is(this));
         if (!isKeybindUse && living instanceof Player) {
             itemCheckPassed = living.getItemInHand(InteractionHand.MAIN_HAND).is(this) ||
-                    living.getItemInHand(InteractionHand.MAIN_HAND).is(ItemInit.BEYONDER_ABILITY_USER.get()) ||
                     living.getItemInHand(InteractionHand.OFF_HAND).is(this);
         }
         if (itemCheckPassed) {

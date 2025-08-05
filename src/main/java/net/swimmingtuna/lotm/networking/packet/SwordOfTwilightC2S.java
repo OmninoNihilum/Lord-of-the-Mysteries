@@ -10,10 +10,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class SwordOfTwilightC2S {
+public class SwordOfTwilightC2S implements LeftClickType {
     public SwordOfTwilightC2S() {
 
     }

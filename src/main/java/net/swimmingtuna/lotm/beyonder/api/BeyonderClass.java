@@ -19,7 +19,6 @@ public interface BeyonderClass {
 
     List<Integer> spiritualityRegen();
 
-    List<Double> maxHealth();
 
     void tick(LivingEntity player, int sequence);
 
@@ -55,4 +54,6 @@ public interface BeyonderClass {
     List<Integer> antiDivination();
 
     List<Integer> divination();
+
+    void applyAllModifiers(LivingEntity entity, int seq);
 }

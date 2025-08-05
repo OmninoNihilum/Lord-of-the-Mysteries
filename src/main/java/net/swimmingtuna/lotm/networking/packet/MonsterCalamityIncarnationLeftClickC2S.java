@@ -4,10 +4,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class MonsterCalamityIncarnationLeftClickC2S {
+public class MonsterCalamityIncarnationLeftClickC2S implements LeftClickType {
     public MonsterCalamityIncarnationLeftClickC2S() {
 
     }

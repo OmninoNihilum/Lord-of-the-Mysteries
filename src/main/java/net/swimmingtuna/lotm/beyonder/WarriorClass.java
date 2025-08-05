@@ -15,6 +15,7 @@ import net.minecraft.world.item.*;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.swimmingtuna.lotm.attributes.WarriorAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -76,8 +77,8 @@ public class WarriorClass implements BeyonderClass {
     }
 
     @Override
-    public List<Double> maxHealth() {
-        return List.of(70.0, 68.0, 65.0, 60.0, 50.0, 42.0, 32.0, 28.0, 28.0, 25.0);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+        WarriorAttributes.applyAll(entity, seq);
     }
 
     @Override
@@ -89,7 +90,7 @@ public class WarriorClass implements BeyonderClass {
             boolean isTwilightGiant = player.getPersistentData().getBoolean("twilightGiant");
             boolean x = !isGiant && !isHoGGiant && !isTwilightGiant;
             if (player.tickCount % 10 == 0) {
-                if (player instanceof Player pPlayer) {
+                if (player instanceof Player) {
                     if (sequenceLevel == 8) {
                         if (player.getMainHandItem().getItem() instanceof ShieldItem || player.getOffhandItem().getItem() instanceof ShieldItem) {
                             applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 20, resistance + 1, true, true);
@@ -137,105 +138,12 @@ public class WarriorClass implements BeyonderClass {
                     applyRandomWeaponEffects(player, sequenceLevel);
                 }
             }
-            if (player.tickCount % 60 == 0) {
-                if (sequenceLevel == 9) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    speed = 1;
-                    strength = 0;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 8) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 0;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 7) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 1;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 6) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 2;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 5) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 1, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 0, false, false);
-                    speed = 1;
-                    strength = 2;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 4) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 3) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 2) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 1) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                } else if (sequenceLevel == 0) {
-                    applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_BOOST, 300, 3, false, false);
-                    applyMobEffect(player, MobEffects.JUMP, 300, 2, false, false);
-                    applyMobEffect(player, MobEffects.DAMAGE_RESISTANCE, 300, 0, false, false);
-                    speed = 2;
-                    strength = 3;
-                    resistance = 0;
-                    regen = -1;
-                }
-            }
         }
     }
 
     @Override
     public Multimap<Integer, Item> getItems() {
         HashMultimap<Integer, Item> items = HashMultimap.create();
-        items.put(9, ItemInit.BEYONDER_ABILITY_USER.get());
         items.put(9, ItemInit.ALLY_MAKER.get());
         items.put(6, ItemInit.GIGANTIFICATION.get());
         items.put(6, ItemInit.LIGHTOFDAWN.get());

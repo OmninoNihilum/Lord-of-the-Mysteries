@@ -26,7 +26,10 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
 import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -35,7 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MatterAccelerationSelf extends SimpleAbilityItem {
+public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
 
     public MatterAccelerationSelf(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 0, 0, 300);
@@ -224,5 +227,9 @@ public class MatterAccelerationSelf extends SimpleAbilityItem {
             return 70;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.MATTER_ACCELERATION_BLOCKS.get()));
     }
 }

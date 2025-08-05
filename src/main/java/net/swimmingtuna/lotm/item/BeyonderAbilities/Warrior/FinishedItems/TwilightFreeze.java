@@ -24,7 +24,10 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class TwilightFreeze extends SimpleAbilityItem {
+public class TwilightFreeze extends LeftClickHandlerSkillP {
 
     public TwilightFreeze(Properties properties) {
         super(properties, BeyonderClassInit.WARRIOR, 0, 3000, 2400);
@@ -210,5 +213,10 @@ public class TwilightFreeze extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) { //marked ... make it so you can choose which somehow
         return 0;
+    }
+
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TWILIGHTACCELERATE.get()));
     }
 }

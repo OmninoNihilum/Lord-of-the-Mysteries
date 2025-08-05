@@ -25,7 +25,10 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +36,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class TrickElectricShock extends SimpleAbilityItem {
+public class TrickElectricShock extends LeftClickHandlerSkillP {
 
 
     public TrickElectricShock(Properties properties) {
@@ -125,6 +128,7 @@ public class TrickElectricShock extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, enables or disables your electric shock. If enabled, all of your attacks will very briefly stun at the cost of some spirituality"));
+        tooltipComponents.add(Component.literal("Left click for Trick: Escape Trick"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("20 or less per attack while enabled, depending on your sequence.").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("10 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -143,5 +147,9 @@ public class TrickElectricShock extends SimpleAbilityItem {
             return 30;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKESCAPETRICK.get()));
     }
 }

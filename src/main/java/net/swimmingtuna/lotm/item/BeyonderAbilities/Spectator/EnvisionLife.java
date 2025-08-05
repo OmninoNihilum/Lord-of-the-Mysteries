@@ -21,12 +21,15 @@ import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class EnvisionLife extends SimpleAbilityItem {
+public class EnvisionLife extends LeftClickHandlerSkillP {
 
     public EnvisionLife(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 0, 0, 400);
@@ -146,5 +149,9 @@ public class EnvisionLife extends SimpleAbilityItem {
             }
         }
         return projectileSize;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.ENVISION_WEATHER.get()));
     }
 }

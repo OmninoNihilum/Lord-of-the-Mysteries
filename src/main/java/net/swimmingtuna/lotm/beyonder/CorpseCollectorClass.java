@@ -52,9 +52,10 @@ public class CorpseCollectorClass implements BeyonderClass {
         return List.of(34, 22, 16, 12, 10, 8, 6, 5, 3, 2);
     }
 
+
     @Override
-    public List<Double> maxHealth() {
-        return List.of(350.0, 250.0, 186.0, 136.0, 96.0, 66.0, 54.0, 48.0, 28.0, 22.0);
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+
     }
 
     @Override
@@ -89,7 +90,6 @@ public class CorpseCollectorClass implements BeyonderClass {
     @Override
     public Multimap<Integer, Item> getItems() {
         HashMultimap<Integer, Item> items = HashMultimap.create();
-        items.put(9, ItemInit.BEYONDER_ABILITY_USER.get());
         items.put(9, ItemInit.ALLY_MAKER.get());
         return items;
     }

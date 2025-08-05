@@ -23,14 +23,16 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.OtherItems.SpearOfDawn;
+import net.swimmingtuna.lotm.networking.packet.DawnWeaponryLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
 import net.swimmingtuna.lotm.util.ModArmorMaterials;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DawnWeaponry extends SimpleAbilityItem {
+public class DawnWeaponry extends LeftClickHandlerSkill {
 
 
     public DawnWeaponry(Properties properties) {
@@ -214,6 +216,11 @@ public class DawnWeaponry extends SimpleAbilityItem {
             return 60;
         }
         return 0;
+    }
+
+    @Override
+    public DawnWeaponryLeftClickC2S getleftClickEmpty() {
+        return new DawnWeaponryLeftClickC2S();
     }
 }
 

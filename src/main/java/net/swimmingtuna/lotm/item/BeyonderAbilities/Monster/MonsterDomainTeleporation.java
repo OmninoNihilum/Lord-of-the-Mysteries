@@ -15,12 +15,15 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.MonsterLeftClickC2S;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class MonsterDomainTeleporation extends SimpleAbilityItem {
+public class MonsterDomainTeleporation extends LeftClickHandlerSkill {
 
     public MonsterDomainTeleporation(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 3, 300, 200);
@@ -68,5 +71,8 @@ public class MonsterDomainTeleporation extends SimpleAbilityItem {
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         return 0;
     }
-
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new MonsterLeftClickC2S();
+    }
 }

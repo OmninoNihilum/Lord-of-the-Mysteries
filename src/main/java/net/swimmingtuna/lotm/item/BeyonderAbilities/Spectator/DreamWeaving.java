@@ -20,6 +20,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.attributes.AttributeHelper;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -136,7 +137,7 @@ public class DreamWeaving extends SimpleAbilityItem {
                 Mob mob = mobEntityType.create(level);
                 if (mob != null) {
                     spawnEntityInRadius(mob, level, x, y, z);
-                    BeyonderHolder.updateMaxHealthModifier(mob, 551);
+                    AttributeHelper.setHealth(entity, 551);
                     mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
                     mob.setTarget(entity);
                     mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);

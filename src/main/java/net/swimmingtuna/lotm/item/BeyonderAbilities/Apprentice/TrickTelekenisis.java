@@ -24,14 +24,17 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TrickTelekenisis extends SimpleAbilityItem {
+public class TrickTelekenisis extends LeftClickHandlerSkillP {
 
 
     public TrickTelekenisis(Properties properties) {
@@ -121,6 +124,7 @@ public class TrickTelekenisis extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, enables or disables your telekenisis. If enabled, all projectiles and other entities will be pushed away from you at the cost of spirituality for each entity pushed away."));
+        tooltipComponents.add(Component.literal("Left click for Trick: Tumble"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("Depends on strength of entity pushed.").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second.").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -142,5 +146,9 @@ public class TrickTelekenisis extends SimpleAbilityItem {
             return 0;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKTUMBLE.get()));
     }
 }

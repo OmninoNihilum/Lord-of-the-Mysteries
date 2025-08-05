@@ -7,10 +7,11 @@ import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfDecay;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfProvidence;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 
 import java.util.function.Supplier;
 
-public class MonsterDomainLeftClickC2S {
+public class MonsterDomainLeftClickC2S implements LeftClickType {
     public MonsterDomainLeftClickC2S() {
 
     }

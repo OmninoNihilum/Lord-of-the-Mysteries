@@ -22,7 +22,10 @@ import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.TravelerWaypointC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +33,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class TravelersDoorWaypoint extends SimpleAbilityItem {
+public class TravelersDoorWaypoint extends LeftClickHandlerSkill {
 
     public TravelersDoorWaypoint(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 5, 300, 20);
@@ -256,7 +259,7 @@ public class TravelersDoorWaypoint extends SimpleAbilityItem {
     }
 
     @Override
-    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        return 0;
+    public LeftClickType getleftClickEmpty() {
+        return new TravelerWaypointC2S();
     }
 }

@@ -21,7 +21,10 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -30,8 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class TrickEscapeTrick extends SimpleAbilityItem {
-    private static final int MIN_TELEPORT_Y = -60; // Minimum Y level to prevent void teleportation
+public class TrickEscapeTrick extends LeftClickHandlerSkillP {
+    private static final int MIN_TELEPORT_Y = -60;
 
     public TrickEscapeTrick(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 8, 150, 200);
@@ -301,6 +304,7 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, saves an Escape Trick, which causes the next time you take damage to be canceled, turning you into smoke and teleporting a small distance away."));
+        tooltipComponents.add(Component.literal("Left click for Trick: Flash"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("150").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("10 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -323,5 +327,9 @@ public class TrickEscapeTrick extends SimpleAbilityItem {
             return 0;
         }
         return 0;
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKFLASH.get()));
     }
 }

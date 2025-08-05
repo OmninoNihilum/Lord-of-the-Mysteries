@@ -18,14 +18,17 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.LuckManipulationLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class LuckManipulation extends SimpleAbilityItem {
+public class LuckManipulation extends LeftClickHandlerSkill {
     public LuckManipulation(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 5, 150, 60);
     }
@@ -163,5 +166,8 @@ public class LuckManipulation extends SimpleAbilityItem {
         }
         return (int) priority;
     }
-
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new LuckManipulationLeftClickC2S();
+    }
 }

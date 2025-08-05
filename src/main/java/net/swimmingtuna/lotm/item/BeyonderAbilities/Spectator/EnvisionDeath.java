@@ -14,13 +14,16 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class EnvisionDeath extends SimpleAbilityItem {
+public class EnvisionDeath extends LeftClickHandlerSkillP {
 
     public EnvisionDeath(Properties properties) {
         super(properties, BeyonderClassInit.SPECTATOR, 0, 2000, 2400);
@@ -55,29 +58,33 @@ public class EnvisionDeath extends SimpleAbilityItem {
         }
     }
 
-@Override
-public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-    tooltipComponents.add(Component.literal("Upon use, envision the death of everything around you"));
-    tooltipComponents.add(Component.literal("Left Click for Envision Health"));
-    tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2000").withStyle(ChatFormatting.YELLOW)));
-    tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Minutes").withStyle(ChatFormatting.YELLOW)));
-    tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
-    tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
-    super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
-}
-
-@Override
-public @NotNull Rarity getRarity(ItemStack pStack) {
-    return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
-}
-
-@Override
-public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-    float damage = BeyonderUtil.getDamage(livingEntity).get(this);
-    if (target != null && target.getHealth() <= damage) {
-        return 100;
-    } else {
-        return 15;
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("Upon use, envision the death of everything around you"));
+        tooltipComponents.add(Component.literal("Left Click for Envision Health"));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2000").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Minutes").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
+        tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
+        super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
-}
+
+    @Override
+    public @NotNull Rarity getRarity(ItemStack pStack) {
+        return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        float damage = BeyonderUtil.getDamage(livingEntity).get(this);
+        if (target != null && target.getHealth() <= damage) {
+            return 100;
+        } else {
+            return 15;
+        }
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.ENVISION_HEALTH.get()));
+    }
 }

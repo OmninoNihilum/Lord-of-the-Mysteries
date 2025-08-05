@@ -25,7 +25,10 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BlinkAfterimage extends SimpleAbilityItem {
+public class BlinkAfterimage extends LeftClickHandlerSkillP {
 
 
     public BlinkAfterimage(Properties properties) {
@@ -212,5 +215,9 @@ public class BlinkAfterimage extends SimpleAbilityItem {
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
+    }
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.BLINK.get()));
     }
 }

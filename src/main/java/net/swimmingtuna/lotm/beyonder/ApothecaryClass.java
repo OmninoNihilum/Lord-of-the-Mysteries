@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -38,6 +39,11 @@ public class ApothecaryClass implements BeyonderClass {
     }
 
     @Override
+    public void applyAllModifiers(LivingEntity entity, int seq) {
+
+    }
+
+    @Override
     public List<Integer> spiritualityLevels() {
         return List.of(10000, 5000, 3000, 1800, 1200, 700, 450, 300, 175, 125);
     }
@@ -52,10 +58,6 @@ public class ApothecaryClass implements BeyonderClass {
         return List.of(34, 22, 16, 12, 10, 8, 6, 5, 3, 2);
     }
 
-    @Override
-    public List<Double> maxHealth() {
-        return List.of(350.0, 250.0, 186.0, 136.0, 96.0, 66.0, 54.0, 48.0, 28.0, 22.0);
-    }
 
     @Override
     public void tick(LivingEntity player, int sequenceLevel) {
@@ -89,7 +91,6 @@ public class ApothecaryClass implements BeyonderClass {
     @Override
     public Multimap<Integer, Item> getItems() {
         HashMultimap<Integer, Item> items = HashMultimap.create();
-        items.put(9, ItemInit.BEYONDER_ABILITY_USER.get());
         items.put(9, ItemInit.ALLY_MAKER.get());
         return items;
     }
@@ -99,4 +100,3 @@ public class ApothecaryClass implements BeyonderClass {
         return ChatFormatting.DARK_GREEN;
     }
 }
-  

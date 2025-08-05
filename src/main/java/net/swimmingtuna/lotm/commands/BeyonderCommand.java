@@ -53,8 +53,8 @@ public class BeyonderCommand {
                                         ScaleData scaleData = ScaleTypes.BASE.getScaleData(player);
                                         scaleData.setScale(1);
                                         Abilities playerAbilities = player.getAbilities();
-                                        playerAbilities.setFlyingSpeed(0.05F);
-                                        playerAbilities.setWalkingSpeed(0.1F);
+                                        //playerAbilities.setFlyingSpeed(0.05F);
+                                        //playerAbilities.setWalkingSpeed(0.1F);
                                         player.onUpdateAbilities();
                                         if (player instanceof ServerPlayer serverPlayer) {
                                             serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
@@ -103,7 +103,6 @@ public class BeyonderCommand {
                                     player.setItemSlot(EquipmentSlot.LEGS, createArmorLow(Items.IRON_LEGGINGS.getDefaultInstance()));
                                     player.setItemSlot(EquipmentSlot.FEET, createArmorLow(Items.IRON_BOOTS.getDefaultInstance()));
                                     inventory.setItem(findClosestEmptySlot(player), createSwordLow(Items.IRON_SWORD.getDefaultInstance()));
-                                    inventory.setItem(findClosestEmptySlot(player), ItemInit.BEYONDER_ABILITY_USER.get().getDefaultInstance());
                                     return 1;
                                 }))
                         .then(Commands.literal("mid")
@@ -115,7 +114,6 @@ public class BeyonderCommand {
                                     player.setItemSlot(EquipmentSlot.LEGS, createArmorMid(Items.DIAMOND_LEGGINGS.getDefaultInstance()));
                                     player.setItemSlot(EquipmentSlot.FEET, createArmorMid(Items.DIAMOND_BOOTS.getDefaultInstance()));
                                     inventory.setItem(findClosestEmptySlot(player), createSwordMid(Items.DIAMOND_SWORD.getDefaultInstance()));
-                                    inventory.setItem(findClosestEmptySlot(player), ItemInit.BEYONDER_ABILITY_USER.get().getDefaultInstance());
                                     return 1;
                                 }))
                         .then(Commands.literal("high")
@@ -127,7 +125,6 @@ public class BeyonderCommand {
                                     player.setItemSlot(EquipmentSlot.LEGS, createArmorHigh(Items.NETHERITE_LEGGINGS.getDefaultInstance()));
                                     player.setItemSlot(EquipmentSlot.FEET, createArmorHigh(Items.NETHERITE_BOOTS.getDefaultInstance()));
                                     inventory.setItem(findClosestEmptySlot(player), createSwordHigh(Items.NETHERITE_SWORD.getDefaultInstance()));
-                                    inventory.setItem(findClosestEmptySlot(player), ItemInit.BEYONDER_ABILITY_USER.get().getDefaultInstance());
                                     return 1;
                                 }))
                 ));

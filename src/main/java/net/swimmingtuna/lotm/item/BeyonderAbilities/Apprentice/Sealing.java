@@ -26,7 +26,10 @@ import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.SealingLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +37,7 @@ import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
 
-public class Sealing extends SimpleAbilityItem {
+public class Sealing extends LeftClickHandlerSkill {
     public Sealing(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 2, 3000, 1500);
     }
@@ -136,5 +139,9 @@ public class Sealing extends SimpleAbilityItem {
             return 60;
         }
         return 0;
+    }
+    @Override
+    public LeftClickType getleftClickEmpty() {
+        return new SealingLeftClickC2S();
     }
 }

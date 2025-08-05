@@ -645,7 +645,7 @@ java.lang.IllegalAccessException: class io.netty.util.internal.PlatformDependent
 [20May2025 23:16:44.972] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.ProphesizeDemise to FORGE
 [20May2025 23:16:44.977] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing net.swimmingtuna.lotm.LOTM$ClientModEvents to MOD
 [20May2025 23:16:44.979] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing net.swimmingtuna.lotm.LOTM to MOD
-[20May2025 23:16:44.983] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing net.swimmingtuna.lotm.spirituality.AttributeAdder to MOD
+[20May2025 23:16:44.983] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing net.swimmingtuna.lotm.attributes.AttributeAdder to MOD
 [20May2025 23:16:45.017] [main/DEBUG] [net.minecraftforge.registries.ObjectHolderRegistry/REGISTRIES]: Processing ObjectHolder annotations
 [20May2025 23:16:45.047] [main/DEBUG] [net.minecraftforge.registries.ObjectHolderRegistry/REGISTRIES]: Found 4512 ObjectHolder annotations
 [20May2025 23:16:45.051] [main/DEBUG] [net.minecraftforge.common.capabilities.CapabilityManager/CAPABILITIES]: Attempting to automatically register: Lnet/minecraftforge/energy/IEnergyStorage;
