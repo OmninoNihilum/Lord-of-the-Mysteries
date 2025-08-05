@@ -275,6 +275,7 @@ public class ModEvents {
             if (ClientShouldntMoveData.getDontMoveTimer() >= 1) {
                 ClientShouldntMoveData.decrementDontMoveTimer();
             }
+            ClientGrayscaleData.decrementDuration();
             if (player.tickCount % 100 == 0) {
                 //DimensionalSightEntity.debugLoadedChunks();
             }

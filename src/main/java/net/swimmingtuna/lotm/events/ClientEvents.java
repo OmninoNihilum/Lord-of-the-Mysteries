@@ -8,9 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -21,9 +19,13 @@ import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
 import net.swimmingtuna.lotm.client.WormOfStarOverlay;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
+import net.swimmingtuna.lotm.util.ClientData.ClientGrayscaleData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
+import net.swimmingtuna.lotm.util.ClientUtil;
 import net.swimmingtuna.lotm.util.SpiritWorld.SpiritWorldHandler;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
+
+import static net.swimmingtuna.lotm.util.ClientUtil.renderGrayscaleUsingGUI;
 
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
@@ -55,6 +57,16 @@ public class ClientEvents {
     }
 
      */
+
+
+    @SubscribeEvent
+    public static void onRenderGui(RenderGuiEvent.Pre event) {
+        // Decrement the timer and render overlay before GUI rendering
+        if (ClientGrayscaleData.isActive()) {
+            renderGrayscaleUsingGUI(event.getGuiGraphics());
+        }
+    }
+
 
     private static float lerpAngle(float partialTick, float prev, float current) {
         return prev + (current - prev) * partialTick;

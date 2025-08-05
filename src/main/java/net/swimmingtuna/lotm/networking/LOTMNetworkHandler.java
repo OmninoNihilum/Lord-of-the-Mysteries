@@ -277,6 +277,11 @@ public class LOTMNetworkHandler {
                 .encoder(ClientFogDataS2C::toByte)
                 .consumerMainThread(ClientFogDataS2C::handle)
                 .add();
+        INSTANCE.messageBuilder(ClientGrayscaleS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientGrayscaleS2C::new)
+                .encoder(ClientGrayscaleS2C::toByte)
+                .consumerMainThread(ClientGrayscaleS2C::handle)
+                .add();
         INSTANCE.messageBuilder(ClientShouldntMovePacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(ClientShouldntMovePacketS2C::new)
                 .encoder(ClientShouldntMovePacketS2C::toByte)

@@ -125,6 +125,7 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
                     if (entity instanceof LivingEntity livingTarget && livingTarget != owner) {
                         livingTarget.getPersistentData().putInt("cancelTick", 10);
                         BeyonderUtil.applyStun(livingTarget, 10);
+                        BeyonderUtil.setGray(livingTarget, 10);
                         livingTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 5, false, false));
                     } else if (!(entity instanceof LivingEntity) && !(entity instanceof ColoredBoxEntity)) {
                         if (entity.distanceTo(this) <= 10) {

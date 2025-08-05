@@ -4540,4 +4540,10 @@ public class BeyonderUtil {
             }
         }
     }
+
+    public static void setGray(LivingEntity player, int duration) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            LOTMNetworkHandler.sendToPlayer(new ClientGrayscaleS2C(duration * 2, 1.8f), serverPlayer);
+        }
+    }
 }

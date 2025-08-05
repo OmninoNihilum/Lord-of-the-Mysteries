@@ -75,6 +75,10 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
+            BeyonderUtil.setGray(livingEntity, 100);
+            if (livingEntity.isShiftKeyDown()) {
+                BeyonderUtil.setGray(livingEntity, 0);
+            }
             /*
             MinecraftServer server = livingEntity.getServer();
             if (server != null && livingEntity instanceof Player pPlayer) {
