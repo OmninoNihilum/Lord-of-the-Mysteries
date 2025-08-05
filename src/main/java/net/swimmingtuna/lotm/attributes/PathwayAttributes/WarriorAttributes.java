@@ -10,19 +10,19 @@ import net.swimmingtuna.lotm.attributes.ModAttributes;
 import java.util.List;
 
 public class WarriorAttributes extends BaseAttributes {
-    private static final List<Double> healthList
+    public static final List<Double> healthList
             = List.of(70.0, 68.0, 65.0, 60.0, 50.0, 42.0, 32.0, 28.0, 28.0, 25.0);
-    private static final List<Double> speedList
+    public static final List<Double> speedList
             = List.of(0.12, 0.1, 0.08, 0.08, 0.07, 0.06, 0.06, 0.04, 0.04, 0.02);
-    private static final List<Double> attackList
+    public static final List<Double> attackList
             = List.of(20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0, 4.0, 2.0);
-    private static final List<Double> jumpList
+    public static final List<Double> jumpList
             = List.of(0.225, 0.2, 0.175, 0.175, 0.15, 0.15, 0.125, 0.125, 0.1, 0.0);
-    private static final List<Double> armorList
+    public static final List<Double> armorList
             = List.of(20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0, 4.0, 2.0);
-    private static final List<Double> armorToughnessList
+    public static final List<Double> armorToughnessList
             = List.of(16.0, 15.0, 14.0, 13.0, 12.0, 10.0, 8.0, 6.0, 4.0, 2.0);
-    private static final List<Double> digSpeedList
+    public static final List<Double> digSpeedList
             = List.of(12.0, 11.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 2.0);
 
     public static void applyAll(LivingEntity entity, int seq) {

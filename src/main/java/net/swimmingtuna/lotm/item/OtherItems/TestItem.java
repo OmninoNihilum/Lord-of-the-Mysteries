@@ -14,6 +14,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.attributes.AttributeHelper;
 import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -57,9 +59,12 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity player, LivingEntity interactionTarget, InteractionHand hand) {
         if (!player.level().isClientSide()) {
-            BeyonderUtil.setPathway(interactionTarget, BeyonderClassInit.SAILOR.get());
-            BeyonderUtil.setSequence(interactionTarget, 5);
-            DragonBreathEntity.shootDragonBreathLarge(interactionTarget, 30, interactionTarget.getX(), interactionTarget.getY(), interactionTarget.getZ());
+            LOTM.sendMessageToAllPlayers("JUMP BOOST IS " + AttributeHelper.getJumpBoost(interactionTarget));
+            LOTM.sendMessageToAllPlayers("FIRE RESISTANCE IS " + AttributeHelper.getFireResistance(interactionTarget));
+            LOTM.sendMessageToAllPlayers("NIGHT VISION IS " + AttributeHelper.getNightVision(interactionTarget));
+            LOTM.sendMessageToAllPlayers("DIG SPEED IS " + AttributeHelper.getDigSpeed(interactionTarget));
+            LOTM.sendMessageToAllPlayers("WATER BREATHING BOOST IS " + AttributeHelper.getWaterBreathing(interactionTarget));
+
         }
         return InteractionResult.SUCCESS;
     }
