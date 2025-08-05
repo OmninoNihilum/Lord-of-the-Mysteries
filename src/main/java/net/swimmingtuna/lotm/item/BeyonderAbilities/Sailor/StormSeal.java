@@ -16,6 +16,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.entity.MCLightningBoltEntity;
 import net.swimmingtuna.lotm.entity.StormSealEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -23,6 +25,7 @@ import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -64,12 +67,13 @@ public class StormSeal extends SimpleAbilityItem {
         LivingEntity entity = event.getEntity();
         CompoundTag tag = entity.getPersistentData();
         if (!entity.level().isClientSide()) {
-            if (tag.getInt("inStormSeal") >= 3) {
+            if (tag.contains("stormSealUUID") && SealedUtils.hasSpecificSeal(entity, tag.getUUID("stormSealUUID"))) {
                 int stormSeal = tag.getInt("inStormSeal");
                 int x = tag.getInt("stormSealX");
                 int y = tag.getInt("stormSealY");
                 int z = tag.getInt("stormSealZ");
-                entity.teleportTo(x, y + 4000, z);
+                if(stormSeal > 3)entity.teleportTo(x, y + 4000, z);
+                else entity.teleportTo(x, y, z);
                 BlockPos lightningSpawnPos = new BlockPos((int) (entity.getX() + (Math.random() * 20) - 10), (int) (entity.getY() + (Math.random() * 20) - 10), (int) (entity.getZ() + (Math.random() * 20) - 10));
                 MCLightningBoltEntity lightningBolt = new MCLightningBoltEntity(EntityInit.MC_LIGHTNING_BOLT.get(), entity.level());
                 lightningBolt.teleportTo(lightningSpawnPos.getX(), lightningSpawnPos.getY(), lightningSpawnPos.getZ());
@@ -89,13 +93,13 @@ public class StormSeal extends SimpleAbilityItem {
                         player.displayClientMessage(Component.literal("You are stuck in the storm seal for " + sealSeconds + " seconds").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                     }
                 }
-            }
-            if (tag.getInt("inStormSeal") == 2 || tag.getInt("inStormSeal") == 1) {
-                int x = tag.getInt("stormSealX");
-                int y = tag.getInt("stormSealY");
-                int z = tag.getInt("stormSealZ");
-                tag.putInt("inStormSeal", tag.getInt("inStormSeal") - 1);
-                entity.teleportTo(x, y, z);
+            }else{
+
+                tag.remove("inStormSeal");
+                tag.remove("stormSealX");
+                tag.remove("stormSealY");
+                tag.remove("stormSealZ");
+                tag.remove("stormSealUUID");
             }
         }
     }

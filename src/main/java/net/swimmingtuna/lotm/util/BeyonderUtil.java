@@ -679,8 +679,7 @@ public class BeyonderUtil {
             if (sequence <= 1) {
                 abilityNames.add(ItemInit.SPACE_FRAGMENTATION.get());
                 abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
-                abilityNames.add(ItemInit.SPATIAL_SEAL.get());
-                abilityNames.add(ItemInit.SPATIAL_LOCK_ON.get());
+                abilityNames.add(ItemInit.SPATIAL_MAZE.get());
             }
             if (sequence <= 0) {
                 abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
@@ -1844,6 +1843,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.SEPARATE_WORM_OF_STAR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
+        damageMap.put(ItemInit.SPACE_FRAGMENTATION.get(), applyAbilityStrengthened((80 - sequence * 15.0f) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SYMBOLIZATION.get(), applyAbilityStrengthened((160.0f - sequence * 30) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.TELEPORTATION.get(), applyAbilityStrengthened((1.0f - (sequence * 0.015f)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.TRAVELERSDOOR.get(), applyAbilityStrengthened(1.0f + (sequence * 0.1f) * abilityWeakness, abilityStrengthened));
@@ -1860,6 +1860,202 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.TRICKWIND.get(), applyAbilityStrengthened((150 - (sequence * 15.0f)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.GRAVITY_MANIPULATION.get(), applyAbilityStrengthened((500.0f - sequence * 150) / abilityWeakness, abilityStrengthened));
         return damageMap;
+    }
+
+    public static List<Item> getAbilities() {
+        List<Item> abilityNames = new ArrayList<>();
+        //Spectator
+        abilityNames.add(ItemInit.MIND_READING.get());
+        abilityNames.add(ItemInit.AWE.get());
+        abilityNames.add(ItemInit.FRENZY.get());
+        abilityNames.add(ItemInit.PLACATE.get());
+        abilityNames.add(ItemInit.PSYCHOLOGICAL_INVISIBILITY.get());
+        abilityNames.add(ItemInit.BATTLE_HYPNOTISM.get());
+        abilityNames.add(ItemInit.GUIDANCE.get());
+        abilityNames.add(ItemInit.ALTERATION.get());
+        abilityNames.add(ItemInit.NIGHTMARE.get());
+        abilityNames.add(ItemInit.DREAM_WALKING.get());
+        abilityNames.add(ItemInit.FRENZY.get());
+        abilityNames.add(ItemInit.APPLY_MANIPULATION.get());
+        abilityNames.add(ItemInit.MANIPULATE_MOVEMENT.get());
+        abilityNames.add(ItemInit.MANIPULATE_FONDNESS.get());
+        abilityNames.add(ItemInit.MANIPULATE_EMOTION.get());
+        abilityNames.add(ItemInit.MENTAL_PLAGUE.get());
+        abilityNames.add(ItemInit.MIND_STORM.get());
+        abilityNames.add(ItemInit.DRAGON_BREATH.get());
+        abilityNames.add(ItemInit.CONSCIOUSNESS_STROLL.get());
+        abilityNames.add(ItemInit.PLAGUE_STORM.get());
+        abilityNames.add(ItemInit.DREAM_WEAVING.get());
+        abilityNames.add(ItemInit.DISCERN.get());
+        abilityNames.add(ItemInit.DREAM_INTO_REALITY.get());
+        abilityNames.add(ItemInit.PROPHECY.get());
+        abilityNames.add(ItemInit.METEOR_SHOWER.get());
+        abilityNames.add(ItemInit.METEOR_NO_LEVEL_SHOWER.get());
+        abilityNames.add(ItemInit.ENVISION_BARRIER.get());
+        abilityNames.add(ItemInit.ENVISION_DEATH.get());
+        abilityNames.add(ItemInit.ENVISION_HEALTH.get());
+        abilityNames.add(ItemInit.ENVISION_KINGDOM.get());
+        abilityNames.add(ItemInit.ENVISION_LIFE.get());
+        abilityNames.add(ItemInit.ENVISION_LOCATION.get());
+        abilityNames.add(ItemInit.ENVISION_WEATHER.get());
+
+        //Sailor
+        abilityNames.add(ItemInit.RAGING_BLOWS.get());
+        abilityNames.add(ItemInit.ENABLE_OR_DISABLE_LIGHTNING.get());
+        abilityNames.add(ItemInit.AQUEOUS_LIGHT_PUSH.get());
+        abilityNames.add(ItemInit.AQUEOUS_LIGHT_PULL.get());
+        abilityNames.add(ItemInit.AQUEOUS_LIGHT_DROWN.get());
+        abilityNames.add(ItemInit.SAILORPROJECTILECTONROL.get());
+        abilityNames.add(ItemInit.WIND_MANIPULATION_BLADE.get());
+        abilityNames.add(ItemInit.WIND_MANIPULATION_FLIGHT.get());
+        abilityNames.add(ItemInit.WIND_MANIPULATION_SENSE.get());
+        abilityNames.add(ItemInit.SAILOR_LIGHTNING.get());
+        abilityNames.add(ItemInit.SIREN_SONG_HARM.get());
+        abilityNames.add(ItemInit.SIREN_SONG_STRENGTHEN.get());
+        abilityNames.add(ItemInit.SIREN_SONG_WEAKEN.get());
+        abilityNames.add(ItemInit.SIREN_SONG_STUN.get());
+        abilityNames.add(ItemInit.ACIDIC_RAIN.get());
+        abilityNames.add(ItemInit.WATER_SPHERE.get());
+        abilityNames.add(ItemInit.TSUNAMI.get());
+        abilityNames.add(ItemInit.TSUNAMI_SEAL.get());
+        abilityNames.add(ItemInit.HURRICANE.get());
+        abilityNames.add(ItemInit.TORNADO.get());
+        abilityNames.add(ItemInit.EARTHQUAKE.get());
+        abilityNames.add(ItemInit.ROAR.get());
+        abilityNames.add(ItemInit.AQUATIC_LIFE_MANIPULATION.get());
+        abilityNames.add(ItemInit.LIGHTNING_STORM.get());
+        abilityNames.add(ItemInit.LIGHTNING_BRANCH.get());
+        abilityNames.add(ItemInit.SONIC_BOOM.get());
+        abilityNames.add(ItemInit.THUNDER_CLAP.get());
+        abilityNames.add(ItemInit.RAIN_EYES.get());
+        abilityNames.add(ItemInit.VOLCANIC_ERUPTION.get());
+        abilityNames.add(ItemInit.EXTREME_COLDNESS.get());
+        abilityNames.add(ItemInit.LIGHTNING_BALL.get());
+        abilityNames.add(ItemInit.LIGHTNING_BALL_ABSORB.get());
+        abilityNames.add(ItemInit.SAILOR_LIGHTNING_TRAVEL.get());
+        abilityNames.add(ItemInit.STAR_OF_LIGHTNING.get());
+        abilityNames.add(ItemInit.LIGHTNING_REDIRECTION.get());
+        abilityNames.add(ItemInit.STORM_SEAL.get());
+        abilityNames.add(ItemInit.WATER_COLUMN.get());
+        abilityNames.add(ItemInit.MATTER_ACCELERATION_SELF.get());
+        abilityNames.add(ItemInit.MATTER_ACCELERATION_BLOCKS.get());
+        abilityNames.add(ItemInit.MATTER_ACCELERATION_ENTITIES.get());
+        abilityNames.add(ItemInit.TYRANNY.get());
+
+        //Monster
+        abilityNames.add(ItemInit.SPIRITVISION.get());
+        abilityNames.add(ItemInit.MONSTERDANGERSENSE.get());
+        abilityNames.add(ItemInit.MONSTERPROJECTILECONTROL.get());
+        abilityNames.add(ItemInit.LUCKPERCEPTION.get());
+        abilityNames.add(ItemInit.PSYCHESTORM.get());
+        abilityNames.add(ItemInit.LUCK_MANIPULATION.get());
+        abilityNames.add(ItemInit.LUCKDEPRIVATION.get());
+        abilityNames.add(ItemInit.LUCKGIFTING.get());
+        abilityNames.add(ItemInit.MISFORTUNEBESTOWAL.get());
+        abilityNames.add(ItemInit.LUCKFUTURETELLING.get());
+        abilityNames.add(ItemInit.DECAYDOMAIN.get());
+        abilityNames.add(ItemInit.PROVIDENCEDOMAIN.get());
+        abilityNames.add(ItemInit.LUCKCHANNELING.get());
+        abilityNames.add(ItemInit.LUCKDENIAL.get());
+        abilityNames.add(ItemInit.MISFORTUNEMANIPULATION.get());
+        abilityNames.add(ItemInit.MONSTERCALAMITYATTRACTION.get());
+        abilityNames.add(ItemInit.CALAMITYINCARNATION.get());
+        abilityNames.add(ItemInit.ENABLEDISABLERIPPLE.get());
+        abilityNames.add(ItemInit.AURAOFCHAOS.get());
+        abilityNames.add(ItemInit.CHAOSWALKERCOMBAT.get());
+        abilityNames.add(ItemInit.MISFORTUNEREDIRECTION.get());
+        abilityNames.add(ItemInit.MONSTERDOMAINTELEPORATION.get());
+        abilityNames.add(ItemInit.WHISPEROFCORRUPTION.get());
+        abilityNames.add(ItemInit.FORTUNEAPPROPIATION.get());
+        abilityNames.add(ItemInit.FALSEPROPHECY.get());
+        abilityNames.add(ItemInit.MISFORTUNEIMPLOSION.get());
+        abilityNames.add(ItemInit.MONSTERREBOOT.get());
+        abilityNames.add(ItemInit.FATEREINCARNATION.get());
+        abilityNames.add(ItemInit.CYCLEOFFATE.get());
+        abilityNames.add(ItemInit.CHAOSAMPLIFICATION.get());
+        abilityNames.add(ItemInit.FATEDCONNECTION.get());
+        abilityNames.add(ItemInit.REBOOTSELF.get());
+        abilityNames.add(ItemInit.PROBABILITYMISFORTUNEINCREASE.get());
+        abilityNames.add(ItemInit.PROBABILITYFORTUNEINCREASE.get());
+        abilityNames.add(ItemInit.PROBABILITYFORTUNE.get());
+        abilityNames.add(ItemInit.PROBABILITYMISFORTUNE.get());
+        abilityNames.add(ItemInit.PROBABILITYWIPE.get());
+        abilityNames.add(ItemInit.PROBABILITYEFFECT.get());
+        abilityNames.add(ItemInit.PROBABILITYINFINITEFORTUNE.get());
+        abilityNames.add(ItemInit.PROBABILITYINFINITEMISFORTUNE.get());
+
+        //Warrior
+        abilityNames.add(ItemInit.GIGANTIFICATION.get());
+        abilityNames.add(ItemInit.LIGHTOFDAWN.get());
+        abilityNames.add(ItemInit.DAWNARMORY.get());
+        abilityNames.add(ItemInit.DAWNWEAPONRY.get());
+        abilityNames.add(ItemInit.ENABLEDISABLEPROTECTION.get());
+        abilityNames.add(ItemInit.EYEOFDEMONHUNTING.get());
+        abilityNames.add(ItemInit.WARRIORDANGERSENSE.get());
+        abilityNames.add(ItemInit.MERCURYLIQUEFICATION.get());
+        abilityNames.add(ItemInit.SILVERSWORDMANIFESTATION.get());
+        abilityNames.add(ItemInit.SILVERRAPIER.get());
+        abilityNames.add(ItemInit.SILVERARMORY.get());
+        abilityNames.add(ItemInit.LIGHTCONCEALMENT.get());
+        abilityNames.add(ItemInit.BEAMOFGLORY.get());
+        abilityNames.add(ItemInit.AURAOFGLORY.get());
+        abilityNames.add(ItemInit.TWILIGHTSWORD.get());
+        abilityNames.add(ItemInit.MERCURYCAGE.get());
+        abilityNames.add(ItemInit.DIVINEHANDLEFT.get());
+        abilityNames.add(ItemInit.DIVINEHANDRIGHT.get());
+        abilityNames.add(ItemInit.TWILIGHTMANIFESTATION.get());
+        abilityNames.add(ItemInit.AURAOFTWILIGHT.get());
+        abilityNames.add(ItemInit.TWILIGHTFREEZE.get());
+        abilityNames.add(ItemInit.TWILIGHTACCELERATE.get());
+        abilityNames.add(ItemInit.GLOBEOFTWILIGHT.get());
+        abilityNames.add(ItemInit.BEAMOFTWILIGHT.get());
+        abilityNames.add(ItemInit.TWILIGHTLIGHT.get());
+
+        //Apprentice
+        abilityNames.add(ItemInit.CREATEDOOR.get());
+        abilityNames.add(ItemInit.TRICKBURNING.get());
+        abilityNames.add(ItemInit.TRICKFREEZING.get());
+        abilityNames.add(ItemInit.TRICKTUMBLE.get());
+        abilityNames.add(ItemInit.TRICKWIND.get());
+        abilityNames.add(ItemInit.TRICKFOG.get());
+        abilityNames.add(ItemInit.TRICKELECTRICSHOCK.get());
+        abilityNames.add(ItemInit.TRICKTELEKENISIS.get());
+        abilityNames.add(ItemInit.TRICKESCAPETRICK.get());
+        abilityNames.add(ItemInit.TRICKFLASH.get());
+        abilityNames.add(ItemInit.TRICKLOUDNOISE.get());
+        abilityNames.add(ItemInit.TRICKBLACKCURTAIN.get());
+        abilityNames.add(ItemInit.ASTROLOGER_SPIRIT_VISION.get());
+        abilityNames.add(ItemInit.RECORDSCRIBE.get());
+        abilityNames.add(ItemInit.SCRIBEABILITIES.get());
+        abilityNames.add(ItemInit.TRAVELERSDOOR.get());
+        abilityNames.add(ItemInit.TRAVELERSDOORHOME.get());
+        abilityNames.add(ItemInit.INVISIBLEHAND.get());
+        abilityNames.add(ItemInit.BLINK.get());
+        abilityNames.add(ItemInit.BLINKAFTERIMAGE.get());
+        abilityNames.add(ItemInit.BLINK_STATE.get());
+        abilityNames.add(ItemInit.EXILE.get());
+        abilityNames.add(ItemInit.DOOR_MIRAGE.get());
+        abilityNames.add(ItemInit.CREATE_CONCEALED_BUNDLE.get());
+        abilityNames.add(ItemInit.CREATE_CONCEALED_SPACE.get());
+        abilityNames.add(ItemInit.SEPARATE_WORM_OF_STAR.get());
+        abilityNames.add(ItemInit.SPATIAL_CAGE.get());
+        abilityNames.add(ItemInit.SPATIAL_TEARING.get());
+        abilityNames.add(ItemInit.SYMBOLIZATION.get());
+        abilityNames.add(ItemInit.DIMENSIONAL_SIGHT.get());
+        abilityNames.add(ItemInit.REPLICATE.get());
+        abilityNames.add(ItemInit.SEALING.get());
+        abilityNames.add(ItemInit.TELEPORTATION.get());
+        abilityNames.add(ItemInit.SPACE_FRAGMENTATION.get());
+        abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
+        abilityNames.add(ItemInit.SPATIAL_MAZE.get());
+        abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
+        abilityNames.add(ItemInit.DOOR_DIMENSION_CLOSING.get());
+        abilityNames.add(ItemInit.DOOR_SEALED_SPACE.get());
+        abilityNames.add(ItemInit.DOOR_LAYERING.get());
+        abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
+        abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
+        abilityNames.add(ItemInit.REPLICATION.get());
+        return abilityNames;
     }
 
 
@@ -3513,6 +3709,7 @@ public class BeyonderUtil {
                     }
                 }
             }
+            tag.putInt("spaceFragmentationCopies", 0);
             tag.putInt("invisibleHandCounter", 0);
             tag.putDouble("invisibleHandDistance", 0);
             tag.putInt("travelBlinkDistance", 0);
@@ -3773,7 +3970,7 @@ public class BeyonderUtil {
     public static void startFlying(LivingEntity livingEntity, float flySpeed) {
         if (livingEntity instanceof Player pPlayer) {
             Abilities playerAbilities = pPlayer.getAbilities();
-            if (!pPlayer.isCreative()) {
+            if (!pPlayer.isCreative() || !pPlayer.isSpectator()) {
                 playerAbilities.mayfly = true;
                 playerAbilities.flying = true;
                 playerAbilities.setFlyingSpeed(flySpeed);
@@ -3785,6 +3982,8 @@ public class BeyonderUtil {
         } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
             playerMobEntity.setIsFlying(true);
             playerMobEntity.setFlySpeed(flySpeed);
+        } else if(!(livingEntity instanceof Player player) || !player.isSpectator()){
+            stopFlying(livingEntity);
         }
     }
 
@@ -3859,31 +4058,6 @@ public class BeyonderUtil {
             teleportEntityThroughDimensions(entity, destination, x, y, z);
         } else if (entity instanceof Player player) {
             player.displayClientMessage(Component.literal("You cant teleport over your existing seal").withStyle(ChatFormatting.RED), false);
-        }
-    }
-
-    public static boolean canBreakSeal(LivingEntity entity) {
-        int sequence = getSequence(entity);
-        int sealSequence = SealedUtils.sealSequence(entity);
-        if (currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 3)) sequence--;
-        if (sealSequence >= sequence) {
-            int spiritualityDivisor = sealSequence - sequence + 1;
-            return getSpirituality(entity) >= SealedUtils.getBreakFreeCost(sealSequence) / spiritualityDivisor;
-        }
-        return false;
-    }
-
-    public static void breakSeal(LivingEntity entity) {
-        CompoundTag tag = entity.getPersistentData();
-        SealedUtils.setSealed(entity, false);
-        SealedUtils.setSequence(entity, 9);
-        SealedUtils.setCreator(entity, new UUID(0, 0));
-        SealedUtils.setSealedAbilities(entity, false);
-        if (tag.getBoolean("spatialCageIsSealed")) {
-            tag.remove("spatialCageIsSealed");
-            tag.remove("spatialCageX");
-            tag.remove("spatialCageY");
-            tag.remove("spatialCageZ");
         }
     }
 

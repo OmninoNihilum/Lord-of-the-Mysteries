@@ -244,9 +244,9 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(2, ItemInit.SEALING.get());
         items.put(2, ItemInit.TELEPORTATION.get());
 
-        //items.put(1, ItemInit.SPACE_FRAGMENTATION.get());
-        //items.put(1, ItemInit.GRAVITY_MANIPULATION.get());
-        //items.put(1, ItemInit.SPATIAL_SEAL.get());
+        items.put(1, ItemInit.SPACE_FRAGMENTATION.get());
+        items.put(1, ItemInit.GRAVITY_MANIPULATION.get());
+        items.put(1, ItemInit.SPATIAL_MAZE.get());
         //items.put(1, ItemInit.SPATIAL_LOCK_ON.get());
 
         //items.put(0, ItemInit.DOOR_SPATIAL_LOCK_ON.get());
@@ -315,6 +315,11 @@ public class ApprenticeClass implements BeyonderClass {
 
     public static void apprenticeTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
+        if (!livingEntity.level().isClientSide()) {
+            if (livingEntity.getPersistentData().getInt("spaceFragmentationCopies") >= 1) {
+                livingEntity.getPersistentData().putInt("spaceFragmentationCopies", livingEntity.getPersistentData().getInt("spaceFragmentationCopies") - 1);
+            }
+        }
         if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 40 == 0) {
             if (livingEntity instanceof ServerPlayer serverPlayer) {
                 LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(livingEntity.getPersistentData().getInt("wormOfStar")), serverPlayer);

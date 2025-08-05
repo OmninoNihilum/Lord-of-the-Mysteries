@@ -14,6 +14,9 @@ import net.swimmingtuna.lotm.entity.*;
 public class EntityInit {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, LOTM.MOD_ID);
 
+    public static final RegistryObject<EntityType<ColoredBoxEntity>> COLORED_BOX_ENTITY =
+            ENTITIES.register("colored_box_entity", () -> EntityType.Builder.<ColoredBoxEntity>of(ColoredBoxEntity::new, MobCategory.MISC)
+                    .sized(5.0f,5.0f).clientTrackingRange(400).build(new ResourceLocation(LOTM.MOD_ID, "colored_box_entity").toString()));
     public static final RegistryObject<EntityType<AqueousLightEntity>> AQUEOUS_LIGHT_ENTITY_DROWN =
             ENTITIES.register("aqueous_light", () -> EntityType.Builder.<AqueousLightEntity>of(AqueousLightEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(100).build(new ResourceLocation(LOTM.MOD_ID, "aqueous_light").toString()));
@@ -41,6 +44,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<RoarEntity>> ROAR_ENTITY =
             ENTITIES.register("roar_entity", () -> EntityType.Builder.<RoarEntity>of(RoarEntity::new, MobCategory.MISC)
                     .sized(2.0f,2.0f).clientTrackingRange(200).build(new ResourceLocation(LOTM.MOD_ID, "roar_entity").toString()));
+    public static final RegistryObject<EntityType<SpaceFragmentationEntity>> SPACE_FRAGMENTATION_ENTITY =
+            ENTITIES.register("space_fragmentation_entity", () -> EntityType.Builder.<SpaceFragmentationEntity>of(SpaceFragmentationEntity::new, MobCategory.MISC)
+                    .sized(2.0f, 10.10029375f).clientTrackingRange(300).build(new ResourceLocation(LOTM.MOD_ID,"space_fragmentation_entity").toString()));
     public static final RegistryObject<EntityType<StormSealEntity>> STORM_SEAL_ENTITY =
             ENTITIES.register("storm_seal_entity", () -> EntityType.Builder.<StormSealEntity>of(StormSealEntity::new, MobCategory.MISC)
                     .sized(2.0f,2.0f).build(new ResourceLocation(LOTM.MOD_ID, "storm_seal_entity").toString()));

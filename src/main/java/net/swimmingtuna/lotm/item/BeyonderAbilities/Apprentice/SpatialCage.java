@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -38,6 +39,12 @@ public class SpatialCage extends SimpleAbilityItem {
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand hand) {
         if (!livingEntity.level().isClientSide && !interactionTarget.level().isClientSide) {
             if (!checkAll(livingEntity)) {
+                return InteractionResult.FAIL;
+            }
+            if (interactionTarget.getPersistentData().contains("spatialCageSealUUID")){
+                if(livingEntity instanceof Player player){
+                    player.displayClientMessage(Component.literal("Target is already on a Spatial Cage").withStyle(ChatFormatting.RED), true);
+                }
                 return InteractionResult.FAIL;
             }
             useSpirituality(livingEntity);

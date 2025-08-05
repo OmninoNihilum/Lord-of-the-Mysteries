@@ -16,6 +16,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.world.worldgen.ConcealedSpaceChunkGenerator;
 import net.swimmingtuna.lotm.world.worldgen.DollSpaceChunkGenerator;
 
@@ -101,13 +102,14 @@ public class DimensionInit {
         );
 
         BiomeSource fixedSource = new FixedBiomeSource(biomeRegistry.getOrThrow(Biomes.PLAINS));
+
         ConcealedSpaceChunkGenerator concealedGenerator = new ConcealedSpaceChunkGenerator(fixedSource);
         DollSpaceChunkGenerator dollGenerator = new DollSpaceChunkGenerator(fixedSource);
 
-        LevelStem stemConcealed = new LevelStem(dimTypes.getOrThrow(DimensionInit.CONCEALED_SPACE_TYPE), concealedGenerator);
-        LevelStem stemDoll = new LevelStem(dimTypes.getOrThrow(DimensionInit.DOLL_SPACE_TYPE), dollGenerator);
         LevelStem stemSpirit = new LevelStem(dimTypes.getOrThrow(DimensionInit.SPIRIT_WORLD_TYPE), noiseBasedChunkGenerator);
         LevelStem stemExiled = new LevelStem(dimTypes.getOrThrow(DimensionInit.EXILED_DIMENSION_TYPE), noiseBasedChunkGenerator);
+        LevelStem stemConcealed = new LevelStem(dimTypes.getOrThrow(DimensionInit.CONCEALED_SPACE_TYPE), concealedGenerator);
+        LevelStem stemDoll = new LevelStem(dimTypes.getOrThrow(DimensionInit.DOLL_SPACE_TYPE), dollGenerator);
 
         context.register(SPIRIT_WORLD_KEY, stemSpirit);
         context.register(EXILED_DIMENSION_KEY, stemExiled);

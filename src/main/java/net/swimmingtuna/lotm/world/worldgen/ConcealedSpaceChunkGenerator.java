@@ -33,14 +33,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+
 public class ConcealedSpaceChunkGenerator extends ChunkGenerator {
+
     public static final Codec<ConcealedSpaceChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(g -> g.biomeSource),
             BlockState.CODEC.fieldOf("fill_block").forGetter(g -> g.fillBlock)
     ).apply(instance, ConcealedSpaceChunkGenerator::new));
+
     public static final ResourceLocation ID = new ResourceLocation(LOTM.MOD_ID, "concealed_space");
+
     private static final int FILL_HEIGHT = 100;
     private final BlockState fillBlock;
+
     public ConcealedSpaceChunkGenerator(BiomeSource source, BlockState fillBlock) {
         super(source);
         if (fillBlock == null) {
@@ -53,7 +58,6 @@ public class ConcealedSpaceChunkGenerator extends ChunkGenerator {
         super(source);
         this.fillBlock = BlockInit.VOID_BLOCK.get().defaultBlockState();
     }
-
 
     @Override
     protected Codec<? extends ChunkGenerator> codec() {

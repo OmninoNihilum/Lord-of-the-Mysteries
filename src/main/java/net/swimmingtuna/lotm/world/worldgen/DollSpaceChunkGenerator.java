@@ -28,6 +28,7 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.init.BlockInit;
 
 import java.util.Arrays;
 import java.util.List;

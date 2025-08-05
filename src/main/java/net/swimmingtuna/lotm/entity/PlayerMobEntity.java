@@ -83,6 +83,17 @@ import java.util.*;
 
 public class PlayerMobEntity extends Monster implements RangedAttackMob, CrossbowAttackMob, SmartBrainOwner<PlayerMobEntity> {
 
+    public enum ColorMode {
+        NORMAL,
+        GRAY,
+        BLACK,
+        RED,
+        BLUE,
+        YELLOW,
+        PURPLE,
+        GREEN
+    }
+
     @Nullable
     private GameProfile profile;
     @Nullable
@@ -122,6 +133,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     private static final EntityDataAccessor<Float> FLY_SPEED = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> HAS_ABILITY_CAP = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> MAX_ABILITIES_USE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<String> COLOR_MODE = SynchedEntityData.defineId(PlayerMobEntity.class, EntityDataSerializers.STRING);
+
 
     private boolean canBreakDoors;
     private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, (difficulty) -> difficulty == Difficulty.HARD);
@@ -215,6 +228,8 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         getEntityData().define(CREATOR_UUID, Optional.empty());
         getEntityData().define(MAX_ABILITIES_USE, 1);
         getEntityData().define(HAS_ABILITY_CAP, false);
+        getEntityData().define(COLOR_MODE, ColorMode.NORMAL.name());
+
     }
 
 
@@ -741,6 +756,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (profile != null && profile.isComplete()) {
             compound.put("Profile", NbtUtils.writeGameProfile(new CompoundTag(), profile));
         }
+        compound.putString("colorMode", this.getColorMode());
         compound.putString("Pathway", this.entityData.get(PATHWAY));
         compound.putInt("MentalStrength", this.getMentalStrength());
         compound.putInt("Sequence", this.getCurrentSequence());
@@ -769,7 +785,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             setUsername(NameManager.INSTANCE.getRandomName());
         }
         setBaby(compound.getBoolean("IsBaby"));
-
+        if (compound.contains("colorMode")) {
+            this.setColorMode(compound.getString("colorMode"));
+        }
         if (compound.contains("Profile", Tag.TAG_COMPOUND)) {
             profile = NbtUtils.readGameProfile(compound.getCompound("Profile"));
         }
@@ -923,6 +941,55 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     public int getMaxlife() {
         return this.entityData.get(MAX_LIFE);
     }
+
+    public String getColorMode() {
+        return this.getEntityData().get(COLOR_MODE);
+    }
+
+    public void setColorMode(ColorMode colorMode) {
+        this.getEntityData().set(COLOR_MODE, colorMode.name());
+    }
+
+    public void setColorMode(String colorMode) {
+        try {
+            ColorMode mode = ColorMode.valueOf(colorMode.toUpperCase());
+            this.getEntityData().set(COLOR_MODE, mode.name());
+        } catch (IllegalArgumentException e) {
+            // If invalid color mode, default to normal
+            this.getEntityData().set(COLOR_MODE, ColorMode.NORMAL.name());
+        }
+    }
+
+    public ColorMode getColorModeEnum() {
+        try {
+            return ColorMode.valueOf(getColorMode());
+        } catch (IllegalArgumentException e) {
+            return ColorMode.NORMAL;
+        }
+    }
+
+    public void setRandomColorMode() {
+        ColorMode[] modes = ColorMode.values();
+        // Skip NORMAL (index 0) and pick from colored modes
+        ColorMode randomMode = modes[1 + this.random.nextInt(modes.length - 1)];
+        setColorMode(randomMode);
+    }
+
+
+    public void cycleColorMode() {
+        ColorMode[] modes = ColorMode.values();
+        ColorMode currentMode;
+        try {
+            currentMode = ColorMode.valueOf(getColorMode());
+        } catch (IllegalArgumentException e) {
+            currentMode = ColorMode.NORMAL;
+        }
+
+        int currentIndex = currentMode.ordinal();
+        int nextIndex = (currentIndex + 1) % modes.length;
+        setColorMode(modes[nextIndex]);
+    }
+
 
     public BeyonderClass getCurrentPathway() {
         if (BeyonderUtil.getPathwayByName(entityData.get(PATHWAY)) instanceof SpectatorClass) {

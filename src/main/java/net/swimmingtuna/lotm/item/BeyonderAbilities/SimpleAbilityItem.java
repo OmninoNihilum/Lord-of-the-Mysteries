@@ -15,17 +15,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public abstract class SimpleAbilityItem extends Item implements Ability {
@@ -112,13 +118,32 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
 
-    public boolean abilitiesArentSealed(LivingEntity living) {
+    public boolean abilitiesArentSealed(LivingEntity living, Item abilityItem) {
         if (!living.level().isClientSide()) {
-            if (living.getPersistentData().getInt("abilitySealed" + this.requiredSequence) >= 1) {
-                if (living instanceof Player player) {
-                    player.displayClientMessage(Component.literal("Your abilities for sequence " + this.requiredSequence + " are sealed for " + (int) living.getPersistentData().getInt("abilitySealed" + this.requiredSequence) / 20 + " seconds").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
+            if(SealedUtils.hasAbilitiesSealed(living)){
+                if(abilityItem instanceof SimpleAbilityItem ability) {
+                    HashSet<ABILITIES_SEAL_TYPES> types = SealedUtils.getSealedAbilitiesTypes(living);
+                    if (types.contains(ABILITIES_SEAL_TYPES.ALL)) {
+                        if (living instanceof Player player) {
+                            player.displayClientMessage(Component.literal("All your abilities are sealed").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
+                        }
+                        return false;
+                    } else if (types.contains(ABILITIES_SEAL_TYPES.LIST)) {
+                        if (SealedUtils.getAllSealedAbilitiesListType(living).contains(ability)) {
+                            if (living instanceof Player player) {
+                                player.displayClientMessage(Component.literal("This ability is sealed").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
+                            }
+                            return false;
+                        }
+                    } else if (types.contains(ABILITIES_SEAL_TYPES.SEQUENCE)){
+                        if (SealedUtils.getAllSealedAbilitiesSequenceType(living).contains(ability.requiredSequence)){
+                            if (living instanceof Player player) {
+                                player.displayClientMessage(Component.literal("All your abilities for sequence " + ability.getRequiredSequence() + " are sealed").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
+                            }
+                            return false;
+                        }
+                    }
                 }
-                return false;
             }
         }
         return true;
@@ -130,7 +155,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        if (!level.isClientSide() && checkIfCanUseAbility(player) && abilitiesArentSealed(player)) {
+        if (!level.isClientSide() && checkIfCanUseAbility(player) && abilitiesArentSealed(player, player.getItemInHand(hand).getItem())) {
             InteractionResult interactionResult = useAbility(level, player, hand);
             return new InteractionResultHolder<>(interactionResult, player.getItemInHand(hand));
         }
@@ -141,7 +166,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         boolean x = true;
-        if (context.getPlayer() != null && !checkIfCanUseAbility(context.getPlayer()) && abilitiesArentSealed(context.getPlayer())) {
+        if (context.getPlayer() != null && !checkIfCanUseAbility(context.getPlayer()) && abilitiesArentSealed(context.getPlayer(), context.getItemInHand().getItem())) {
             x = false;
         }
         if (!level.isClientSide() && x) {
@@ -153,7 +178,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
     @Override
     public InteractionResult useAbilityOnEntity(ItemStack stack, LivingEntity livingEntity, LivingEntity interactionTarget, InteractionHand usedHand) {
-        if (!livingEntity.level().isClientSide() && checkIfCanUseAbility(livingEntity) && abilitiesArentSealed(livingEntity)) {
+        if (!livingEntity.level().isClientSide() && checkIfCanUseAbility(livingEntity) && abilitiesArentSealed(livingEntity, stack.getItem())) {
             return interactLivingEntityLivingEntity(stack, livingEntity, interactionTarget, usedHand);
         }
         return InteractionResult.PASS;
@@ -336,7 +361,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                         Component.literal("You are not of the ").withStyle(ChatFormatting.AQUA).append(
                                 Component.literal(name).withStyle(requiredClass.getColorFormatting())).append(
                                 Component.literal(" Pathway").withStyle(ChatFormatting.AQUA)), true);
-                }
+            }
             return false;
         }
         return true;
@@ -370,7 +395,10 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
 
 
     public static boolean checkAll(LivingEntity living, BeyonderClass requiredClass, int requiredSequence, int requiredSpirituality, boolean message) {
-        return checkRequiredClass(living, requiredClass, message) && checkRequiredSequence(living, requiredSequence, message) && checkSpirituality(living, requiredSpirituality, message);
+        Item abilityItem = living.getItemInHand(InteractionHand.MAIN_HAND).getItem();
+        boolean isNotSealed = true;
+        if(abilityItem instanceof SimpleAbilityItem ability) isNotSealed = ability.abilitiesArentSealed(living, ability);
+        return checkRequiredClass(living, requiredClass, message) && checkRequiredSequence(living, requiredSequence, message) && checkSpirituality(living, requiredSpirituality, message) && isNotSealed;
     }
 
 
@@ -430,7 +458,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
             if (livingEntity.getMainHandItem().getItem() instanceof SimpleAbilityItem) {
                 if (BeyonderUtil.hasStun(livingEntity)) {
                     if (livingEntity instanceof Player) {
-                        livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " + (int) livingEntity.getPersistentData().getInt("LOTMStun") / 20 + " seconds.").withStyle(ChatFormatting.RED));
+                        livingEntity.sendSystemMessage(Component.literal("You are stunned and unable to use abilities for another " + (int) (livingEntity.getPersistentData().getInt("LOTMStun") / 20) + " seconds.").withStyle(ChatFormatting.RED));
                     }
                     return false;
                 } else if (tag.getInt("cantUseAbility") >= 1) {

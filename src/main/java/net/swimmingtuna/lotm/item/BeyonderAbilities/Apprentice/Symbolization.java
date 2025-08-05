@@ -97,6 +97,15 @@ public class Symbolization extends SimpleAbilityItem {
         }
     }
 
+    public static void cancelSymbolization(LivingEntity player) {
+        CompoundTag tag = player.getPersistentData();
+        if (tag.contains("planeswalkerSymbolization") && tag.getBoolean("planeswalkerSymbolization")) {
+            tag.remove("planeswalkerSymbolization");
+            BeyonderUtil.stopFlying(player);
+            BeyonderUtil.setInvisible(player, false, 0);
+        }
+    }
+
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {

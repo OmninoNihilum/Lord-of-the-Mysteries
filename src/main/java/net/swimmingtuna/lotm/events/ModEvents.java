@@ -45,6 +45,7 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.client.Configs;
@@ -386,11 +387,11 @@ public class ModEvents {
                 BeyonderEntityData.regenerateSpirituality(event);
 
                 //regular ticks
+                SealedUtils.timerTick(livingEntity);
                 SailorClass.rainEyesTickEvent(event);
                 BeyonderUtil.effectTick(event);
                 GravityManipulation.gravityManipulationTickEvent(event);
                 PsychologicalInvisibility.psychologicalInvisibilityTick(event);
-                Sealing.sealingTick(event);
                 Symbolization.symbolizationTick(event);
                 DimensionalSightSealEntity.dimensionalSightSealTick(livingEntity);
                 SpatialCageEntity.cageTick(livingEntity);
@@ -488,6 +489,7 @@ public class ModEvents {
                 matterAccelerationEntitiesAndRainEyes(livingEntity);
                 ExtremeColdness.extremeColdnessTick(event);
                 StormSeal.stormSealTick(event);
+                SpatialMaze.mazeTick(livingEntity);
                 AqueousLightDrown.lightTickEvent(livingEntity);
                 TsunamiSeal.sealTick(event);
             }

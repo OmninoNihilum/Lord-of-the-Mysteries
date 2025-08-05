@@ -480,7 +480,6 @@ public class SailorClass implements BeyonderClass {
 
     private static void explodeMob(LivingEntity mob) {
         if (!mob.level().isClientSide()) {
-            mob.level().explode(mob, mob.getX(), mob.getY(), mob.getZ(), 3.0f, Level.ExplosionInteraction.MOB);
             ServerLevel serverLevel = (ServerLevel) mob.level();
             Vec3 mobPos = mob.position();
             for (int i = 0; i < 50; i++) {

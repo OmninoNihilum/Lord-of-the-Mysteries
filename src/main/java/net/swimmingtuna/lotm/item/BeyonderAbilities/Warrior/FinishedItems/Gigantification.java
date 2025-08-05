@@ -72,10 +72,7 @@ public class Gigantification extends SimpleAbilityItem {
             int sequence = BeyonderUtil.getSequence(livingEntity);
             float scaleToSet = BeyonderUtil.getDamage(livingEntity).get(ItemInit.GIGANTIFICATION.get());
             if (isGiant || isHoGGiant || isTwilightGiant) {
-                scaleData.setTargetScale(1.0f);
-                tag.putBoolean("warriorGiant", false);
-                tag.putBoolean("handOfGodGiant", false);
-                tag.putBoolean("twilightGiant", false);
+                disableGigantification(livingEntity);
             } else if (sequence <= 6 && sequence >= 2) {
                 tag.putBoolean("warriorGiant", true);
                 tag.putBoolean("handOfGodGiant", false);
@@ -93,6 +90,15 @@ public class Gigantification extends SimpleAbilityItem {
                 scaleData.setTargetScale(Math.min(25,scaleToSet * 3));
             }
         }
+    }
+
+    public static void disableGigantification(LivingEntity livingEntity){
+        CompoundTag tag = livingEntity.getPersistentData();
+        ScaleData scaleData = ScaleTypes.BASE.getScaleData(livingEntity);
+        scaleData.setTargetScale(1.0f);
+        tag.putBoolean("warriorGiant", false);
+        tag.putBoolean("handOfGodGiant", false);
+        tag.putBoolean("twilightGiant", false);
     }
 
     public static void gigantificationDestroyBlocks(LivingEvent.LivingTickEvent event) {
@@ -143,15 +149,15 @@ public class Gigantification extends SimpleAbilityItem {
             float scale = 1.0f;
             int sequence = BeyonderUtil.getSequence(livingEntity);
             if (sequence == 6) {
-                scale = 1.8f;
+                scale = 1.3f;
             } else if (sequence == 5) {
-                scale = 1.9f;
+                scale = 1.5f;
             } else if (sequence == 4) {
-                scale = 2.3f;
+                scale = 1.5f;
             } else if (sequence == 3) {
                 scale = 2.0f;
             } else if (sequence == 2) {
-                scale = 2.5f;
+                scale = 2.3f;
             } else if (sequence == 1) {
                 scale = 2.3f;
             } else if (sequence == 0) {

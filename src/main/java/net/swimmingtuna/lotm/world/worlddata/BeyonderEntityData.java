@@ -30,7 +30,6 @@ import net.swimmingtuna.lotm.util.BeyonderUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static net.swimmingtuna.lotm.util.BeyonderUtil.getAbilities;
 import static net.swimmingtuna.lotm.util.BeyonderUtil.useAvailableAbilityAsMob;
 
 public class BeyonderEntityData extends SavedData {
@@ -232,7 +231,7 @@ public class BeyonderEntityData extends SavedData {
         }
     }
     public static void selectAndUseAbility(Mob mob) {
-        List<Item> availableAbilities = getAbilities(mob);
+        List<Item> availableAbilities = BeyonderUtil.getAbilities(mob);
         if (availableAbilities.isEmpty()) {
             return;
         }

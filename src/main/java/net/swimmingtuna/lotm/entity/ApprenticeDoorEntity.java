@@ -41,7 +41,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         TELEPORT_ONLY,
         DOOR_MIRAGE,
         EXILE,
-        CONCEALED_SPACE
+        CONCEALED_SPACE,
+        MAZE
     }
 
     public enum DoorAnimationKind {
@@ -67,11 +68,13 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<String> DESTINATION = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.STRING);
 
     private UUID creator;
+    private UUID sealUUID;
 
     public ApprenticeDoorEntity(EntityType<?> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
+    //Concealed Spaces
     public ApprenticeDoorEntity(Level level, UUID creator, int sequence, int life, float yaw, float x, float y, float z, boolean isEntering, Level dimensionDestination, DoorAnimationKind animationKind) {
         this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
         this.entityData.set(DOOR_MODE, DoorMode.CONCEALED_SPACE);
@@ -87,6 +90,24 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.entityData.set(DESTINATION, dimensionDestination.dimension().location().toString());
 
         this.creator = creator;
+    }
+
+    //Maze
+    public ApprenticeDoorEntity(Level level, UUID creator, UUID sealUUID, int sequence, float yaw, float x, float y, float z, Level dimensionDestination){
+        this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
+        this.entityData.set(DOOR_MODE, DoorMode.MAZE);
+        this.entityData.set(DOOR_ANIMATION_KIND, DoorAnimationKind.FADE_IN);
+        this.entityData.set(SEQUENCE, sequence);
+        this.entityData.set(LIFE, 10);
+        this.entityData.set(FULL_LIFE, 10);
+        this.entityData.set(YAW, yaw);
+        this.entityData.set(X, x);
+        this.entityData.set(Y, y);
+        this.entityData.set(Z, z);
+        this.entityData.set(DESTINATION, dimensionDestination.dimension().location().toString());
+
+        this.creator = creator;
+        this.sealUUID = sealUUID;
     }
 
     //Teleport only
@@ -213,7 +234,13 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         }
                     }
                 } else if (getCreator() == null && getDoorMode() == DoorMode.EXILE) {
-                    this.discard();
+                    this.delete();
+                }
+            }
+            if (getDoorMode() == DoorMode.MAZE){
+                if (BeyonderUtil.isEntityColliding(this, this.level(), 1.0)) {
+                    LivingEntity entity = BeyonderUtil.checkLivingEntityCollision(this, this.level(), 1.0);
+                    if (entity != null && entity.isShiftKeyDown()) teleport(entity);
                 }
             }
         }
@@ -229,6 +256,10 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
 
     public void setYaw(float yaw){
         this.entityData.set(YAW, yaw);
+    }
+
+    public UUID getSealUUID(){
+        return this.sealUUID;
     }
 
 
@@ -363,6 +394,9 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 delete();
             }
         }
+        if(getDoorMode() == DoorMode.MAZE){
+            this.entityData.set(LIFE, 10);
+        }
     }
 
     private void teleport(LivingEntity entity) {
@@ -395,21 +429,22 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             }
         }
         if(getDoorMode() == DoorMode.CONCEALED_SPACE){
-            if(isFreeToUse() && entity != null){
-                if(getEnterConcealedSpace()){
+            if(isFreeToUse() && entity != null) {
+                if (getEnterConcealedSpace()) {
                     ConcealedUtils.setConcealedSpaceExit(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
                     ConcealedUtils.setConcealedSpaceExitDimension(entity, entity.level());
 
                     IsConcealedUtils.setConcealmentOwner(entity, this.creator);
                     IsConcealedUtils.setIsConcealed(entity, true);
                     IsConcealedUtils.setConcealmentSequence(entity, getSequence());
-                }else{
+                } else {
                     IsConcealedUtils.setConcealmentOwner(entity, new UUID(0, 0));
                     IsConcealedUtils.setIsConcealed(entity, false);
                     IsConcealedUtils.setConcealmentSequence(entity, 9);
                 }
                 this.entityData.set(LIFE, 30);
-                BeyonderUtil.teleportEntity(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());            }
+                BeyonderUtil.teleportEntity(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
+            }
         }
     }
 
@@ -454,6 +489,9 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             } catch (IllegalArgumentException ignored) {
                 delete();
             }
+        }
+        if (tag.contains("sealUUID")) {
+            this.sealUUID = tag.getUUID("sealUUID");
         }
         if (tag.contains("doorAnimationKind")) {
             try {
@@ -523,6 +561,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         tag.putString("destination", this.entityData.get(DESTINATION));
 
         tag.putUUID("creator", this.creator);
+        tag.putUUID("sealUUID", this.sealUUID);
     }
 
     @Override

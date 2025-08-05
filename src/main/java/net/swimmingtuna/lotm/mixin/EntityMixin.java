@@ -33,6 +33,7 @@ public abstract class EntityMixin {
         Entity entity = (Entity) (Object) this;
         CompoundTag tag = entity.getPersistentData();
         int timer = tag.getInt("twilightManifestationTimer");
+        int cancelTickTimer = tag.getInt("cancelTick");
         if (!entity.level().isClientSide()) {
             if (timer > 1) {
                 tag.putInt("twilightManifestationTimer", timer - 1);
@@ -51,6 +52,19 @@ public abstract class EntityMixin {
             double twilightZ = tag.getDouble("twilightManifestationZ");
             int inTwilight = tag.getInt("inTwilight");
             if (twilightX != 0 || twilightY != 0 || twilightZ != 0 || inTwilight >= 1) {
+                if (entity instanceof LivingEntity living) {
+                    living.getDeltaMovement().multiply(0, 0, 0);
+                    living.setDeltaMovement(0, 0, 0);
+                    living.xo = living.getX();
+                    living.yo = living.getY();
+                    living.zo = living.getZ();
+                    living.xOld = living.getX();
+                    living.yOld = living.getY();
+                    living.zOld = living.getZ();
+                }
+                ci.cancel();
+            }
+            if (cancelTickTimer >= 1) {
                 if (entity instanceof LivingEntity living) {
                     living.getDeltaMovement().multiply(0, 0, 0);
                     living.setDeltaMovement(0, 0, 0);

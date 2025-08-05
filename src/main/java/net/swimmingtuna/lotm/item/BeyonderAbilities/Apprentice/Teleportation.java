@@ -52,17 +52,21 @@ public class Teleportation extends SimpleAbilityItem {
             teleporation(player);
             useSpirituality(player);
         } else {
-            for (PlayerMobEntity playerMobEntity : BeyonderUtil.getAllPlayerMobEntities(player.level())) {
-                if (playerMobEntity.getCreator().is(player) && playerMobEntity.getPersistentData().getBoolean("shouldFlicker")) {
-                    playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
-                }
-            }
+            removeCopies(player);
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("You are no longer flickering between locations").withStyle(ChatFormatting.AQUA), true);
             }
             addCooldown(player);
         }
         return InteractionResult.SUCCESS;
+    }
+
+    public static void removeCopies(LivingEntity player){
+        for (PlayerMobEntity playerMobEntity : BeyonderUtil.getAllPlayerMobEntities(player.level())) {
+            if (playerMobEntity.getCreator().is(player) && playerMobEntity.getPersistentData().getBoolean("shouldFlicker")) {
+                playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
+            }
+        }
     }
 
     public void teleporation(LivingEntity player) {

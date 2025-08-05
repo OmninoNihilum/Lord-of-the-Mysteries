@@ -59,6 +59,8 @@ public class ClientEventsEntity {
         event.registerEntityRenderer(EntityInit.SILVER_LIGHT_ENTITY.get(), SilverLightRenderer::new);
         event.registerEntityRenderer(EntityInit.GLOBE_OF_TWILIGHT_ENTITY.get(), GlobeOfTwilightRenderer::new);
         event.registerEntityRenderer(EntityInit.APPRENTICE_DOOR_ENTITY.get(), ApprenticeDoorRenderer::new);
+        event.registerEntityRenderer(EntityInit.SPACE_FRAGMENTATION_ENTITY.get(), SpaceFragmentationRenderer::new);
+        event.registerEntityRenderer(EntityInit.COLORED_BOX_ENTITY.get(), ColoredBoxEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.MERCURY_ENTITY.get(), MercuryEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.DAWN_RAY_ENTITY.get(), DawnRayRenderer::new);
         event.registerEntityRenderer(EntityInit.TWILIGHT_LIGHT.get(), TwilightLightRenderer::new);
@@ -95,7 +97,6 @@ public class ClientEventsEntity {
     public static void registerParticleProvidersEvent(final RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ParticleInit.DOOR.get(), DoorParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.ACIDRAIN_PARTICLE.get(), AcidRainParticle.Provider::new);
-        event.registerSpriteSet(ParticleInit.GRAVITY.get(), GravityParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), PlayerTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.MOB_TRAIL_PARTICLE.get(), MobTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.NULL_PARTICLE.get(), NullParticle.Provider::new);

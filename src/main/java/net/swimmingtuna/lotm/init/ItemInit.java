@@ -396,13 +396,11 @@ public class ItemInit {
 
     //1
     public static final RegistryObject<Item> SPACE_FRAGMENTATION = ITEMS.register("space_fragmentation",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new SpatialFragmentation(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> GRAVITY_MANIPULATION = ITEMS.register("gravitymanipulation",
             () -> new GravityManipulation(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> SPATIAL_SEAL = ITEMS.register("spatialseal",
-            () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> SPATIAL_LOCK_ON = ITEMS.register("spatiallockon",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SPATIAL_MAZE = ITEMS.register("spatialmaze",
+            () -> new SpatialMaze(new Item.Properties().stacksTo(1)));
 
     //0
     public static final RegistryObject<Item> DOOR_SPATIAL_LOCK_ON = ITEMS.register("doorspatiallockon",

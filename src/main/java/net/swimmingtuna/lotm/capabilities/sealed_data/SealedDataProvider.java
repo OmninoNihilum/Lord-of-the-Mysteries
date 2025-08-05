@@ -15,9 +15,9 @@ public class SealedDataProvider implements ICapabilityProvider, INBTSerializable
     public static Capability<ISealedDataCapability> SEALED_DATA = CapabilityManager.get(new CapabilityToken<ISealedDataCapability>() {});
 
     private SealedDataCapability sealedData = null;
-    private final LazyOptional<ISealedDataCapability> optional = LazyOptional.of(this::createIsConcealed);
+    private final LazyOptional<ISealedDataCapability> optional = LazyOptional.of(this::createSealedData);
 
-    private SealedDataCapability createIsConcealed() {
+    private SealedDataCapability createSealedData() {
         if (this.sealedData == null) {
             this.sealedData = new SealedDataCapability();
         }
@@ -34,11 +34,11 @@ public class SealedDataProvider implements ICapabilityProvider, INBTSerializable
 
     @Override
     public CompoundTag serializeNBT() {
-        return createIsConcealed().serializeNBT();
+        return createSealedData().serializeNBT();
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        createIsConcealed().deserializeNBT(tag);
+        createSealedData().deserializeNBT(tag);
     }
 }

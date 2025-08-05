@@ -3,6 +3,7 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -20,6 +21,8 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -28,6 +31,7 @@ import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
 
 public class Sealing extends SimpleAbilityItem {
@@ -67,20 +71,14 @@ public class Sealing extends SimpleAbilityItem {
 
     public static void sealAbilities(LivingEntity livingEntity, LivingEntity target) {
         if (!livingEntity.level().isClientSide() && !target.level().isClientSide()) {
-            int sealingChoice = livingEntity.getPersistentData().getInt("planeswalkerSealingChoice");
+            CompoundTag userTag = livingEntity.getPersistentData();
+            int sealingChoice;
+            if(userTag.contains("planeswalkerSealingChoice")) sealingChoice = userTag.getInt("planeswalkerSealingChoice");
+            else sealingChoice = 9;
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEALING.get());
-            target.getPersistentData().putInt("abilitySealed" + sealingChoice, damage);
-        }
-    }
 
-    public static void sealingTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity living = event.getEntity();
-        if (!living.level().isClientSide()) {
-            for (int i = 0; i <= 9; i++) {
-                if (living.getPersistentData().getInt("abilitySealed" + i) >= 1) {
-                    living.getPersistentData().putInt("abilitySealed" + i, living.getPersistentData().getInt("abilitySealed" + i) - 1);
-                }
-            }
+            if(BeyonderUtil.getSequence(target) > 3) SealedUtils.seal(target, livingEntity.getUUID(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.ALL, null, false, null);
+            else SealedUtils.seal(target, livingEntity.getUUID(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.SEQUENCE, null, false, new HashSet<>(sealingChoice));
         }
     }
 
@@ -98,6 +96,7 @@ public class Sealing extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         tooltipComponents.add(Component.literal("Upon use on a target, seal their abilities depending on the sequence you choose for some time."));
+        tooltipComponents.add(Component.literal("If the target is a sequence 4 or weaker, seal all of his abilities"));
         tooltipComponents.add(Component.literal("Left click in order to switch which sequence abilities you can seal, with the lowest being your own."));
         tooltipComponents.add(Component.literal("Cooldown and spirituality will vary depending on strength of target."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("~3000").withStyle(ChatFormatting.YELLOW)));

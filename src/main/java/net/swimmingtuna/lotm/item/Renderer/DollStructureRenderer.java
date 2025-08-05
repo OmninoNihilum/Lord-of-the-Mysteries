@@ -22,9 +22,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class DollStructureRenderer implements IItemRenderer {
-
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final BlockPos.MutableBlockPos MUTABLE_POS = new BlockPos.MutableBlockPos();
+
 
     @Override
     public void renderItem(ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {

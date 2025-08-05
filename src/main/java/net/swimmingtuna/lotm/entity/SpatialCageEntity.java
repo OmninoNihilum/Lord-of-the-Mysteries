@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -48,19 +49,19 @@ public class SpatialCageEntity extends Entity{
     public static void cageTick(LivingEntity entity){
         Level level = entity.level();
         CompoundTag tag = entity.getPersistentData();
-        if(level.isClientSide && !tag.getBoolean("spatialCageIsSealed")) return;
-        if(tag.getInt("spatialCageTime") > 0) {
+        if(level.isClientSide || !tag.getBoolean("spatialCageIsSealed")) return;
+        if(tag.contains("spatialCageSealUUID") && SealedUtils.hasSpecificSeal(entity, tag.getUUID("spatialCageSealUUID"))) {
             double x = tag.getDouble("spatialCageX");
             double y = tag.getDouble("spatialCageY");
             double z = tag.getDouble("spatialCageZ");
             entity.teleportTo(x, y, z);
             entity.setInvisible(true);
             BeyonderUtil.setInvisible(entity, true, 5);
+            entity.fallDistance = 0;
             entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 10, 1 ,false ,false));
             SpatialCageEntity cage = new SpatialCageEntity(level, entity);
             cage.moveTo(x, y, z);
             level.addFreshEntity(cage);
-            tag.putInt("spatialCageTime", tag.getInt("spatialCageTime") - 1);
         } else {
             unsetSealed(entity);
         }
@@ -68,26 +69,24 @@ public class SpatialCageEntity extends Entity{
 
     public static void setSealed(LivingEntity entity, LivingEntity user, int sequence, int time){
         if(entity.level().isClientSide) return;
-        SealedUtils.setSealed(entity, true);
-        SealedUtils.setCreator(entity, user.getUUID());
-        SealedUtils.setSequence(entity, sequence);
-        SealedUtils.setSealedAbilities(entity, true);
+
+        UUID sealUUID = SealedUtils.seal(entity, user.getUUID(), sequence, time, ABILITIES_SEAL_TYPES.ALL, null, false, null);
+
         CompoundTag tag = entity.getPersistentData();
         tag.putBoolean("spatialCageIsSealed", true);
         tag.putDouble("spatialCageX", entity.getX());
         tag.putDouble("spatialCageY", entity.getY());
         tag.putDouble("spatialCageZ", entity.getZ());
-        tag.putInt("spatialCageTime", time);
+        tag.putUUID("spatialCageSealUUID", sealUUID);
     }
 
     public static void unsetSealed(LivingEntity entity){
         if(entity.level().isClientSide) return;
         entity.setInvisible(false);
+
         CompoundTag tag = entity.getPersistentData();
-        SealedUtils.setSealed(entity, false);
-        SealedUtils.setCreator(entity, new UUID(0, 0));
-        SealedUtils.setSequence(entity, 9);
-        SealedUtils.setSealedAbilities(entity, false);
+        UUID sealUUID = tag.getUUID("spatialCageSealUUID");
+        SealedUtils.removeSeal(entity, sealUUID);
         tag.putBoolean("spatialCageIsSealed", false);
         tag.remove("spatialCageIsSealed");
         tag.remove("spatialCageX");

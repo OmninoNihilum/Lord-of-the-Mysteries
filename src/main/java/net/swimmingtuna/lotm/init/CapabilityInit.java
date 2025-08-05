@@ -25,6 +25,7 @@ import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityProv
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.IScribedAbilitiesCapability;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedAbilitiesCapability;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedAbilitiesProvider;
+import net.swimmingtuna.lotm.capabilities.sealed_data.ISealedDataCapability;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataCapability;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataProvider;
 
@@ -40,6 +41,7 @@ public class CapabilityInit {
         event.register(IScribedAbilitiesCapability.class);
         event.register(IDollDataCapability.class);
         event.register(IReplicatedEntityCapability.class);
+        event.register(ISealedDataCapability.class);
     }
 
     @SubscribeEvent

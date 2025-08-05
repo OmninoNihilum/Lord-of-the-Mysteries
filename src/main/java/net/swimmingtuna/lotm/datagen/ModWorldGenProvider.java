@@ -21,8 +21,8 @@ public class ModWorldGenProvider extends DatapackBuiltinEntriesProvider {
             .add(Registries.DIMENSION_TYPE, DimensionInit::bootstrapTypeConcealedSpace)
             .add(Registries.DIMENSION_TYPE, DimensionInit::bootstrapTypeDollSpace);
 
-
     public ModWorldGenProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries, BUILDER, Set.of(LOTM.MOD_ID));
     }
 }
+
