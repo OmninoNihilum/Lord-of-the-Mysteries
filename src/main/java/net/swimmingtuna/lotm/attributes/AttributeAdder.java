@@ -22,6 +22,12 @@ public class AttributeAdder {
         addToAllLivingEntities(event, ModAttributes.JUMP_BOOST);
         addToAllLivingEntities(event, ModAttributes.WATER_BREATHING);
         addToAllLivingEntities(event, ModAttributes.DIG_SPEED);
+
+        event.add(EntityType.PLAYER, ModAttributes.NIGHT_VISION.get());
+        event.add(EntityType.PLAYER, ModAttributes.FIRE_RESISTANCE.get());
+        event.add(EntityType.PLAYER, ModAttributes.JUMP_BOOST.get());
+        event.add(EntityType.PLAYER, ModAttributes.WATER_BREATHING.get());
+        event.add(EntityType.PLAYER, ModAttributes.DIG_SPEED.get());
     }
 
     @SafeVarargs

@@ -35,60 +35,50 @@ public class SailorAttributes extends BaseAttributes {
         AttributeInstance healthAttr = entity.getAttribute(Attributes.MAX_HEALTH);
         if (healthAttr != null) {
             apply(healthAttr, healthBoostID, healthList.get(seq) - 20.0, "HealthBoost");
-            LOTM.sendMessageToAllPlayers("NEW HEALTH IS " + entity.getMaxHealth());
         }
 
         AttributeInstance speedAttr = entity.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttr != null) {
             apply(speedAttr, speedID, speedList.get(seq), "SpeedBoost");
-            LOTM.sendMessageToAllPlayers("NEW SPEED IS " + speedList.get(seq));
         }
 
         AttributeInstance attackAttr = entity.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attackAttr != null) {
             apply(attackAttr, attackID, attackList.get(seq), "AttackBoost");
-            LOTM.sendMessageToAllPlayers("NEW ATTACK DAMAGE IS " + attackList.get(seq));
-        }
+            }
 
         AttributeInstance armorAttr = entity.getAttribute(Attributes.ARMOR);
         if (armorAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW ARMOR IS " + armorList.get(seq));
             apply(armorAttr, armorID, armorList.get(seq), "ArmorBoost");
         }
 
         AttributeInstance armorToughnessAttr = entity.getAttribute(Attributes.ARMOR_TOUGHNESS);
         if (armorToughnessAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW ARMOR TOUGHNESS IS " + armorToughnessList.get(seq));
             apply(armorToughnessAttr, armorToughnessID, armorToughnessList.get(seq), "ArmorToughnessBoost");
         }
 
         AttributeInstance nightVisionAttr = entity.getAttribute(ModAttributes.NIGHT_VISION.get());
         if (nightVisionAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW NIGHT VISION IS " + nightVisionList.get(seq));
             apply(nightVisionAttr, nightVisionID, nightVisionList.get(seq), "NightVision");
         }
 
         AttributeInstance fireResistanceAttr = entity.getAttribute(ModAttributes.FIRE_RESISTANCE.get());
         if (fireResistanceAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW FIRE RES IS " + fireResistanceList.get(seq));
             apply(fireResistanceAttr, fireResistanceID, fireResistanceList.get(seq), "FireResistance");
         }
 
         AttributeInstance jumpAttr = entity.getAttribute(ModAttributes.JUMP_BOOST.get());
         if (jumpAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW JUMP IS " + jumpList.get(seq));
             apply(jumpAttr, jumpID, jumpList.get(seq), "JumpBoost");
         }
 
         AttributeInstance digSpeedAttr = entity.getAttribute(ModAttributes.DIG_SPEED.get());
         if (digSpeedAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW DIG SPEED IS " + digSpeedList.get(seq));
             apply(digSpeedAttr, digSpeedID, digSpeedList.get(seq), "DigSpeed");
         }
 
         AttributeInstance waterBreathingAttr = entity.getAttribute(ModAttributes.WATER_BREATHING.get());
         if (waterBreathingAttr != null) {
-            LOTM.sendMessageToAllPlayers("NEW WATER BREATHING IS " + waterBreathingList.get(seq));
             apply(waterBreathingAttr, waterBreathingID, waterBreathingList.get(seq), "WaterBreathingBoost");
         }
     }
