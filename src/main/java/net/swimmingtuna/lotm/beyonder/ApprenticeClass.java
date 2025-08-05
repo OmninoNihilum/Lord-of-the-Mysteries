@@ -172,21 +172,6 @@ public class ApprenticeClass implements BeyonderClass {
                     }
                     break;
             }
-            if (sequenceLevel == 0) {
-                maxWormCount = 80000;
-                wormRegenAmount = 100;
-                tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-                if (player instanceof ServerPlayer serverPlayer) {
-                    LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                }
-                applyMobEffect(player, MobEffects.MOVEMENT_SPEED, 60, 2, false, false);
-                applyMobEffect(player, MobEffects.DOLPHINS_GRACE, 60, 2, false, false);
-                tag.putInt("maxScribedAbilities", 50);
-                if(player instanceof Player pPlayer){
-                    ReplicatedEntityUtils.setMaxEntities(pPlayer, 20);
-                    ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 10);
-                }
-            }
             if (sequenceLevel <= 4) {
                 if (tag.getInt("wormOfStar") < maxWormCount * 0.1) {
                     player.sendSystemMessage(Component.literal("Died due to a lack of Worms of Star").withStyle(ChatFormatting.DARK_RED).withStyle(ChatFormatting.BOLD));
