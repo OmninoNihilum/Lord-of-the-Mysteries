@@ -1,0 +1,92 @@
+package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
+
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.entity.GuardianBoxEntity;
+import net.swimmingtuna.lotm.entity.KeyOfStarsProtectiveSealEntity;
+import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
+import org.jetbrains.annotations.NotNull;
+import virtuoel.pehkui.api.ScaleData;
+import virtuoel.pehkui.api.ScaleTypes;
+
+import javax.annotation.Nullable;
+import java.util.List;
+
+public class SpatialSeal extends SimpleAbilityItem {
+
+
+    public SpatialSeal(Properties properties) {
+        super(properties, BeyonderClassInit.APPRENTICE, 1, 0, 2400);
+    }
+
+    @Override
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+        if (!checkAll(player)) {
+            return InteractionResult.FAIL;
+        }
+        useSpirituality(player);
+        addCooldown(player);
+        createSpatialSeal(player);
+        return InteractionResult.SUCCESS;
+    }
+
+    public static void createSpatialSeal(LivingEntity living) {
+        if (!living.level().isClientSide()) {
+            int damage = (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.SPATIAL_SEAL.get());
+            KeyOfStarsProtectiveSealEntity spatialSealEntity = new KeyOfStarsProtectiveSealEntity(EntityInit.PROTECTIVE_SEAL_ENTITY.get(), living.level());
+            ScaleData scaleData = ScaleTypes.BASE.getScaleData(spatialSealEntity);
+            scaleData.setTargetScale(25);
+            spatialSealEntity.setOwnerUUID(living.getUUID());
+            spatialSealEntity.teleportTo(living.getX(), living.getY(), living.getZ());
+            spatialSealEntity.setMaxHealth(damage * 150);
+            living.level().addFreshEntity(spatialSealEntity);
+        }
+    }
+
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("Use in order to create a spatial seal that only you and your allies can freely enter. Any non-ally or projectile owned by a non-ally that tries to enter will be teleported away and hurt the barrier corresponding to their strength. However, the barrier will regenerate on it's own with starlight."));
+        tooltipComponents.add(Component.literal("Shift while holding this item to increase/decrease max size of the seal."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50 + Amount of damage").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Minutes").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
+        tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
+        super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
+    }
+
+    @Override
+    public Rarity getRarity(ItemStack pStack) {
+        return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
+    }
+
+    @Override
+    public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        return 0;
+    }
+}
