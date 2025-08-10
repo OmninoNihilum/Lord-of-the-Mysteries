@@ -103,6 +103,7 @@ public class Gigantification extends LeftClickHandlerSkill {
         tag.putBoolean("twilightGiant", false);
     }
 
+    @SuppressWarnings("deprecation")
     public static void gigantificationDestroyBlocks(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (!entity.level().isClientSide() && entity.isShiftKeyDown() && entity.tickCount % 20 == 0) {
@@ -130,7 +131,7 @@ public class Gigantification extends LeftClickHandlerSkill {
                             if (pos.distSqr(playerPos) <= radius * radius) {
                                 BlockState state = level.getBlockState(pos);
                                 if (!state.isAir() && state.getBlock().getExplosionResistance() < obsidianStrength) {
-                                    level.destroyBlock(pos, false);
+                                    BeyonderUtil.setAir(entity ,pos);
                                 }
                             }
                         }

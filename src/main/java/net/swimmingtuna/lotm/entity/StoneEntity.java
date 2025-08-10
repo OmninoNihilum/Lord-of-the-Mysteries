@@ -173,7 +173,7 @@ public class StoneEntity extends AbstractArrow {
                             float blockStrength = block.defaultDestroyTime();
                             float bedrockStrength = Blocks.BEDROCK.defaultDestroyTime();
                             if (blockStrength <= bedrockStrength) {
-                                this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                                BeyonderUtil.setAir(this, pos);
                             }
                         }
                     }

@@ -1173,7 +1173,7 @@ public class CorruptionAndLuckHandler {
                     for (BlockPos blockPos : BlockPos.betweenClosedStream(checkArea).toList()) {
                         if (!livingEntity.level().getBlockState(blockPos).isAir() && Earthquake.isOnSurface(livingEntity.level(), blockPos)) {
                             if (random.nextInt(200) == 1) { // 50% chance to destroy a block
-                                livingEntity.level().destroyBlock(blockPos, false);
+                                BeyonderUtil.setAir(livingEntity, blockPos);
                             } else if (random.nextInt(200) == 2) { // 10% chance to spawn a stone entity
                                 StoneEntity stoneEntity = new StoneEntity(livingEntity.level(), livingEntity);
                                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(stoneEntity);

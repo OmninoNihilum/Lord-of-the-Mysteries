@@ -1,5 +1,6 @@
 package net.swimmingtuna.lotm.entity;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -128,32 +129,12 @@ public class WindBladeEntity extends AbstractHurtingProjectile {
     }
 
     // Handle block hit logic
-    private void handleBlockHit(Block block) {
+    private void handleBlockHit(BlockPos block) {
         if (this.level().isClientSide) {
             return;
         }
 
-        if (!EXCLUDED_BLOCKS.contains(block)) {
-            int currentLifeCount = this.entityData.get(DATA_LIFE_COUNT);
-            int decrease = (BeyonderUtil.getSequence((LivingEntity) this.getOwner()) * 4) + 10;
-            currentLifeCount = currentLifeCount - decrease;
-            this.entityData.set(DATA_LIFE_COUNT, currentLifeCount);
-
-            if (currentLifeCount <= 0) {
-                this.discard();
-            }
-        }
-    }
-
-    // Keep these methods for compatibility but don't do anything in them
-    @Override
-    protected void onHitEntity(EntityHitResult result) {
-        // Hit detection is now handled in tick()
-    }
-
-    @Override
-    protected void onHitBlock(BlockHitResult result) {
-        // Hit detection is now handled in tick()
+        BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, block, Math.max(2,BeyonderUtil.getScale(this) / 2), 0);
     }
 
     @Override
@@ -232,7 +213,7 @@ public class WindBladeEntity extends AbstractHurtingProjectile {
                 for (int z = minZ; z <= maxZ && !hitBlock; z++) {
                     Block block = this.level().getBlockState(new net.minecraft.core.BlockPos(x, y, z)).getBlock();
                     if (block != Blocks.AIR && block != Blocks.CAVE_AIR && block != Blocks.VOID_AIR) {
-                        handleBlockHit(block);
+                        handleBlockHit(this.getOnPos());
                         hitBlock = true;
                     }
                 }

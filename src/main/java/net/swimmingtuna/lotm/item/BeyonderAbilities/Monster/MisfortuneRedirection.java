@@ -49,6 +49,7 @@ import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -110,12 +111,16 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                 if (level instanceof ServerLevel serverLevel) {
                     enhancement = CalamityEnhancementData.getInstance(serverLevel).getCalamityEnhancement();
                 }
+                List<MobEffect> effectsToRemove = new ArrayList<>();
                 for (MobEffectInstance effectInstance : livingEntity.getActiveEffects()) {
                     MobEffect effect = effectInstance.getEffect();
                     if (!effect.isBeneficial()) {
                         BeyonderUtil.applyMobEffect(interactionTarget, effect, effectInstance.getDuration(), effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.isVisible());
-                        livingEntity.removeEffect(effect);
+                        effectsToRemove.add(effect);
                     }
+                }
+                for (MobEffect effect : effectsToRemove) {
+                    livingEntity.removeEffect(effect);
                 }
                 int paralysisDuration = 0;
                 int lotmLightningCount = 0;
@@ -319,24 +324,7 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
                     calamityExplosionCounter++;
                     BlockPos hitPos = interactionTarget.getOnPos();
                     float radius = calamityExplosionCounter * 4 + (enhancement);
-                    interactionTarget.level().playSound(null, interactionTarget.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 30.0f, 1.0f);
-                    for (BlockPos pos : BlockPos.betweenClosed(
-                            hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                            hitPos.offset((int) radius, (int) radius, (int) radius))) {
-                        if (pos.distSqr(hitPos) <= radius * radius) {
-                            if (interactionTarget.level().getBlockState(pos).getDestroySpeed(interactionTarget.level(), pos) >= 0) {
-                                interactionTarget.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                            }
-                        }
-                    }
-                    List<Entity> entities = interactionTarget.level().getEntities(interactionTarget,
-                            new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                                    hitPos.offset((int) radius, (int) radius, (int) radius)));
-                    for (Entity entity : entities) {
-                        if (entity instanceof LivingEntity livingEntity1) {
-                            livingEntity1.hurt(BeyonderUtil.genericSource(interactionTarget, livingEntity1), 4 * radius); // problem w/ damage sources
-                        }
-                    }
+                    BeyonderUtil.destroyBlocksInSphere(interactionTarget, hitPos, radius, radius * 4);
                 }
 
                 if (calamityTornado >= 1) {
@@ -528,38 +516,6 @@ public class MisfortuneRedirection extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        int totalPriority = 0;
-        if (target != null) {
-            for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.MISFORTUNEREDIRECTION.get())))) {
-                CompoundTag tag = entity.getPersistentData();
-                int misfortuneCount = 0;
-                if (tag.getInt("luckMeteor") > 1) misfortuneCount++;
-                if (tag.getInt("luckLightningLOTM") > 1) misfortuneCount++;
-                if (tag.getInt("luckParalysis") > 1) misfortuneCount++;
-                if (tag.getInt("luckUnequipArmor") > 1) misfortuneCount++;
-                if (tag.getInt("luckWarden") > 1) misfortuneCount++;
-                if (tag.getInt("luckLightningMC") > 1) misfortuneCount++;
-                if (tag.getInt("luckPoison") > 1) misfortuneCount++;
-                if (tag.getInt("luckTornado") > 1) misfortuneCount++;
-                if (tag.getInt("luckStone") > 1) misfortuneCount++;
-                if (tag.getInt("luckDoubleDamage") > 1) misfortuneCount++;
-                if (tag.getInt("cantUseAbility") > 1) misfortuneCount++;
-                if (tag.getInt("calamityMeteor") > 1) misfortuneCount++;
-                if (tag.getInt("calamityLightningStorm") > 1) misfortuneCount++;
-                if (tag.getInt("calamityLightningBolt") > 1) misfortuneCount++;
-                if (tag.getInt("calamityGroundTremor") > 1) misfortuneCount++;
-                if (tag.getInt("calamityGaze") > 1) misfortuneCount++;
-                if (tag.getInt("calamityUndeadArmy") > 1) misfortuneCount++;
-                if (tag.getInt("calamityBabyZombie") > 1) misfortuneCount++;
-                if (tag.getInt("calamityWindArmorRemoval") > 1) misfortuneCount++;
-                if (tag.getInt("calamityBreeze") > 1) misfortuneCount++;
-                if (tag.getInt("calamityWave") > 1) misfortuneCount++;
-                if (tag.getInt("calamityExplosion") > 1) misfortuneCount++;
-                if (tag.getInt("calamityTornado") > 1) misfortuneCount++;
-                totalPriority += misfortuneCount * 10;
-            }
-        }
-        return Math.min(totalPriority, 100);
+        return 0;
     }
-
 }

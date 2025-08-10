@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -175,12 +177,16 @@ public class GuardianBoxEntity extends Entity {
                                 if (this.tickCount >= 60) {
                                     this.setDamage((int) (damage + (int) ((pScaleData.getScale() * 10) + (Math.abs(projectile.getDeltaMovement().y() + projectile.getDeltaMovement().x() + projectile.getDeltaMovement().z())))));
                                 }
-                                double x = projectile.getX() - this.getX();
-                                double y = projectile.getY() - this.getY();
-                                double z = projectile.getZ() - this.getZ();// Reversed direction for pushing away
-                                double magnitude = Math.sqrt(x * x + y * y + z * z);
-                                projectile.setDeltaMovement(x / magnitude * 4, y / magnitude * 4, z / magnitude * 4);
-                                projectile.hurtMarked = true;
+                                BeyonderUtil.setScale(projectile, BeyonderUtil.getScale(projectile) * (0.4f));
+                                EntityHitResult hitResult = new EntityHitResult(this);
+
+                                try {
+                                    Method onHitEntityMethod = projectile.getClass().getDeclaredMethod("onHitEntity", EntityHitResult.class);
+                                    onHitEntityMethod.setAccessible(true);
+                                    onHitEntityMethod.invoke(projectile, hitResult);
+                                } catch (Exception ignored) {
+                                }
+                                projectile.discard();
                             }
                         }
                     }

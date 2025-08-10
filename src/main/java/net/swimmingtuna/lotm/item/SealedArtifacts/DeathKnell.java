@@ -201,8 +201,10 @@ public class DeathKnell extends Item {
             int d = tag.getInt("deathKnellPeacefulFear");
             int e = tag.getInt("deathKnellPlayerFear");
             int f = tag.getInt("deathKnellNightFear");
-            if (a >= 1 && livingEntity.isInWaterOrRain()) {
-                applyFear(livingEntity);
+            if (a >= 1) {
+                if (livingEntity.isInWaterOrRain()) {
+                    applyFear(livingEntity);
+                }
                 tag.putInt("deathKnellWaterFear", a - 1);
             }
             if (b >= 1) {

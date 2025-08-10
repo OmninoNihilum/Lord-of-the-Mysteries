@@ -112,7 +112,7 @@ public class AqueousLightEntityPush extends AbstractHurtingProjectile {
     protected void onHitBlock(BlockHitResult result) {
         if (!this.level().isClientSide && !this.level().dimension().equals(Level.NETHER)) {
             this.level().broadcastEntityEvent(this, ((byte) 3));
-            this.level().setBlock(blockPosition(), Blocks.AIR.defaultBlockState(), 3);
+            BeyonderUtil.setAir(this, result.getBlockPos());
             this.discard(); //increase damage as sequence increase
         }
     }

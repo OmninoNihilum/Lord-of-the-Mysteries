@@ -209,7 +209,7 @@ public class Prophecy extends LeftClickHandlerSkill {
                                 }
                             }
                             if (random.nextInt(6000) == 1) {
-                                livingEntity.level().destroyBlock(blockPos, false);
+                                BeyonderUtil.setAir(livingEntity, blockPos);
                             } else if (random.nextInt(12000) == 2) {
                                 StoneEntity stoneEntity = new StoneEntity(livingEntity.level(), livingEntity);
                                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(stoneEntity);
@@ -267,7 +267,7 @@ public class Prophecy extends LeftClickHandlerSkill {
                                     if (livingEntity.getRandom().nextInt(5) == 0 && livingEntity.level() instanceof ServerLevel serverLevel) {
                                         serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.05);
                                     }
-                                    livingEntity.level().destroyBlock(targetPos, false);
+                                    BeyonderUtil.setAir(livingEntity, targetPos);
                                 }
                             }
                         }
@@ -287,7 +287,7 @@ public class Prophecy extends LeftClickHandlerSkill {
                                     }
                                     BlockState state = livingEntity.level().getBlockState(targetPos);
                                     if (!state.isAir() && state.getBlock() != Blocks.BEDROCK && !state.is(BlockTags.WITHER_IMMUNE)) {
-                                        livingEntity.level().destroyBlock(targetPos, false);
+                                        BeyonderUtil.setAir(livingEntity, targetPos);
                                     }
                                 }
                             }

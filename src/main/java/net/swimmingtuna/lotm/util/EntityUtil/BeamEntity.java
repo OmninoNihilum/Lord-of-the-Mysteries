@@ -238,7 +238,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                     if (getIsTwilight() && entity instanceof LivingEntity livingEntity && this.getOwner() instanceof LivingEntity pOwner && !BeyonderUtil.areAllies(pOwner, livingEntity)) {
                         int age = livingEntity.getPersistentData().getInt("age");
                         livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), 10);
-                        int ageDivisibleAmount = 1;
+                        int ageDivisibleAmount = 2;
                         if (pOwner instanceof Mob mob) {
                             ageDivisibleAmount = 3;
                         }
@@ -428,9 +428,8 @@ public abstract class BeamEntity extends LOTMProjectile {
                                     this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() &&
                                     this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState() &&
                                     (!isNearOwnerFeet || isLookingDown)) { // Same logic for twilight effect
-                                if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() &&
-                                        this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
-                                    this.level().setBlock(mutablePos, Blocks.DIRT.defaultBlockState(), 11);
+                                if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
+                                    BeyonderUtil.setAsBlock(this, mutablePos, Blocks.DIRT);
                                 } else {
                                     this.level().destroyBlock(mutablePos, false);
                                 }

@@ -74,13 +74,13 @@ public class CathedralBlockEntity extends BlockEntity implements TickableBlockEn
         }
         if (ticks >= 800) {
             int radius = 300;
-            level.setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState(), 2);
+            BeyonderUtil.setAirBE(this.level, this.getBlockPos());
             List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class,
                     new AABB(worldPosition.offset(-radius, -radius, -radius), worldPosition.offset(radius, radius, radius)));
 
             for (ItemEntity itemEntity : items) {
                 if (itemEntity.getItem().getItem() == Items.REDSTONE || itemEntity.getItem().getItem() == Items.TWISTING_VINES) {
-                    itemEntity.discard(); // Remove the item entity from the world
+                    itemEntity.discard();
                 }
             }
         }

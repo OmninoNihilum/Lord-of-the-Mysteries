@@ -133,7 +133,7 @@ public class MatterAccelerationBlocks extends LeftClickHandlerSkill {
             if (surfacePos != null) {
                 for (int i = 0; i < BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()); i++) {
                     BlockPos posToRemove = surfacePos.below(i);
-                    level.destroyBlock(posToRemove, false);
+                    BeyonderUtil.setAir(player, posToRemove);
                     if (level.dimension() == Level.OVERWORLD) {
                         StoneEntity stoneEntity = new StoneEntity(EntityInit.STONE_ENTITY.get(), player.level());
                         float randomStayX;

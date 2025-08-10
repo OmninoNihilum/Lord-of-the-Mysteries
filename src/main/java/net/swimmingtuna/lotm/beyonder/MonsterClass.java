@@ -209,7 +209,6 @@ public class MonsterClass implements BeyonderClass {
         items.put(3, ItemInit.ENABLEDISABLERIPPLE.get());
         items.put(3, ItemInit.AURAOFCHAOS.get());
         items.put(3, ItemInit.CHAOSWALKERCOMBAT.get());
-        items.put(3, ItemInit.MISFORTUNEREDIRECTION.get());
         items.put(3, ItemInit.MONSTERDOMAINTELEPORATION.get());
 
         items.put(2, ItemInit.WHISPEROFCORRUPTION.get());
@@ -447,12 +446,16 @@ public class MonsterClass implements BeyonderClass {
                 if (level instanceof ServerLevel serverLevel) {
                     enhancement = CalamityEnhancementData.getInstance(serverLevel).getCalamityEnhancement();
                 }
+                List<MobEffect> effectsToRemove = new ArrayList<>();
                 for (MobEffectInstance effectInstance : livingEntity.getActiveEffects()) {
                     MobEffect effect = effectInstance.getEffect();
                     if (!effect.isBeneficial()) {
                         BeyonderUtil.applyMobEffect(interactionTarget, effect, effectInstance.getDuration(), effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.isVisible());
-                        livingEntity.removeEffect(effect);
+                        effectsToRemove.add(effect);
                     }
+                }
+                for (MobEffect effect : effectsToRemove) {
+                    livingEntity.removeEffect(effect);
                 }
                 int paralysisDuration = 0;
                 int lotmLightningCount = 0;
@@ -657,23 +660,7 @@ public class MonsterClass implements BeyonderClass {
                     BlockPos hitPos = interactionTarget.getOnPos();
                     float radius = calamityExplosionCounter * 4 + (enhancement);
                     interactionTarget.level().playSound(null, interactionTarget.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 30.0f, 1.0f);
-                    for (BlockPos pos : BlockPos.betweenClosed(
-                            hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                            hitPos.offset((int) radius, (int) radius, (int) radius))) {
-                        if (pos.distSqr(hitPos) <= radius * radius) {
-                            if (interactionTarget.level().getBlockState(pos).getDestroySpeed(interactionTarget.level(), pos) >= 0) {
-                                interactionTarget.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                            }
-                        }
-                    }
-                    List<Entity> entities = interactionTarget.level().getEntities(interactionTarget,
-                            new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                                    hitPos.offset((int) radius, (int) radius, (int) radius)));
-                    for (Entity entity : entities) {
-                        if (entity instanceof LivingEntity livingEntity1) {
-                            livingEntity1.hurt(BeyonderUtil.genericSource(interactionTarget, livingEntity1), 4 * radius); // problem w/ damage sources
-                        }
-                    }
+                    BeyonderUtil.destroyBlocksInSphere(interactionTarget, hitPos, radius, radius * 4);
                 }
 
                 if (calamityTornado >= 1) {

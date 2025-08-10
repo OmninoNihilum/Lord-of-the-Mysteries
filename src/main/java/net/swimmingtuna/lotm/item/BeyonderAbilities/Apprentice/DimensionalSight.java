@@ -138,7 +138,7 @@ DimensionalSight extends SimpleAbilityItem {
                                     if (distance >= radius - 0.5 && distance <= radius + 0.5) {
                                         BlockPos blockPos = sealPos.offset(x, y, z);
                                         if (livingEntity.level().getBlockState(blockPos) == BlockInit.VOID_BLOCK.get().defaultBlockState()) {
-                                            livingEntity.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                                            BeyonderUtil.setAir(livingEntity, blockPos);
                                         }
                                     }
                                 }

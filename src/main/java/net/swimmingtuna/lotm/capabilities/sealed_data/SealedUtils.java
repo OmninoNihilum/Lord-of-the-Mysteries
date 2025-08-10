@@ -241,15 +241,24 @@ public class SealedUtils {
     }
 
     public static void timerTick(LivingEntity entity){
-        if(hasSealWithTimer(entity)){
-            entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
-                for (UUID seal : data.sealsWithTimers()) {
-                    int time = data.sealsTimers().getOrDefault(seal, 0) - 1;
-                    if (time <= 0) removeSeal(entity, seal);
-                    else setTimer(entity, seal, time);
+        entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
+            HashSet<UUID> sealsWithTimers = data.sealsWithTimers();
+            if (sealsWithTimers.isEmpty()) return;
+            List<UUID> sealsToRemove = new ArrayList<>();
+            for (UUID seal : sealsWithTimers) {
+                int currentTime = data.sealsTimers().getOrDefault(seal, 0);
+                int newTime = currentTime - 1;
+
+                if (newTime <= 0) {
+                    sealsToRemove.add(seal);
+                } else {
+                    data.setTimer(seal, newTime);
                 }
-            });
-        }
+            }
+            for (UUID sealToRemove : sealsToRemove) {
+                data.removeSeal(sealToRemove);
+            }
+        });
     }
 
     public static int getBreakFreeCost(int sequence){

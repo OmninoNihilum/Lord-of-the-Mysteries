@@ -79,7 +79,7 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
                             if (Math.abs(x) > 1 || Math.abs(y) > 1 || Math.abs(z) > 1) {
                                 BlockPos blockPos = headPos.offset(x, y, z);
                                 if (level.getBlockState(blockPos).is(Blocks.WATER)) {
-                                    level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
+                                    BeyonderUtil.setAir(entity, blockPos);
                                 }
                             }
                         }
@@ -111,7 +111,7 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
                         for (int z = -3; z <= 3; z++) {
                             BlockPos blockPos = headPos.offset(x, y, z);
                             if (level.getBlockState(blockPos).is(Blocks.WATER)) {
-                                level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
+                                BeyonderUtil.setAir( entity, blockPos);
                             }
                         }
                     }
@@ -157,9 +157,8 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
                     for (int y = -3; y <= 3; y++) {
                         for (int z = -3; z <= 3; z++) {
                             BlockPos blockPos = headPos.offset(x, y, z);
-                            // Check if the block is water and remove it
                             if (level.getBlockState(blockPos).is(Blocks.WATER)) {
-                                level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
+                                BeyonderUtil.setAir( entity, blockPos);
                             }
                         }
                     }

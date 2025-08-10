@@ -215,7 +215,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
                 if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0 && this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) <= 51) {
-                    this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                    BeyonderUtil.setAir(this, pos);
                 }
             }
         }
@@ -244,7 +244,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
                 if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0 && this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) <= 51) {
-                    this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                    BeyonderUtil.setAir(this, pos);
                 }
             }
         }

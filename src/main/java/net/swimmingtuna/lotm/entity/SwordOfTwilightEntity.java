@@ -241,23 +241,6 @@ public class SwordOfTwilightEntity extends AbstractHurtingProjectile implements 
         this.yRotO = this.getYRot();
     }
 
-    public void destroyBlocksAround(int radius) {
-        BlockPos centerPos = this.blockPosition();
-        BlockState obsidianState = Blocks.OBSIDIAN.defaultBlockState();
-        float obsidianHardness = obsidianState.getDestroySpeed(level(), centerPos);
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    BlockPos targetPos = centerPos.offset(x, y, z);
-                    BlockState blockState = level().getBlockState(targetPos);
-                    if (blockState.getDestroySpeed(level(), targetPos) < obsidianHardness && !blockState.isAir() && !(blockState.getBlock() == Blocks.BEDROCK)) {
-                        level().destroyBlock(targetPos, false);
-                    }
-                }
-            }
-        }
-    }
-
     public void setYaw(float yaw) {
         this.entityData.set(YAW, yaw);
     }

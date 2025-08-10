@@ -80,7 +80,7 @@ public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
                 blockPositions.add(offsetedPos);
 
                 if (!blockState.isAir() && blockState.getBlock().defaultDestroyTime() != -1.0F) {
-                    level.setBlock(offsetedPos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                    BeyonderUtil.setAir(player, offsetedPos);
                 }
             }
 

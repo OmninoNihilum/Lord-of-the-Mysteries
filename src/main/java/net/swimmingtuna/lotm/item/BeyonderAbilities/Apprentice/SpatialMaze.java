@@ -169,7 +169,7 @@ public class SpatialMaze extends SimpleAbilityItem {
             for (int x = 0; x < sizeX; x++) {
                 for (int z = 0; z < sizeZ; z++) {
                     BlockPos pos = origin.offset(x, y, z);
-                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), 0);
+                    BeyonderUtil.setAirBE(level, pos);
                     if(isExit && x == 1 && y == 0 && z == 1){
                         boolean isNorth = level.getBlockState(pos.offset(0, 0, -3)).isAir();
                         boolean isWest = level.getBlockState(pos.offset(-3, 0, 0)).isAir();

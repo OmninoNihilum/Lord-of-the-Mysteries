@@ -303,18 +303,26 @@ public class DimensionalSightTileEntity extends DimensionalTileEntity implements
             }
             if (this.tickCounter >= 5) {
                 if (this.tickCounter > maxLife) {
-                    level.setBlock(this.worldPosition, Blocks.AIR.defaultBlockState(), 3);
+                    if (this.level != null) {
+                        BeyonderUtil.setAirBE(this.level, this.worldPosition);
+                    }
                 }
                 if (this.getCasterUUID() == null) {
-                    level.setBlock(this.worldPosition, Blocks.AIR.defaultBlockState(), 3);
+                    if (this.level != null) {
+                        BeyonderUtil.setAirBE(this.level, this.worldPosition);
+                    }
                 } else {
                     LivingEntity livingEntity = BeyonderUtil.getLivingEntityFromUUID(level, this.getCasterUUID());
                     if (livingEntity == null) {
-                        level.setBlock(this.worldPosition, Blocks.AIR.defaultBlockState(), 3);
+                        if (this.level != null) {
+                            BeyonderUtil.setAirBE(this.level, this.worldPosition);
+                        }
                         return;
                     }
                     if (!livingEntity.isAlive() || this.getScryTarget() == null || !this.getScryTarget().isAlive()) {
-                        level.setBlock(this.worldPosition, Blocks.AIR.defaultBlockState(), 3);
+                        if (this.level != null) {
+                            BeyonderUtil.setAirBE(this.level, this.worldPosition);
+                        }
                     }
                 }
             }

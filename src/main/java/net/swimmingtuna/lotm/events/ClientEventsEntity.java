@@ -65,6 +65,7 @@ public class ClientEventsEntity {
         event.registerEntityRenderer(EntityInit.DAWN_RAY_ENTITY.get(), DawnRayRenderer::new);
         event.registerEntityRenderer(EntityInit.TWILIGHT_LIGHT.get(), TwilightLightRenderer::new);
         event.registerEntityRenderer(EntityInit.GUARDIAN_BOX_ENTITY.get(), GuardianBoxEntityRenderer::new);
+        event.registerEntityRenderer(EntityInit.PROTECTIVE_SEAL_ENTITY.get(), KeyOfStarsProtectiveSealEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.METEOR_ENTITY.get(), MeteorEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.DEATH_KNELL_BULLET_ENTITY.get(), BulletEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.METEOR_TRAIL_ENTITY.get(), MeteorTrailRenderer::new);

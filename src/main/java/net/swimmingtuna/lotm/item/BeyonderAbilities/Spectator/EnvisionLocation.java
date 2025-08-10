@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -90,7 +91,11 @@ public class EnvisionLocation extends LeftClickHandlerSkillP {
             double targetX = player.getX() + blinkDistance * lookVector.x();
             double targetY = (player.getY() + 1) + blinkDistance * lookVector.y();
             double targetZ = player.getZ() + blinkDistance * lookVector.z();
-            player.teleportTo(targetX, targetY, targetZ);
+            if (player instanceof Player) {
+                player.teleportTo(targetX, targetY, targetZ);
+            } else if (player instanceof Mob mob && mob.getTarget() != null) {
+                mob.teleportTo(mob.getTarget().getX(), mob.getTarget().getY(), mob.getTarget().getZ());
+            }
             BlockPos playerPos = new BlockPos((int) player.getX(), (int) player.getY(), (int) player.getZ());
             BlockPos playerPos1 = new BlockPos((int) player.getX() + 1, (int) player.getY() + 1, (int) player.getZ() + 1);
 
@@ -100,14 +105,11 @@ public class EnvisionLocation extends LeftClickHandlerSkillP {
                         BlockPos targetPos = playerPos.offset(x, y, z);
                         BlockPos targetPos1 = playerPos.offset(x + 1, y + 1, z + 1);
                         BlockState blockState = level.getBlockState(targetPos);
-                        if (blockState.is(Blocks.DIRT) || blockState.is(Blocks.STONE) || blockState.is(Blocks.IRON_ORE) || blockState.is(Blocks.COAL_ORE)
-                                || blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.SNOW) || blockState.is(Blocks.END_STONE) ||
-                                blockState.is(Blocks.DEEPSLATE) || blockState.is(Blocks.COPPER_ORE) || blockState.is(Blocks.SOUL_SAND) || blockState.is(Blocks.SOUL_SOIL) || blockState.is(Blocks.DEEPSLATE_COPPER_ORE) || blockState.is(Blocks.DEEPSLATE_COAL_ORE)) {
-                            level.setBlockAndUpdate(targetPos, Blocks.AIR.defaultBlockState());
-                            level.destroyBlock(playerPos, false);
-                            level.destroyBlock(targetPos, false);
-                            level.destroyBlock(targetPos1, false);
-                            level.destroyBlock(playerPos1, false);
+                        if (blockState.getDestroySpeed(level, targetPos) <= 3) {
+                            BeyonderUtil.destroyBlock(player, targetPos);
+                            BeyonderUtil.destroyBlock(player, playerPos);
+                            BeyonderUtil.destroyBlock(player, targetPos1);
+                            BeyonderUtil.destroyBlock(player, playerPos1);
                         }
                     }
                 }

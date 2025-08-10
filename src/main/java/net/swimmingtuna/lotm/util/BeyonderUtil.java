@@ -50,6 +50,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -115,6 +116,30 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems
 public class BeyonderUtil {
 
     public static final Map<UUID, SimpleAbilityItem> pendingAbilityCopies = new HashMap<>();
+
+    public static void destroyBlock(Entity entity, BlockPos pos) {
+        entity.level().destroyBlock(pos, true);
+    }
+
+    public static boolean canDestroyBlock(Entity entity, BlockPos pos) {
+        Level level = entity.level();
+        BlockState blockState = level.getBlockState(pos);
+        return blockState.getDestroySpeed(level, pos) >= 0 && blockState.getDestroySpeed(level, pos) <= 51;
+
+        }
+
+    public static void setAir(Entity entity, BlockPos pos) {
+        entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+    }
+
+
+    public static void setAsBlock(Entity entity, BlockPos pos, Block block) {
+        entity.level().setBlock(pos, block.defaultBlockState(), 2);
+    }
+
+    public static void setAirBE(Level level, BlockPos pos) {
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+    }
 
     public static Projectile getProjectiles(LivingEntity livingEntity, int radius) {
         if (livingEntity.level().isClientSide()) {
@@ -550,7 +575,6 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.ENABLEDISABLERIPPLE.get());
                 abilityNames.add(ItemInit.AURAOFCHAOS.get());
                 abilityNames.add(ItemInit.CHAOSWALKERCOMBAT.get());
-                abilityNames.add(ItemInit.MISFORTUNEREDIRECTION.get());
                 abilityNames.add(ItemInit.MONSTERDOMAINTELEPORATION.get());
             }
             if (sequence <= 2) {
@@ -673,6 +697,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.SPACE_FRAGMENTATION.get());
                 abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
                 abilityNames.add(ItemInit.SPATIAL_MAZE.get());
+                abilityNames.add(ItemInit.SPATIAL_SEAL.get());
             }
             if (sequence <= 0) {
                 abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
@@ -1486,6 +1511,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.SPATIAL_CAGE.get(), applyAbilityStrengthened((400.0f - sequence * 100) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SEPARATE_WORM_OF_STAR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.SPATIAL_SEAL.get(), applyAbilityStrengthened((30.0f - sequence * 6.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SPACE_FRAGMENTATION.get(), applyAbilityStrengthened((75 - sequence * 15.0f) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SYMBOLIZATION.get(), applyAbilityStrengthened((160.0f - sequence * 30) / abilityWeakness, -abilityStrengthened));
@@ -1605,7 +1631,6 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.ENABLEDISABLERIPPLE.get());
         abilityNames.add(ItemInit.AURAOFCHAOS.get());
         abilityNames.add(ItemInit.CHAOSWALKERCOMBAT.get());
-        abilityNames.add(ItemInit.MISFORTUNEREDIRECTION.get());
         abilityNames.add(ItemInit.MONSTERDOMAINTELEPORATION.get());
         abilityNames.add(ItemInit.WHISPEROFCORRUPTION.get());
         abilityNames.add(ItemInit.FORTUNEAPPROPIATION.get());
@@ -1688,6 +1713,7 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.SEALING.get());
         abilityNames.add(ItemInit.TELEPORTATION.get());
         abilityNames.add(ItemInit.SPACE_FRAGMENTATION.get());
+        abilityNames.add(ItemInit.SPATIAL_SEAL.get());
         abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
         abilityNames.add(ItemInit.SPATIAL_MAZE.get());
         abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
@@ -1800,7 +1826,7 @@ public class BeyonderUtil {
 
     public static void registerAllRecipes(CommandContext<CommandSourceStack> server) {
         // Monster Potions
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_9_potion ingredients 2 iceandfire:cyclops_eye legendary_monsters:nature_crystal minecraft:gunpowder alexscaves:charred_remnant bosses_of_mass_destruction:soul_star");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_9_potion ingredients 2 mowziesmobs:sol_visage legendary_monsters:nature_crystal minecraft:gunpowder alexscaves:charred_remnant bosses_of_mass_destruction:soul_star");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_8_potion ingredients 2 legendary_monsters:crystal_of_sandstorm legendary_monsters:frozen_rune alexscaves:sweet_tooth minecraft:netherite_scrap mutantmonsters:mutant_skeleton_skull");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_7_potion ingredients 2 alexscaves:pure_darkness legendary_monsters:anchor_handle arphex:giant_spinneret macabre:mortis_essence faded_conquest_2:key_of_death");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_6_potion ingredients 2 cataclysm:monstrous_horn illageandspillage:spellbound_book minecraft:nether_star bosses_of_mass_destruction:void_thorn illageandspillage:bag_of_horrors");
@@ -1812,7 +1838,7 @@ public class BeyonderUtil {
 
         // Sailor Potions
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_9_potion ingredients 2 cataclysm:kobolediator_skull mowziesmobs:sol_visage aquamirae:fin arphex:roach_nymph arphex:fly_appendage");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_8_potion ingredients 2 faded_conquest_2:summon_blocknight alexsmobs:warped_muscle iceandfire:sea_serpent_fang minecraft:prismarine_shard mutantmonsters:endersoul_hand");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_8_potion ingredients 2 faded_conquest_2:summon_blocknight alexsmobs:warped_muscle alexscaves:sweet_tooth minecraft:prismarine_shard mutantmonsters:endersoul_hand");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_7_potion ingredients 2 eeeabsmobs:heart_of_pagan mowziesmobs:ice_crystal aquamirae:abyssal_amethyst arphex:abyssal_shard faded_conquest_2:keyof_pestilence");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_6_potion ingredients 2 cataclysm:monstrous_horn illageandspillage:spellbound_book arphex:oversized_stinger illageandspillage:totem_of_banishment bosses_of_mass_destruction:void_thorn");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_5_potion ingredients 2 soulsweapons:essence_of_eventide aquamirae:frozen_key soulsweapons:darkin_blade arphex:void_geode_shard cataclysm:gauntlet_of_guard");
@@ -1822,7 +1848,7 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:sailor_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:diamond_block");
 
         // Spectator Potions
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_9_potion ingredients 2 iceandfire:cyclops_eye legendary_monsters:dinosaur_bone born_in_chaos_v1:nightmare_claw macabre:eye arphex:venomous_appendage");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_9_potion ingredients 2 cataclysm:kobolediator_skull legendary_monsters:dinosaur_bone born_in_chaos_v1:nightmare_claw macabre:eye arphex:venomous_appendage");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_8_potion ingredients 2 faded_conquest_2:stormclasher_katana alexscaves:heavy_bone born_in_chaos_v1:seedof_chaos born_in_chaos_v1:spider_mandible mutantmonsters:endersoul_hand");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_7_potion ingredients 2 deeperdarker:soul_crystal animatedmobsmod:ender_spectre bosses_of_mass_destruction:ancient_anima arphex:mangled_spider_flesh legendary_monsters:withered_bone");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_6_potion ingredients 2 awakened_bosses:herobrine_nugget faded_conquest_2:war_claymore born_in_chaos_v1:lifestealer_bone minecraft:nether_star legendary_monsters:lava_eaters_skin");
@@ -1834,7 +1860,7 @@ public class BeyonderUtil {
 
         // Warrior Potions
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_9_potion ingredients 2 mowziesmobs:sol_visage zoniex:deathly_onyx mowziesmobs:wrought_axe macabre:rattails born_in_chaos_v1:fangofthe_hound_leader");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_8_potion ingredients 2 aether:silver_dungeon_key iceandfire:hydra_fang terramity:spiteful_soul mutantmonsters:hulk_hammer macabre:blindbaloon_item");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_8_potion ingredients 2 aether:silver_dungeon_key alexscaves:heavy_bone terramity:spiteful_soul mutantmonsters:hulk_hammer macabre:blindbaloon_item");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_7_potion ingredients 2 aether:gold_dungeon_key bosses_of_mass_destruction:blazing_eye macabre:mortis_essence arphex:scarab_seal bosses_of_mass_destruction:obsidian_heart");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_6_potion ingredients 2 awakened_bosses:herobrine_nugget macabre:rootofinfestation legendary_monsters:lava_eaters_skin born_in_chaos_v1:soul_cutlass illageandspillage:totem_of_banishment");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_5_potion ingredients 2 soulsweapons:chaos_crown soulsweapons:lord_soul_rose arphex:void_geode_shard cataclysm:witherite_ingot cataclysm:gauntlet_of_guard");
@@ -3164,7 +3190,7 @@ public class BeyonderUtil {
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
                 if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
-                    entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                    setAir(entity, pos);
                 }
             }
         }
@@ -3194,7 +3220,7 @@ public class BeyonderUtil {
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
                 if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
-                    entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                    setAir(entity, pos);
                 }
             }
         }
@@ -3638,7 +3664,7 @@ public class BeyonderUtil {
     public static void stopFlying(LivingEntity livingEntity) {
         if (livingEntity instanceof Player player) {
             Abilities playerAbilities = player.getAbilities();
-            if (!playerAbilities.instabuild) {
+            if (!isCreative(player)) {
                 playerAbilities.mayfly = false;
                 playerAbilities.flying = false;
             }
@@ -3678,7 +3704,11 @@ public class BeyonderUtil {
     public static boolean canFly(LivingEntity livingEntity) {
         if (livingEntity instanceof Player player) {
             return player.getAbilities().mayfly;
-        } else return livingEntity instanceof PlayerMobEntity playerMobEntity && playerMobEntity.getIsFlying();
+        } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+            return playerMobEntity.getIsFlying();
+        } else {
+            return livingEntity.getPersistentData().getInt("LOTMFlying") >= 1;
+        }
     }
 
     public static boolean canSeal(LivingEntity owner, LivingEntity target) {

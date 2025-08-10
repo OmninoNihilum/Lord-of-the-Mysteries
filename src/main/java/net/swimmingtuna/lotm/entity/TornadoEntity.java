@@ -401,7 +401,7 @@ public class TornadoEntity extends AbstractHurtingProjectile {
                 double randomDirectionZ = normalizedZ * 0.5 + (random.nextDouble() - 0.5) * 1.5;
 
                 fallingBlock.setDeltaMovement(randomDirectionX, randomDirectionY, randomDirectionZ);
-                this.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                BeyonderUtil.setAir(this, blockPos);
                 this.level().addFreshEntity(fallingBlock);
                 pickedUpBlocks++;
             }

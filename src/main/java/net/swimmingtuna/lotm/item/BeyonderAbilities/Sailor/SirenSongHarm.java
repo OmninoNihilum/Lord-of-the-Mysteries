@@ -80,9 +80,6 @@ public class SirenSongHarm extends LeftClickHandlerSkillP {
         int sirenSongWeaken = tag.getInt("sirenSongWeaken");
         int sirenSongStun = tag.getInt("sirenSongStun");
         int sirenSongStrengthen = tag.getInt("sirenSongStrengthen");
-        if (!BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.SAILOR.get(), 5)) {
-            return;
-        }
         if (sirenSongHarm % 20 == 0 && sirenSongHarm != 0) {
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.SIREN_SONG_HARM.get())))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {

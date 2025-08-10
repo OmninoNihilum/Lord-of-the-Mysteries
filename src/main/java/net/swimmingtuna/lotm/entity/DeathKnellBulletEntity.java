@@ -101,8 +101,8 @@ public class DeathKnellBulletEntity extends AbstractHurtingProjectile {
                     for (int z = -radius; z <= radius; z++) {
                         BlockPos targetPos = hitPos.offset(x, y, z);
                         BlockState state = this.level().getBlockState(targetPos);
-                        if (state.getDestroySpeed(this.level(), targetPos) >= 0) {
-                            this.level().destroyBlock(targetPos, true);
+                        if (state.getDestroySpeed(this.level(), targetPos) >= 0 && state.getDestroySpeed(this.level(), targetPos) <= 51) {
+                            BeyonderUtil.destroyBlock(this, hitPos);
                         }
                     }
                 }

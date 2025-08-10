@@ -60,8 +60,6 @@ public class WaterSphere extends SimpleAbilityItem {
             double radius = 3.0;
             double minRemovalRadius = 4.0;
             double maxRemovalRadius = 7.0;
-
-            // Create a sphere of water around the player
             for (int sphereX = (int) -radius; sphereX <= radius; sphereX++) {
                 for (int sphereY = (int) -radius; sphereY <= radius; sphereY++) {
                     for (int sphereZ = (int) -radius; sphereZ <= radius; sphereZ++) {
@@ -85,7 +83,7 @@ public class WaterSphere extends SimpleAbilityItem {
                         }
                         BlockPos blockPos = playerPos.offset(sphereX, sphereY, sphereZ);
                         if (level.getBlockState(blockPos).getBlock() == Blocks.WATER) {
-                            level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                            BeyonderUtil.setAir(livingEntity, blockPos);
                         }
                     }
                 }

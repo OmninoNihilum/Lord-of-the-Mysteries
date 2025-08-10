@@ -72,14 +72,11 @@ public class Blink extends LeftClickHandlerSkillP {
                             BlockPos targetPos = playerPos.offset(x, y, z);
                             BlockPos targetPos1 = playerPos.offset(x + 1, y + 1, z + 1);
                             BlockState blockState = level.getBlockState(targetPos);
-                            if (blockState.is(Blocks.DIRT) || blockState.is(Blocks.STONE) || blockState.is(Blocks.IRON_ORE) || blockState.is(Blocks.COAL_ORE)
-                                    || blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.SNOW) || blockState.is(Blocks.END_STONE) ||
-                                    blockState.is(Blocks.DEEPSLATE) || blockState.is(Blocks.COPPER_ORE) || blockState.is(Blocks.SOUL_SAND) || blockState.is(Blocks.SOUL_SOIL) || blockState.is(Blocks.DEEPSLATE_COPPER_ORE) || blockState.is(Blocks.DEEPSLATE_COAL_ORE)) {
-                                level.setBlockAndUpdate(targetPos, Blocks.AIR.defaultBlockState());
-                                level.destroyBlock(playerPos, false);
-                                level.destroyBlock(targetPos, false);
-                                level.destroyBlock(targetPos1, false);
-                                level.destroyBlock(playerPos1, false);
+                            if (blockState.getDestroySpeed(level, targetPos) <= 3) {
+                                BeyonderUtil.destroyBlock(player, targetPos);
+                                BeyonderUtil.destroyBlock(player, playerPos);
+                                BeyonderUtil.destroyBlock(player, targetPos1);
+                                BeyonderUtil.destroyBlock(player, playerPos1);
                             }
                         }
                     }

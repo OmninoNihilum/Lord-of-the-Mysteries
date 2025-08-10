@@ -44,7 +44,7 @@ public class PickaxeOfDawn extends PickaxeItem {
                             if (blockState.getDestroySpeed(level, newPos) > 0) {
                                 stack.hurtAndBreak(1, entity, (p) -> p.broadcastBreakEvent(EquipmentSlot.MAINHAND));
                             }
-                            level.destroyBlock(newPos, true, entity);
+                            BeyonderUtil.destroyBlock(entity, newPos);
                         }
                     }
                 }

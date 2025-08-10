@@ -306,7 +306,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
             int maxRadius = 250 - (beyonderHolder.getSequence() * 45);
             multiplier = Math.max(1, (maxRadius / safeRadius) / 2);
             if (!BeyonderUtil.currentPathwayAndSequenceMatches(owner, BeyonderClassInit.MONSTER.get(), 4)) {
-                this.level.setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState(), 3);
+                BeyonderUtil.setAirBE(level, this.getBlockPos());
             }
         }
         else multiplier = 1;

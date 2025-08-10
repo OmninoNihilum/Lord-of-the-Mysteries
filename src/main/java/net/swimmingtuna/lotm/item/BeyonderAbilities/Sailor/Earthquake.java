@@ -82,7 +82,7 @@ public class Earthquake extends SimpleAbilityItem {
                                 }
                             }
                             if (random.nextInt(6000) == 1) {
-                                livingEntity.level().destroyBlock(blockPos, false);
+                                BeyonderUtil.setAir(livingEntity, blockPos);
                             } else if (random.nextInt(18000) == 2) {
                                 StoneEntity stoneEntity = new StoneEntity(livingEntity.level(), livingEntity);
                                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(stoneEntity);

@@ -308,21 +308,6 @@ public class SilverLightEntity extends AbstractHurtingProjectile implements GeoE
         return new Vec3(x, y, z);
     }
 
-
-    private void destroyBlocksAroundEntityDropBlocks(int radius) {
-        BlockPos pos = this.blockPosition();
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    BlockPos blockPos = pos.offset(x, y, z);
-                    if (this.level().getBlockState(blockPos).getBlock() != Blocks.AIR) {
-                        this.level().destroyBlock(blockPos, true);
-                    }
-                }
-            }
-        }
-    }
-
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "controller", 0, this::predicate));

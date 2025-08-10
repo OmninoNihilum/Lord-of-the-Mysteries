@@ -32,6 +32,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<GuardianBoxEntity>> GUARDIAN_BOX_ENTITY =
             ENTITIES.register("guardian_box_entity", () -> EntityType.Builder.<GuardianBoxEntity>of(GuardianBoxEntity::new, MobCategory.MISC)
                     .sized(5.0f,5.0f).clientTrackingRange(400).build(new ResourceLocation(LOTM.MOD_ID, "guardian_box_entity").toString()));
+    public static final RegistryObject<EntityType<KeyOfStarsProtectiveSealEntity>> PROTECTIVE_SEAL_ENTITY =
+            ENTITIES.register("protective_seal_entity", () -> EntityType.Builder.<KeyOfStarsProtectiveSealEntity>of(KeyOfStarsProtectiveSealEntity::new, MobCategory.MISC)
+                    .sized(1.0f,1.0f).clientTrackingRange(400).build(new ResourceLocation(LOTM.MOD_ID, "protective_seal_entity").toString()));
     public static final RegistryObject<EntityType<DeathKnellBulletEntity>> DEATH_KNELL_BULLET_ENTITY =
             ENTITIES.register("death_knell_bullet", () -> EntityType.Builder.<DeathKnellBulletEntity>of(DeathKnellBulletEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(200).build(new ResourceLocation(LOTM.MOD_ID, "death_knell_bullet").toString()));

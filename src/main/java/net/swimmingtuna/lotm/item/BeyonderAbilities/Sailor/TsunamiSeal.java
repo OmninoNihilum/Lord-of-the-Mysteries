@@ -124,7 +124,7 @@ public class TsunamiSeal extends LeftClickHandlerSkillP {
                             if (distance <= maxRemovalRadius && distance >= minRemovalRadius) {
                                 BlockPos blockPos = playerPos.offset(x, y, z);
                                 if (level.getBlockState(blockPos).getBlock() == Blocks.WATER) {
-                                    level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                                    BeyonderUtil.setAir(entity, blockPos);
                                 }
                             }
                         }
@@ -147,7 +147,7 @@ public class TsunamiSeal extends LeftClickHandlerSkillP {
                             if (distance <= maxRemovalRadius && distance >= minRemovalRadius) {
                                 BlockPos blockPos = playerPos.offset(x, y, z);
                                 if (level.getBlockState(blockPos).getBlock() == Blocks.WATER) {
-                                    level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                                    BeyonderUtil.setAir(entity, blockPos);
                                 }
                             }
                         }

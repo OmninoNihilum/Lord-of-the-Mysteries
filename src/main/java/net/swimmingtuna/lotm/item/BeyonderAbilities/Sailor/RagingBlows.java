@@ -319,7 +319,7 @@ public class RagingBlows extends SimpleAbilityItem {
         }
         for (LivingEntity livingEntity : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(Math.max(3, damage * 0.66f)))) {
             if (livingEntity != living && !BeyonderUtil.areAllies(livingEntity, living)) {
-                livingEntity.hurt(BeyonderUtil.genericSource(living, livingEntity), damage * 0.6f);
+                livingEntity.hurt(BeyonderUtil.genericSource(living, livingEntity), damage * 0.45f);
                 livingEntity.invulnerableTime = 0;
                 livingEntity.hurtTime = 0;
                 livingEntity.hurtDuration = 0;

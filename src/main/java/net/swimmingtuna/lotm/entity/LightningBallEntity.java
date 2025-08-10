@@ -281,8 +281,8 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
                 hitPos.offset((int) -radius, (int) -radius, (int) -radius),
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
-                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0) {
-                    this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                if (this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) >= 0 && this.level().getBlockState(pos).getDestroySpeed(this.level(), pos) <= 51) {
+                    BeyonderUtil.setAir(this, pos);
                 }
             }
         }

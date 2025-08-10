@@ -98,7 +98,7 @@ public class EnvisionBarrier extends LeftClickHandlerSkillP {
                 }
                 for (BlockPos airPos : replacedAirBlocks) {
                     BlockPos worldPos = domeCenter.offset(airPos);
-                    level.setBlockAndUpdate(worldPos, Blocks.AIR.defaultBlockState());
+                    BeyonderUtil.setAir(player, worldPos);
                 }
                 replacedBlocks.clear();
                 replacedAirBlocks.clear();

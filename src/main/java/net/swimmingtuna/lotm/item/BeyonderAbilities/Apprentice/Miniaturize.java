@@ -246,7 +246,9 @@ public class Miniaturize extends SimpleAbilityItem {
                     int y = destination.getY() + dy;
                     int z = destination.getZ() + dz;
                     mutablePos.set(x, y, z);
-                    level.destroyBlock(mutablePos, false);
+                    if (level != null) {
+                        level.destroyBlock(mutablePos, false);
+                    }
                 }
             }
         }

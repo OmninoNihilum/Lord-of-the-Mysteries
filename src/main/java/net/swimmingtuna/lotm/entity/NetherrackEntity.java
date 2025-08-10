@@ -167,7 +167,7 @@ public class NetherrackEntity extends AbstractArrow {
                             float blockStrength = block.defaultDestroyTime();
                             float obsidianStrength = Blocks.OBSIDIAN.defaultDestroyTime();
                             if (blockStrength <= obsidianStrength) {
-                                this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                                BeyonderUtil.setAir(this, pos);
                             }
                             if (blockStrength >= obsidianStrength) {
                                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 8, Level.ExplosionInteraction.TNT);

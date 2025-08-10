@@ -126,7 +126,7 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
                 hitPos.offset((int) radius, (int) radius, (int) radius))) {
             if (pos.distSqr(hitPos) <= radius * radius) {
                 if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0) {
-                    entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                    BeyonderUtil.setAir(entity, pos);
                 }
             }
         }
