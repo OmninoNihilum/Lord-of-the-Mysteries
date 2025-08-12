@@ -398,6 +398,8 @@ public class ItemInit {
             () -> new SpatialMaze(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_SEAL = ITEMS.register("spatialseal",
             () -> new SpatialSeal(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> STARFALL = ITEMS.register("starfall",
+            () -> new Starfall(new Item.Properties().stacksTo(1)));
 
     //0
     public static final RegistryObject<Item> DOOR_SPATIAL_LOCK_ON = ITEMS.register("doorspatiallockon",

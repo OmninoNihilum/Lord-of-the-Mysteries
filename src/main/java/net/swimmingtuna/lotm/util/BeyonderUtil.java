@@ -81,10 +81,11 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Ability;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationWipe;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.*;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamIntoReality;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.*;
@@ -126,7 +127,7 @@ public class BeyonderUtil {
         BlockState blockState = level.getBlockState(pos);
         return blockState.getDestroySpeed(level, pos) >= 0 && blockState.getDestroySpeed(level, pos) <= 51;
 
-        }
+    }
 
     public static void setAir(Entity entity, BlockPos pos) {
         entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
@@ -698,6 +699,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
                 abilityNames.add(ItemInit.SPATIAL_MAZE.get());
                 abilityNames.add(ItemInit.SPATIAL_SEAL.get());
+                abilityNames.add(ItemInit.STARFALL.get());
             }
             if (sequence <= 0) {
                 abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
@@ -1180,11 +1182,12 @@ public class BeyonderUtil {
         if (!heldItem.isEmpty()) {
             if (item instanceof LeftClickHandlerSkill neededItem) {
                 handleEmptyLeftClickSkill(neededItem);
-            } else if(item instanceof LeftClickHandlerSkillP neededItem) {
+            } else if (item instanceof LeftClickHandlerSkillP neededItem) {
                 handleEmptyLeftClickSkill(neededItem, activeSlot);
             } else if (item instanceof LeftClickHandlerSword neededItem) {
                 handleEmptyLeftClickItem(neededItem);
-            } if (heldItem.getItem() instanceof DeathKnell) {
+            }
+            if (heldItem.getItem() instanceof DeathKnell) {
                 LOTMNetworkHandler.sendToServer(new DeathKnellLeftClickC2S());
             }
         }
@@ -1512,6 +1515,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.SEPARATE_WORM_OF_STAR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_SEAL.get(), applyAbilityStrengthened((30.0f - sequence * 6.0f) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.STARFALL.get(), applyAbilityStrengthened((50.0f - sequence * 10.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SPACE_FRAGMENTATION.get(), applyAbilityStrengthened((75 - sequence * 15.0f) / abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SYMBOLIZATION.get(), applyAbilityStrengthened((160.0f - sequence * 30) / abilityWeakness, -abilityStrengthened));
@@ -1714,6 +1718,7 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.TELEPORTATION.get());
         abilityNames.add(ItemInit.SPACE_FRAGMENTATION.get());
         abilityNames.add(ItemInit.SPATIAL_SEAL.get());
+        abilityNames.add(ItemInit.STARFALL.get());
         abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
         abilityNames.add(ItemInit.SPATIAL_MAZE.get());
         abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
@@ -1763,6 +1768,10 @@ public class BeyonderUtil {
             }
         }
         return null;
+    }
+
+    public static void updateLocationClientSide(Entity entity) {
+        LOTMNetworkHandler.sendToAllPlayers(new UpdateEntityLocationS2C(entity.getX(), entity.getY(), entity.getZ(), entity.getDeltaMovement().x(), entity.getDeltaMovement().y(), entity.getDeltaMovement().z(), entity.getId()));
     }
 
     public static void updatePositions(Entity entity, CompoundTag tag) {
@@ -2346,7 +2355,6 @@ public class BeyonderUtil {
         }
         return false;
     }
-
 
 
     public static List<LivingEntity> getAllies(LivingEntity livingEntity) {
@@ -3502,6 +3510,7 @@ public class BeyonderUtil {
             tag.putBoolean("doorBlinkState", false);
             tag.putInt("doorBlinkStateDistance", 0);
             tag.putBoolean("planeswalkerSymbolization", false);
+            tag.putInt("starfallTimer", 0);
         }
     }
 
@@ -3540,13 +3549,17 @@ public class BeyonderUtil {
         return false;
     }
 
-    public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
+    public static void sendParticles(Entity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
         if (living.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0, 0, 0, 0, 0);
         }
     }
 
-    public static void sendParticles(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ, double velocityX, double velocityY, double velocityZ) {
+    public static void sendAlwaysVisibleParticle(ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
+        LOTMNetworkHandler.sendToAllPlayers(new SendParticleS2C(particle, spawnX, spawnY, spawnZ, 0, 0, 0));
+    }
+
+    public static void sendParticles(Entity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ, double velocityX, double velocityY, double velocityZ) {
         if (living.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(particle, spawnX, spawnY, spawnZ, 0, velocityX, velocityY, velocityZ, 1.0);
         }
@@ -3656,7 +3669,7 @@ public class BeyonderUtil {
         } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
             playerMobEntity.setIsFlying(true);
             playerMobEntity.setFlySpeed(flySpeed);
-        } else if(!(livingEntity instanceof Player player) || !player.isSpectator()){
+        } else if (!(livingEntity instanceof Player player) || !player.isSpectator()) {
             stopFlying(livingEntity);
         }
     }

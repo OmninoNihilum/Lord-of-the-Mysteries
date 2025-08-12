@@ -34,7 +34,7 @@ public class ApprenticeDoorRenderer extends GeoEntityRenderer<ApprenticeDoorEnti
     @Override
     protected void applyRotations(ApprenticeDoorEntity entity, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTicks) {
         super.applyRotations(entity, poseStack, ageInTicks, rotationYaw, partialTicks);
-
         poseStack.mulPose(Axis.YP.rotationDegrees(entity.getYaw()));
+        poseStack.mulPose(Axis.XP.rotationDegrees(entity.getPitch()));
     }
 }

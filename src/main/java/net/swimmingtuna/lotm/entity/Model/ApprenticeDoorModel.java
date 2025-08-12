@@ -68,7 +68,10 @@ public class ApprenticeDoorModel extends GeoModel<ApprenticeDoorEntity> {
 
         if (door != null) {
             float yaw = animatable.getYRot();
+            float pitch = animatable.getPitch();
+
             door.setRotY(yaw * Mth.DEG_TO_RAD);
+            door.setRotX(pitch * Mth.DEG_TO_RAD);
         }
     }
 }

@@ -38,7 +38,7 @@ public class ColoredBoxEntityRenderer extends EntityRenderer<ColoredBoxEntity> {
         }
     }
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(LOTM.MOD_ID, "textures/entity/colored_box.png");
+    public static final ResourceLocation TEXTURE = new ResourceLocation(LOTM.MOD_ID, "textures/entity/colored_box.png");
     private static final Map<ColorMode, RenderType> RENDER_TYPES = new HashMap<>();
 
     static {

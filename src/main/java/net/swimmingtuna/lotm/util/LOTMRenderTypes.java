@@ -60,6 +60,23 @@ public class LOTMRenderTypes extends RenderType {
                     .createCompositeState(false)
     );
 
+    public static final RenderType NO_CULL_SOLID = RenderType.create(
+            "black_hole_no_cull",
+            DefaultVertexFormat.BLOCK,
+            VertexFormat.Mode.QUADS,
+            256,
+            false,
+            true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(RenderType.ShaderStateShard.RENDERTYPE_SOLID_SHADER)
+                    .setTextureState(RenderType.TextureStateShard.NO_TEXTURE)
+                    .setTransparencyState(RenderType.TransparencyStateShard.NO_TRANSPARENCY)
+                    .setCullState(RenderType.CullStateShard.NO_CULL)
+                    .setLightmapState(RenderType.LightmapStateShard.LIGHTMAP)
+                    .setOverlayState(RenderType.OverlayStateShard.OVERLAY)
+                    .createCompositeState(false)
+    );
+
     public LOTMRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
     }

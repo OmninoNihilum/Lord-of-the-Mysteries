@@ -190,6 +190,7 @@ public class CreativeTabInit {
                         event.accept(ItemInit.SEALING.get());
                         event.accept(ItemInit.TELEPORTATION.get());
                         event.accept(ItemInit.SPATIAL_SEAL.get());
+                        event.accept(ItemInit.STARFALL.get());
                         event.accept(ItemInit.SPACE_FRAGMENTATION.get());
                         event.accept(ItemInit.GRAVITY_MANIPULATION.get());
                         event.accept(ItemInit.SPATIAL_MAZE.get());

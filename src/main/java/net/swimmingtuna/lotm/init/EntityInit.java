@@ -20,6 +20,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<AqueousLightEntity>> AQUEOUS_LIGHT_ENTITY_DROWN =
             ENTITIES.register("aqueous_light", () -> EntityType.Builder.<AqueousLightEntity>of(AqueousLightEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(100).build(new ResourceLocation(LOTM.MOD_ID, "aqueous_light").toString()));
+    public static final RegistryObject<EntityType<StarfallEntity>> STARFALL_ENTITY =
+            ENTITIES.register("starfall_entity", () -> EntityType.Builder.<StarfallEntity>of(StarfallEntity::new, MobCategory.MISC)
+                    .sized(0.1f,0.1f).clientTrackingRange(300).build(new ResourceLocation(LOTM.MOD_ID, "starfall_entity").toString()));
     public static final RegistryObject<EntityType<MercuryEntity>> MERCURY_ENTITY =
             ENTITIES.register("mercury_entity", () -> EntityType.Builder.<MercuryEntity>of(MercuryEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(100).build(new ResourceLocation(LOTM.MOD_ID, "mercury_entity").toString()));

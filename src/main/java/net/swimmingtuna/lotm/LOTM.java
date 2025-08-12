@@ -145,6 +145,7 @@ public class LOTM {
         event.registerEntityRenderer(EntityInit.SPEAR_OF_DAWN_ENTITY.get(), SpearOfDawnRenderer::new);
         event.registerEntityRenderer(EntityInit.AQUEOUS_LIGHT_ENTITY_PUSH.get(), AqueousLightEntityPushRenderer::new);
         event.registerEntityRenderer(EntityInit.AQUEOUS_LIGHT_ENTITY_PULL.get(), AqueousLightEntityPullRenderer::new);
+        event.registerEntityRenderer(EntityInit.STARFALL_ENTITY.get(), StarfallEntityRenderer::new);
         event.registerEntityRenderer(EntityInit.LIGHTNING_ENTITY.get(), LightningEntityRenderer::new);
     }
 
@@ -391,6 +392,7 @@ public class LOTM {
             event.accept(ItemInit.SEALING);
             event.accept(ItemInit.TELEPORTATION);
             event.accept(ItemInit.SPATIAL_SEAL);
+            event.accept(ItemInit.STARFALL);
             event.accept(ItemInit.SPACE_FRAGMENTATION);
             event.accept(ItemInit.GRAVITY_MANIPULATION);
             event.accept(ItemInit.SPATIAL_MAZE);

@@ -15,8 +15,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedUtils;
@@ -42,7 +46,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         DOOR_MIRAGE,
         EXILE,
         CONCEALED_SPACE,
-        MAZE
+        MAZE,
+        STARFALL
     }
 
     public enum DoorAnimationKind {
@@ -51,7 +56,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         FADE_IN
     }
 
-
+    private static final EntityDataAccessor<Float> PITCH = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<DoorMode> DOOR_MODE = SynchedEntityData.defineId(ApprenticeDoorEntity.class, CustomEntityDataSerializers.DOOR_MODE);
     private static final EntityDataAccessor<DoorAnimationKind> DOOR_ANIMATION_KIND = SynchedEntityData.defineId(ApprenticeDoorEntity.class, CustomEntityDataSerializers.DOOR_ANIMATION_KIND);
     private static final EntityDataAccessor<Boolean> HAS_PLAYED_ANIMATION = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.BOOLEAN);
@@ -156,10 +161,38 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.creator = creator.getUUID();
     }
 
+    //Starfall
+    public ApprenticeDoorEntity(LivingEntity creator, Level level, float yaw, float pitch, int life) {
+        this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
+        this.entityData.set(DOOR_MODE, DoorMode.STARFALL);
+        this.entityData.set(DOOR_ANIMATION_KIND, DoorAnimationKind.FADE_IN);
+        this.entityData.set(SEQUENCE, BeyonderUtil.getSequence(creator));
+        this.entityData.set(LIFE, life);
+        this.entityData.set(FULL_LIFE, life);
+        this.entityData.set(YAW, yaw);
+        this.entityData.set(PITCH, pitch);
+        this.creator = creator.getUUID();
+    }
+
+
     @Override
     public void tick() {
         super.tick();
         if (!this.level().isClientSide()) {
+            if (getDoorMode() == DoorMode.STARFALL) {
+                if (this.tickCount == 1) {
+                    this.getPersistentData().putInt("apprenticeDoorTeleportX", (int) this.getX());
+                    this.getPersistentData().putInt("apprenticeDoorTeleportY", (int) this.getY());
+                    this.getPersistentData().putInt("apprenticeDoorTeleportZ", (int) this.getZ());
+                }
+                if (this.tickCount > 1) {
+                    int x = this.getPersistentData().getInt("apprenticeDoorTeleportX");
+                    int y = this.getPersistentData().getInt("apprenticeDoorTeleportY");
+                    int z = this.getPersistentData().getInt("apprenticeDoorTeleportZ");
+                    this.teleportTo(x,y,z);
+                }
+                handleLife();
+            }
             if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
                 if (!this.level().isClientSide) {
                     handleLife();
@@ -307,6 +340,14 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         return this.entityData.get(Z);
     }
 
+    public float getPitch() {
+        return this.entityData.get(PITCH);
+    }
+
+    public void setPitch(float pitch) {
+        this.entityData.set(PITCH, pitch);
+    }
+
     public Level getDimensionDestination() {
         ResourceLocation location = new ResourceLocation(this.entityData.get(DESTINATION));
         ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, location);
@@ -324,6 +365,73 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
 
     private void handleLife() {
         int life = getLife();
+        if (getDoorMode() == DoorMode.STARFALL) {
+            if (this.creator != null) {
+                //Make the starfalls move to the block position 80 blocks ahead of where the player is looking
+            }
+            boolean x = this.getPersistentData().getBoolean("largeStarfall");
+            if (!x) {
+                if (this.tickCount % 20 == 0 && this.tickCount != 0) {
+                    StarfallEntity starfall = new StarfallEntity(EntityInit.STARFALL_ENTITY.get(), this.level());
+                    float yaw = this.entityData.get(YAW);
+                    float pitch = this.entityData.get(PITCH);
+                    if (this.creator != null) {
+                        LivingEntity owner = BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
+                        if (owner != null) {
+                            this.setYaw(owner.getYHeadRot());
+                            this.setPitch(owner.getXRot());
+                        }
+                    }
+                    Vec3 lookVec = Vec3.directionFromRotation(pitch, yaw);
+                    double dirX = lookVec.x;
+                    double dirY = lookVec.y;
+                    double dirZ = lookVec.z;
+                    double spawnX = this.getX() + dirX * 5.0;
+                    double spawnY = this.getY() + dirY * 5.0;
+                    double spawnZ = this.getZ() + dirZ * 5.0;
+                    starfall.teleportTo(spawnX, spawnY, spawnZ);
+                    BeyonderUtil.setScale(starfall, BeyonderUtil.getRandomInRange(4));
+                    double speed = 20.0;
+                    starfall.setMaxLife(200);
+                    starfall.setRandomColor();
+                    starfall.setDeltaMovement(dirX * speed, dirY * speed, dirZ * speed);
+                    starfall.hurtMarked = true;
+                    this.level().addFreshEntity(starfall);
+                }
+            } else {
+                if (this.tickCount == 70) {
+                    LOTM.LOGGER.info("BIG ONE ");
+                    StarfallEntity starfall = new StarfallEntity(EntityInit.STARFALL_ENTITY.get(), this.level());
+                    float yaw = this.entityData.get(YAW);
+                    float pitch = this.entityData.get(PITCH);
+                    if (this.creator != null) {
+                        LivingEntity owner = BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
+                        if (owner != null) {
+                            this.setYaw(owner.getYHeadRot());
+                            this.setPitch(owner.getXRot());
+                        }
+                    }
+                    Vec3 lookVec = Vec3.directionFromRotation(pitch, yaw);
+                    double dirX = lookVec.x;
+                    double dirY = lookVec.y;
+                    double dirZ = lookVec.z;
+                    double spawnX = this.getX() + dirX * 5.0;
+                    double spawnY = this.getY() + dirY * 5.0;
+                    double spawnZ = this.getZ() + dirZ * 5.0;
+                    starfall.teleportTo(spawnX, spawnY, spawnZ);
+                    BeyonderUtil.setScale(starfall, 10);
+                    double speed = 15.0;
+                    starfall.setMaxLife(200);
+                    starfall.setColorMode(StarfallEntity.ColorMode.YELLOW);
+                    starfall.setDeltaMovement(dirX * speed, dirY * speed, dirZ * speed);
+                    starfall.hurtMarked = true;
+                    this.level().addFreshEntity(starfall);
+                }
+            }
+            if (this.tickCount >= 75) {
+                this.discard();
+            }
+        }
         if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
             if (life < getFullLife() - 30) {
                 this.entityData.set(HAS_PLAYED_ANIMATION, true);
@@ -477,6 +585,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.entityData.define(X, 0F);
         this.entityData.define(Y, 0F);
         this.entityData.define(Z, 0F);
+        this.entityData.define(PITCH, 0F);
         this.entityData.define(DESTINATION, this.level().dimension().location().toString());
     }
 
@@ -489,6 +598,9 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             } catch (IllegalArgumentException ignored) {
                 delete();
             }
+        }
+        if (tag.contains("pitch")) {
+            this.entityData.set(PITCH, tag.getFloat("pitch"));
         }
         if (tag.contains("sealUUID")) {
             this.sealUUID = tag.getUUID("sealUUID");
@@ -545,6 +657,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
+        tag.putFloat("pitch", this.entityData.get(PITCH));
         tag.putString("doorMode", this.entityData.get(DOOR_MODE).name());
         tag.putString("doorAnimationKind", this.entityData.get(DOOR_ANIMATION_KIND).name());
         tag.putBoolean("hasPlayedAnimation", this.entityData.get(HAS_PLAYED_ANIMATION));
@@ -560,8 +673,12 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         tag.putFloat("z", this.entityData.get(Z));
         tag.putString("destination", this.entityData.get(DESTINATION));
 
-        tag.putUUID("creator", this.creator);
-        tag.putUUID("sealUUID", this.sealUUID);
+        if (this.creator != null) {
+            tag.putUUID("creator", this.creator);
+        }
+        if (this.sealUUID != null) {
+            tag.putUUID("sealUUID", this.sealUUID);
+        }
     }
 
     @Override
