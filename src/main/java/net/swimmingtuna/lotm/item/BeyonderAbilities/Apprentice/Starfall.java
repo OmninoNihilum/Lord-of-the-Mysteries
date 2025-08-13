@@ -8,10 +8,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.*;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
@@ -62,31 +65,80 @@ public class Starfall extends SimpleAbilityItem {
     public static void starfallTick(LivingEvent.LivingTickEvent event) {
         LivingEntity player = event.getEntity();
         CompoundTag tag = player.getPersistentData();
-        if (!player.level().isClientSide() && tag.getInt("starfallTimer") >= 1) {
-            int timer = tag.getInt("starfallTimer");
-            tag.putInt("starfallTimer", timer - 1);
-            int x = tag.getInt("starfallX");
-            int y = tag.getInt("starfallY");
-            int z = tag.getInt("starfallZ");
-            float yaw = player.getYHeadRot();
-            float pitch = player.getXRot();
-            ApprenticeDoorEntity doorEntity = new ApprenticeDoorEntity(player, player.level(), yaw, pitch, 75);
-            doorEntity.getPersistentData().putFloat("starfallPitch", pitch);
-            doorEntity.getPersistentData().putFloat("starfallYaw", yaw);
-            int randomX = (int) BeyonderUtil.getRandomInRange(30);
-            int randomY = (int) BeyonderUtil.getRandomInRange(15);
-            int randomZ = (int) BeyonderUtil.getRandomInRange(30);
-            BeyonderUtil.setScale(doorEntity, 6);
-            doorEntity.teleportTo(x + randomX, y + 50 + randomY, z + randomZ);
-            player.level().addFreshEntity(doorEntity);
-            if (timer == 1) {
-                ApprenticeDoorEntity doorEntityNew = new ApprenticeDoorEntity(player, player.level(), yaw, pitch, 100);
+        if (!player.level().isClientSide()) {
+            if (tag.getInt("starfallTimer") >= 1) {
+                int timer = tag.getInt("starfallTimer");
+                tag.putInt("starfallTimer", timer - 1);
+                int x = tag.getInt("starfallX");
+                int y = tag.getInt("starfallY");
+                int z = tag.getInt("starfallZ");
+                float yaw = player.getYHeadRot();
+                float pitch = player.getXRot();
+                ApprenticeDoorEntity doorEntity = new ApprenticeDoorEntity(player, player.level(), yaw, pitch, 75);
                 doorEntity.getPersistentData().putFloat("starfallPitch", pitch);
                 doorEntity.getPersistentData().putFloat("starfallYaw", yaw);
-                BeyonderUtil.setScale(doorEntity, 20);
-                doorEntity.teleportTo(x, y + 50, z);
-                doorEntity.getPersistentData().putBoolean("largeStarfall", true);
-                player.level().addFreshEntity(doorEntityNew);
+                int randomX = (int) BeyonderUtil.getRandomInRange(30);
+                int randomY = (int) BeyonderUtil.getRandomInRange(15);
+                int randomZ = (int) BeyonderUtil.getRandomInRange(30);
+                BeyonderUtil.setScale(doorEntity, 6);
+                doorEntity.teleportTo(x + randomX, y + 50 + randomY, z + randomZ);
+                player.level().addFreshEntity(doorEntity);
+                if (timer == 1) {
+                    ApprenticeDoorEntity doorEntityNew = new ApprenticeDoorEntity(player, player.level(), yaw, pitch, 100);
+                    doorEntity.getPersistentData().putFloat("starfallPitch", pitch);
+                    doorEntity.getPersistentData().putFloat("starfallYaw", yaw);
+                    BeyonderUtil.setScale(doorEntity, 20);
+                    doorEntity.teleportTo(x, y + 50, z);
+                    doorEntity.getPersistentData().putBoolean("largeStarfall", true);
+                    player.level().addFreshEntity(doorEntityNew);
+                }
+            }
+            if (tag.getInt("starfallEntitySearch") >= 1) {
+                tag.putInt("starfallEntitySearch", tag.getInt("starfallEntitySearch") - 1);
+                Vec3 lookDirection = player.getLookAngle().normalize();
+                Vec3 ownerPosition = player.position();
+                Vec3 targetPosition = ownerPosition.add(lookDirection.scale(500.0));
+                Vec3 eyePosition = player.getEyePosition();
+                Vec3 lookVector = player.getLookAngle();
+                Vec3 reachVector = eyePosition.add(lookVector.scale(500.0));
+                AABB searchBox = player.getBoundingBox().inflate(500.0);
+
+                EntityHitResult targetEntity = ProjectileUtil.getEntityHitResult(
+                        player.level(),
+                        player,
+                        eyePosition,
+                        reachVector,
+                        searchBox,
+                        entity -> !entity.isSpectator() && entity.isPickable() && entity instanceof LivingEntity && entity != player && !BeyonderUtil.isEntityAlly(player, entity),
+                        0.1f
+                );
+
+                if (targetEntity != null) {
+                    targetPosition = targetEntity.getEntity().position();
+                } else {
+                    BlockHitResult blockHit = player.level().clip(new ClipContext(
+                            eyePosition,
+                            reachVector,
+                            ClipContext.Block.OUTLINE,
+                            ClipContext.Fluid.NONE,
+                            player
+                    ));
+                    if (blockHit.getType() != HitResult.Type.MISS) {
+                        targetPosition = Vec3.atCenterOf(blockHit.getBlockPos());
+                    }
+                }
+                int x = (int) targetPosition.x();
+                int y = (int) targetPosition.y();
+                int z = (int) targetPosition.z();
+                tag.putInt("starfallEntitySearchX", x);
+                tag.putInt("starfallEntitySearchY", y);
+                tag.putInt("starfallEntitySearchZ", z);
+            } else {
+                if (player.tickCount % 10 == 0) {
+                    tag.putInt("starfallEntitySearchX", 0);
+                    tag.putInt("starfallEntitySearchY", 0);
+                    tag.putInt("starfallEntitySearchZ", 0);
+                }
             }
         }
     }
@@ -94,7 +146,7 @@ public class Starfall extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Created doors connected to space, appearing right in front of miniature stars. These doors will shoot out these stars in the direction you looked when using this ability"));
+        tooltipComponents.add(Component.literal("Created doors connected to space, appearing right in front of miniature stars. These doors will shoot out these stars in the direction you looked when using this ability. The stars will target whatever block/entity you look at."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("3000").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("30 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

@@ -3391,6 +3391,7 @@ public class BeyonderUtil {
                     }
                 }
             }
+            tag.putInt("starfallEntitySearch", 0);
             tag.putInt("spaceFragmentationCopies", 0);
             tag.putInt("invisibleHandCounter", 0);
             tag.putDouble("invisibleHandDistance", 0);
@@ -3543,6 +3544,9 @@ public class BeyonderUtil {
             return BeyonderUtil.areAllies(living, livingAlly);
         } else if (possibleAlly instanceof Projectile projectile) {
             if (projectile.getOwner() != null && projectile.getOwner() instanceof LivingEntity owner) {
+                if (projectile.getOwner() == living) {
+                    return true;
+                }
                 return BeyonderUtil.areAllies(living, owner);
             }
         }

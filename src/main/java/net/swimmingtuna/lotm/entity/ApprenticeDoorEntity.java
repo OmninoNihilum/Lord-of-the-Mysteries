@@ -15,8 +15,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
@@ -364,7 +367,16 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         int life = getLife();
         if (getDoorMode() == DoorMode.STARFALL) {
             boolean x = this.getPersistentData().getBoolean("largeStarfall");
+            int targetX = 0;
+            int targetY = 0;
+            int targetZ = 0;
             if (!x) {
+                if (this.creator != null) {
+                    LivingEntity owner = BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
+                    if (owner != null) {
+                        owner.getPersistentData().putInt("starfallEntitySearch", 20);
+                    }
+                }
                 if (this.tickCount % 20 == 0 && this.tickCount != 0) {
                     StarfallEntity starfall = new StarfallEntity(EntityInit.STARFALL_ENTITY.get(), this.level());
                     float yaw = this.entityData.get(YAW);
@@ -373,16 +385,34 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                     if (this.creator != null) {
                         LivingEntity owner = BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
                         if (owner != null) {
-                            Vec3 ownerLookVec = owner.getViewVector(1.0f);
-                            Vec3 targetPos = owner.position().add(ownerLookVec.scale(500.0));
+                            int ownerX = owner.getPersistentData().getInt("starfallEntitySearchX");
+                            int ownerY = owner.getPersistentData().getInt("starfallEntitySearchY");
+                            int ownerZ = owner.getPersistentData().getInt("starfallEntitySearchZ");
+                            Vec3 newDir = null;
+                            if (ownerX != 0 || ownerY != 0 || ownerZ != 0) {
+                                targetX = ownerX;
+                                targetY = ownerY;
+                                targetZ = ownerZ;
+                                newDir = new Vec3(targetX, targetY, targetZ);
+                            }
+
+                            Vec3 lookDirection = owner.getLookAngle().normalize();
+                            Vec3 ownerPosition = owner.position();
+                            Vec3 targetPosition = ownerPosition.add(lookDirection.scale(500.0));
+
+                            if (newDir != null) {
+                                LOTM.LOGGER.info("NOT NULL");
+                                targetPosition = newDir;
+                            }
                             Vec3 spawnPos = new Vec3(this.getX(), this.getY(), this.getZ());
-                            directionVec = targetPos.subtract(spawnPos).normalize();
+                            directionVec = targetPosition.subtract(spawnPos).normalize();
                         } else {
                             directionVec = Vec3.directionFromRotation(pitch, yaw);
                         }
                     } else {
                         directionVec = Vec3.directionFromRotation(pitch, yaw);
                     }
+
                     double dirX = directionVec.x;
                     double dirY = directionVec.y;
                     double dirZ = directionVec.z;
@@ -410,19 +440,37 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                     float yaw = this.entityData.get(YAW);
                     float pitch = this.entityData.get(PITCH);
                     Vec3 directionVec;
+
                     if (this.creator != null) {
                         LivingEntity owner = BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
                         if (owner != null) {
-                            Vec3 ownerLookVec = owner.getViewVector(1.0f);
-                            Vec3 targetPos = owner.position().add(ownerLookVec.scale(500.0));
+                            int ownerX = owner.getPersistentData().getInt("starfallEntitySearchX");
+                            int ownerY = owner.getPersistentData().getInt("starfallEntitySearchY");
+                            int ownerZ = owner.getPersistentData().getInt("starfallEntitySearchZ");
+                            Vec3 newDir = null;
+                            if (ownerX != 0 || ownerY != 0 || ownerZ != 0) {
+                                targetX = ownerX;
+                                targetY = ownerY;
+                                targetZ = ownerZ;
+                                newDir = new Vec3(targetX, targetY, targetZ);
+                            }
+
+                            Vec3 lookDirection = owner.getLookAngle().normalize();
+                            Vec3 ownerPosition = owner.position();
+                            Vec3 targetPosition = ownerPosition.add(lookDirection.scale(500.0));
+
+                            if (newDir != null) {
+                                targetPosition = newDir;
+                            }
                             Vec3 spawnPos = new Vec3(this.getX(), this.getY(), this.getZ());
-                            directionVec = targetPos.subtract(spawnPos).normalize();
+                            directionVec = targetPosition.subtract(spawnPos).normalize();
                         } else {
                             directionVec = Vec3.directionFromRotation(pitch, yaw);
                         }
                     } else {
                         directionVec = Vec3.directionFromRotation(pitch, yaw);
                     }
+
                     double dirX = directionVec.x;
                     double dirY = directionVec.y;
                     double dirZ = directionVec.z;

@@ -181,21 +181,41 @@ public class MatterAccelerationEntities extends LeftClickHandlerSkillP {
                 for (Entity pEntity : entity.level().getEntitiesOfClass(Entity.class, entity.getBoundingBox().inflate(100))) {
                     if (!BeyonderUtil.isEntityAlly(entity, pEntity)) {
                         if (BeyonderUtil.getSequence(entity) == 0) {
-                            if (pEntity instanceof Projectile pProjectile) {
-                                float projectileHeight = pEntity.getBbHeight();
-                                float projectileWidth = pEntity.getBbWidth();
-                                float projectileSize = Math.min(50, Math.max(10, projectileHeight * projectileWidth * 100));
-                                double distance = pEntity.distanceTo(entity);
-                                double pushThreshold = Math.max(8.0, projectileSize * 0.25);
-                                if (distance <= pushThreshold) {
-                                    Vec3 playerPos = entity.position();
-                                    Vec3 projectilePos = pEntity.position();
-                                    Vec3 pushDirection = projectilePos.subtract(playerPos).normalize();
-                                    double pushForce = (projectileSize / 15.0) * (pushThreshold / Math.max(0.3, distance)) * 1.5;
-                                    pushForce = Math.min(pushForce, 5.0);
-                                    Vec3 pushVelocity = pushDirection.scale(pushForce);
-                                    pEntity.setDeltaMovement(pEntity.getDeltaMovement().add(pushVelocity));
-                                    pEntity.hurtMarked = true;
+                            if (pEntity instanceof Projectile projectile) {
+                                LOTM.sendMessageToAllPlayers("ENTITY FOUND");
+                                boolean check = false;
+                                if (projectile.getOwner() != null) {
+                                    LOTM.LOGGER.info("1");
+                                    if (projectile.getOwner() instanceof LivingEntity owner) {
+                                        LOTM.LOGGER.info("2");
+                                        if (BeyonderUtil.areAllies(entity, owner) || projectile.getOwner() == entity) {
+                                            check = true;
+                                            LOTM.LOGGER.info("3");
+                                        } else {
+                                            LOTM.LOGGER.info("NOT ALLIES");
+                                        }
+                                    } else {
+                                        LOTM.LOGGER.info("OWNER NOT LIVING");
+                                    }
+                                } else {
+                                    LOTM.LOGGER.info("OWNER NULL");
+                                }
+                                if (!check) {
+                                    float projectileHeight = pEntity.getBbHeight();
+                                    float projectileWidth = pEntity.getBbWidth();
+                                    float projectileSize = Math.min(50, Math.max(10, projectileHeight * projectileWidth * 100));
+                                    double distance = pEntity.distanceTo(entity);
+                                    double pushThreshold = Math.max(8.0, projectileSize * 0.25);
+                                    if (distance <= pushThreshold) {
+                                        Vec3 playerPos = entity.position();
+                                        Vec3 projectilePos = pEntity.position();
+                                        Vec3 pushDirection = projectilePos.subtract(playerPos).normalize();
+                                        double pushForce = (projectileSize / 15.0) * (pushThreshold / Math.max(0.3, distance)) * 1.5;
+                                        pushForce = Math.min(pushForce, 5.0);
+                                        Vec3 pushVelocity = pushDirection.scale(pushForce);
+                                        pEntity.setDeltaMovement(pEntity.getDeltaMovement().add(pushVelocity));
+                                        pEntity.hurtMarked = true;
+                                    }
                                 }
                             } else if (pEntity instanceof LightningEntity lightningEntity) {
                                 if (lightningEntity.getLastPos().distanceTo(entity.getOnPos().getCenter()) <= 30) {
