@@ -7,10 +7,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import net.minecraftforge.network.NetworkEvent;
 import net.swimmingtuna.lotm.entity.EndStoneEntity;
 import net.swimmingtuna.lotm.entity.NetherrackEntity;
@@ -53,8 +52,18 @@ public class MatterAccelerationBlockC2S implements LeftClickType {
                 EntityHitResult targetEntity = ProjectileUtil.getEntityHitResult(player.level(), player, eyePosition, reachVector, searchBox, entity -> !entity.isSpectator() && entity.isPickable(), 0.1f);
                 if (targetEntity != null) {
                     targetPosition = targetEntity.getEntity().position();
+                } else {
+                    BlockHitResult blockHit = player.level().clip(new ClipContext(
+                            eyePosition,
+                            reachVector,
+                            ClipContext.Block.OUTLINE,
+                            ClipContext.Fluid.NONE,
+                            player
+                    ));
+                    if (blockHit.getType() != HitResult.Type.MISS) {
+                        targetPosition = Vec3.atCenterOf(blockHit.getBlockPos());
+                    }
                 }
-
                 if (player.level().dimension() == Level.OVERWORLD) {
                     StoneEntity stoneEntity = player.level().getEntitiesOfClass(StoneEntity.class, player.getBoundingBox().inflate(10))
                             .stream()

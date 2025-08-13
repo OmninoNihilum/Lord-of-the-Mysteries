@@ -2656,27 +2656,27 @@ public class BeyonderUtil {
         CompoundTag tag = livingEntity.getPersistentData();
         int age = tag.getInt("age");
         int sequence = getSequence(livingEntity);
-        int maxAge = 20;
+        int maxAge = 25;
         if (sequence == 9) {
-            maxAge = 40;
+            maxAge = 50;
         } else if (sequence == 8) {
-            maxAge = 80;
+            maxAge = 100;
         } else if (sequence == 7) {
-            maxAge = 150;
+            maxAge = 220;
         } else if (sequence == 6) {
-            maxAge = 230;
+            maxAge = 300;
         } else if (sequence == 5) {
-            maxAge = 330;
+            maxAge = 4500;
         } else if (sequence == 4) {
-            maxAge = 550;
+            maxAge = 800;
         } else if (sequence == 3) {
-            maxAge = 700;
-        } else if (sequence == 2) {
             maxAge = 1000;
+        } else if (sequence == 2) {
+            maxAge = 2200;
         } else if (sequence == 1) {
-            maxAge = 1600;
+            maxAge = 4500;
         } else if (sequence == 0) {
-            maxAge = 3000;
+            maxAge = 8000;
         }
         boolean tenPercent = age >= maxAge * 0.1;
         boolean twentyPercent = age >= maxAge * 0.2;
