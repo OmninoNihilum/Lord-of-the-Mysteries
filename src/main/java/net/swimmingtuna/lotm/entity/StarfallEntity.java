@@ -4,10 +4,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -49,6 +52,11 @@ public class StarfallEntity extends AbstractHurtingProjectile {
             this.g = g;
             this.b = b;
         }
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult pResult) {
+        BeyonderUtil.destroyBlocksInSphere(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 6.0f);
     }
 
     @Override
@@ -135,6 +143,14 @@ public class StarfallEntity extends AbstractHurtingProjectile {
             }
             BeyonderUtil.sendAlwaysVisibleParticle(ParticleInit.FLASH_PARTICLE.get(), this.getX(), this.getY(), this.getZ());
             BeyonderUtil.updateLocationClientSide(this);
+        }
+        for (Entity living : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 5))) {
+            if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
+                if (!BeyonderUtil.isEntityAlly(owner, living)) {
+                    BeyonderUtil.destroyBlocksInSphere(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 6.0f);
+                    this.discard();
+                }
+            }
         }
     }
 

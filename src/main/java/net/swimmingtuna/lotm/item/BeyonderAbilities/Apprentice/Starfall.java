@@ -76,14 +76,14 @@ public class Starfall extends SimpleAbilityItem {
             int randomX = (int) BeyonderUtil.getRandomInRange(30);
             int randomY = (int) BeyonderUtil.getRandomInRange(15);
             int randomZ = (int) BeyonderUtil.getRandomInRange(30);
-            BeyonderUtil.setScale(doorEntity, 3);
+            BeyonderUtil.setScale(doorEntity, 6);
             doorEntity.teleportTo(x + randomX, y + 50 + randomY, z + randomZ);
             player.level().addFreshEntity(doorEntity);
             if (timer == 1) {
                 ApprenticeDoorEntity doorEntityNew = new ApprenticeDoorEntity(player, player.level(), yaw, pitch, 100);
                 doorEntity.getPersistentData().putFloat("starfallPitch", pitch);
                 doorEntity.getPersistentData().putFloat("starfallYaw", yaw);
-                BeyonderUtil.setScale(doorEntity, 10);
+                BeyonderUtil.setScale(doorEntity, 20);
                 doorEntity.teleportTo(x, y + 50, z);
                 doorEntity.getPersistentData().putBoolean("largeStarfall", true);
                 player.level().addFreshEntity(doorEntityNew);
