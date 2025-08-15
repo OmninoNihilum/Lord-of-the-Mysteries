@@ -1,7 +1,6 @@
 package net.swimmingtuna.lotm.events;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -23,19 +22,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -44,7 +40,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
-import net.swimmingtuna.lotm.attributes.ModAttributes;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
@@ -71,6 +66,7 @@ import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientRecipiesJEISyncS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -78,6 +74,7 @@ import net.swimmingtuna.lotm.util.ClientData.*;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerMobSequenceData;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
+import net.swimmingtuna.lotm.world.worlddata.BeyonderRecipeData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
 
@@ -164,8 +161,10 @@ public class ModEvents {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientAbilityCombinationData.clientSideLoginHandling();
         }
+
         Player player = event.getEntity();
         if (!player.level().isClientSide()) {
+            LOTMNetworkHandler.sendToPlayer(new ClientRecipiesJEISyncS2C(BeyonderRecipeData.getInstance(((ServerPlayer) player).serverLevel()).getBeyonderRecipes()), (ServerPlayer) player);
             BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
             LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(holder.getSequence()), (ServerPlayer) player);
             CompoundTag persistentData = player.getPersistentData();
@@ -304,6 +303,7 @@ public class ModEvents {
             //boolean x = ClientAntiConcealmentData.getAntiConceal();
             //player.sendSystemMessage(Component.literal("value is " + x));
         }
+
 
         if (player instanceof ServerPlayer serverPlayer) {
             if (player.tickCount % 20 == 0) {

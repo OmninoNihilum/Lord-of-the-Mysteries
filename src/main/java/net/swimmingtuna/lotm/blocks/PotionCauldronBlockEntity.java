@@ -178,8 +178,8 @@ public class PotionCauldronBlockEntity extends BlockEntity implements MenuProvid
         }
         for (Map.Entry<ItemStack, BeyonderRecipeData.RecipeIngredients> recipeEntry : recipeData.getBeyonderRecipes().entrySet()) {
             List<ItemStack> recipeIngredients = new ArrayList<>();
-            recipeIngredients.addAll(recipeEntry.getValue().getMainIngredients());
-            recipeIngredients.addAll(recipeEntry.getValue().getSupplementaryIngredients());
+            recipeIngredients.addAll(recipeEntry.getValue().mainIngredients());
+            recipeIngredients.addAll(recipeEntry.getValue().supplementaryIngredients());
             if (ingredientsMatch(inputIngredients, recipeIngredients)) {
                 return true;
             }
@@ -190,7 +190,7 @@ public class PotionCauldronBlockEntity extends BlockEntity implements MenuProvid
             for (Map.Entry<ItemStack, BeyonderRecipeData.RecipeIngredients> recipeEntry : recipeData.getBeyonderRecipes().entrySet()) {
                 if (recipeEntry.getKey().getItem() instanceof BeyonderPotion beyonderPotion) {
                     if (pathway == beyonderPotion.getBeyonderClass() && sequence == beyonderPotion.getSequence()) {
-                        List<ItemStack> supplementaryIngredients = recipeEntry.getValue().getSupplementaryIngredients();
+                        List<ItemStack> supplementaryIngredients = recipeEntry.getValue().supplementaryIngredients();
                         if (!supplementaryIngredients.isEmpty()) {
                             List<ItemStack> remainingSupplementaryIngredients = new ArrayList<>(supplementaryIngredients);
                             for (ItemStack suppIngredient : supplementaryIngredients) {
@@ -258,8 +258,8 @@ public class PotionCauldronBlockEntity extends BlockEntity implements MenuProvid
         }
         for (Map.Entry<ItemStack, BeyonderRecipeData.RecipeIngredients> recipeEntry : recipeData.getBeyonderRecipes().entrySet()) {
             List<ItemStack> recipeIngredients = new ArrayList<>();
-            recipeIngredients.addAll(recipeEntry.getValue().getMainIngredients());
-            recipeIngredients.addAll(recipeEntry.getValue().getSupplementaryIngredients());
+            recipeIngredients.addAll(recipeEntry.getValue().mainIngredients());
+            recipeIngredients.addAll(recipeEntry.getValue().supplementaryIngredients());
             if (ingredientsMatch(inputIngredients, recipeIngredients)) {
                 craftPotionWithIngredients(recipeEntry, inputIngredients);
                 return;
@@ -300,7 +300,7 @@ public class PotionCauldronBlockEntity extends BlockEntity implements MenuProvid
                 break;
             }
         }
-        List<ItemStack> supplementaryIngredients = recipeEntry.getValue().getSupplementaryIngredients();
+        List<ItemStack> supplementaryIngredients = recipeEntry.getValue().supplementaryIngredients();
         for (ItemStack suppIngredient : supplementaryIngredients) {
             for (int i = INPUT_SLOT_1; i <= INPUT_SLOT_5; i++) {
                 ItemStack slotItem = this.itemHandler.getStackInSlot(i);

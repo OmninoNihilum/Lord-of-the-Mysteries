@@ -16,7 +16,6 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.ScryingEntityPacketS2C;
 import net.swimmingtuna.lotm.networking.packet.*;
 import net.swimmingtuna.lotm.util.AllyInformation.SyncAlliesPacket;
 import net.swimmingtuna.lotm.util.CapabilitySyncer.network.SimpleEntityCapabilityStatusPacket;
-import net.swimmingtuna.lotm.util.ClientData.ClientShouldntMoveData;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -327,7 +326,16 @@ public class LOTMNetworkHandler {
                 .encoder(ClientShouldntRenderS2C::encode)
                 .consumerMainThread(ClientShouldntRenderS2C::handle)
                 .add();
-
+        INSTANCE.messageBuilder(ClientRecipiesJEISyncS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientRecipiesJEISyncS2C::decode)
+                .encoder(ClientRecipiesJEISyncS2C::encode)
+                .consumerMainThread(ClientRecipiesJEISyncS2C::handle)
+                .add();
+        INSTANCE.messageBuilder(ClientRemoveRecipeJEISyncS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientRemoveRecipeJEISyncS2C::decode)
+                .encoder(ClientRemoveRecipeJEISyncS2C::encode)
+                .consumerMainThread(ClientRemoveRecipeJEISyncS2C::handle)
+                .add();
     }
 
 
