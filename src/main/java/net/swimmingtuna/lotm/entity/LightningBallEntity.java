@@ -181,7 +181,8 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
                 }
             }
         }
-        if (!this.level().isClientSide() && y && this.tickCount <= 40 && owner != null) {
+        boolean isExploding = this.getPersistentData().getBoolean("isExploding");
+        if (!this.level().isClientSide() && y && !isExploding && owner != null) {
             for (Entity entity : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(100))) {
                 if (entity instanceof LightningEntity lightningEntity) {
                     if (lightningEntity.getSpeed() != 10.5f && lightningEntity.getLastPos() != null) {
@@ -225,7 +226,6 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
         this.yRotO = this.getYRot();
         if (!this.level().isClientSide) {
             int lightningArea = this.getPersistentData().getInt("lightningRadiusCounter");
-            boolean isExploding = this.getPersistentData().getBoolean("isExploding");
             float scale = ScaleTypes.BASE.getScaleData(this).getScale();
             if (isExploding) {
                 if (lightningArea <= 1) {
@@ -324,6 +324,13 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
             lightningPos = lightningPos.above();
             LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
             List<LivingEntity> entities = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(adjustedRadius));
+            for (LivingEntity living : entities) {
+                if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner) {
+                    if (living == owner || BeyonderUtil.areAllies(living, owner)) {
+                        entities.remove(living);
+                    }
+                }
+            }
             if (!entities.isEmpty()) {
                 LivingEntity randomEntity = entities.get(this.random.nextInt(entities.size()));
                 lightningBolt.moveTo(randomEntity.getOnPos().getCenter());

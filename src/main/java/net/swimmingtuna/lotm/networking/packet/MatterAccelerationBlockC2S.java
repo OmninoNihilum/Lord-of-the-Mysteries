@@ -72,7 +72,7 @@ public class MatterAccelerationBlockC2S implements LeftClickType {
                     if (stoneEntity != null) {
                         serverLevel.playSound(null, player.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 5, 5 );
                         Vec3 stoneToTarget = targetPosition.subtract(stoneEntity.position()).normalize();
-                        stoneEntity.setDeltaMovement(stoneToTarget.scale(20.0));
+                        stoneEntity.setDeltaMovement(stoneToTarget.scale(40.0));
                         stoneEntity.setBB(15);
                         stoneEntity.setSent(true);
                         stoneEntity.setDamage((int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) * 12);
@@ -93,7 +93,7 @@ public class MatterAccelerationBlockC2S implements LeftClickType {
                     if (netherrackEntity != null) {
                         serverLevel.playSound(null, player.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 5, 5 );
                         Vec3 netherrackToTarget = targetPosition.subtract(netherrackEntity.position()).normalize();
-                        netherrackEntity.setDeltaMovement(netherrackToTarget.scale(20.0));
+                        netherrackEntity.setDeltaMovement(netherrackToTarget.scale(40.0));
                         netherrackEntity.setSent(true);
                         netherrackEntity.setBB(15);
                         netherrackEntity.setShouldDamage(true);
@@ -114,7 +114,7 @@ public class MatterAccelerationBlockC2S implements LeftClickType {
                     if (endStoneEntity != null) {
                         serverLevel.playSound(null, player.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 5, 5 );
                         Vec3 endStoneToTarget = targetPosition.subtract(endStoneEntity.position()).normalize();
-                        endStoneEntity.setDeltaMovement(endStoneToTarget.scale(20.0)); // Adjust speed as needed
+                        endStoneEntity.setDeltaMovement(endStoneToTarget.scale(40.0)); // Adjust speed as needed
                         endStoneEntity.setSent(true);
                         endStoneEntity.setBB(15);
                         endStoneEntity.setShouldntDamage(false);

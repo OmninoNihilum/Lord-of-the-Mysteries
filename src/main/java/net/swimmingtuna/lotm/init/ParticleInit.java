@@ -14,6 +14,8 @@ public class ParticleInit {
 
     public static final RegistryObject<SimpleParticleType> NULL_PARTICLE =
             PARTICLE_TYPES.register("null_particle", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> SPARKLE_PARTICLE =
+            PARTICLE_TYPES.register("sparkle", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> DOOR =
             PARTICLE_TYPES.register("door", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> GRAVITY =

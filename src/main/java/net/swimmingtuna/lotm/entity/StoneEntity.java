@@ -160,7 +160,35 @@ public class StoneEntity extends AbstractArrow {
             if (getRemoveAndHurt()) {
                 if (!getSent() && this.getOwner() != null) {
                     this.hurtMarked = true;
-                    this.setDeltaMovement(this.getOwner().getX() - this.getX() + getStoneStayAtX(), this.getOwner().getY() - this.getY() + getStoneStayAtY(), this.getOwner().getZ() - this.getZ() + getStoneStayAtX());
+
+                    // Calculate position relative to player's look direction
+                    Vec3 ownerLookDirection = this.getOwner().getLookAngle();
+                    Vec3 horizontalLookDirection = new Vec3(ownerLookDirection.x, 0, ownerLookDirection.z).normalize();
+
+                    // Calculate perpendicular direction (left-right relative to look direction)
+                    Vec3 rightDirection = new Vec3(-horizontalLookDirection.z, 0, horizontalLookDirection.x);
+
+                    // Use the stored stay-at values to determine which side and distance
+                    // getStoneStayAtX() will be used as a side multiplier (-1 for left, 1 for right)
+                    float sideMultiplier = Math.signum(getStoneStayAtX()); // -1 or 1
+                    float sideDistance = Math.abs(getStoneStayAtX()); // Distance from player
+
+                    // Calculate the target position
+                    Vec3 sideOffset = rightDirection.scale(sideMultiplier * sideDistance);
+                    Vec3 forwardOffset = horizontalLookDirection.scale(getStoneStayAtZ()); // Forward/backward offset
+
+                    Vec3 targetPos = new Vec3(
+                            this.getOwner().getX() + sideOffset.x + forwardOffset.x,
+                            this.getOwner().getY() + getStoneStayAtY(), // Height offset
+                            this.getOwner().getZ() + sideOffset.z + forwardOffset.z
+                    );
+
+                    // Set delta movement toward the calculated target position
+                    this.setDeltaMovement(
+                            targetPos.x - this.getX(),
+                            targetPos.y - this.getY(),
+                            targetPos.z - this.getZ()
+                    );
                 }
                 BlockPos entityPos = this.blockPosition();
                 int amount = 0;

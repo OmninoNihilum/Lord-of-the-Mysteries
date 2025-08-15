@@ -155,9 +155,39 @@ public class NetherrackEntity extends AbstractArrow {
             }
             if (getRemoveAndHurt()) {
                 if (!getSent() && this.getOwner() != null) {
-                    this.setDeltaMovement(this.getOwner().getX() - this.getX() + getNetherrackStayAtX(),this.getOwner().getY() - this.getY() + getNetherrackStayAtY(),this.getOwner().getZ() - this.getZ() + getNetherrackStayAtZ());
+                    this.hurtMarked = true;
+
+                    // Calculate position relative to player's look direction
+                    Vec3 ownerLookDirection = this.getOwner().getLookAngle();
+                    Vec3 horizontalLookDirection = new Vec3(ownerLookDirection.x, 0, ownerLookDirection.z).normalize();
+
+                    // Calculate perpendicular direction (left-right relative to look direction)
+                    Vec3 rightDirection = new Vec3(-horizontalLookDirection.z, 0, horizontalLookDirection.x);
+
+                    // Use the stored stay-at values to determine which side and distance
+                    // getStoneStayAtX() will be used as a side multiplier (-1 for left, 1 for right)
+                    float sideMultiplier = Math.signum(getNetherrackStayAtY()); // -1 or 1
+                    float sideDistance = Math.abs(getNetherrackStayAtX()); // Distance from player
+
+                    // Calculate the target position
+                    Vec3 sideOffset = rightDirection.scale(sideMultiplier * sideDistance);
+                    Vec3 forwardOffset = horizontalLookDirection.scale(getNetherrackStayAtZ()); // Forward/backward offset
+
+                    Vec3 targetPos = new Vec3(
+                            this.getOwner().getX() + sideOffset.x + forwardOffset.x,
+                            this.getOwner().getY() + getNetherrackStayAtY(), // Height offset
+                            this.getOwner().getZ() + sideOffset.z + forwardOffset.z
+                    );
+
+                    // Set delta movement toward the calculated target position
+                    this.setDeltaMovement(
+                            targetPos.x - this.getX(),
+                            targetPos.y - this.getY(),
+                            targetPos.z - this.getZ()
+                    );
                 }
                 BlockPos entityPos = this.blockPosition();
+                int amount = 0;
                 for (int x = -2; x <= 2; x++) {
                     for (int y = -2; y <= 2; y++) {
                         for (int z = -2; z <= 2; z++) {
@@ -165,27 +195,17 @@ public class NetherrackEntity extends AbstractArrow {
                             BlockState state = this.level().getBlockState(pos);
                             Block block = state.getBlock();
                             float blockStrength = block.defaultDestroyTime();
-                            float obsidianStrength = Blocks.OBSIDIAN.defaultDestroyTime();
-                            if (blockStrength <= obsidianStrength) {
+                            float bedrockStrength = Blocks.BEDROCK.defaultDestroyTime();
+                            if (blockStrength <= bedrockStrength) {
                                 BeyonderUtil.setAir(this, pos);
-                            }
-                            if (blockStrength >= obsidianStrength) {
-                                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 8, Level.ExplosionInteraction.TNT);
                             }
                         }
                     }
                 }
                 for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(getBB()))) {
                     if (entity != this.getOwner()) {
-                        entity.invulnerableTime = 0;
-                        entity.hurtTime = 0;
-                        entity.hurtDuration = 0;
-                        if (this.getOwner() == null) {
-                            entity.hurt(BeyonderUtil.genericSource(this, entity), this.getDamage());
-                        } else {
-                            entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), this.getDamage());
-                        }
-                        BeyonderUtil.destroyBlocksInSphere(entity, entity.getOnPos(), 10,0);
+                        entity.hurt(BeyonderUtil.genericSource(this.getOwner(), entity), this.getDamage());
+                        BeyonderUtil.destroyBlocksInSphere(entity, entity.getOnPos(), 9,0);
                         this.discard();
                     }
                 }

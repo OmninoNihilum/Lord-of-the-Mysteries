@@ -131,24 +131,42 @@ public class MatterAccelerationBlocks extends LeftClickHandlerSkill {
             BlockPos surfacePos = findSurfaceBelow(level, playerPos);
 
             if (surfacePos != null) {
+                // Get player's look direction for calculating relative positions
+                float playerYaw = player.getYHeadRot(); // Get head rotation in degrees
+                double yawRad = Math.toRadians(playerYaw); // Convert to radians
+
+                // Calculate forward and right vectors based on player's look direction
+                double forwardX = -Math.sin(yawRad);
+                double forwardZ = Math.cos(yawRad);
+                double rightX = Math.cos(yawRad);
+                double rightZ = Math.sin(yawRad);
+
                 for (int i = 0; i < BeyonderUtil.getDamage(player).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()); i++) {
                     BlockPos posToRemove = surfacePos.below(i);
                     BeyonderUtil.setAir(player, posToRemove);
+
+                    // Calculate position relative to player's look direction
+                    boolean isLeftSide = (i % 2 == 0); // Alternate between left and right
+                    float sideMultiplier = isLeftSide ? -1.0f : 1.0f; // -1 for left, 1 for right
+                    float sideDistance = 3.0f + (float)(Math.random() * 2.0f); // 3-5 blocks to the side
+                    float heightOffset = (float)((Math.random() * 4) - 2); // -2 to 2 blocks height variation
+                    float backwardOffset = -0.5f - (float)(Math.random() * 1.5f); // 0.5-2 blocks behind player
+
+                    // Calculate actual world position using player's look direction
+                    double offsetX = (rightX * sideMultiplier * sideDistance) + (forwardX * backwardOffset);
+                    double offsetZ = (rightZ * sideMultiplier * sideDistance) + (forwardZ * backwardOffset);
+
+                    int randomXRot = (int) ((Math.random() * 10) - 5);
+                    int randomYRot = (int) ((Math.random() * 10) - 5);
+
                     if (level.dimension() == Level.OVERWORLD) {
                         StoneEntity stoneEntity = new StoneEntity(EntityInit.STONE_ENTITY.get(), player.level());
-                        float randomStayX;
-                        do {
-                            randomStayX = (float) ((Math.random() * 6) - 3);
-                        } while (randomStayX > -0.5 && randomStayX < 0.5);
-                        float randomStayY = (float) ((Math.random() * 6) - 3);
-                        float randomStayZ = (float) ((Math.random() * 6) - 3);
-                        int randomXRot = (int) ((Math.random() * 10) - 5);
-                        int randomYRot = (int) ((Math.random() * 10) - 5);
+
                         stoneEntity.setStoneYRot(randomYRot);
                         stoneEntity.setStoneXRot(randomXRot);
-                        stoneEntity.setStoneStayAtX(randomStayX);
-                        stoneEntity.setStoneStayAtY(randomStayY);
-                        stoneEntity.setStoneStayAtZ(randomStayZ);
+                        stoneEntity.setStoneStayAtX((float)offsetX);
+                        stoneEntity.setStoneStayAtY(heightOffset);
+                        stoneEntity.setStoneStayAtZ((float)offsetZ);
                         stoneEntity.setOwner(player);
                         stoneEntity.setRemoveAndHurt(true);
                         stoneEntity.setDamage(30);
@@ -157,43 +175,30 @@ public class MatterAccelerationBlocks extends LeftClickHandlerSkill {
                         stoneEntity.setShouldntDamage(true);
                         player.level().addFreshEntity(stoneEntity);
                     }
-                    if (level.dimension() == Level.NETHER) {
-                        NetherrackEntity netherrackEntity = new NetherrackEntity(EntityInit.NETHERRACK_ENTITY.get(), player.level());
-                        float randomStayX;
-                        do {
-                            randomStayX = (float) ((Math.random() * 6) - 3);
-                        } while (randomStayX > -0.5 && randomStayX < 0.5);
-                        float randomStayY = (float) ((Math.random() * 6) - 3);
-                        float randomStayZ = (float) ((Math.random() * 6) - 3);
-                        int randomXRot = (int) ((Math.random() * 10) - 5);
-                        int randomYRot = (int) ((Math.random() * 10) - 5);
-                        netherrackEntity.setNetherrackStayAtX(randomStayX);
-                        netherrackEntity.setNetherrackStayAtY(randomStayY);
-                        netherrackEntity.setNetherrackStayAtZ(randomStayZ);
-                        netherrackEntity.setOwner(player);
-                        netherrackEntity.setRemoveAndHurt(true);
-                        netherrackEntity.setSent(false);
-                        netherrackEntity.setPos(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
-                        netherrackEntity.setShouldDamage(false);
-                        netherrackEntity.setDamage(30);
-                        netherrackEntity.setNetherrackXRot(randomXRot);
-                        netherrackEntity.setNetherrackYRot(randomYRot);
 
-                        player.level().addFreshEntity(netherrackEntity);
+                    if (level.dimension() == Level.NETHER) {
+                        NetherrackEntity stoneEntity = new NetherrackEntity(EntityInit.NETHERRACK_ENTITY.get(), player.level());
+
+                        stoneEntity.setNetherrackYRot(randomYRot);
+                        stoneEntity.setNetherrackXRot(randomXRot);
+                        stoneEntity.setNetherrackStayAtX((float)offsetX);
+                        stoneEntity.setNetherrackStayAtY(heightOffset);
+                        stoneEntity.setNetherrackStayAtZ((float)offsetZ);
+                        stoneEntity.setOwner(player);
+                        stoneEntity.setRemoveAndHurt(true);
+                        stoneEntity.setDamage(30);
+                        stoneEntity.setSent(false);
+                        stoneEntity.setShouldDamage(false);
+                        stoneEntity.teleportTo(surfacePos.getX() + 0.5, surfacePos.getY() + 1, surfacePos.getZ() + 0.5);
+                        player.level().addFreshEntity(stoneEntity);
                     }
+
                     if (level.dimension() == Level.END) {
                         EndStoneEntity endstoneEntity = new EndStoneEntity(EntityInit.ENDSTONE_ENTITY.get(), player.level());
-                        float randomStayX;
-                        do {
-                            randomStayX = (float) ((Math.random() * 6) - 3);
-                        } while (randomStayX > -0.5 && randomStayX < 0.5);
-                        float randomStayY = (float) ((Math.random() * 6) - 3);
-                        float randomStayZ = (float) ((Math.random() * 6) - 3);
-                        int randomXRot = (int) ((Math.random() * 10) - 5);
-                        int randomYRot = (int) ((Math.random() * 10) - 5);
-                        endstoneEntity.setEndstoneStayAtX(randomStayX);
-                        endstoneEntity.setEndstoneStayAtY(randomStayY);
-                        endstoneEntity.setEndstoneStayAtZ(randomStayZ);
+
+                        endstoneEntity.setEndstoneStayAtX((float)offsetX);
+                        endstoneEntity.setEndstoneStayAtY(heightOffset);
+                        endstoneEntity.setEndstoneStayAtZ((float)offsetZ);
                         endstoneEntity.setOwner(player);
                         endstoneEntity.setRemoveAndHurt(true);
                         endstoneEntity.setSent(false);
@@ -204,19 +209,13 @@ public class MatterAccelerationBlocks extends LeftClickHandlerSkill {
                         endstoneEntity.setEndstoneYRot(randomYRot);
                         player.level().addFreshEntity(endstoneEntity);
                     }
+
                     if (level.dimension() != Level.OVERWORLD && level.dimension() != Level.NETHER && level.dimension() != Level.END) {
                         StoneEntity stoneEntity = new StoneEntity(EntityInit.STONE_ENTITY.get(), player.level());
-                        float randomStayX;
-                        do {
-                            randomStayX = (float) ((Math.random() * 6) - 3);
-                        } while (randomStayX > -0.5 && randomStayX < 0.5);
-                        float randomStayY = (float) ((Math.random() * 6) - 3);
-                        float randomStayZ = (float) ((Math.random() * 6) - 3);
-                        int randomXRot = (int) ((Math.random() * 10) - 5);
-                        int randomYRot = (int) ((Math.random() * 10) - 5);
-                        stoneEntity.setStoneStayAtX(randomStayX);
-                        stoneEntity.setStoneStayAtY(randomStayY);
-                        stoneEntity.setStoneStayAtZ(randomStayZ);
+
+                        stoneEntity.setStoneStayAtX((float)offsetX);
+                        stoneEntity.setStoneStayAtY(heightOffset);
+                        stoneEntity.setStoneStayAtZ((float)offsetZ);
                         stoneEntity.setOwner(player);
                         stoneEntity.setDamage(30);
                         stoneEntity.setRemoveAndHurt(true);
