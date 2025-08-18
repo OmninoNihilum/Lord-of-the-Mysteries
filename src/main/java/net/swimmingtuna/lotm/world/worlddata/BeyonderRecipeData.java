@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientRecipiesJEISyncS2C;
-import net.swimmingtuna.lotm.networking.packet.ClientRemoveRecipeJEISyncS2C;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,10 +111,8 @@ public class BeyonderRecipeData extends SavedData {
     public boolean removeRecipe(ItemStack potion) {
         ItemStack existingKey = findExistingRecipe(potion);
         if (existingKey != null) {
-            BeyonderRecipeData.RecipeIngredients data = getBeyonderRecipes().get(existingKey);
             beyonderRecipes.remove(existingKey);
             setDirty();
-            LOTMNetworkHandler.sendToAllPlayers(new ClientRemoveRecipeJEISyncS2C(Map.of(existingKey, data)));
             return true;
         }
         return false;
@@ -131,10 +128,8 @@ public class BeyonderRecipeData extends SavedData {
     }
 
     public void clearRecipes() {
-        Map<ItemStack, RecipeIngredients> recipes = getBeyonderRecipes();
         beyonderRecipes.clear();
         setDirty();
-        LOTMNetworkHandler.sendToAllPlayers(new ClientRemoveRecipeJEISyncS2C(recipes));
     }
 
 
