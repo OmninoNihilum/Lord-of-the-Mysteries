@@ -332,11 +332,6 @@ public class LOTMNetworkHandler {
                 .encoder(ClientRecipesJEISyncS2C::encode)
                 .consumerMainThread(ClientRecipesJEISyncS2C::handle)
                 .add();
-        INSTANCE.messageBuilder(ClientRemoveRecipeJEISyncS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(ClientRemoveRecipeJEISyncS2C::decode)
-                .encoder(ClientRemoveRecipeJEISyncS2C::encode)
-                .consumerMainThread(ClientRemoveRecipeJEISyncS2C::handle)
-                .add();
 
     }
 

@@ -51,10 +51,6 @@ public class JEILordOfTheMysteries implements IModPlugin {
         registration.addRecipeCategories(new PotionCraftingCategory(registration.getJeiHelpers().getGuiHelper()));
     }
 
-    public static void removeIngredient(Map<ItemStack, BeyonderRecipeData.RecipeIngredients> recepies) {
-        jeiRuntime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, recepies.keySet().stream().toList());
-    }
-
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         IIngredientManager ingredientManager = registration.getIngredientManager();
