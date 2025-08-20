@@ -71,6 +71,7 @@ import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientRecipesJEISyncS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -78,6 +79,7 @@ import net.swimmingtuna.lotm.util.ClientData.*;
 import net.swimmingtuna.lotm.util.CorruptionAndLuckHandler;
 import net.swimmingtuna.lotm.util.PlayerMobs.PlayerMobSequenceData;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
+import net.swimmingtuna.lotm.world.worlddata.BeyonderRecipeData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
 
@@ -974,6 +976,9 @@ public class ModEvents {
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
         int sequence = holder.getSequence();
         if (!player.level().isClientSide()) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                LOTMNetworkHandler.sendToPlayer(new ClientRecipesJEISyncS2C(BeyonderRecipeData.getInstance(((ServerPlayer) player).serverLevel()).getBeyonderRecipes()), serverPlayer);
+            }
             LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(holder.getSequence()), (ServerPlayer) player);
             if (persistentData.contains("DemiseCounter")) {
                 int demiseCounter = persistentData.getInt("DemiseCounter");

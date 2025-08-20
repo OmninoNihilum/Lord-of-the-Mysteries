@@ -4,11 +4,15 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientRecipesJEISyncS2C;
+import net.swimmingtuna.lotm.networking.packet.ClientRemoveRecipeJEISyncS2C;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,23 +24,50 @@ public class BeyonderRecipeData extends SavedData {
     private static final String RECIPES_KEY = "BeyonderRecipes";
     private final Map<ItemStack, RecipeIngredients> beyonderRecipes = new HashMap<>();
 
-    public static class RecipeIngredients {
-        private final List<ItemStack> mainIngredients;
-        private final List<ItemStack> supplementaryIngredients;
 
-        public RecipeIngredients(List<ItemStack> mainIngredients, List<ItemStack> supplementaryIngredients) {
-            this.mainIngredients = mainIngredients;
-            this.supplementaryIngredients = supplementaryIngredients;
+    public record RecipeIngredients(
+            List<ItemStack> mainIngredients,
+            List<ItemStack> supplementaryIngredients
+    ) {
+
+        public void toNetwork(FriendlyByteBuf buf) {
+            buf.writeInt(mainIngredients.size());
+            for (ItemStack stack : mainIngredients) {
+                buf.writeItem(stack);
+            }
+            buf.writeInt(supplementaryIngredients.size());
+            for (ItemStack stack : supplementaryIngredients) {
+                buf.writeItem(stack);
+            }
         }
 
-        public List<ItemStack> getMainIngredients() {
+        public static RecipeIngredients fromNetwork(FriendlyByteBuf buf) {
+            int mainSize = buf.readInt();
+            List<ItemStack> main = new ArrayList<>();
+            for (int i = 0; i < mainSize; i++) {
+                main.add(buf.readItem());
+            }
+
+            int suppSize = buf.readInt();
+            List<ItemStack> supp = new ArrayList<>();
+            for (int i = 0; i < suppSize; i++) {
+                supp.add(buf.readItem());
+            }
+
+            return new RecipeIngredients(main, supp);
+        }
+
+        @Override
+        public List<ItemStack> mainIngredients() {
             return new ArrayList<>(mainIngredients);
         }
 
-        public List<ItemStack> getSupplementaryIngredients() {
+        @Override
+        public List<ItemStack> supplementaryIngredients() {
             return new ArrayList<>(supplementaryIngredients);
         }
     }
+
 
     private BeyonderRecipeData() {
         super();
@@ -75,14 +106,17 @@ public class BeyonderRecipeData extends SavedData {
 
         beyonderRecipes.put(potion.copy(), new RecipeIngredients(mainCopy, suppCopy));
         setDirty();
+        LOTMNetworkHandler.sendToAllPlayers(new ClientRecipesJEISyncS2C(Map.of(potion.copy(), new RecipeIngredients(mainCopy, suppCopy))));
         return true;
     }
 
     public boolean removeRecipe(ItemStack potion) {
         ItemStack existingKey = findExistingRecipe(potion);
         if (existingKey != null) {
+            BeyonderRecipeData.RecipeIngredients data = getBeyonderRecipes().get(existingKey);
             beyonderRecipes.remove(existingKey);
             setDirty();
+            LOTMNetworkHandler.sendToAllPlayers(new ClientRemoveRecipeJEISyncS2C(Map.of(existingKey, data)));
             return true;
         }
         return false;
@@ -98,9 +132,12 @@ public class BeyonderRecipeData extends SavedData {
     }
 
     public void clearRecipes() {
+        Map<ItemStack, RecipeIngredients> recipes = getBeyonderRecipes();
         beyonderRecipes.clear();
         setDirty();
+        LOTMNetworkHandler.sendToAllPlayers(new ClientRemoveRecipeJEISyncS2C(recipes));
     }
+
 
     public Map<ItemStack, RecipeIngredients> getBeyonderRecipes() {
         return new HashMap<>(beyonderRecipes);
@@ -114,7 +151,7 @@ public class BeyonderRecipeData extends SavedData {
         for (Map.Entry<ItemStack, RecipeIngredients> entry : beyonderRecipes.entrySet()) {
             StringBuilder recipeMessage = new StringBuilder("Potion: ").append(entry.getKey().getHoverName().getString()).append(" - Main Ingredients: ");
 
-            List<ItemStack> mainIngredients = entry.getValue().getMainIngredients();
+            List<ItemStack> mainIngredients = entry.getValue().mainIngredients();
             if (!mainIngredients.isEmpty()) {
                 for (int i = 0; i < mainIngredients.size(); i++) {
                     recipeMessage.append(mainIngredients.get(i).getHoverName().getString());
@@ -125,7 +162,7 @@ public class BeyonderRecipeData extends SavedData {
             }
 
             recipeMessage.append(" - Supplementary Ingredients: ");
-            List<ItemStack> suppIngredients = entry.getValue().getSupplementaryIngredients();
+            List<ItemStack> suppIngredients = entry.getValue().supplementaryIngredients();
             if (!suppIngredients.isEmpty()) {
                 for (int i = 0; i < suppIngredients.size(); i++) {
                     recipeMessage.append(suppIngredients.get(i).getHoverName().getString());
@@ -153,7 +190,7 @@ public class BeyonderRecipeData extends SavedData {
 
             // Save main ingredients
             ListTag mainIngredientsTag = new ListTag();
-            for (ItemStack ingredient : entry.getValue().getMainIngredients()) {
+            for (ItemStack ingredient : entry.getValue().mainIngredients()) {
                 CompoundTag ingredientTag = new CompoundTag();
                 ingredient.save(ingredientTag);
                 mainIngredientsTag.add(ingredientTag);
@@ -162,7 +199,7 @@ public class BeyonderRecipeData extends SavedData {
 
             // Save supplementary ingredients
             ListTag supplementaryIngredientsTag = new ListTag();
-            for (ItemStack ingredient : entry.getValue().getSupplementaryIngredients()) {
+            for (ItemStack ingredient : entry.getValue().supplementaryIngredients()) {
                 CompoundTag ingredientTag = new CompoundTag();
                 ingredient.save(ingredientTag);
                 supplementaryIngredientsTag.add(ingredientTag);
