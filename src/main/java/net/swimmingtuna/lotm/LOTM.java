@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm;
 
 import com.mojang.logging.LogUtils;
+import mezz.jei.api.helpers.IJeiHelpers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
