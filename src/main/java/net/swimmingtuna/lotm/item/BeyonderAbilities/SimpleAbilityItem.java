@@ -19,6 +19,7 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
+import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
@@ -438,7 +439,7 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                 }
             }
             boolean shouldntActiveCalamity = true;
-            boolean allowBeyonderAbilitiesNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            boolean allowBeyonderAbilitiesNearSpawn = Configs.COMMON.shouldUseAbilitiesNearSpawn.get();
             if (!allowBeyonderAbilitiesNearSpawn) {
                 BlockPos entityPos = livingEntity.getOnPos();
                 BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();

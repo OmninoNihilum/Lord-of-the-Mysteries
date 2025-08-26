@@ -19,7 +19,6 @@ import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -35,7 +34,7 @@ import virtuoel.pehkui.api.ScaleTypes;
 import java.util.List;
 
 public class MeteorEntity extends AbstractHurtingProjectile {
-    private static final EntityDataAccessor<Boolean> DATA_DANGEROUS = SynchedEntityData.defineId(MeteorEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOULD_BE_INVISIBLE_TO_OWNER = SynchedEntityData.defineId(MeteorEntity.class, EntityDataSerializers.BOOLEAN);
 
     public MeteorEntity(EntityType<? extends MeteorEntity> entityType, Level level) {
         super(entityType, level);
@@ -97,20 +96,28 @@ public class MeteorEntity extends AbstractHurtingProjectile {
             Entity hitEntity = result.getEntity();
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
             float scale = scaleData.getScale();
-            if (hitEntity instanceof LivingEntity livingEntity) {
-                if (this.getOwner() != null && this.getOwner().getPersistentData().getInt("inMindscape") >= 1) {
-                    if (hitEntity.getX() > this.getOwner().getX()) {
+            if (this.getPersistentData().getBoolean("calamityIncarnationInMeteor")) {
+                if (this.getOwner() instanceof LivingEntity owner) {
+                    if (hitEntity == owner) {
                         return;
-                    } else {
-                        this.explodeMeteor(livingEntity, scale);
                     }
                 }
-                explodeMeteor(livingEntity, scale);
-                this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 30.0f, 1.0f);
-                this.discard();
-            }
-            if (this.getOwner() != null) {
-                (this.getOwner()).getPersistentData().putInt("calamityIncarnationInMeteor", 0);
+            } else {
+                if (hitEntity instanceof LivingEntity livingEntity) {
+                    if (this.getOwner() != null && this.getOwner().getPersistentData().getInt("inMindscape") >= 1) {
+                        if (hitEntity.getX() > this.getOwner().getX()) {
+                            return;
+                        } else {
+                            this.explodeMeteor(livingEntity, scale);
+                        }
+                    }
+                    explodeMeteor(livingEntity, scale);
+                    this.level().playSound(null, this.getOnPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 30.0f, 1.0f);
+                    this.discard();
+                }
+                if (this.getOwner() != null) {
+                    (this.getOwner()).getPersistentData().putInt("calamityIncarnationInMeteor", 0);
+                }
             }
         }
     }
@@ -120,13 +127,18 @@ public class MeteorEntity extends AbstractHurtingProjectile {
         return false;
     }
 
-
-    protected void defineSynchedData() {
-        this.entityData.define(DATA_DANGEROUS, false);
+    public void setInvisibleToOwner(boolean invisibleToOwner) {
+        this.entityData.set(SHOULD_BE_INVISIBLE_TO_OWNER, invisibleToOwner);
     }
 
-    public boolean isDangerous() {
-        return this.entityData.get(DATA_DANGEROUS);
+
+    @Override
+    protected void defineSynchedData() {
+        this.entityData.define(SHOULD_BE_INVISIBLE_TO_OWNER, false);
+    }
+
+    public boolean isInvisibleToOwner() {
+        return this.entityData.get(SHOULD_BE_INVISIBLE_TO_OWNER);
     }
 
 
@@ -238,6 +250,20 @@ public class MeteorEntity extends AbstractHurtingProjectile {
         }
     }
 
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        if (compound.contains("invisibleToOwner")) {
+            this.setInvisibleToOwner(compound.getBoolean("invisibleToOwner"));
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        compound.putBoolean("invisibleToOwner", this.isInvisibleToOwner());
+    }
+
     public void explodeMeteorBlock(BlockPos hitPos, double radius, float damage) {
         for (BlockPos pos : BlockPos.betweenClosed(
                 hitPos.offset((int) -radius, (int) -radius, (int) -radius),
@@ -275,6 +301,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
         ProjectileUtil.rotateTowardsMovement(this, 0.5f);
         this.xRotO = getXRot();
         this.yRotO = this.getYRot();
+        boolean shouldBeInvisibleToOwner = false;
         if (this.level() instanceof ServerLevel serverLevel) {
             int chunkRadius = 5;
             ChunkPos centerChunk = new ChunkPos(this.blockPosition());
@@ -313,7 +340,9 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                 float scale = ScaleTypes.BASE.getScaleData(this).getScale();
                 Vec3 lookVec = livingEntity.getLookAngle();
                 if (tag.getInt("calamityIncarnationInMeteor") >= 1 && !livingEntity.onGround()) {
-                    EnvisionLocation.envisionLocationTeleport((LivingEntity) this.getOwner(), livingEntity.getX(), livingEntity.getY() + 1 * scale, livingEntity.getZ());
+                    shouldBeInvisibleToOwner = true;
+                    livingEntity.fallDistance = 0;
+                    EnvisionLocation.envisionLocationTeleport(this.getOwner(), this.getX(), this.getY() + 1 * scale, this.getZ());
                     this.setDeltaMovement(lookVec.x, -1, lookVec.z);
                     this.hurtMarked = true;
                     if (livingEntity.onGround()) {
@@ -321,6 +350,7 @@ public class MeteorEntity extends AbstractHurtingProjectile {
                     }
                 }
             }
+            setInvisibleToOwner(shouldBeInvisibleToOwner);
             if (this.tickCount >= 400) {
                 this.discard();
             }

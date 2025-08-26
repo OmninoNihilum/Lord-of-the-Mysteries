@@ -121,7 +121,7 @@ public class ExtremeColdness extends SimpleAbilityItem {
                     for (int dy = 0; dy < 3; dy++) {
                         BlockPos targetPos = new BlockPos(surfacePos.getX(), surfaceY - dy, surfacePos.getZ());
                         if (ExtremeColdness.canFreezeBlock(livingEntity, targetPos)) {
-                            livingEntity.level().setBlockAndUpdate(targetPos, Blocks.ICE.defaultBlockState());
+                            BeyonderUtil.setAsBlock(livingEntity, targetPos, Blocks.ICE);
                             processedBlocks++;
                         }
                     }

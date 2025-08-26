@@ -27,12 +27,6 @@ public class ItemManager {
     private ItemManager() {
     }
 
-    public void configLoad() {
-        weightedMainItems.clear();
-        weightedOffItems.clear();
-        weightedMainItems.addAll(parseItems(Configs.COMMON.mainItems));
-        weightedOffItems.addAll(parseItems(Configs.COMMON.offhandItems));
-    }
 
     private List<WeightedEntry.Wrapper<ResourceLocation>> parseItems(ForgeConfigSpec.ConfigValue<List<? extends String>> items) {
         return items.get().stream().map(item -> {

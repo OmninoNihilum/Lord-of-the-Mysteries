@@ -69,7 +69,7 @@ public class WaterSphere extends SimpleAbilityItem {
                         }
                         BlockPos blockPos = playerPos.offset(sphereX, sphereY, sphereZ);
                         if (level.getBlockState(blockPos).isAir() && !level.getBlockState(blockPos).is(Blocks.WATER)) {
-                            level.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 3);
+                            BeyonderUtil.setAsBlockIgnoreConfig(livingEntity, playerPos, Blocks.WATER);
                         }
                     }
                 }
@@ -100,7 +100,7 @@ public class WaterSphere extends SimpleAbilityItem {
                         }
                         BlockPos blockPos = livingEntity.getOnPos().offset(sphereX, sphereY, sphereZ);
                         if (livingEntity.level().getBlockState(blockPos).getBlock() == Blocks.WATER) {
-                            livingEntity.level().setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+                            BeyonderUtil.setAir(livingEntity, blockPos);
                         }
                     }
                 }

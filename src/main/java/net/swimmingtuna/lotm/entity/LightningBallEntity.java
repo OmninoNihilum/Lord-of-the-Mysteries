@@ -341,7 +341,7 @@ public class LightningBallEntity extends AbstractHurtingProjectile {
             lightningBolt.setDamage(15);
             this.level().addFreshEntity(lightningBolt);
             if (this.level().getBlockState(lightningPos).getDestroySpeed(this.level(), lightningPos) >= 0) {
-                this.level().setBlock(lightningPos, Blocks.AIR.defaultBlockState(), 3);
+                BeyonderUtil.setAir(this, lightningPos);
             }
         }
     }

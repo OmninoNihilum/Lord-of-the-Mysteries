@@ -50,6 +50,7 @@ public class PotionCraftingCategory implements IRecipeCategory<BeyonderJEIRecipe
         return icon;
     }
 
+    @SuppressWarnings("removal")
     @Override
     public @Nullable IDrawable getBackground() {
         return background;

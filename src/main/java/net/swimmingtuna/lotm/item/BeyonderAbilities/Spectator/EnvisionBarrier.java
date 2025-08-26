@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -94,7 +95,7 @@ public class EnvisionBarrier extends LeftClickHandlerSkillP {
                 // Remove the existing glass dome
                 for (Map.Entry<BlockPos, BlockState> entry : replacedBlocks.entrySet()) {
                     BlockPos worldPos = domeCenter.offset(entry.getKey());
-                    level.setBlockAndUpdate(worldPos, entry.getValue());
+                    BeyonderUtil.setAsBlock(player, worldPos, entry.getValue().getBlock());
                 }
                 for (BlockPos airPos : replacedAirBlocks) {
                     BlockPos worldPos = domeCenter.offset(airPos);
@@ -122,11 +123,11 @@ public class EnvisionBarrier extends LeftClickHandlerSkillP {
 
                             BlockState currentState = level.getBlockState(worldPos);
                             if (currentState.isAir()) {
-                                level.setBlockAndUpdate(worldPos, BlockInit.VISIONARY_BARRIER_BLOCK.get().defaultBlockState());
+                                BeyonderUtil.setAsBlock(player, worldPos, BlockInit.VISIONARY_BARRIER_BLOCK.get());
                                 replacedAirBlocks.add(pos);
                             } else {
                                 replacedBlocks.put(pos, currentState);
-                                level.setBlockAndUpdate(worldPos, BlockInit.VISIONARY_BARRIER_BLOCK.get().defaultBlockState());
+                                BeyonderUtil.setAsBlock(player, worldPos, BlockInit.VISIONARY_BARRIER_BLOCK.get());
                             }
                         }
                     }

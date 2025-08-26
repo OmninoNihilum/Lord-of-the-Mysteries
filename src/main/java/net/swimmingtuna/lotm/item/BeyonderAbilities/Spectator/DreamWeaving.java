@@ -201,7 +201,9 @@ public class DreamWeaving extends SimpleAbilityItem {
             EntityType.VEX,
             EntityType.ENDERMITE,
             EntityType.SPIDER,
-            EntityType.WITHER,
+            EntityType.EVOKER,
+            EntityType.VINDICATOR,
+            EntityType.PIGLIN_BRUTE,
             EntityType.PHANTOM
     );
 

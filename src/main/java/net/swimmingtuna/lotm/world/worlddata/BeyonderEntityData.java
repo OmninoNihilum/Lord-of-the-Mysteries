@@ -22,6 +22,7 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -235,8 +236,13 @@ public class BeyonderEntityData extends SavedData {
         if (availableAbilities.isEmpty()) {
             return;
         }
-
-        if (mob.level().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ONLY_USE_ABILITIES_ON_PLAYERS) && !(mob.getTarget() instanceof Player)) {
+        boolean shouldUseAbility = true;
+        if (!(mob instanceof PlayerMobEntity)) {
+            if (Configs.COMMON.mobsShouldOnlyUseAbilitiesOnPlayers.get() && !(mob.getTarget() instanceof Player)) {
+                shouldUseAbility = false;
+            }
+        }
+        if (!shouldUseAbility) {
             return;
         }
 

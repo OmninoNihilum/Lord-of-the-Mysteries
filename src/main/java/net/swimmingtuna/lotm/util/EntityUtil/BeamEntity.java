@@ -16,11 +16,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
-import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateDragonBreathS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -92,7 +90,6 @@ public abstract class BeamEntity extends LOTMProjectile {
     public void setRange(int range) {
         this.entityData.set(RANGE, range);
     }
-
 
 
     public float getDamage() {
@@ -239,19 +236,19 @@ public abstract class BeamEntity extends LOTMProjectile {
                         int age = livingEntity.getPersistentData().getInt("age");
                         livingEntity.hurt(BeyonderUtil.genericSource(owner, livingEntity), 10);
                         int ageDivisibleAmount = 2;
-                        if (pOwner instanceof Mob mob) {
+                        if (pOwner instanceof Mob) {
                             ageDivisibleAmount = 3;
                         }
-                        if (this.tickCount % 3 == 0) {
+                        if (this.tickCount % 2 == 0) {
                             if (livingEntity instanceof Player player) {
                                 player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD), true);
                             }
                             if (BeyonderUtil.getSequence(pOwner) != 0) {
                                 livingEntity.getPersistentData().putUUID("ageUUID", pOwner.getUUID());
-                                livingEntity.getPersistentData().putInt("age", ((age + (30 - BeyonderUtil.getSequence(pOwner))) * 9) / ageDivisibleAmount);
+                                livingEntity.getPersistentData().putInt("age", ((age + (30 - BeyonderUtil.getSequence(pOwner))) * 9 / ageDivisibleAmount));
                             } else {
                                 livingEntity.getPersistentData().putUUID("ageUUID", pOwner.getUUID());
-                                livingEntity.getPersistentData().putInt("age", (age + (50)) / ageDivisibleAmount);
+                                livingEntity.getPersistentData().putInt("age", (age + (50 / ageDivisibleAmount)));
                             }
                         }
                     }
@@ -439,7 +436,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                                 if (this.random.nextInt(3) == 0 &&
                                         this.level().getBlockState(mutablePos).isAir() &&
                                         this.level().getBlockState(mutablePos.below()).isSolidRender(this.level(), mutablePos.below())) {
-                                    this.level().setBlockAndUpdate(mutablePos, BaseFireBlock.getState(this.level(), mutablePos));
+                                    BeyonderUtil.setAsBlock(this, mutablePos, Blocks.FIRE);
                                 }
                             }
                         }
@@ -554,7 +551,6 @@ public abstract class BeamEntity extends LOTMProjectile {
     public boolean shouldRenderAtSqrDistance(double distance) {
         return true;
     }
-
 
 
     private void update() {

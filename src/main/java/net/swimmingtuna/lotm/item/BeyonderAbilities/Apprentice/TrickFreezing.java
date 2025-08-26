@@ -130,7 +130,7 @@ public class TrickFreezing extends LeftClickHandlerSkillP {
         BlockState currentState = level.getBlockState(pos);
         if (isOnSurface(level, pos)) {
             if (!currentState.isAir()) {
-                level.setBlock(pos, Blocks.ICE.defaultBlockState(), 3);
+                BeyonderUtil.setBlockBE(level, pos, Blocks.ICE);
             }
         }
     }

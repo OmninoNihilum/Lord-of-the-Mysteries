@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalTileEntity;
 import net.swimmingtuna.lotm.networking.packet.ForceLookPacketS2C;

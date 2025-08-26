@@ -1,11 +1,7 @@
 package net.swimmingtuna.lotm.client;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -31,84 +27,71 @@ public class Configs {
     }
 
     public static class Common {
-        public ForgeConfigSpec.BooleanValue attackTwin;
-        public ForgeConfigSpec.BooleanValue openDoors;
-        public ForgeConfigSpec.EnumValue<Difficulty> openDoorsDifficulty;
-        public ForgeConfigSpec.DoubleValue pickupItemsChance;
-        public ForgeConfigSpec.DoubleValue playerHeadDropChance;
-        public ForgeConfigSpec.DoubleValue mobHeadDropChance;
-        public ForgeConfigSpec.DoubleValue babySpawnChance;
-        public ForgeConfigSpec.ConfigValue<List<? extends String>> dimensionBlocklistStrings;
-        public final List<ResourceKey<Level>> dimensionBlocklist = new CopyOnWriteArrayList<>();
+
+        //LOTM CONFIGS
+        public ForgeConfigSpec.IntValue damageMultiplier;
+        public ForgeConfigSpec.BooleanValue shouldDestroyBlocks;
+        public ForgeConfigSpec.BooleanValue shouldNpcSpawn;
+        public ForgeConfigSpec.BooleanValue shouldDropCharacteristic;
+        public ForgeConfigSpec.BooleanValue shouldResetSequence;
+        public ForgeConfigSpec.BooleanValue pathwaySafetyNet;
+        public ForgeConfigSpec.BooleanValue mobsShouldActivateCalamities;
+        public ForgeConfigSpec.BooleanValue mobsShouldOnlyUseAbilitiesOnPlayers;
+        public ForgeConfigSpec.BooleanValue shouldUseAbilitiesNearSpawn;
+
+        //PLAYER MOB CONFIGS
         public ForgeConfigSpec.ConfigValue<List<? extends String>> mainItems;
         public ForgeConfigSpec.ConfigValue<List<? extends String>> offhandItems;
-        public ForgeConfigSpec.EnumValue<Difficulty> offhandDifficultyLimit;
-        public ForgeConfigSpec.DoubleValue offhandSpawnChance;
-        public ForgeConfigSpec.BooleanValue allowTippedArrows;
-        public ForgeConfigSpec.BooleanValue forceSpawnItem;
         public ForgeConfigSpec.ConfigValue<List<? extends String>> tippedArrowBlocklistStrings;
         public final List<ResourceLocation> tippedArrowBlocklist = new CopyOnWriteArrayList<>();
-
         public ForgeConfigSpec.ConfigValue<List<? extends String>> mobNames;
         public ForgeConfigSpec.ConfigValue<List<? extends String>> nameLinks;
-        public ForgeConfigSpec.IntValue nameLinksSyncTime;
-        public ForgeConfigSpec.BooleanValue useWhitelist;
-        public ForgeConfigSpec.IntValue damageMultiplier;
 
 
         public Common(ForgeConfigSpec.Builder builder) {
-            builder.push("general");
+            builder.push("LOTMC Configs");
             damageMultiplier = builder
                     .comment("The amount that damage should be multiplied by in the mod, damage doesn't mean damage dealt, but just how much stronger the ability will be in one way or another.",
                             "The ability can either be made to have a larger range, longer effect duration, more damage, or something else. Very case by case.",
                             "Max of 10, Min of 1.")
                     .defineInRange("Damage Multiplier", 1, 1, 10);
-            attackTwin = builder
-                    .comment("If true the player mobs will attack all players",
-                            "If false they will ignore players with the same name as themself")
-                    .define("Attack Twin", true);
 
-            openDoors = builder
-                    .comment("If the player mobs should be able to open doors.")
-                    .define("Open Doors", true);
+            shouldDestroyBlocks = builder
+                    .comment("If disabled, most abilities that don't rely on block breaking/altering to work properly won't destroy/alter blocks")
+                    .define("Abilities Should Break Blocks", true);
 
-            openDoorsDifficulty = builder
-                    .comment("The difficulty and above that player mobs can open doors, if enabled above.")
-                    .defineEnum("Open Doors Difficulty", Difficulty.EASY);
+            shouldNpcSpawn = builder
+                    .comment("Disables or enables whether NPCs should naturally spawn in the world.")
+                            .define("NPC Should Spawn", true);
 
-            pickupItemsChance = builder
-                    .comment("The chance of the mob getting the ability to pickup items, it's used on mob spawn.",
-                            "Set to -1 to disable.")
-                    .defineInRange("Pickup Item Chance", 256D, -1D, 256D);
+            shouldDropCharacteristic = builder
+                    .comment("If enabled, when killed by a player, you will drop a beyonder characteristic which can be used to make potions, substituting main ingredients.")
+                    .define("Should Drop Characteristic", false);
 
-            playerHeadDropChance = builder
-                    .comment("The chance of players dropping a head with their texture.",
-                            "Set to -1 to disable.")
-                    .defineInRange("Player Head Drop Chance", -1D, -1D, 1D);
+            shouldResetSequence = builder
+                    .comment("If you have the config option to drop characteristics on death, this will control whether you reset a sequence (if true) or simply go down a sequence (if false).")
+                    .define("Should Reset Sequence", false);
 
-            mobHeadDropChance = builder
-                    .comment("The chance of player mobs dropping their head.",
-                            "Set to -1 to disable.")
-                    .defineInRange("Mob Head Drop Chance", -1D, -1D, 1D);
+            pathwaySafetyNet = builder
+                    .comment("If you have the config option to drop characteristics on death, this will control if at sequences 8 and 4, you don't decrement a sequence or drop characteristics.")
+                    .define("Should Have Pathway Safety Net", false);
+
+            mobsShouldActivateCalamities = builder
+                    .comment("If enabled, mobs from Monster Sequence 6 or higher will have calamities activate passively")
+                    .define("Mobs Should Activate Calamities", true);
+
+            mobsShouldOnlyUseAbilitiesOnPlayers = builder
+                    .comment("If enabled, mobs will only use abilities on players and not other mobs.")
+                    .define("Mobs Should Only Use Abilities On Players", true);
+
+            shouldUseAbilitiesNearSpawn = builder
+                    .comment("If disabled, abilities won't be able to be used near spawn.")
+                    .define("Can Use Abilities Near Spawn", true);
+
 
             builder.pop()
-                    .comment("Configs related to spawning the mobs")
+                    .comment("NPC Config")
                     .push("spawning");
-
-            babySpawnChance = builder
-                    .comment("Chance that a player mob will spawn as a baby.",
-                            "Set to -1 to disable.")
-                    .defineInRange("Baby Spawn Chance", -1D, -1D, 1D);
-
-            dimensionBlocklistStrings = builder
-                    .comment("The id of the dimensions to block spawning in.",
-                            "The player mobs spawn where Zombies spawn, so no need to block dimensions that doesn't contain Zombies.",
-                            "Example id: \"minecraft:overworld\"")
-                    .defineList("Dimension Blocklist", ImmutableList.of(), Common::validResourceLocation);
-
-            forceSpawnItem = builder
-                    .comment("Force the mobs to spawn holding items.")
-                    .define("Force Items Spawn", false);
 
             mainItems = builder
                     .comment("A list of items that the player mobs can spawn with.",
@@ -125,21 +108,6 @@ public class Configs {
                             "Syntax is \"namespace:id-weight\"")
                     .defineList("Spawn Items Offhand", DEFAULT_OFFHAND_ITEMS, Common::validString);
 
-            offhandDifficultyLimit = builder
-                    .comment("The difficulty and above that player mobs can spawn with items in their offhand.")
-                    .defineEnum("Offhand Spawn Difficulty", Difficulty.EASY);
-
-            offhandSpawnChance = builder
-                    .comment("The chance of items spawning in the offhand",
-                            "If holding a projectile weapon this can spawn a tipped arrow if allowed",
-                            "Else it will spawn from the offhand item list",
-                            "Set to -1 to disable.")
-                    .defineInRange("Offhand Spawn Chance", 0.5D, -1D, 1D);
-
-            allowTippedArrows = builder
-                    .comment("Allow for a change to spawn a random tipped arrow when the mob is holding a projectile weapon")
-                    .define("Spawn Tipped Arrows", true);
-
             tippedArrowBlocklistStrings = builder
                     .comment("A list of potion \"namespace:id\" to block from getting applied to tipped arrows")
                     .defineList("Tipped Arrow Blocklist", DEFAULT_BLOCKED_POTIONS, Common::validResourceLocation);
@@ -155,18 +123,10 @@ public class Configs {
                             "As an example you have Twitch subs in the game by using https://whitelist.gorymoon.se")
                     .defineList("Name Links", ImmutableList.of(), Common::validString);
 
-            nameLinksSyncTime = builder
-                    .comment("The time interval in minutes when to reload the links (approximately, based on TPS)",
-                            "If set to 0 it will only sync once on load.")
-                    .defineInRange("Reload Interval", 60, 0, Integer.MAX_VALUE);
-
             mobNames = builder
                     .comment("A list of names that the player mobs can have.")
                     .defineList("Mob Names", DEFAULT_NAMES, Common::validString);
 
-            useWhitelist = builder
-                    .comment("If the names in the whitelist should be used for the player mobs.")
-                    .define("Use Whitelist", true);
 
             builder.pop();
         }
@@ -177,10 +137,6 @@ public class Configs {
 
         private static boolean validResourceLocation(Object o) {
             return validString(o) && ResourceLocation.tryParse((String) o) != null;
-        }
-
-        public boolean isDimensionBlocked(ResourceKey<Level> type) {
-            return dimensionBlocklist.contains(type);
         }
 
         @SubscribeEvent
@@ -195,12 +151,6 @@ public class Configs {
 
         private void configReload() {
             ThreadUtils.tryRunOnMain(() -> {
-                dimensionBlocklist.clear();
-                dimensionBlocklist.addAll(dimensionBlocklistStrings.get().stream()
-                        .map(ResourceLocation::tryParse)
-                        .filter(Objects::nonNull)
-                        .map(s -> ResourceKey.create(Registries.DIMENSION, s))
-                        .toList());
                 tippedArrowBlocklist.clear();
                 tippedArrowBlocklist.addAll(tippedArrowBlocklistStrings.get().stream()
                         .map(ResourceLocation::tryParse)
@@ -211,7 +161,7 @@ public class Configs {
             });
         }
 
-        private static final List<String> DEFAULT_MAIN_HAND_ITEMS = ImmutableList.of(
+        public static final List<String> DEFAULT_MAIN_HAND_ITEMS = ImmutableList.of(
                 "minecraft:bow-90",
                 "minecraft:crossbow-10",
                 "minecraft:stone_sword-64",
@@ -221,7 +171,7 @@ public class Configs {
                 "minecraft:netherite_sword-1"
         );
 
-        private static final List<String> DEFAULT_OFFHAND_ITEMS = ImmutableList.of(
+        public static final List<String> DEFAULT_OFFHAND_ITEMS = ImmutableList.of(
                 "minecraft:shield-1",
                 "minecraft:air-4"
         );

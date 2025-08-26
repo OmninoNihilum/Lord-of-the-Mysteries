@@ -26,6 +26,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.*;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -86,7 +87,7 @@ public class CorruptionAndLuckHandler {
                 maxCorruption = 1500;
             }
             boolean shouldntActiveCalamity = false;
-            boolean calamityNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            boolean calamityNearSpawn = Configs.COMMON.mobsShouldActivateCalamities.get();
             if (calamityNearSpawn) {
                 BlockPos entityPos = livingEntity.getOnPos();
                 BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
@@ -739,7 +740,7 @@ public class CorruptionAndLuckHandler {
                         }
                     }
                 }
-            } else if (!shouldntActiveCalamity && livingEntity instanceof Mob mob && serverLevel.getLevelData().getGameRules().getBoolean(GameRuleInit.MOBS_SHOULD_ACTIVATE_CALAMITIES)) {
+            } else if (!shouldntActiveCalamity && livingEntity instanceof Mob mob && Configs.COMMON.mobsShouldActivateCalamities.get()) {
                 if (isMonsterNoException) {
                     if (sequence <= 6 && tag.getBoolean("monsterCalamityAttraction") && livingEntity.tickCount % 100 == 0) {
                         int calamityMeteor = tag.getInt("calamityMeteor");

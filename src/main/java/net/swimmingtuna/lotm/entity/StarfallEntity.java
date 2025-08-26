@@ -212,7 +212,7 @@ public class StarfallEntity extends AbstractHurtingProjectile {
                         livingEntity.invulnerableTime = 0;
                         livingEntity.hurtTime = 0;
                         livingEntity.hurtDuration = 0;
-                        BeyonderUtil.destroyBlocksInSphere(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 50.0f);
+                        BeyonderUtil.destroyBlocksInSphere(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 30.0f);
                         this.discard();
                     }
                 }

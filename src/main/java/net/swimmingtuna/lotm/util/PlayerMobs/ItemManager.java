@@ -34,6 +34,8 @@ public class ItemManager {
         weightedOffItems.addAll(parseItems(Configs.COMMON.offhandItems));
     }
 
+
+
     private List<WeightedEntry.Wrapper<ResourceLocation>> parseItems(ForgeConfigSpec.ConfigValue<List<? extends String>> items) {
         return items.get().stream().map(item -> {
             String[] parts = item.split("-");

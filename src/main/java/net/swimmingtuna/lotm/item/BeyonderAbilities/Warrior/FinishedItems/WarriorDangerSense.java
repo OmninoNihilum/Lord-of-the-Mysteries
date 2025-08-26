@@ -2,6 +2,7 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems;
 
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -40,8 +41,14 @@ public class WarriorDangerSense extends SimpleAbilityItem {
 
     public static void startGigantification(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
-            ScaleData scaleData = ScaleTypes.BASE.getScaleData(livingEntity);
-            scaleData.setTargetScale(3.0f);
+            if (!livingEntity.level().isClientSide()) {
+                CompoundTag tag = livingEntity.getPersistentData();
+                boolean monsterDangerSense = tag.getBoolean("warriorDangerSense");
+                tag.putBoolean("warriorDangerSense", !monsterDangerSense);
+                if (livingEntity instanceof Player pPlayer) {
+                    pPlayer.displayClientMessage(Component.literal("Danger Sense Turned " + (monsterDangerSense ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW), true);
+                }
+            }
         }
     }
 

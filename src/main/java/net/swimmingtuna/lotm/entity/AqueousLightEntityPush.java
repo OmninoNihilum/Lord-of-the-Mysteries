@@ -2,10 +2,12 @@ package net.swimmingtuna.lotm.entity;
 
 
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -157,7 +159,17 @@ public class AqueousLightEntityPush extends AbstractHurtingProjectile {
                 this.discard();
             }
         }
-        ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
-
+        if (this.level() instanceof ServerLevel serverLevel) {
+            int scale = (int) BeyonderUtil.getScale(this);
+            double radius = 2.0 * scale;
+            int particleCount = 16 * scale;
+            for (int i = 0; i < particleCount; i++) {
+                double angle = 2 * Math.PI * i / particleCount;
+                double xSpawn = this.getX() + BeyonderUtil.getRandomInRange((float) scale);
+                double ySpawn = this.getY() + BeyonderUtil.getRandomInRange((float) scale);
+                double zSpawn = this.getZ() + BeyonderUtil.getRandomInRange((float) scale);
+                serverLevel.sendParticles(ParticleTypes.FALLING_DRIPSTONE_WATER, xSpawn, ySpawn, zSpawn, 0, 0.0, -0.5, 0.0, 0.2);
+            }
+        }
     }
 }

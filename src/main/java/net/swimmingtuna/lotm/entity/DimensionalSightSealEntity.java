@@ -154,7 +154,7 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
                                     double distance = Math.sqrt(x * x + y * y + z * z);
                                     if (distance >= radius - 0.5 && distance <= radius + 0.5) {
                                         BlockPos blockPos = sealPos.offset(x, y, z);
-                                        this.level().setBlock(blockPos, BlockInit.VOID_BLOCK.get().defaultBlockState(), 3);
+                                        BeyonderUtil.setAsBlockIgnoreConfig(this, blockPos, BlockInit.VOID_BLOCK.get());
                                     }
                                 }
                             }
@@ -170,7 +170,7 @@ public class DimensionalSightSealEntity extends AbstractHurtingProjectile {
                                         double distance = Math.sqrt(x * x + y * y + z * z);
                                         if (distance >= radius - 0.5 && distance <= radius + 0.5) {
                                             BlockPos blockPos = sealPos.offset(x, y, z);
-                                            this.level().setBlock(blockPos, BlockInit.VOID_BLOCK.get().defaultBlockState(), 3);
+                                            BeyonderUtil.setAsBlockIgnoreConfig(this, blockPos, BlockInit.VOID_BLOCK.get());
                                         }
                                     }
                                 }

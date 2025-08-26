@@ -155,7 +155,7 @@ public class SpatialMaze extends SimpleAbilityItem {
             for (int y = 0; y < 10; y++) {
                 for (int z = 0; z <= 160; z++) {
                     BlockPos currentPos = destination.offset(x, y, z);
-                    level.setBlock(currentPos, BlockInit.VOID_BLOCK.get().defaultBlockState(), 0);
+                    BeyonderUtil.setAsBlockIgnoreConfig(user, currentPos, BlockInit.VOID_BLOCK.get());
                 }
             }
         }
@@ -211,7 +211,7 @@ public class SpatialMaze extends SimpleAbilityItem {
                 for (int y = 0; y < 10; y++) {
                     for (int z = 0; z <= 160; z++) {
                         BlockPos currentPos = destination.offset(x, y, z);
-                        level.setBlock(currentPos, Blocks.AIR.defaultBlockState(), 0);
+                        BeyonderUtil.setAir(entity, currentPos);
                     }
                 }
             }

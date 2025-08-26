@@ -83,7 +83,7 @@ public class NameManager {
         allNames.addAll(remoteNames);
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (setup && Configs.COMMON.useWhitelist.get() && server != null) {
+        if (setup && server != null) {
             for (String name : server.getPlayerList().getWhiteListNames()) {
                 allNames.add(new PlayerName(name));
             }
@@ -118,7 +118,7 @@ public class NameManager {
     }
 
     public void configLoad() {
-        tickTime = Configs.COMMON.nameLinksSyncTime.get() * 1200; // time * 60 seconds * 20 ticks
+        tickTime = 60 * 1200; // time * 60 seconds * 20 ticks
         updateNameList();
     }
 

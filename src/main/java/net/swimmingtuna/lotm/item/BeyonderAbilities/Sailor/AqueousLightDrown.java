@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -71,7 +72,7 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
                 }
                 tag.putInt("lightDrowning", aqueousLight + 1);
                 if (level.getBlockState(headPos).is(Blocks.AIR)) {
-                    level.setBlockAndUpdate(headPos, Blocks.WATER.defaultBlockState());
+                    BeyonderUtil.setAsBlockIgnoreConfig(entity, headPos, Blocks.WATER);
                 }
                 for (int x = -3; x <= 3; x++) {
                     for (int y = -3; y <= 3; y++) {
@@ -135,7 +136,7 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
                 }
                 tag.putInt("lightDrowning", aqueousLight + 1);
                 if (level.getBlockState(headPos).is(Blocks.AIR)) {
-                    level.setBlockAndUpdate(headPos, Blocks.WATER.defaultBlockState());
+                    BeyonderUtil.setAsBlockIgnoreConfig(entity, headPos, Blocks.WATER);
                 }
                 for (int x = -3; x <= 3; x++) {
                     for (int y = -3; y <= 3; y++) {
@@ -143,7 +144,7 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
                             if (Math.abs(x) > 1 || Math.abs(y) > 1 || Math.abs(z) > 1) {
                                 BlockPos blockPos = headPos.offset(x, y, z);
                                 if (level.getBlockState(blockPos).is(Blocks.WATER)) {
-                                    level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
+                                    BeyonderUtil.setAsBlockIgnoreConfig(entity, blockPos, Blocks.WATER);
                                 }
                             }
                         }

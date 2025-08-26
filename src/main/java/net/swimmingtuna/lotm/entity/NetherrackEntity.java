@@ -115,7 +115,7 @@ public class NetherrackEntity extends AbstractArrow {
                 Random random = new Random();
                 if (random.nextInt(10) == 1) {
                     this.level().broadcastEntityEvent(this, (byte) 3);
-                    this.level().setBlock(blockPosition(), Blocks.STONE.defaultBlockState(), 3);
+                    BeyonderUtil.setAsBlock(this, result.getBlockPos(), Blocks.NETHERRACK);
                 }
             } else if (getRemoveAndHurt()) {
                 BeyonderUtil.destroyBlocksInSphere(this, result.getBlockPos(), 12, 30);

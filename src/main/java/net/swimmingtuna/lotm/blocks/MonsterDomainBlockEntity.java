@@ -77,14 +77,14 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                     if (!(targetBlock.getBlock() instanceof AirBlock)) {
                         if (targetBlock.getBlock() == Blocks.DIRT && Earthquake.isOnSurface(level, mutablePos)) {
                             if (level.random.nextInt(100) <= (multiplier) && level.random.nextInt() != 0) {
-                                level.setBlock(mutablePos, Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+                                BeyonderUtil.setBlockBE(level, mutablePos, Blocks.GRASS);
                             }
                             blockWasProcessed = true;
                         }
                         if (mutablePos.getY() <= 15 && mutablePos.getY() >= 5) {
                             if (targetBlock.getBlock() == Blocks.DEEPSLATE || targetBlock.getBlock() == Blocks.STONE) {
                                 if (level.random.nextInt(1000) <= (multiplier) && level.random.nextInt() != 0) {
-                                    level.setBlock(mutablePos, Blocks.DIAMOND_ORE.defaultBlockState(), 3);
+                                    BeyonderUtil.setBlockBE(level, mutablePos, Blocks.DIAMOND_ORE);
                                 }
                                 blockWasProcessed = true;
                             }
@@ -92,7 +92,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                         if (mutablePos.getY() <= 40 && mutablePos.getY() >= 10) {
                             if (targetBlock.getBlock() == Blocks.DEEPSLATE || targetBlock.getBlock() == Blocks.STONE) {
                                 if (level.random.nextInt(300) <= (multiplier) && level.random.nextInt() != 0) {
-                                    level.setBlock(mutablePos, Blocks.IRON_ORE.defaultBlockState(), 3);
+                                    BeyonderUtil.setBlockBE(level, mutablePos, Blocks.IRON_ORE);
                                 }
                                 blockWasProcessed = true;
                             }
@@ -100,7 +100,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                         if (mutablePos.getY() <= 25 && mutablePos.getY() >= 10) {
                             if (targetBlock.getBlock() == Blocks.DEEPSLATE || targetBlock.getBlock() == Blocks.STONE) {
                                 if (level.random.nextInt(500) <= (multiplier) && level.random.nextInt() != 0) {
-                                    level.setBlock(mutablePos, Blocks.IRON_ORE.defaultBlockState(), 3);
+                                    BeyonderUtil.setBlockBE(level, mutablePos, Blocks.IRON_ORE);
                                 }
                                 blockWasProcessed = true;
                             }
@@ -544,7 +544,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                         // Process grass to dirt conversion
                         if (targetBlock.getBlock() == Blocks.GRASS_BLOCK) {
                             if (level.random.nextInt(100) <= (multiplier) && level.random.nextInt() != 0) {
-                                level.setBlock(mutablePos, Blocks.DIRT.defaultBlockState(), 3);
+                                BeyonderUtil.setBlockBE(level, mutablePos, Blocks.DIRT);
                             }
                             blockWasProcessed = true;
                         }
@@ -562,7 +562,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                         // Process ore degradation
                         if (targetBlock.getBlock() == Blocks.DIAMOND_ORE || targetBlock.getBlock() == Blocks.IRON_ORE) {
                             if (level.random.nextInt(500) <= (multiplier) && level.random.nextInt() != 0) {
-                                level.setBlock(mutablePos, Blocks.STONE.defaultBlockState(), 3);
+                                BeyonderUtil.setBlockBE(level, mutablePos, Blocks.STONE);
                             }
                             blockWasProcessed = true;
                         }
@@ -570,7 +570,7 @@ public class MonsterDomainBlockEntity extends BlockEntity implements TickableBlo
                         // Process deepslate ore degradation
                         if (targetBlock.getBlock() == Blocks.DEEPSLATE_DIAMOND_ORE || targetBlock.getBlock() == Blocks.DEEPSLATE_IRON_ORE) {
                             if (level.random.nextInt(500) <= (multiplier) && level.random.nextInt() != 0) {
-                                level.setBlock(mutablePos, Blocks.DEEPSLATE.defaultBlockState(), 3);
+                                BeyonderUtil.setBlockBE(level, mutablePos, Blocks.DEEPSLATE);
                             }
                             blockWasProcessed = true;
                         }

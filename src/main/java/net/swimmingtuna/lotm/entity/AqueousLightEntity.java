@@ -2,10 +2,12 @@ package net.swimmingtuna.lotm.entity;
 
 
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +22,7 @@ import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
@@ -99,7 +102,7 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
     protected void onHitBlock(BlockHitResult result) {
         if (!this.level().isClientSide && !this.level().dimension().equals(Level.NETHER)) {
             this.level().broadcastEntityEvent(this, ((byte) 3));
-            this.level().setBlock(blockPosition(), Blocks.WATER.defaultBlockState(), 3);
+            BeyonderUtil.setAsBlock(this, blockPosition(), Blocks.WATER);
             this.discard();
         }
     }
@@ -142,6 +145,16 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
         if (this.tickCount % 20 == 0) {
             if (this.tickCount >= 100) {
                 this.discard();
+            }
+        }
+        if (this.level() instanceof ServerLevel serverLevel) {
+            int scale = (int) BeyonderUtil.getScale(this);
+            int particleCount = 16 * scale;
+            for (int i = 0; i < particleCount; i++) {
+                double xSpawn = this.getX() + BeyonderUtil.getRandomInRange((float) scale);
+                double ySpawn = this.getY() + BeyonderUtil.getRandomInRange((float) scale);
+                double zSpawn = this.getZ() + BeyonderUtil.getRandomInRange((float) scale);
+                serverLevel.sendParticles(ParticleTypes.FALLING_DRIPSTONE_WATER, xSpawn, ySpawn, zSpawn, 0, 0.0, -0.5, 0.0, 0.2);
             }
         }
     }

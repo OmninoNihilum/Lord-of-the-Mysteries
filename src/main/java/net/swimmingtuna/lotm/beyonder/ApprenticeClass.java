@@ -243,6 +243,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(1, ItemInit.GRAVITY_MANIPULATION.get());
         items.put(1, ItemInit.SPATIAL_MAZE.get());
 
+        items.put(0, ItemInit.SECRET_KEEPING.get());
         //items.put(0, ItemInit.DOOR_SPATIAL_LOCK_ON.get());
         //items.put(0, ItemInit.DOOR_DIMENSION_CLOSING.get());
         //items.put(0, ItemInit.DOOR_SEALED_SPACE.get());

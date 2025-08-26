@@ -70,7 +70,7 @@ public class LavaEntity extends AbstractArrow {
         if (!this.level().isClientSide && !(result.getEntity() instanceof LavaEntity) && !(result.getEntity() instanceof StoneEntity)) {
             Vec3 hitPos = result.getLocation();
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
-            this.level().setBlock(BlockPos.containing(hitPos), Blocks.LAVA.defaultBlockState(), 3);
+            BeyonderUtil.setAsBlock(this, BlockPos.containing(hitPos), Blocks.LAVA);
             if (result.getEntity() instanceof LivingEntity living) {
                 if (this.getOwner() == null) {
                     living.hurt(BeyonderUtil.lavaSource(this, living), 5 * BeyonderUtil.getScale(this));
@@ -88,7 +88,7 @@ public class LavaEntity extends AbstractArrow {
             Random random = new Random();
             if (random.nextInt(10) == 1) {
                 this.level().broadcastEntityEvent(this, (byte) 3);
-                this.level().setBlock(blockPosition(), Blocks.LAVA.defaultBlockState(), 3);
+                BeyonderUtil.setAsBlock(this, result.getBlockPos(), Blocks.LAVA);
             }
             this.discard();
         }

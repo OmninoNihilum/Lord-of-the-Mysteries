@@ -89,7 +89,7 @@ public class CalamityIncarnationTsunami extends LeftClickHandlerSkillP {
                     if (distance <= radius) {
                         BlockPos blockPos = playerPos.offset(sphereX, sphereY, sphereZ);
                         if (level.getBlockState(blockPos).isAir() && !level.getBlockState(blockPos).is(Blocks.WATER)) {
-                            level.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 3);
+                            BeyonderUtil.setAsBlock(livingEntity, blockPos, Blocks.WATER);
                         }
                     }
                 }

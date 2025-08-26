@@ -70,27 +70,27 @@ public class RoarEntity extends AbstractHurtingProjectile {
     protected void onHitEntity(EntityHitResult result) {
         if (!this.level().isClientSide() && this.getOwner() != null) {
             Entity entity = result.getEntity();
+            ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
             if (entity.distanceTo(this) < 5) {
-                ScaleData scaleData = ScaleTypes.BASE.getScaleData(this);
                 if (entity instanceof Projectile) {
                     float explosionRadius = 3 * scaleData.getScale();
-                    BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), explosionRadius, explosionRadius);
+                    BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this.getOwner(), this.getOnPos(), explosionRadius, explosionRadius);
                 }
-                if (entity instanceof LivingEntity livingEntity) {
-                    if (getOwner() != null && getOwner() instanceof LivingEntity owner) {
-                        if (!BeyonderUtil.areAllies(livingEntity, owner) && livingEntity != owner) {
-                            livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), (int) (20 * scaleData.getScale()));
-                            float explosionRadius = 3 * scaleData.getScale();
-                            BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), explosionRadius, explosionRadius);
-                        }
-                    } else {
-                        livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), (int) (20 * scaleData.getScale()));
-                        float explosionRadius = 3 * scaleData.getScale();
-                        BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), explosionRadius, explosionRadius);
-                    }
-                }
-                this.discard();
             }
+            if (entity instanceof LivingEntity livingEntity) {
+                if (getOwner() != null && getOwner() instanceof LivingEntity owner) {
+                    if (!BeyonderUtil.areAllies(livingEntity, owner) && livingEntity != owner) {
+                        livingEntity.hurt(BeyonderUtil.genericSource(this.getOwner(), livingEntity), (int) (20 * scaleData.getScale()));
+                        float explosionRadius = 3 * scaleData.getScale();
+                        BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this.getOwner(), this.getOnPos(), explosionRadius, explosionRadius);
+                    }
+                } else {
+                    livingEntity.hurt(BeyonderUtil.genericSource(this, livingEntity), (int) (20 * scaleData.getScale()));
+                    float explosionRadius = 3 * scaleData.getScale();
+                    BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this.getOwner(), this.getOnPos(), explosionRadius, explosionRadius);
+                }
+            }
+            this.discard();
         }
     }
 
@@ -124,7 +124,7 @@ public class RoarEntity extends AbstractHurtingProjectile {
         float radius = 1.5f * scaleData.getScale();
         if (!this.level().isClientSide()) {
             if (this.level() instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, this.getX(), this.getY(), this.getZ(), 0,0,0,0,0);
+                serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, this.getX(), this.getY(), this.getZ(), 0, 0, 0, 0, 0);
             }
             BlockPos center = new BlockPos((int) this.getX(), (int) this.getY(), (int) this.getZ());
             for (BlockPos pos : BlockPos.betweenClosed(center.offset(-(int) radius, -(int) radius, -(int) radius), center.offset((int) radius, (int) radius, (int) radius))) {
@@ -160,7 +160,7 @@ public class RoarEntity extends AbstractHurtingProjectile {
                     double offsetZ = distance * Math.sin(angle);
                     double offsetY = random.nextDouble() * radius * 2 - radius;
                     if (this.level() instanceof ServerLevel serverLevel) {
-                        serverLevel.sendParticles(ParticleTypes.EXPLOSION, this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ, 0,0,0,0,0);
+                        serverLevel.sendParticles(ParticleTypes.EXPLOSION, this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ, 0, 0, 0, 0, 0);
                     }
                 }
             }

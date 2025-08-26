@@ -57,6 +57,7 @@ import static net.swimmingtuna.lotm.beyonder.SpectatorClass.EVENT_TO_TAG;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Teleportation.flickeringCopy;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoor.*;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLife.spawnMob;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation.envisionLocationTeleport;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation.isThreeIntegers;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionWeather.*;
 
@@ -113,6 +114,79 @@ public class ServerEvents {
                         otherPlayer.getPersistentData().putInt("sailorStormVecX1", (int) player.getX());
                         otherPlayer.getPersistentData().putInt("sailorStormVecY1", (int) player.getY());
                         otherPlayer.getPersistentData().putInt("sailorStormVecZ1", (int) player.getZ());
+                    }
+                    if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                        if (message.contains(" to ")) {
+                            String[] messageParts = message.split(" to ", 2);
+                            if (messageParts.length == 2) {
+                                String targetPlayerName = messageParts[0].trim();
+                                String destination = messageParts[1].trim();
+                                Player targetPlayer = null;
+                                for (Player p : level.players()) {
+                                    if (p.getName().getString().toLowerCase().equals(targetPlayerName.toLowerCase())) {
+                                        targetPlayer = p;
+                                        break;
+                                    }
+                                }
+                                if (targetPlayer == null) {
+                                    player.sendSystemMessage(Component.literal("Player '" + targetPlayerName + "' not found!").withStyle(ChatFormatting.RED));
+                                    return;
+                                }
+                                Level destinationLevel = player.level();
+                                if (hasDimensionId(message)) {
+                                    destinationLevel = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message), destinationLevel);
+                                }
+                                if (isThreeIntegers(destination)) {
+                                    try {
+                                        String[] coordinates = destination.replace(",", " ").trim().split("\\s+");
+                                        int x = Integer.parseInt(coordinates[0]);
+                                        int y = Integer.parseInt(coordinates[1]);
+                                        int z = Integer.parseInt(coordinates[2]);
+
+                                        envisionLocationTeleport(targetPlayer, destinationLevel, x + 0.5, y, z + 0.5);
+
+                                        String dimensionInfo = destinationLevel != player.level() ? " in dimension " + destinationLevel.dimension().location() : "";
+                                        player.sendSystemMessage(Component.literal("Teleported " + targetPlayer.getName().getString() + " to coordinates: " + x + ", " + y + ", " + z + dimensionInfo).withStyle(ChatFormatting.GREEN));
+                                        targetPlayer.sendSystemMessage(Component.literal("You were teleported to coordinates: " + x + ", " + y + ", " + z + dimensionInfo + " by " + player.getName().getString()).withStyle(ChatFormatting.YELLOW));
+                                    } catch (Exception e) {
+                                        player.sendSystemMessage(Component.literal("Invalid coordinates format!").withStyle(ChatFormatting.RED));
+                                    }
+                                } else {
+                                    Player destinationPlayer = null;
+                                    for (Player p : level.players()) {
+                                        if (p.getName().getString().toLowerCase().equals(destination.toLowerCase())) {
+                                            destinationPlayer = p;
+                                            break;
+                                        }
+                                    }
+
+                                    if (destinationPlayer != null) {
+                                        if (targetPlayer == destinationPlayer) {
+                                            player.sendSystemMessage(Component.literal("Cannot teleport a player to themselves!").withStyle(ChatFormatting.RED));
+                                        } else {
+                                            int sequence = BeyonderUtil.getSequence(targetPlayer);
+                                            if (sequence != -1) {
+                                                BeyonderUtil.useSpirituality(player, 1000 - (sequence * 100));
+                                            }
+                                            envisionLocationTeleport(targetPlayer, destinationPlayer.level(), destinationPlayer.getX(), destinationPlayer.getY(), destinationPlayer.getZ());
+                                            String dimensionInfo = destinationPlayer.level() != targetPlayer.level() ? " in dimension " + destinationPlayer.level().dimension().location() : "";
+                                            player.sendSystemMessage(Component.literal("Teleported " + targetPlayer.getName().getString() + " to " + destinationPlayer.getName().getString() + dimensionInfo).withStyle(ChatFormatting.GREEN));
+                                            targetPlayer.sendSystemMessage(Component.literal("You were teleported to " + destinationPlayer.getName().getString() + dimensionInfo + " by " + player.getName().getString()).withStyle(ChatFormatting.YELLOW));
+                                        }
+                                    } else {
+                                        player.sendSystemMessage(Component.literal("Destination player '" + destination + "' not found!").withStyle(ChatFormatting.RED));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (otherPlayer != player) {
+                        if (otherPlayer.getPersistentData().getBoolean("doorSecretKeeping")) {
+                            if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(otherPlayer, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                                event.setCanceled(true);
+                                otherPlayer.displayClientMessage(Component.literal("You are unable to utter " + otherPlayer.getName().getString() + "'s name").withStyle(ChatFormatting.RED), true);
+                            }
+                        }
                     }
                 }
             }
@@ -246,7 +320,7 @@ public class ServerEvents {
                 int x = Integer.parseInt(coordinates[0]);
                 int y = Integer.parseInt(coordinates[1]);
                 int z = Integer.parseInt(coordinates[2]);
-                EnvisionLocation.envisionLocationTeleport(player, x, y, z);
+                envisionLocationTeleport(player, x, y, z);
                 event.getPlayer().displayClientMessage(Component.literal("Teleported to " + x + ", " + y + ", " + z).withStyle(BeyonderUtil.getStyle(player)), true);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
                 event.setCanceled(true);
@@ -263,7 +337,7 @@ public class ServerEvents {
                 int x = (int) targetPlayer.getX();
                 int y = (int) targetPlayer.getY();
                 int z = (int) targetPlayer.getZ();
-                EnvisionLocation.envisionLocationTeleport(player, targetPlayer.level(), x, y, z);
+                envisionLocationTeleport(player, targetPlayer.level(), x, y, z);
                 BeyonderUtil.useSpirituality(player, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_LOCATION.get()));
             } else {
                 event.getPlayer().displayClientMessage(Component.literal("Invalid coordinates or player name: " + message).withStyle(BeyonderUtil.getStyle(player)), true);

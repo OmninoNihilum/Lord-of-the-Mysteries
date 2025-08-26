@@ -1,7 +1,6 @@
 package net.swimmingtuna.lotm.events;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -23,19 +22,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -44,7 +40,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
-import net.swimmingtuna.lotm.attributes.ModAttributes;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
@@ -863,9 +858,9 @@ public class ModEvents {
             if (BeyonderUtil.isBeyonder(livingEntity) && !event.isCanceled() && entityAttacker != livingEntity && livingEntity instanceof Player && isValidPlayerAttack && !areAllies) {
                 int sequence = BeyonderUtil.getSequence(livingEntity);
                 BeyonderClass pathway = BeyonderUtil.getPathway(livingEntity);
-                boolean resetSequence = level.getLevelData().getGameRules().getBoolean(GameRuleInit.RESET_SEQUENCE);
-                boolean safetyNet = level.getLevelData().getGameRules().getBoolean(GameRuleInit.PATHWAY_SAFETY_NET);
-                boolean dropCharacteristic = level.getLevelData().getGameRules().getBoolean(GameRuleInit.SHOULD_DROP_CHARACTERISTIC);
+                boolean resetSequence = Configs.COMMON.shouldResetSequence.get();
+                boolean safetyNet = Configs.COMMON.pathwaySafetyNet.get();
+                boolean dropCharacteristic = Configs.COMMON.shouldDropCharacteristic.get();
                 boolean fateReincarnation = livingEntity.getPersistentData().getInt("monsterReincarnationCounter") >= 1;
                 if (dropCharacteristic) {
                     if (!safetyNet) {
@@ -947,9 +942,6 @@ public class ModEvents {
         public static void onCheckSpawn(MobSpawnEvent.FinalizeSpawn event) {
             if (event.getEntity() instanceof PlayerMobEntity) {
                 ResourceKey<Level> worldKey = event.getLevel().getLevel().dimension();
-                if (Configs.COMMON.isDimensionBlocked(worldKey)) {
-                    event.setSpawnCancelled(true);
-                }
             }
         }
     }
@@ -1025,9 +1017,9 @@ public class ModEvents {
             }
             if (entity instanceof LivingEntity livingEntity) {
                 if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
-                    if (!playerMobEntity.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN) && !playerMobEntity.shouldIgnoreGamerule()) {
+                    if (!Configs.COMMON.shouldNpcSpawn.get() && !playerMobEntity.shouldIgnoreGamerule()) {
                         event.setCanceled(true);
-                    } else {
+                    } if (!event.isCancelable() && playerMobEntity != null) {
                         playerMobEntity.setSpirituality(playerMobEntity.getMaxSpirituality());
                     }
                 }

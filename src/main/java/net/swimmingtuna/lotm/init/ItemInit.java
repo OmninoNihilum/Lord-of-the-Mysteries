@@ -416,6 +416,8 @@ public class ItemInit {
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> REPLICATION = ITEMS.register("replication",
             () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SECRET_KEEPING = ITEMS.register("secretkeeping",
+            () -> new SecretKeeping(new Item.Properties().stacksTo(1)));
 
     //INGREDIENTS
     public static final RegistryObject<Item> SPIRIT_EATER_STOMACH_POUCH = ITEMS.register("spirit_eater_stomach_pouch",

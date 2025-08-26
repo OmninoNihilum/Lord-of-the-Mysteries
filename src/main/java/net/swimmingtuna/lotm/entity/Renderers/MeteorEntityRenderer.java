@@ -3,6 +3,7 @@ package net.swimmingtuna.lotm.entity.Renderers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -26,6 +27,11 @@ public class MeteorEntityRenderer extends EntityRenderer<MeteorEntity> {
 
     @Override
     public void render(MeteorEntity entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.equals(entity.getOwner()) && entity.isInvisibleToOwner()) {
+            super.render(entity, entityYaw, partialTicks, poseStack, buffers, packedLight);
+            return;
+        }
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(Mth.lerp(partialTicks, entity.yRotO, entity.getYRot())));
         poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(partialTicks, entity.xRotO, entity.getXRot())));

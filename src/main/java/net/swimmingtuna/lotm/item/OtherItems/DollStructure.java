@@ -25,6 +25,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 
 import javax.annotation.Nullable;
@@ -138,7 +139,7 @@ public class DollStructure extends Item {
                             beTag = sourceBE.saveWithFullMetadata();
                         }
 
-                        level.setBlock(destPos, sourceState, 3);
+                        BeyonderUtil.setAsBlockIgnoreConfig(user, destPos, sourceState.getBlock());
 
                         if (beTag != null) {
                             BlockEntity destBE = level.getBlockEntity(destPos);
@@ -161,7 +162,7 @@ public class DollStructure extends Item {
                         int y = center.getY() + dy;
                         int z = center.getZ() + dz;
                         mutablePos.set(x, y, z);
-                        dollLevel.setBlock(mutablePos, Blocks.GOLD_BLOCK.defaultBlockState(), 3);
+                        BeyonderUtil.setAsBlockIgnoreConfig(user, mutablePos, Blocks.GOLD_BLOCK);
                     }
                 }
             }

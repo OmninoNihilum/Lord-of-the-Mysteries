@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -71,64 +73,132 @@ public class Teleportation extends SimpleAbilityItem {
 
     public void teleporation(LivingEntity player) {
         if (!player.level().isClientSide()) {
-            PlayerMobEntity playerMobEntity = flickeringCopy(player);
-            Vec3 lookVec = player.getLookAngle().scale(20);
-            Vec3 location = new Vec3(player.getX() + lookVec.x(), player.getY() + lookVec.y(), player.getZ() + lookVec.z());
-            int surfaceY = playerMobEntity.level().getHeight(Heightmap.Types.WORLD_SURFACE, (int) location.x, (int) location.z) + 2;
-            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
-            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
-                playerMobEntity.teleportTo(dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ());
-            } else {
-                playerMobEntity.teleportTo(location.x(), surfaceY, location.z());
-            }
-            for (EquipmentSlot slot : EquipmentSlot.values()) {
-                playerMobEntity.setItemSlot(slot, player.getItemBySlot(slot).copy());
-            }
-            CompoundTag playerData = player.getPersistentData();
-            CompoundTag cloneData = playerMobEntity.getPersistentData();
-            cloneData.merge(playerData.copy());
-            for (Attribute attribute : ForgeRegistries.ATTRIBUTES.getValues()) {
-                AttributeInstance playerAttribute = player.getAttribute(attribute);
-                AttributeInstance cloneAttribute = playerMobEntity.getAttribute(attribute);
-                if (playerAttribute != null && cloneAttribute != null) {
-                    cloneAttribute.setBaseValue(playerAttribute.getBaseValue());
-                    for (AttributeModifier modifier : playerAttribute.getModifiers()) {
-                        if (!cloneAttribute.hasModifier(modifier)) {
-                            cloneAttribute.addPermanentModifier(modifier);
+            int sequence = BeyonderUtil.getSequence(player);
+            if (sequence == 0) {
+                PlayerMobEntity playerMobEntity = new PlayerMobEntity(EntityInit.PLAYER_MOB_ENTITY.get(), player.level());
+                playerMobEntity.setSequence(BeyonderUtil.getSequence(player));
+                playerMobEntity.setPathway(BeyonderUtil.getPathway(player));
+                Vec3 lookVec = player.getLookAngle().scale(20);
+
+                Vec3 location = new Vec3(player.getX() + lookVec.x(), player.getY() + lookVec.y(), player.getZ() + lookVec.z());
+                int surfaceY = playerMobEntity.level().getHeight(Heightmap.Types.WORLD_SURFACE, (int) location.x, (int) location.z) + 2;
+                DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+                if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                    playerMobEntity.teleportTo(dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ());
+                } else {
+                    playerMobEntity.teleportTo(location.x(), surfaceY, location.z());
+                }
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    playerMobEntity.setItemSlot(slot, player.getItemBySlot(slot).copy());
+                }
+                CompoundTag playerData = player.getPersistentData();
+                CompoundTag cloneData = playerMobEntity.getPersistentData();
+                cloneData.merge(playerData.copy());
+                for (Attribute attribute : ForgeRegistries.ATTRIBUTES.getValues()) {
+                    AttributeInstance playerAttribute = player.getAttribute(attribute);
+                    AttributeInstance cloneAttribute = playerMobEntity.getAttribute(attribute);
+                    if (playerAttribute != null && cloneAttribute != null) {
+                        cloneAttribute.setBaseValue(playerAttribute.getBaseValue());
+                        for (AttributeModifier modifier : playerAttribute.getModifiers()) {
+                            if (!cloneAttribute.hasModifier(modifier)) {
+                                cloneAttribute.addPermanentModifier(modifier);
+                            }
                         }
                     }
                 }
-            }
-            BeyonderUtil.setScale(playerMobEntity, BeyonderUtil.getScale(player));
-            playerMobEntity.getAttribute(Attributes.MAX_HEALTH).setBaseValue(player.getMaxHealth());
-            playerMobEntity.setHealth(player.getHealth());
-            for (MobEffectInstance effect : player.getActiveEffects()) {
-                playerMobEntity.addEffect(new MobEffectInstance(effect));
-            }
+                BeyonderUtil.setScale(playerMobEntity, BeyonderUtil.getScale(player));
+                playerMobEntity.getAttribute(Attributes.MAX_HEALTH).setBaseValue(player.getMaxHealth());
+                playerMobEntity.setHealth(player.getHealth());
+                for (MobEffectInstance effect : player.getActiveEffects()) {
+                    playerMobEntity.addEffect(new MobEffectInstance(effect));
+                }
+                Set<String> playerTags = player.getTags();
+                for (String tag : playerTags) {
+                    playerMobEntity.addTag(tag);
+                }
+                if (BeyonderUtil.canFly(player)) {
+                    BeyonderUtil.startFlying(playerMobEntity, 0.12f * BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()), 100);
+                }
 
-            Set<String> playerTags = player.getTags();
-            for (String tag : playerTags) {
-                playerMobEntity.addTag(tag);
+                playerMobEntity.setCreator(player);
+                playerMobEntity.setUsername(player.getScoreboardName());
+                playerMobEntity.setIsClone(true);
+                playerMobEntity.setIdealDistanceFromTarget(10);
+                playerMobEntity.setAttackChance(0);
+                playerMobEntity.setMaxSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setRegenSpirituality(true);
+                if (player.hasCustomName()) {
+                    playerMobEntity.setCustomName(player.getCustomName());
+                }
+                if (BeyonderUtil.inCombat(player)) {
+                    playerMobEntity.setTarget(player.getLastHurtMob());
+                }
+
+                player.level().addFreshEntity(playerMobEntity);
+            } else {
+                PlayerMobEntity playerMobEntity = flickeringCopy(player);
+                Vec3 lookVec = player.getLookAngle().scale(20);
+                Vec3 location = new Vec3(player.getX() + lookVec.x(), player.getY() + lookVec.y(), player.getZ() + lookVec.z());
+                int surfaceY = playerMobEntity.level().getHeight(Heightmap.Types.WORLD_SURFACE, (int) location.x, (int) location.z) + 2;
+                DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+                if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                    playerMobEntity.teleportTo(dimensionalSightTileEntity.getScryTarget().getX(), dimensionalSightTileEntity.getScryTarget().getY(), dimensionalSightTileEntity.getScryTarget().getZ());
+                } else {
+                    playerMobEntity.teleportTo(location.x(), surfaceY, location.z());
+                }
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    playerMobEntity.setItemSlot(slot, player.getItemBySlot(slot).copy());
+                }
+                CompoundTag playerData = player.getPersistentData();
+                CompoundTag cloneData = playerMobEntity.getPersistentData();
+                cloneData.merge(playerData.copy());
+                for (Attribute attribute : ForgeRegistries.ATTRIBUTES.getValues()) {
+                    AttributeInstance playerAttribute = player.getAttribute(attribute);
+                    AttributeInstance cloneAttribute = playerMobEntity.getAttribute(attribute);
+                    if (playerAttribute != null && cloneAttribute != null) {
+                        cloneAttribute.setBaseValue(playerAttribute.getBaseValue());
+                        for (AttributeModifier modifier : playerAttribute.getModifiers()) {
+                            if (!cloneAttribute.hasModifier(modifier)) {
+                                cloneAttribute.addPermanentModifier(modifier);
+                            }
+                        }
+                    }
+                }
+                BeyonderUtil.setScale(playerMobEntity, BeyonderUtil.getScale(player));
+                playerMobEntity.getAttribute(Attributes.MAX_HEALTH).setBaseValue(player.getMaxHealth());
+                playerMobEntity.setHealth(player.getHealth());
+                for (MobEffectInstance effect : player.getActiveEffects()) {
+                    playerMobEntity.addEffect(new MobEffectInstance(effect));
+                }
+
+                Set<String> playerTags = player.getTags();
+                for (String tag : playerTags) {
+                    playerMobEntity.addTag(tag);
+                }
+
+
+                if (BeyonderUtil.canFly(player)) {
+                    BeyonderUtil.startFlying(playerMobEntity, 0.12f * BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()), 5000);
+                }
+                if (BeyonderUtil.inCombat(player)) {
+                    playerMobEntity.setTarget(player.getLastHurtMob());
+                }
+
+                playerMobEntity.setCreator(player);
+                playerMobEntity.setUsername(player.getScoreboardName());
+                playerMobEntity.setIsClone(true);
+                playerMobEntity.setIdealDistanceFromTarget(10);
+                playerMobEntity.setAttackChance(100);
+                playerMobEntity.setMaxSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
+                playerMobEntity.setRegenSpirituality(false);
+                if (player.hasCustomName()) {
+                    playerMobEntity.setCustomName(player.getCustomName());
+                }
+
+                player.level().addFreshEntity(playerMobEntity);
             }
-
-
-            if (BeyonderUtil.canFly(player)) {
-                BeyonderUtil.startFlying(playerMobEntity, 0.12f * BeyonderUtil.getDamage(player).get(ItemInit.TELEPORTATION.get()), 5000);
-            }
-
-            playerMobEntity.setCreator(player);
-            playerMobEntity.setUsername(player.getScoreboardName());
-            playerMobEntity.setIsClone(true);
-            playerMobEntity.setIdealDistanceFromTarget(10);
-            playerMobEntity.setAttackChance(100);
-            playerMobEntity.setMaxSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
-            playerMobEntity.setSpirituality(BeyonderClassInit.APPRENTICE.get().spiritualityLevels().get(BeyonderUtil.getSequence(player)));
-            playerMobEntity.setRegenSpirituality(false);
-            if (player.hasCustomName()) {
-                playerMobEntity.setCustomName(player.getCustomName());
-            }
-
-            player.level().addFreshEntity(playerMobEntity);
         }
     }
 
@@ -147,6 +217,16 @@ public class Teleportation extends SimpleAbilityItem {
                 float amount = event.getAmount();
                 if (playerMobEntity.getCreator() != null) {
                     LivingEntity creator = playerMobEntity.getCreator();
+                    DamageSource source = event.getSource();
+                    Entity entitySourceOwner = source.getEntity();
+                    if (source.getEntity() != null) {
+                        if (entitySourceOwner instanceof Projectile projectile && projectile.getOwner() != null) {
+                            entitySourceOwner = projectile.getOwner();
+                        }
+                    }
+                    if (creator != null && creator.isAlive() && entitySourceOwner == creator) {
+                        return;
+                    }
                     boolean x = !(creator instanceof Player player) || (!player.isCreative() && !player.isSpectator());
                     if (creator.isAlive()) {
                         if (event.getAmount() > creator.getHealth() + 10) {
@@ -178,6 +258,7 @@ public class Teleportation extends SimpleAbilityItem {
         tooltipComponents.add(Component.literal("Upon use, create a copy of yourself that is flickering in front of you, which will keep any active abilities you choose."));
         tooltipComponents.add(Component.literal("These flickering copies will try to attach anything nearby, and cause you to take any damage they take (despawning if the damage will put you near death), and use your spirituality."));
         tooltipComponents.add(Component.literal("Shift right click to remove all your copies"));
+        tooltipComponents.add(Component.literal("At Sequence 0, these will be perfect replicas, now only spawning in as your current state, and then being able to regenerate and use spirituality as well as take damage separately. They will also not automatically attck."));
         tooltipComponents.add(Component.literal("Type in a player's name or any coordinates in order to cause a copy to appear at that location."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));

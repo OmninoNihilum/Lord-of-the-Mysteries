@@ -119,27 +119,44 @@ public class BeyonderUtil {
     public static final Map<UUID, SimpleAbilityItem> pendingAbilityCopies = new HashMap<>();
 
     public static void destroyBlock(Entity entity, BlockPos pos) {
-        entity.level().destroyBlock(pos, true);
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            entity.level().destroyBlock(pos, true);
+        }
     }
 
     public static boolean canDestroyBlock(Entity entity, BlockPos pos) {
         Level level = entity.level();
         BlockState blockState = level.getBlockState(pos);
         return blockState.getDestroySpeed(level, pos) >= 0 && blockState.getDestroySpeed(level, pos) <= 51;
-
     }
 
     public static void setAir(Entity entity, BlockPos pos) {
-        entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+        }
     }
 
 
     public static void setAsBlock(Entity entity, BlockPos pos, Block block) {
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            entity.level().setBlock(pos, block.defaultBlockState(), 2);
+        }
+    }
+
+    public static void setAsBlockIgnoreConfig(Entity entity, BlockPos pos, Block block) {
         entity.level().setBlock(pos, block.defaultBlockState(), 2);
     }
 
     public static void setAirBE(Level level, BlockPos pos) {
-        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+        }
+    }
+
+    public static void setBlockBE(Level level, BlockPos pos, Block block) {
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            level.setBlock(pos, block.defaultBlockState(), 2);
+        }
     }
 
     public static Projectile getProjectiles(LivingEntity livingEntity, int radius) {
@@ -709,6 +726,7 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
                 abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
                 abilityNames.add(ItemInit.REPLICATION.get());
+                abilityNames.add(ItemInit.SECRET_KEEPING.get());
             }
         }
         return abilityNames;
@@ -1001,7 +1019,7 @@ public class BeyonderUtil {
                 }
             }
             boolean shouldntActiveCalamity = true;
-            boolean allowBeyonderAbilitiesNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            boolean allowBeyonderAbilitiesNearSpawn = Configs.COMMON.shouldUseAbilitiesNearSpawn.get();
             if (!allowBeyonderAbilitiesNearSpawn) {
                 BlockPos entityPos = livingEntity.getOnPos();
                 BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
@@ -1728,6 +1746,7 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
         abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
         abilityNames.add(ItemInit.REPLICATION.get());
+        abilityNames.add(ItemInit.SECRET_KEEPING.get());
         return abilityNames;
     }
 
@@ -1841,7 +1860,7 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_6_potion ingredients 2 cataclysm:monstrous_horn illageandspillage:spellbound_book minecraft:nether_star bosses_of_mass_destruction:void_thorn illageandspillage:bag_of_horrors");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_5_potion ingredients 2 soulsweapons:chaos_crown cataclysm:witherite_ingot arphex:crusher_claw arphex:void_geode_shard soulsweapons:darkin_blade");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_4_potion ingredients 2 macabre:gargamaw_heart cataclysm:ignitium_ingot legendary_monsters:air_rune alexscaves:immortal_embryo cataclysm:remnant_skull");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_3_potion ingredients 1 terramity:pocket_universe cataclysm:cursium_ingot arphex:abyssal_crystal");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_3_potion ingredients 1 terramity:pocket_universe cataclysm:cursium_ingot arphex:void_geode");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_2_potion ingredients 1 terramity:music_sheet_of_the_legendary_super_sniffer soulsweapons:lord_soul_day_stalker minecraft:iron_ingot");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:monster_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:netherite_block");
 
@@ -1864,7 +1883,7 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_5_potion ingredients 2 soulsweapons:essence_of_eventide soulsweapons:lord_soul_rose aquamirae:frozen_key cataclysm:witherite_ingot arphex:void_geode_shard");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_4_potion ingredients 2 macabre:gomoria_heart cataclysm:ignitium_ingot arphex:fire_opal_shard sleepy_hollows:lootbag cataclysm:remnant_skull");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_3_potion ingredients 1 born_in_chaos_v1:soulbane arphex:fire_opal cataclysm:cursium_ingot");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_day_stalker minecraft:spyglass");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_night_prowler minecraft:spyglass");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:spectator_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:emerald_block");
 
         // Warrior Potions
@@ -1874,7 +1893,7 @@ public class BeyonderUtil {
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_6_potion ingredients 2 awakened_bosses:herobrine_nugget macabre:rootofinfestation legendary_monsters:lava_eaters_skin born_in_chaos_v1:soul_cutlass illageandspillage:totem_of_banishment");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_5_potion ingredients 2 soulsweapons:chaos_crown soulsweapons:lord_soul_rose arphex:void_geode_shard cataclysm:witherite_ingot cataclysm:gauntlet_of_guard");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_4_potion ingredients 2 alexscaves:tectonic_shard macabre:valamon_heart eeeabsmobs:guardian_core sleepy_hollows:lootbag terramity:music_sheet_of_the_gnome_king");
-        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_3_potion ingredients 1 terramity:perish_staff arphex:abyssal_crystal cataclysm:essence_of_the_storm");
+        executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_3_potion ingredients 1 terramity:perish_staff arphex:fire_opal cataclysm:essence_of_the_storm");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_2_potion ingredients 1 terramity:fortunes_favor soulsweapons:lord_soul_day_stalker minecraft:clock");
         executeRecipeCommand(server, "/beyonderrecipe add lotm:warrior_1_potion ingredients 1 terramity:music_sheet_of_the_omnipotent_ultra_sniffer minecraft:gold_block");
     }
@@ -3270,7 +3289,7 @@ public class BeyonderUtil {
     public static void useAvailableAbilityAsMob(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide() && getPathway(livingEntity) != null && livingEntity instanceof Mob mob) {
             boolean shouldntActiveCalamity = true;
-            boolean allowBeyonderAbilitiesNearSpawn = livingEntity.level().getGameRules().getBoolean(GameRuleInit.SHOULD_BEYONDER_ABILITY_NEAR_SPAWN);
+            boolean allowBeyonderAbilitiesNearSpawn = Configs.COMMON.shouldUseAbilitiesNearSpawn.get();
             if (!allowBeyonderAbilitiesNearSpawn) {
                 BlockPos entityPos = livingEntity.getOnPos();
                 BlockPos worldSpawnPos = livingEntity.level().getSharedSpawnPos();
@@ -3503,6 +3522,7 @@ public class BeyonderUtil {
             tag.remove("separateEntitySequence");
             tag.remove("separateEntityPathway");
             tag.putBoolean("windManipulationSense", false);
+            tag.putBoolean("doorSecretKeeping", false);
             if (livingEntity instanceof ServerPlayer serverPlayer) {
                 LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(0), serverPlayer);
             }
@@ -3833,8 +3853,8 @@ public class BeyonderUtil {
         return allMobs;
     }
 
-    public static void setInvisible(LivingEntity living, boolean choice, int time) {
-        LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(choice, living.getUUID(), time));
+    public static void setInvisible(Entity entity, boolean choice, int time) {
+        LOTMNetworkHandler.sendToAllPlayers(new SyncShouldntRenderInvisibilityPacketS2C(choice, entity.getUUID(), time));
     }
 
     public static boolean isInvisible(LivingEntity living) {

@@ -201,6 +201,7 @@ public class CreativeTabInit {
                         event.accept(ItemInit.DOOR_GAMMA_RAY_BURST.get());
                         event.accept(ItemInit.CONCEPTUALIZATION.get());
                         event.accept(ItemInit.REPLICATION.get());
+                        event.accept(ItemInit.SECRET_KEEPING.get());
                         event.accept(ItemInit.SPIRIT_EATER_STOMACH_POUCH.get());
                         event.accept(ItemInit.DEEP_SEA_MARLINS_BLOOD.get());
                         event.accept(ItemInit.HORNBEAM_ESSENTIALS_OIL.get());

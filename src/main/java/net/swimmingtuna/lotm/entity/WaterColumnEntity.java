@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class WaterColumnEntity extends AbstractHurtingProjectile {
@@ -92,7 +93,7 @@ public class WaterColumnEntity extends AbstractHurtingProjectile {
                     BlockPos abovePos = currentPos.offset(dx, 1, dz);
                     BlockState stateAbove = level.getBlockState(abovePos);
                     if (stateAbove.isAir()) {
-                        level.setBlock(abovePos, Blocks.WATER.defaultBlockState(), 3);
+                        BeyonderUtil.setAsBlockIgnoreConfig(this, abovePos, Blocks.WATER);
                     }
                 }
             }

@@ -45,6 +45,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
@@ -179,11 +180,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     private boolean targetTwin(LivingEntity livingEntity) {
-        return Configs.COMMON.attackTwin.get() || !(livingEntity instanceof Player && livingEntity.getName().getString().equals(getUsername().getDisplayName()));
-    }
-
-    private boolean canOpenDoor() {
-        return Configs.COMMON.openDoors.get() && level().getDifficulty().getId() >= Configs.COMMON.openDoorsDifficulty.get().getId();
+        return !(livingEntity instanceof Player && livingEntity.getName().getString().equals(getUsername().getDisplayName()));
     }
 
     protected void registerGoals() {
@@ -194,10 +191,9 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     }
 
     private void addBehaviourGoals() {
-        if (canOpenDoor()) {
-            goalSelector.addGoal(1, new OpenDoorGoal(this, true));
-            ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
-        }
+
+        goalSelector.addGoal(1, new OpenDoorGoal(this, true));
+        ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
 
         goalSelector.addGoal(3, new BeyonderMeleeAttackGoal(this, 1.2D, false));
         goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0D));
@@ -254,7 +250,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
     public static boolean isCopy(LivingEntity living) {
         if (living instanceof PlayerMobEntity playerMob) {
-            if (playerMob.getIsClone() && playerMob.getCreator() != null) {
+            if (playerMob.getIsClone() && playerMob.getCreator() != null && !playerMob.getRegenSpirituality()) {
                 return true;
             }
         }
@@ -264,12 +260,11 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
     @Override
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
         super.populateDefaultEquipmentSlots(random, difficulty);
-        boolean force = Configs.COMMON.forceSpawnItem.get();
-        if (force || random.nextFloat() < (level().getDifficulty() == Difficulty.HARD ? 0.5F : 0.1F)) {
+        if (random.nextFloat() < (level().getDifficulty() == Difficulty.HARD ? 0.5F : 0.1F)) {
             ItemStack stack = ItemManager.INSTANCE.getRandomMainHand(random);
             setItemSlot(EquipmentSlot.MAINHAND, stack);
-            if (level().getDifficulty().getId() >= Configs.COMMON.offhandDifficultyLimit.get().getId() && random.nextDouble() > Configs.COMMON.offhandSpawnChance.get()) {
-                if (stack.getItem() instanceof ProjectileWeaponItem && Configs.COMMON.allowTippedArrows.get()) {
+            if (level().getDifficulty().getId() >= Difficulty.EASY.getId() && random.nextDouble() > 0.5) {
+                if (stack.getItem() instanceof ProjectileWeaponItem) {
                     var potions = new ArrayList<>(ForgeRegistries.POTIONS.getKeys());
                     potions.removeAll(Configs.COMMON.tippedArrowBlocklist);
                     if (!potions.isEmpty()) {
@@ -366,6 +361,14 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
                     }
                 }
+                if (getIsClone() && this.getCreator() != null && this.getCreator().isAlive()) {
+                    if (BeyonderUtil.inCombat(this.getCreator())) {
+                        LivingEntity target = this.getCreator().getLastHurtMob();
+                        if (this.getTarget() == null) {
+                            this.setTarget(target);
+                        }
+                    }
+                }
                 if (this.getPersistentData().getBoolean("shouldFlicker")) {
                     if (!this.getIsClone()) {
                         this.remove(RemovalReason.DISCARDED);
@@ -419,7 +422,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             //if (this.tickCount == 10 && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
             //    BeyonderHolder.updateMaxHealthModifier(this, this.getCurrentPathway().maxHealth().get(getCurrentSequence()));
             //}
-            if (!this.level().getLevelData().getGameRules().getBoolean(GameRuleInit.NPC_SHOULD_SPAWN) && !shouldIgnoreGamerule()) {
+            if (!Configs.COMMON.shouldNpcSpawn.get() && !shouldIgnoreGamerule()) {
                 this.discard();
             }
             if (this.getRegenSpirituality() && this.getCurrentPathway() != null && this.getCurrentSequence() != -1) {
@@ -434,7 +437,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         }
         super.tick();
         if (!this.level().isClientSide()) {
-
             if (this.getPersistentData().getInt("playerMobAbilityCooldown") == 0) {
                 if (this.getCurrentPathway() != null) {
                     this.getPersistentData().putInt("playerMobAbilityCooldown", 30 + (this.getCurrentSequence() * 3));
@@ -606,7 +608,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
         setCombatTask();
         float specialMultiplier = difficulty.getSpecialMultiplier();
-        setCanPickUpLoot(randomSource.nextFloat() < Configs.COMMON.pickupItemsChance.get() * specialMultiplier);
+        setCanPickUpLoot(randomSource.nextFloat() < 256 * specialMultiplier);
         setCanBreakDoors(randomSource.nextFloat() < specialMultiplier * 0.1F);
 
         double rangeBonus = randomSource.nextDouble() * 1.5 * specialMultiplier;
@@ -621,9 +623,6 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
 
         if (randomSource.nextFloat() < specialMultiplier * 0.2F)
             getAttribute(Attributes.MOVEMENT_SPEED).addPermanentModifier(new AttributeModifier("Speed Bonus", randomSource.nextDouble() * 2.0 * 0.24 + 0.01, AttributeModifier.Operation.MULTIPLY_TOTAL));
-
-        if (randomSource.nextDouble() < Configs.COMMON.babySpawnChance.get())
-            setBaby(true);
 
         return spawnData;
     }
@@ -647,7 +646,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
         if (GoalUtils.hasGroundPathNavigation(this)) {
             if (canBreakDoors != enabled) {
                 canBreakDoors = enabled;
-                ((GroundPathNavigation) getNavigation()).setCanOpenDoors(enabled || canOpenDoor());
+                ((GroundPathNavigation) getNavigation()).setCanOpenDoors(enabled);
                 if (enabled)
                     goalSelector.addGoal(1, breakDoorGoal);
                 else
@@ -1221,7 +1220,7 @@ public class PlayerMobEntity extends Monster implements RangedAttackMob, Crossbo
             return ItemStack.EMPTY;
         if (entity.isBaby())
             return ItemStack.EMPTY;
-        double baseChance = entity instanceof PlayerMobEntity ? Configs.COMMON.mobHeadDropChance.get() : Configs.COMMON.playerHeadDropChance.get();
+        double baseChance = 0.005;
         if (baseChance <= 0)
             return ItemStack.EMPTY;
 
