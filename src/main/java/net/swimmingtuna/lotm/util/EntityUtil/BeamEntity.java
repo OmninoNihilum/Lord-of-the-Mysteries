@@ -164,15 +164,13 @@ public abstract class BeamEntity extends LOTMProjectile {
     @Override
     public void tick() {
         super.tick();
-
-        // Update previous positions and rotations
+        this.prevCollidePosX = this.collidePosX;
+        this.prevCollidePosY = this.collidePosY;
+        this.prevCollidePosZ = this.collidePosZ;
         this.prevCollidePos = this.collidePos;
-        this.prevYaw = this.renderYaw;
-        this.prevPitch = this.renderPitch;
         this.xo = this.getX();
         this.yo = this.getY();
         this.zo = this.getZ();
-
         if (!this.isStill()) {
             this.update();
         }
@@ -552,21 +550,20 @@ public abstract class BeamEntity extends LOTMProjectile {
         return true;
     }
 
-
     private void update() {
         if (this.getOwner() instanceof LivingEntity owner) {
             float yaw = owner.getYRot();
             float pitch = owner.getXRot();
-            this.renderYaw = (float) Math.toRadians(yaw + 90.0F);
-            this.renderPitch = (float) Math.toRadians(-pitch);
-            this.setYaw((float) Math.toRadians(yaw + 90.0F));
-            this.setPitch((float) Math.toRadians(-pitch));
+            this.renderYaw = yaw;
+            this.renderPitch = pitch;
+            this.setYaw((float) Math.toRadians(yaw));
+            this.setPitch((float) Math.toRadians(pitch));
             Vec3 spawn = this.calculateSpawnPos(owner);
             double yOffset = (this.getFrames() <= this.getCharge()) ? 0.5 : 0.0;
             this.setPos(spawn.x, spawn.y + yOffset, spawn.z);
         }
-        //LOTMNetworkHandler.sendToAllPlayers(new UpdateDragonBreathS2C(this.getX(), this.getY(), this.getZ(), this.endPosX, this.endPosY, this.endPosZ, this.getId()));
     }
+
 
 
     private void calculateEndPos() {

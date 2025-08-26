@@ -45,8 +45,10 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
         this.clearerView = Minecraft.getInstance().player == pEntity.getOwner() &&
                 Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
 
-        float yaw = (pEntity.prevYaw + (pEntity.renderYaw - pEntity.prevYaw) * pPartialTick) * Mth.RAD_TO_DEG;
-        float pitch = (pEntity.prevPitch + (pEntity.renderPitch - pEntity.prevPitch) * pPartialTick) * Mth.RAD_TO_DEG;
+        // Use direct rotation values - no interpolation to avoid spinning
+        float yaw = pEntity.renderYaw;
+        float pitch = pEntity.renderPitch;
+
         Vector3f color = null;
         if (pEntity.causesFire()) {
             color = ParticleColors.FIRE_YELLOW;
@@ -61,8 +63,8 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
         // Render charge effect
         pPoseStack.pushPose();
-        pPoseStack.mulPose(Axis.YP.rotationDegrees(180.0F - yaw));
-        pPoseStack.mulPose(Axis.ZN.rotationDegrees(pitch));
+        pPoseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
+        pPoseStack.mulPose(Axis.XP.rotationDegrees(pitch));
         VertexConsumer charge = pBuffer.getBuffer(LOTMRenderTypes.glow(CHARGE));
         this.model.setupAnim(pEntity, 0.0F, 0.0F, age, 0.0F, 0.0F);
         this.model.renderToBuffer(pPoseStack, charge, pPackedLight, OverlayTexture.NO_OVERLAY, color.x, color.y, color.z, 1.0F);
@@ -70,19 +72,20 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
         // Render beam (after charge time)
         if (pEntity.getTime() >= pEntity.getCharge()) {
-            double collidePosX = pEntity.prevCollidePosX + (pEntity.collidePosX - pEntity.prevCollidePosX) * pPartialTick;
-            double collidePosY = pEntity.prevCollidePosY + (pEntity.collidePosY - pEntity.prevCollidePosY) * pPartialTick;
-            double collidePosZ = pEntity.prevCollidePosZ + (pEntity.collidePosZ - pEntity.prevCollidePosZ) * pPartialTick;
-            double posX = pEntity.xo + (pEntity.getX() - pEntity.xo) * pPartialTick;
-            double posY = pEntity.yo + (pEntity.getY() - pEntity.yo) * pPartialTick;
-            double posZ = pEntity.zo + (pEntity.getZ() - pEntity.zo) * pPartialTick;
+            // Use direct collision positions for now to eliminate all interpolation
+            double collidePosX = pEntity.collidePosX;
+            double collidePosY = pEntity.collidePosY;
+            double collidePosZ = pEntity.collidePosZ;
+            double posX = pEntity.getX();
+            double posY = pEntity.getY();
+            double posZ = pEntity.getZ();
+
             float length = (float) Math.sqrt(Math.pow(collidePosX - posX, 2) + Math.pow(collidePosY - posY, 2) + Math.pow(collidePosZ - posZ, 2));
             int frame = Mth.floor((pEntity.animation - 1 + pPartialTick) * 2);
             if (frame < 0) {
                 frame = pEntity.getFrames() * 2;
             }
 
-            // Important: Don't create a new scale context - use the existing scaled context
             pPoseStack.pushPose();
             pPoseStack.translate(0.0F, (pEntity.getBbHeight() / 2.0F) - 0.5F, 0.0F);
             VertexConsumer beam = pBuffer.getBuffer(LOTMRenderTypes.glow(TEXTURE));
@@ -91,7 +94,7 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
             pPoseStack.popPose();
         }
 
-        pPoseStack.popPose(); // Pop the main scale
+        pPoseStack.popPose();
     }
 
     private void drawCube(float length, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float scale) {
@@ -140,9 +143,11 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
     private void renderBeam(float length, float yaw, float pitch, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float entitySize) {
         poseStack.pushPose();
-        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(yaw));
-        poseStack.mulPose(Axis.XN.rotationDegrees(pitch));
+
+        // Simple, direct rotation approach
+        poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
+        poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // Align with forward direction
 
         this.drawCube(length, frame, poseStack, consumer, brightness, packedLight, entitySize);
 
