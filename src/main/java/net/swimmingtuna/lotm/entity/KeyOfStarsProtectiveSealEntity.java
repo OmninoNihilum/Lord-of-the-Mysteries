@@ -183,7 +183,6 @@ public class KeyOfStarsProtectiveSealEntity extends Entity {
                         int randomZ = (int) (this.getZ() + Math.sin(angle) * distance);
                         int surfaceY = entity.level().getHeight(Heightmap.Types.WORLD_SURFACE, randomX, randomZ) + 20;
                         entity.teleportTo(randomX, surfaceY, randomZ);
-                        LOTM.LOGGER.info("ENTITY TELEPORT TO " + randomX + " " + surfaceY + " " + randomZ);
                         int projectileMultiplier = 1;
                         if (entity instanceof Projectile projectile) {
                             projectileMultiplier = (int) Math.max(1, projectile.getBbHeight() * projectile.getBbWidth());

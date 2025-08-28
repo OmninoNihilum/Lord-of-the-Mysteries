@@ -401,7 +401,6 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                             Vec3 targetPosition = ownerPosition.add(lookDirection.scale(500.0));
 
                             if (newDir != null) {
-                                LOTM.LOGGER.info("NOT NULL");
                                 targetPosition = newDir;
                             }
                             Vec3 spawnPos = new Vec3(this.getX(), this.getY(), this.getZ());

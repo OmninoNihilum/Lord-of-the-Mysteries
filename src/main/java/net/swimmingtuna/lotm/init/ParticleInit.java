@@ -12,6 +12,15 @@ public class ParticleInit {
     public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES =
             DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, LOTM.MOD_ID);
 
+
+    public static final RegistryObject<SimpleParticleType> AQUA_FLASH_PARTICLE =
+            PARTICLE_TYPES.register("aqua_flash_particle", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> WHITE_FLASH_PARTICLE =
+            PARTICLE_TYPES.register("white_flash_particle", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> YELLOW_FLASH_PARTICLE =
+            PARTICLE_TYPES.register("yellow_flash_particle", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> PURPLE_FLASH_PARTICLE =
+            PARTICLE_TYPES.register("purple_flash_particle", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> NULL_PARTICLE =
             PARTICLE_TYPES.register("null_particle", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> SPARKLE_PARTICLE =

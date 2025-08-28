@@ -2,6 +2,8 @@ package net.swimmingtuna.lotm.capabilities.sealed_data;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
@@ -197,7 +199,7 @@ public class SealedUtils {
         return sealUUID;
     }
 
-    public static UUID seal(LivingEntity entity, UUID creator, int sequence, int timer){
+    public static UUID seal(LivingEntity entity, UUID creator, int sequence, int timer) {
         UUID sealUUID = generateValidUUID(entity);
         setCreator(entity, sealUUID, creator);
         setSequence(entity, sealUUID, sequence);
@@ -248,8 +250,12 @@ public class SealedUtils {
             for (UUID seal : sealsWithTimers) {
                 int currentTime = data.sealsTimers().getOrDefault(seal, 0);
                 int newTime = currentTime - 1;
-
-                if (newTime <= 0) {
+                if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                    sealsToRemove.add(seal);
+                }
+                if (Conceptualization.isConceptualized(entity)) {
+                    sealsToRemove.add(seal);
+                } else if (newTime <= 0) {
                     sealsToRemove.add(seal);
                 } else {
                     data.setTimer(seal, newTime);

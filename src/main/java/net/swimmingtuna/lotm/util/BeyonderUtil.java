@@ -81,6 +81,7 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Ability;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationWipe;
@@ -719,7 +720,6 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.STARFALL.get());
             }
             if (sequence <= 0) {
-                abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
                 abilityNames.add(ItemInit.DOOR_DIMENSION_CLOSING.get());
                 abilityNames.add(ItemInit.DOOR_SEALED_SPACE.get());
                 abilityNames.add(ItemInit.DOOR_LAYERING.get());
@@ -1739,7 +1739,6 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.STARFALL.get());
         abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
         abilityNames.add(ItemInit.SPATIAL_MAZE.get());
-        abilityNames.add(ItemInit.DOOR_SPATIAL_LOCK_ON.get());
         abilityNames.add(ItemInit.DOOR_DIMENSION_CLOSING.get());
         abilityNames.add(ItemInit.DOOR_SEALED_SPACE.get());
         abilityNames.add(ItemInit.DOOR_LAYERING.get());
@@ -3579,6 +3578,12 @@ public class BeyonderUtil {
         }
     }
 
+    public static void sendPlayerParticle(LivingEntity living, ParticleOptions particle, double spawnX, double spawnY, double spawnZ, double velocityX, double velocityY, double velocityZ) {
+        if (living instanceof ServerPlayer serverPlayer) {
+            LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(particle, spawnX, spawnY, spawnZ, velocityX, velocityY, velocityZ), serverPlayer);
+        }
+    }
+
     public static void sendAlwaysVisibleParticle(ParticleOptions particle, double spawnX, double spawnY, double spawnZ) {
         LOTMNetworkHandler.sendToAllPlayers(new SendParticleS2C(particle, spawnX, spawnY, spawnZ, 0, 0, 0));
     }
@@ -4252,6 +4257,18 @@ public class BeyonderUtil {
                 if (livingEntity.getHealth() > x) {
                     livingEntity.setHealth(x);
                 }
+            }
+            if (Conceptualization.isConceptualized(livingEntity)) {
+                removeAwe(livingEntity);
+                removeNoRegeneration(livingEntity);
+                removeBattleHypnotism(livingEntity);
+                removeStun(livingEntity);
+                removeParalysis(livingEntity);
+                removeBeneficialEffectBlocker(livingEntity);
+                removeMentalPlague(livingEntity);
+                removeManipulation(livingEntity);
+                removeBleeding(livingEntity);
+                removeFrenzy(livingEntity);
             }
         }
     }

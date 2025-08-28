@@ -386,6 +386,7 @@ public class ModEvents {
                 MatterAccelerationBlocks.matterAccelerationBlocksMobTick(event);
                 BeyonderEntityData.regenerateSpirituality(event);
                 //regular ticks
+                Conceptualization.conceptualizationTick(event);
                 Starfall.starfallTick(event);
                 SealedUtils.timerTick(livingEntity);
                 SailorClass.rainEyesTickEvent(event);

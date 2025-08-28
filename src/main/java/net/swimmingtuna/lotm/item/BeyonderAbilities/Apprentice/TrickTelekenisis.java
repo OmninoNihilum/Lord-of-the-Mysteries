@@ -94,6 +94,7 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
                 }
             } else {
                 if (livingEntity instanceof Player pPlayer) {
+                    tag.putBoolean("trickmasterTelekenisis", false);
                     pPlayer.displayClientMessage(Component.literal("Telekenisis turned off due to lack of spirituality").withStyle(ChatFormatting.BOLD, ChatFormatting.RED), true);
                 }
             }

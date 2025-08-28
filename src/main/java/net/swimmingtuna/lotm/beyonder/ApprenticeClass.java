@@ -31,6 +31,7 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
@@ -249,7 +250,7 @@ public class ApprenticeClass implements BeyonderClass {
         //items.put(0, ItemInit.DOOR_SEALED_SPACE.get());
         //items.put(0, ItemInit.DOOR_LAYERING.get());
         //items.put(0, ItemInit.DOOR_GAMMA_RAY_BURST.get());
-        //items.put(0, ItemInit.CONCEPTUALIZATION.get());
+        items.put(0, ItemInit.CONCEPTUALIZATION.get());
         //items.put(0, ItemInit.REPLICATION.get());
 
         return items;
@@ -340,6 +341,7 @@ public class ApprenticeClass implements BeyonderClass {
 
     public static void apprenticeAttackEvent(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntity();
+        Conceptualization.conceptualizationAttack(event);
         if (!attacked.level().isClientSide() && BeyonderUtil.currentPathwayAndSequenceMatchesNoException(attacked, BeyonderClassInit.APPRENTICE.get(), 3)) {
             if (event.getSource().is(DamageTypes.FALL)) {
                 event.setCanceled(true);

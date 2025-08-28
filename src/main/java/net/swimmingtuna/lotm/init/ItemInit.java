@@ -402,20 +402,20 @@ public class ItemInit {
             () -> new Starfall(new Item.Properties().stacksTo(1)));
 
     //0
-    public static final RegistryObject<Item> DOOR_SPATIAL_LOCK_ON = ITEMS.register("doorspatiallockon",
-            () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_DIMENSION_CLOSING = ITEMS.register("door_dimensionclosing",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_SEALED_SPACE = ITEMS.register("doorsealedspace",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_LAYERING = ITEMS.register("doorlayering",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new Item(new Item.Properties().stacksTo(1))); //black hole
     public static final RegistryObject<Item> DOOR_GAMMA_RAY_BURST = ITEMS.register("doorgammarayburst",
-            () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> CONCEPTUALIZATION = ITEMS.register("conceptualization",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> REPLICATION = ITEMS.register("replication",
             () -> new Item(new Item.Properties().stacksTo(1)));
+
+
+    public static final RegistryObject<Item> CONCEPTUALIZATION = ITEMS.register("conceptualization",
+            () -> new Conceptualization(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SECRET_KEEPING = ITEMS.register("secretkeeping",
             () -> new SecretKeeping(new Item.Properties().stacksTo(1)));
 

@@ -98,6 +98,10 @@ public class ClientEventsEntity {
     public static void registerParticleProvidersEvent(final RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ParticleInit.DOOR.get(), DoorParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.SPARKLE_PARTICLE.get(), SparkleParticle.Provider::new);
+        event.registerSpriteSet(ParticleInit.AQUA_FLASH_PARTICLE.get(), AquaFlashParticle.Provider::new);
+        event.registerSpriteSet(ParticleInit.PURPLE_FLASH_PARTICLE.get(), PurpleFlashParticle.Provider::new);
+        event.registerSpriteSet(ParticleInit.YELLOW_FLASH_PARTICLE.get(), YellowFlashParticle.Provider::new);
+        event.registerSpriteSet(ParticleInit.WHITE_FLASH_PARTICLE.get(), WhiteFlashParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.ACIDRAIN_PARTICLE.get(), AcidRainParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.PLAYER_TRAIL_PARTICLE.get(), PlayerTrailParticle.Provider::new);
         event.registerSpriteSet(ParticleInit.MOB_TRAIL_PARTICLE.get(), MobTrailParticle.Provider::new);

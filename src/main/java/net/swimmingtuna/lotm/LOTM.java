@@ -397,7 +397,6 @@ public class LOTM {
             event.accept(ItemInit.SPACE_FRAGMENTATION);
             event.accept(ItemInit.GRAVITY_MANIPULATION);
             event.accept(ItemInit.SPATIAL_MAZE);
-            event.accept(ItemInit.DOOR_SPATIAL_LOCK_ON);
             event.accept(ItemInit.DOOR_DIMENSION_CLOSING);
             event.accept(ItemInit.DOOR_SEALED_SPACE);
             event.accept(ItemInit.DOOR_LAYERING);

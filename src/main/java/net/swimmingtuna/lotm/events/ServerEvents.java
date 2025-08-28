@@ -117,26 +117,33 @@ public class ServerEvents {
                     }
                     if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 0)) {
                         if (message.contains(" to ")) {
+                            LOTM.LOGGER.info("1");
                             String[] messageParts = message.split(" to ", 2);
                             if (messageParts.length == 2) {
+                                LOTM.LOGGER.info("2");
                                 String targetPlayerName = messageParts[0].trim();
                                 String destination = messageParts[1].trim();
                                 Player targetPlayer = null;
                                 for (Player p : level.players()) {
-                                    if (p.getName().getString().toLowerCase().equals(targetPlayerName.toLowerCase())) {
+                                    if (p.getName().getString().equalsIgnoreCase(targetPlayerName)) {
                                         targetPlayer = p;
                                         break;
                                     }
                                 }
                                 if (targetPlayer == null) {
+                                    LOTM.LOGGER.info("NOT FOUND");
                                     player.sendSystemMessage(Component.literal("Player '" + targetPlayerName + "' not found!").withStyle(ChatFormatting.RED));
                                     return;
                                 }
+
                                 Level destinationLevel = player.level();
-                                if (hasDimensionId(message)) {
-                                    destinationLevel = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(message), destinationLevel);
-                                }
-                                if (isThreeIntegers(destination)) {
+                                if (coordsTravel(destination)) {
+                                    LOTM.LOGGER.info("3 - Coordinates detected");
+                                    if (hasDimensionId(destination)) {
+                                        LOTM.LOGGER.info("4 - Dimension detected");
+                                        destinationLevel = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(destination), destinationLevel);
+                                    }
+
                                     try {
                                         String[] coordinates = destination.replace(",", " ").trim().split("\\s+");
                                         int x = Integer.parseInt(coordinates[0]);
@@ -145,9 +152,8 @@ public class ServerEvents {
 
                                         envisionLocationTeleport(targetPlayer, destinationLevel, x + 0.5, y, z + 0.5);
 
-                                        String dimensionInfo = destinationLevel != player.level() ? " in dimension " + destinationLevel.dimension().location() : "";
+                                        String dimensionInfo = destinationLevel != player.level() ? " in dimension " + getDimensionName(destinationLevel.dimension().location().getPath()) : "";
                                         player.sendSystemMessage(Component.literal("Teleported " + targetPlayer.getName().getString() + " to coordinates: " + x + ", " + y + ", " + z + dimensionInfo).withStyle(ChatFormatting.GREEN));
-                                        targetPlayer.sendSystemMessage(Component.literal("You were teleported to coordinates: " + x + ", " + y + ", " + z + dimensionInfo + " by " + player.getName().getString()).withStyle(ChatFormatting.YELLOW));
                                     } catch (Exception e) {
                                         player.sendSystemMessage(Component.literal("Invalid coordinates format!").withStyle(ChatFormatting.RED));
                                     }
@@ -162,6 +168,7 @@ public class ServerEvents {
 
                                     if (destinationPlayer != null) {
                                         if (targetPlayer == destinationPlayer) {
+                                            event.setCanceled(true);
                                             player.sendSystemMessage(Component.literal("Cannot teleport a player to themselves!").withStyle(ChatFormatting.RED));
                                         } else {
                                             int sequence = BeyonderUtil.getSequence(targetPlayer);
@@ -169,9 +176,8 @@ public class ServerEvents {
                                                 BeyonderUtil.useSpirituality(player, 1000 - (sequence * 100));
                                             }
                                             envisionLocationTeleport(targetPlayer, destinationPlayer.level(), destinationPlayer.getX(), destinationPlayer.getY(), destinationPlayer.getZ());
-                                            String dimensionInfo = destinationPlayer.level() != targetPlayer.level() ? " in dimension " + destinationPlayer.level().dimension().location() : "";
+                                            String dimensionInfo = destinationPlayer.level() != targetPlayer.level() ? " in dimension " + getDimensionName(destinationPlayer.level().dimension().location().getPath()) : "";
                                             player.sendSystemMessage(Component.literal("Teleported " + targetPlayer.getName().getString() + " to " + destinationPlayer.getName().getString() + dimensionInfo).withStyle(ChatFormatting.GREEN));
-                                            targetPlayer.sendSystemMessage(Component.literal("You were teleported to " + destinationPlayer.getName().getString() + dimensionInfo + " by " + player.getName().getString()).withStyle(ChatFormatting.YELLOW));
                                         }
                                     } else {
                                         player.sendSystemMessage(Component.literal("Destination player '" + destination + "' not found!").withStyle(ChatFormatting.RED));

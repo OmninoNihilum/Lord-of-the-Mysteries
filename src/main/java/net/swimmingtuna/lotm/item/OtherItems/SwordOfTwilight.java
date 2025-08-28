@@ -156,8 +156,13 @@ public class SwordOfTwilight extends LeftClickHandlerSword implements GeoItem {
                 if (tag.getInt("returnSwordOfTwilight") == 1) {
                     if (livingEntity instanceof Player player) {
                         int selectedSlot = findClosestEmptySlot(player);
-                        Inventory inventory = player.getInventory();
-                        inventory.setItem(selectedSlot, ItemInit.SWORDOFTWILIGHT.get().getDefaultInstance());
+                        if (selectedSlot != -1) {
+                            Inventory inventory = player.getInventory();
+                            inventory.setItem(selectedSlot, ItemInit.SWORDOFTWILIGHT.get().getDefaultInstance());
+                        } else {
+                            ItemStack swordStack = ItemInit.SWORDOFTWILIGHT.get().getDefaultInstance();
+                            player.drop(swordStack, false);
+                        }
                     } else {
                         livingEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemInit.SWORDOFTWILIGHT.get().getDefaultInstance());
                     }
