@@ -96,6 +96,9 @@ public class Astrolabe extends Item {
             boolean foundResource = false;
             String resourceKey = searchQuery.replace(' ', '_');
             int maxDistance = (int) (BeyonderUtil.getDivination(player) * 30.0);
+            if (hasPositionPrefix && BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                maxDistance *= (int) 2.5f;
+            }
             ResourceLocation resourceLocation;
 
             try {
@@ -182,8 +185,11 @@ public class Astrolabe extends Item {
                 }
 
                 if (!foundResource) {
-                    player.sendSystemMessage(Component.literal("No divination target found with " + searchQuery)
-                            .withStyle(ChatFormatting.RED));
+                    if (!hasPositionPrefix) {
+                        player.sendSystemMessage(Component.literal("No divination target found with " + searchQuery).withStyle(ChatFormatting.RED));
+                    } else {
+                        player.sendSystemMessage(Component.literal("No target found with " + searchQuery).withStyle(ChatFormatting.RED));
+                    }
                 } else {
                     BeyonderUtil.useSpirituality(player, maxDistance * 2);
                 }
@@ -206,6 +212,10 @@ public class Astrolabe extends Item {
         if (!spatialIntegration) {
             player.sendSystemMessage(Component.literal("The target can't have divination used against them at your sequence")
                     .withStyle(ChatFormatting.RED));
+            return true;
+        }
+        if (BeyonderUtil.isConcealed(targetPlayer)) {
+            player.sendSystemMessage(Component.literal("The target is concealed and can't be divined about.").withStyle(ChatFormatting.RED));
             return true;
         }
 

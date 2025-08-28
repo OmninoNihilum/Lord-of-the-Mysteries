@@ -54,6 +54,27 @@ public class SpatialCage extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
+    @Override
+    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
+        if (!checkAll(player, BeyonderClassInit.APPRENTICE.get(), 0, 5000,true)) {
+            if (player instanceof Player pPlayer) {
+                pPlayer.sendSystemMessage(Component.literal("You need to be the highest sequence in order to use this ability not on a target.").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+            }
+            return InteractionResult.FAIL;
+        }
+        useSpirituality(player, 5000);
+        addCooldown(player, this, 2000);
+        spatialCage(player);
+        return InteractionResult.SUCCESS;
+    }
+
+    public void spatialCage(LivingEntity living) {
+        float damage = BeyonderUtil.getDamage(living).get(ItemInit.SPATIAL_CAGE.get());
+        for (LivingEntity livingEntity : BeyonderUtil.getNonAlliesNearby(living, damage)) {
+            SpatialCageEntity.setSealed(livingEntity, living, BeyonderUtil.getSequence(livingEntity) - 1, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_CAGE.get()));
+        }
+    }
+
 
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
@@ -72,21 +93,6 @@ public class SpatialCage extends SimpleAbilityItem {
         attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 20, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with entities
         attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 20, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with blocks, p much useless for this item
         return attributeBuilder.build();
-    }
-
-    @Override
-    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
-        }
-        DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
-        if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
-            player.sendSystemMessage(Component.literal("You created a Spatial Cage around your Dimensional Sight Target").withStyle(ChatFormatting.AQUA));
-            addCooldown(player);
-            useSpirituality(player);
-            SpatialCageEntity.setSealed(dimensionalSightTileEntity.getScryTarget(), player, BeyonderUtil.getSequence(player) - 1, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.SPATIAL_CAGE.get()));
-        }
-        return InteractionResult.SUCCESS;
     }
 
     @Override

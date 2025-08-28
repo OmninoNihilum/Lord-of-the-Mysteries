@@ -194,8 +194,8 @@ public class CreativeTabInit {
                         event.accept(ItemInit.SPACE_FRAGMENTATION.get());
                         event.accept(ItemInit.GRAVITY_MANIPULATION.get());
                         event.accept(ItemInit.SPATIAL_MAZE.get());
-                        event.accept(ItemInit.DOOR_DIMENSION_CLOSING.get());
-                        event.accept(ItemInit.DOOR_SEALED_SPACE.get());
+                        event.accept(ItemInit.DOOR_CONCEALMENT.get());
+                        event.accept(ItemInit.DOOR_SEAL_STRENGTHENING.get());
                         event.accept(ItemInit.DOOR_LAYERING.get());
                         event.accept(ItemInit.DOOR_GAMMA_RAY_BURST.get());
                         event.accept(ItemInit.CONCEPTUALIZATION.get());

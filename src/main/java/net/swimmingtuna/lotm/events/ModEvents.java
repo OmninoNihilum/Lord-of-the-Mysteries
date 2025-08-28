@@ -27,6 +27,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -350,6 +351,15 @@ public class ModEvents {
                 }
             }
         }
+        if (!player.level().isClientSide()) {
+            if (player.getItemInHand(event.getHand()).isEmpty()) {
+                if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                    if (event.getTarget() instanceof LivingEntity livingEntity && SealedUtils.isSealed(livingEntity)) {
+                        SealedUtils.removeAllSeals(livingEntity);
+                    }
+                }
+            }
+        }
     }
 
     @SubscribeEvent
@@ -361,6 +371,12 @@ public class ModEvents {
     public static void rightClickEmpty(PlayerInteractEvent.RightClickEmpty event) {
         MercuryLiquefication.mercuryRightClick(event);
     }
+
+
+    //@SubscribeEvent
+    //public static void entityTravelToDimensionEvent(EntityTravelToDimensionEvent event) {
+    //    event.setCanceled(true);
+    //}
 
 
     @SubscribeEvent

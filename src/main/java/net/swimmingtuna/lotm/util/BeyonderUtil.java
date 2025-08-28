@@ -78,7 +78,6 @@ import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.entity.CustomFallingBlockEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Ability;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
@@ -100,6 +99,7 @@ import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worlddata.PlayerMobTracker;
+import net.swimmingtuna.lotm.world.worlddata.SealStrengthenData;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import org.jetbrains.annotations.Nullable;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -720,8 +720,8 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.STARFALL.get());
             }
             if (sequence <= 0) {
-                abilityNames.add(ItemInit.DOOR_DIMENSION_CLOSING.get());
-                abilityNames.add(ItemInit.DOOR_SEALED_SPACE.get());
+                abilityNames.add(ItemInit.DOOR_CONCEALMENT.get());
+                abilityNames.add(ItemInit.DOOR_SEAL_STRENGTHENING.get());
                 abilityNames.add(ItemInit.DOOR_LAYERING.get());
                 abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
                 abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
@@ -1356,6 +1356,22 @@ public class BeyonderUtil {
         return cooldown;
     }
 
+    public static int getSealStrength(LivingEntity living) {
+        Level level = living.level();
+        int strengthen = 1;
+        if (level instanceof ServerLevel serverLevel) {
+            strengthen = SealStrengthenData.getInstance(serverLevel).getSealStrengthen();
+        }
+        return strengthen;
+    }
+
+    public static void setSealStrengthen(LivingEntity living, int amount) {
+        Level level = living.level();
+        if (level instanceof ServerLevel serverLevel) {
+            SealStrengthenData.getInstance(serverLevel).setSealStrengthen(amount);
+        }
+    }
+
     public static Map<Item, Float> getDamage(LivingEntity livingEntity) {
         Map<Item, Float> damageMap = new HashMap<>();
         Level level = livingEntity.level();
@@ -1524,7 +1540,9 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.CREATE_CONCEALED_SPACE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
         damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.05f), -abilityStrengthened));
         damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.DOOR_CONCEALMENT.get(), applyAbilityStrengthened(((7200.0f / abilityWeakness) - (sequence * 1200)), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.DOOR_SEAL_STRENGTHENING.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
         damageMap.put(ItemInit.EXILE.get(), applyAbilityStrengthened((80.0f - ((sequence * 15) * abilityWeakness)), abilityStrengthened));
         damageMap.put(ItemInit.INVISIBLEHAND.get(), applyAbilityStrengthened((float) (75 - (sequence * 12)) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.MINIATURIZE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), abilityStrengthened));
@@ -1739,8 +1757,8 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.STARFALL.get());
         abilityNames.add(ItemInit.GRAVITY_MANIPULATION.get());
         abilityNames.add(ItemInit.SPATIAL_MAZE.get());
-        abilityNames.add(ItemInit.DOOR_DIMENSION_CLOSING.get());
-        abilityNames.add(ItemInit.DOOR_SEALED_SPACE.get());
+        abilityNames.add(ItemInit.DOOR_CONCEALMENT.get());
+        abilityNames.add(ItemInit.DOOR_SEAL_STRENGTHENING.get());
         abilityNames.add(ItemInit.DOOR_LAYERING.get());
         abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
         abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
@@ -3396,6 +3414,9 @@ public class BeyonderUtil {
     }
 
     public static boolean isConcealed(LivingEntity entity) {
+        if (entity.getPersistentData().getInt("doorConcealment") >= 1) {
+            return true;
+        }
         return entity.level().dimension() == DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
     }
 
@@ -3408,6 +3429,17 @@ public class BeyonderUtil {
                         living.getPersistentData().putInt("divineHandGuarding", 0);
                     }
                 }
+            }
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            boolean calledBySealedUtils = false;
+            for (int i = 2; i < stackTrace.length; i++) {
+                if (stackTrace[i].getClassName().equals("net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils")) {
+                    calledBySealedUtils = true;
+                    break;
+                }
+            }
+            if (!calledBySealedUtils) {
+                SealedUtils.removeAllSeals(livingEntity);
             }
             tag.putInt("starfallEntitySearch", 0);
             tag.putInt("spaceFragmentationCopies", 0);
@@ -3531,6 +3563,7 @@ public class BeyonderUtil {
             tag.putInt("doorBlinkStateDistance", 0);
             tag.putBoolean("planeswalkerSymbolization", false);
             tag.putInt("starfallTimer", 0);
+            tag.putInt("waitOnWormLogic", 100);
         }
     }
 

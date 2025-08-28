@@ -1,7 +1,9 @@
 package net.swimmingtuna.lotm.capabilities.sealed_data;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -155,7 +157,11 @@ public class SealedUtils {
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             data.setSealedAbilitiesType(sealUUID, type);
         });
-        if(type != ABILITIES_SEAL_TYPES.NONE) BeyonderUtil.removeTags(entity);
+        if (type != ABILITIES_SEAL_TYPES.NONE) {
+            int wormCount = entity.getPersistentData().getInt("wormOfStar");
+            BeyonderUtil.removeTags(entity);
+            entity.getPersistentData().putInt("wormCount", wormCount);
+        }
     }
 
     public static void setSealedAbilitiesList(LivingEntity entity, UUID sealUUID, HashSet<SimpleAbilityItem> abilities){
@@ -242,23 +248,38 @@ public class SealedUtils {
         });
     }
 
-    public static void timerTick(LivingEntity entity){
+    public static void timerTick(LivingEntity entity) {
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             HashSet<UUID> sealsWithTimers = data.sealsWithTimers();
             if (sealsWithTimers.isEmpty()) return;
             List<UUID> sealsToRemove = new ArrayList<>();
             for (UUID seal : sealsWithTimers) {
                 int currentTime = data.sealsTimers().getOrDefault(seal, 0);
-                int newTime = currentTime - 1;
+                int sealStrengthenData = Math.max(1,BeyonderUtil.getSealStrength(entity));
+                int subtractionAmount = 1;
                 if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 0)) {
-                    sealsToRemove.add(seal);
+                    subtractionAmount = 5;
+                } else {
+                    for (LivingEntity ally : BeyonderUtil.getAllies(entity)) {
+                        if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(ally, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                            subtractionAmount = 2;
+                        }
+                    }
                 }
+                float random = BeyonderUtil.getPositiveRandomInRange(sealStrengthenData);
+                int newTime = currentTime - subtractionAmount;
                 if (Conceptualization.isConceptualized(entity)) {
                     sealsToRemove.add(seal);
                 } else if (newTime <= 0) {
                     sealsToRemove.add(seal);
                 } else {
-                    data.setTimer(seal, newTime);
+                    if (sealStrengthenData > 1) {
+                        if (random < 1) {
+                            data.setTimer(seal, newTime);
+                        }
+                    } else {
+                        data.setTimer(seal, newTime);
+                    }
                 }
             }
             for (UUID sealToRemove : sealsToRemove) {
@@ -269,5 +290,14 @@ public class SealedUtils {
 
     public static int getBreakFreeCost(int sequence){
         return BREAK_SEAL_COST.get(sequence);
+    }
+
+    public static void removeAllSeals(LivingEntity entity) {
+        entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
+            HashSet<UUID> allSeals = new HashSet<>(data.sealsCreators().keySet());
+            for (UUID sealUUID : allSeals) {
+                data.removeSeal(sealUUID);
+            }
+        });
     }
 }

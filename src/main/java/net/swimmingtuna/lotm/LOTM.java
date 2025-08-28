@@ -1,7 +1,6 @@
 package net.swimmingtuna.lotm;
 
 import com.mojang.logging.LogUtils;
-import mezz.jei.api.helpers.IJeiHelpers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -397,8 +396,8 @@ public class LOTM {
             event.accept(ItemInit.SPACE_FRAGMENTATION);
             event.accept(ItemInit.GRAVITY_MANIPULATION);
             event.accept(ItemInit.SPATIAL_MAZE);
-            event.accept(ItemInit.DOOR_DIMENSION_CLOSING);
-            event.accept(ItemInit.DOOR_SEALED_SPACE);
+            event.accept(ItemInit.DOOR_CONCEALMENT);
+            event.accept(ItemInit.DOOR_SEAL_STRENGTHENING);
             event.accept(ItemInit.DOOR_LAYERING);
             event.accept(ItemInit.DOOR_GAMMA_RAY_BURST);
             event.accept(ItemInit.CONCEPTUALIZATION);

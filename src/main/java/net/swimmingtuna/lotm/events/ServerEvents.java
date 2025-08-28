@@ -252,7 +252,9 @@ public class ServerEvents {
             String message = event.getMessage().getString();
             for (ServerPlayer onlinePlayer : player.getServer().getPlayerList().getPlayers()) {
                 if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
-                    if (!BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
+                    if (BeyonderUtil.isConcealed(onlinePlayer)) {
+                        player.sendSystemMessage(Component.literal("The target is concealed and can't have this ability used on them.").withStyle(ChatFormatting.RED));
+                    } else if (!BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
                         player.displayClientMessage(Component.literal("You are not of the Spectator pathway").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
                     } else if (BeyonderUtil.getSpirituality(player) < 300) {
                         player.displayClientMessage(Component.literal("You need 300 spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
@@ -462,11 +464,15 @@ public class ServerEvents {
                     if (tagKey != null) {
                         Optional<ServerPlayer> targetPlayer = level.getServer().getPlayerList().getPlayers().stream().filter(p -> p.getName().getString().equals(targetPlayerName)).findFirst();
                         if (targetPlayer.isPresent()) {
-                            player.getCooldowns().addCooldown(ItemInit.PROPHECY.get(), 1200);
-                            CompoundTag tag = targetPlayer.get().getPersistentData();
-                            tag.putInt(tagKey, ticks);
-                            player.sendSystemMessage(Component.literal("Prophecy has been set for " + targetPlayerName).withStyle(ChatFormatting.GREEN));
-                            BeyonderUtil.useSpirituality(player, 1500);
+                            if (BeyonderUtil.isConcealed(targetPlayer.get())) {
+                                player.sendSystemMessage(Component.literal("The target is concealed and can't have this ability used on them.").withStyle(ChatFormatting.RED));
+                            } else {
+                                player.getCooldowns().addCooldown(ItemInit.PROPHECY.get(), 1200);
+                                CompoundTag tag = targetPlayer.get().getPersistentData();
+                                tag.putInt(tagKey, ticks);
+                                player.sendSystemMessage(Component.literal("Prophecy has been set for " + targetPlayerName).withStyle(ChatFormatting.GREEN));
+                                BeyonderUtil.useSpirituality(player, 1500);
+                            }
                         } else {
                             player.sendSystemMessage(Component.literal("Could not find player: " + targetPlayerName).withStyle(ChatFormatting.RED));
                         }
@@ -523,24 +529,28 @@ public class ServerEvents {
         if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof DimensionalSight && !player.getCooldowns().isOnCooldown(ItemInit.DIMENSIONAL_SIGHT.get()) && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 3)) {
             for (ServerPlayer onlinePlayer : player.getServer().getPlayerList().getPlayers()) {
                 if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
-                    BlockPos playerPos = player.blockPosition();
-                    Vec3 lookPos = player.getLookAngle().scale(5);
-                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y() - 2, (int) lookPos.z()));
-                    BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
-                    level.setBlock(targetPos, dimensionalSightState, 3);
-                    level.getServer().execute(() -> {
-                        BlockEntity blockEntity = level.getBlockEntity(targetPos);
-                        if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
-                            sightEntity.setCaster(player.getUUID());
-                            sightEntity.viewTarget = onlinePlayer.getName().getString();
-                            sightEntity.scryUniqueID = onlinePlayer.getUUID();
-                            sightEntity.setChanged();
-                            sightEntity.sendUpdates();
-                            onlinePlayer.getPersistentData().putUUID("dimensionalSightPlayerUUID", player.getUUID());
-                            onlinePlayer.getPersistentData().putInt("ignoreShouldntRender", 10);
-                            player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
-                        }
-                    });
+                    if (BeyonderUtil.isConcealed(onlinePlayer)) {
+                        player.sendSystemMessage(Component.literal("The target is concealed and can't have this ability used on them.").withStyle(ChatFormatting.RED));
+                    } else {
+                        BlockPos playerPos = player.blockPosition();
+                        Vec3 lookPos = player.getLookAngle().scale(5);
+                        BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), (int) lookPos.y() - 2, (int) lookPos.z()));
+                        BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
+                        level.setBlock(targetPos, dimensionalSightState, 3);
+                        level.getServer().execute(() -> {
+                            BlockEntity blockEntity = level.getBlockEntity(targetPos);
+                            if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
+                                sightEntity.setCaster(player.getUUID());
+                                sightEntity.viewTarget = onlinePlayer.getName().getString();
+                                sightEntity.scryUniqueID = onlinePlayer.getUUID();
+                                sightEntity.setChanged();
+                                sightEntity.sendUpdates();
+                                onlinePlayer.getPersistentData().putUUID("dimensionalSightPlayerUUID", player.getUUID());
+                                onlinePlayer.getPersistentData().putInt("ignoreShouldntRender", 10);
+                                player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
+                            }
+                        });
+                    }
                     player.getCooldowns().addCooldown(ItemInit.DIMENSIONAL_SIGHT.get(), 6000);
                 }
             }
@@ -549,24 +559,28 @@ public class ServerEvents {
         if (!player.level().isClientSide() && player.getMainHandItem().getItem() instanceof DimensionalSight && !player.getCooldowns().isOnCooldown(ItemInit.DIMENSIONAL_SIGHT.get()) && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 3)) {
             for (ServerPlayer onlinePlayer : player.getServer().getPlayerList().getPlayers()) {
                 if (message.equalsIgnoreCase(onlinePlayer.getName().getString())) {
-                    BlockPos playerPos = player.blockPosition();
-                    Vec3 lookPos = player.getLookAngle().scale(5);
-                    BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), -2, (int) lookPos.z()));
-                    BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
-                    level.setBlock(targetPos, dimensionalSightState, 3);
-                    level.getServer().execute(() -> {
-                        BlockEntity blockEntity = level.getBlockEntity(targetPos);
-                        if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
-                            sightEntity.setCaster(player.getUUID());
-                            sightEntity.viewTarget = onlinePlayer.getName().getString();
-                            sightEntity.scryUniqueID = onlinePlayer.getUUID();
-                            sightEntity.setChanged();
-                            sightEntity.sendUpdates();
-                            onlinePlayer.getPersistentData().putUUID("dimensionalSightPlayerUUID", player.getUUID());
-                            onlinePlayer.getPersistentData().putInt("ignoreShouldntRender", 10);
-                            player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
-                        }
-                    });
+                    if (BeyonderUtil.isConcealed(onlinePlayer)) {
+                        player.sendSystemMessage(Component.literal("The target is concealed and can't have this ability used on them.").withStyle(ChatFormatting.RED));
+                    } else {
+                        BlockPos playerPos = player.blockPosition();
+                        Vec3 lookPos = player.getLookAngle().scale(5);
+                        BlockPos targetPos = new BlockPos(playerPos.offset((int) lookPos.x(), -2, (int) lookPos.z()));
+                        BlockState dimensionalSightState = BlockInit.DIMENSIONAL_SIGHT.get().defaultBlockState();
+                        level.setBlock(targetPos, dimensionalSightState, 3);
+                        level.getServer().execute(() -> {
+                            BlockEntity blockEntity = level.getBlockEntity(targetPos);
+                            if (blockEntity instanceof DimensionalSightTileEntity sightEntity) {
+                                sightEntity.setCaster(player.getUUID());
+                                sightEntity.viewTarget = onlinePlayer.getName().getString();
+                                sightEntity.scryUniqueID = onlinePlayer.getUUID();
+                                sightEntity.setChanged();
+                                sightEntity.sendUpdates();
+                                onlinePlayer.getPersistentData().putUUID("dimensionalSightPlayerUUID", player.getUUID());
+                                onlinePlayer.getPersistentData().putInt("ignoreShouldntRender", 10);
+                                player.displayClientMessage(Component.literal("Successfully created a Dimensional Sight for " + onlinePlayer.getName().getString()).withStyle(ChatFormatting.GREEN), true);
+                            }
+                        });
+                    }
                 }
             }
             event.setCanceled(true);

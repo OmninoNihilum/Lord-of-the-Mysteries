@@ -251,10 +251,13 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                     int actualReduction = Math.min(maxReduction * (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEPARATE_WORM_OF_STAR.get()), wormOfStarAmount);
                     int newCooldown = cooldown - actualReduction;
                     tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
+                    LOTM.sendMessageToAllPlayers("ACTUAL REDUCTION IS " + actualReduction);
                     if (player instanceof ServerPlayer serverPlayer) {
                         LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                     }
                     player.getCooldowns().addCooldown(item, newCooldown);
+                    LOTM.sendMessageToAllPlayers("OLD COOLDOWN IS " + cooldown);
+                    LOTM.sendMessageToAllPlayers("NEW COOLDOWN IS " + newCooldown);
                 }
             } else {
                 player.getCooldowns().addCooldown(item, cooldown);

@@ -217,6 +217,11 @@ public class LOTMNetworkHandler {
                 .encoder(CalamityEnhancementLeftClickC2S::toByte)
                 .consumerMainThread(CalamityEnhancementLeftClickC2S::handle)
                 .add();
+        INSTANCE.messageBuilder(SealStrengtheningLeftClickC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(SealStrengtheningLeftClickC2S::new)
+                .encoder(SealStrengtheningLeftClickC2S::toByte)
+                .consumerMainThread(SealStrengtheningLeftClickC2S::handle)
+                .add();
         INSTANCE.messageBuilder(NonVisibleS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(NonVisibleS2C::decode)
                 .encoder(NonVisibleS2C::encode)

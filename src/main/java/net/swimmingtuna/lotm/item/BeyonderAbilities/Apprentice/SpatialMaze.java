@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -26,13 +27,15 @@ import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SpatialMaze extends SimpleAbilityItem {
     public SpatialMaze(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 1, 70, 200);
+        super(properties, BeyonderClassInit.APPRENTICE, 1, 1500, 1200);
     }
     public static HashMap<UUID, BlockPos> mazes = new HashMap<>();
 
@@ -42,7 +45,9 @@ public class SpatialMaze extends SimpleAbilityItem {
             if (!checkAll(livingEntity)) {
                 return InteractionResult.FAIL;
             }
-            createMaze(livingEntity, livingEntity);
+            useSpirituality(livingEntity);
+            addCooldown(livingEntity);
+            createMaze(livingEntity, interactionTarget);
         }
         return InteractionResult.SUCCESS;
     }
@@ -344,5 +349,15 @@ public class SpatialMaze extends SimpleAbilityItem {
 
             return maze;
         }
+    }
+
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.add(Component.literal("Upon use on a target, trap them in a maze which they will be forced to escape before leaving. In this maze, most teleportation abilities won't work and the maze can't be broken easily."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1500").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Minute").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
+        tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
+        super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 }

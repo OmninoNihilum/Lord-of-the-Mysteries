@@ -207,7 +207,9 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                     handleLife();
                     if (BeyonderUtil.isEntityColliding(this, this.level(), 1.0)) {
                         LivingEntity entity = BeyonderUtil.checkLivingEntityCollision(this, this.level(), 1.0);
-                        if (entity != null && entity.isShiftKeyDown()) teleport(entity);
+                        if (entity != null && entity.isShiftKeyDown()) {
+                            teleport(entity);
+                        }
                     }
                 }
             }

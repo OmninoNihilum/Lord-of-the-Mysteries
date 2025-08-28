@@ -28,10 +28,13 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.attributes.PathwayAttributes.ApprenticeAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorConcealment;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
@@ -96,6 +99,7 @@ public class ApprenticeClass implements BeyonderClass {
     public void tick(LivingEntity player, int sequenceLevel) {
         if (player.level().getGameTime() % 50 == 0) {
             CompoundTag tag = player.getPersistentData();
+            int waitOnWormLogic = tag.getInt("waitOnWormLogic");
             int maxWormCount = 0;
             int wormRegenAmount = 0;
             switch (sequenceLevel) {
@@ -172,21 +176,26 @@ public class ApprenticeClass implements BeyonderClass {
                     break;
             }
             if (sequenceLevel <= 4) {
-                if (tag.getInt("wormOfStar") < maxWormCount * 0.1) {
-                    player.sendSystemMessage(Component.literal("Died due to a lack of Worms of Star").withStyle(ChatFormatting.DARK_RED).withStyle(ChatFormatting.BOLD));
-                    player.kill();
-                } else if (tag.getInt("wormOfStar") < maxWormCount * 0.25) {
-                    player.sendSystemMessage(Component.literal("You can't handle the low amount of Worms of Star and will soon die").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
-                    player.hurt(player.damageSources().magic(), player.getMaxHealth() / 7);
-                    BeyonderUtil.applyMobEffect(player, MobEffects.BLINDNESS, 100, 1, true, true);
-                } else if (tag.getInt("wormOfStar") < maxWormCount * 0.5) {
-                    player.sendSystemMessage(Component.literal("You are dangerously low on Worms of Star and are taking damage because of it").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
-                    player.hurt(player.damageSources().magic(), player.getMaxHealth() / 10);
-                    BeyonderUtil.applyMobEffect(player, MobEffects.DARKNESS, 100, 1, true, true);
-                } else if (tag.getInt("wormOfStar") < maxWormCount * 0.75) {
-                    player.hurt(player.damageSources().magic(), player.getMaxHealth() / 20);
-                    player.sendSystemMessage(Component.literal("You are over exerting yourself, and shouldn't separate any more Worms of Stars").withStyle(ChatFormatting.YELLOW).withStyle(ChatFormatting.BOLD));
+                if (waitOnWormLogic == 0) {
+                    if (tag.getInt("wormOfStar") < maxWormCount * 0.1) {
+                        player.sendSystemMessage(Component.literal("Died due to a lack of Worms of Star").withStyle(ChatFormatting.DARK_RED).withStyle(ChatFormatting.BOLD));
+                        player.kill();
+                    } else if (tag.getInt("wormOfStar") < maxWormCount * 0.25) {
+                        player.sendSystemMessage(Component.literal("You can't handle the low amount of Worms of Star and will soon die").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                        player.hurt(player.damageSources().magic(), player.getMaxHealth() / 7);
+                        BeyonderUtil.applyMobEffect(player, MobEffects.BLINDNESS, 100, 1, true, true);
+                    } else if (tag.getInt("wormOfStar") < maxWormCount * 0.5) {
+                        player.sendSystemMessage(Component.literal("You are dangerously low on Worms of Star and are taking damage because of it").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
+                        player.hurt(player.damageSources().magic(), player.getMaxHealth() / 10);
+                        BeyonderUtil.applyMobEffect(player, MobEffects.DARKNESS, 100, 1, true, true);
+                    } else if (tag.getInt("wormOfStar") < maxWormCount * 0.75) {
+                        player.hurt(player.damageSources().magic(), player.getMaxHealth() / 20);
+                        player.sendSystemMessage(Component.literal("You are over exerting yourself, and shouldn't separate any more Worms of Stars").withStyle(ChatFormatting.YELLOW).withStyle(ChatFormatting.BOLD));
+                    }
                 }
+            }
+            if (waitOnWormLogic >= 1) {
+                tag.putInt("waitOnWormLogic", waitOnWormLogic - 1);
             }
         }
     }
@@ -312,6 +321,7 @@ public class ApprenticeClass implements BeyonderClass {
     public static void apprenticeTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         if (!livingEntity.level().isClientSide()) {
+            DoorConcealment.concealmentTick(event);
             if (livingEntity.getPersistentData().getInt("spaceFragmentationCopies") >= 1) {
                 livingEntity.getPersistentData().putInt("spaceFragmentationCopies", livingEntity.getPersistentData().getInt("spaceFragmentationCopies") - 1);
             }

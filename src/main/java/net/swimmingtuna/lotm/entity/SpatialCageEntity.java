@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -35,7 +36,11 @@ public class SpatialCageEntity extends Entity{
     @Override
     public void tick(){
         super.tick();
-        if(!this.level().isClientSide()) if (tickCount > 1) this.discard();
+        if(!this.level().isClientSide()) {
+            if (tickCount > 1) {
+                this.discard();
+            }
+        }
     }
 
     public float getBBWidth(){
@@ -49,7 +54,9 @@ public class SpatialCageEntity extends Entity{
     public static void cageTick(LivingEntity entity){
         Level level = entity.level();
         CompoundTag tag = entity.getPersistentData();
-        if(level.isClientSide || !tag.getBoolean("spatialCageIsSealed")) return;
+        if (level.isClientSide || !tag.getBoolean("spatialCageIsSealed")) {
+            return;
+        }
         if(tag.contains("spatialCageSealUUID") && SealedUtils.hasSpecificSeal(entity, tag.getUUID("spatialCageSealUUID"))) {
             double x = tag.getDouble("spatialCageX");
             double y = tag.getDouble("spatialCageY");
