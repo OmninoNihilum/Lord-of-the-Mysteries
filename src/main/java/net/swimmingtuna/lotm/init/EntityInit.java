@@ -17,6 +17,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<ColoredBoxEntity>> COLORED_BOX_ENTITY =
             ENTITIES.register("colored_box_entity", () -> EntityType.Builder.<ColoredBoxEntity>of(ColoredBoxEntity::new, MobCategory.MISC)
                     .sized(5.0f,5.0f).clientTrackingRange(400).build(new ResourceLocation(LOTM.MOD_ID, "colored_box_entity").toString()));
+    public static final RegistryObject<EntityType<BlackHoleEntity>> BLACK_HOLE_ENTITY =
+            ENTITIES.register("black_hole_entity", () -> EntityType.Builder.<BlackHoleEntity>of(BlackHoleEntity::new, MobCategory.MISC)
+                    .sized(5.0f,5.0f).clientTrackingRange(400).build(new ResourceLocation(LOTM.MOD_ID, "black_hole_entity").toString()));
     public static final RegistryObject<EntityType<AqueousLightEntity>> AQUEOUS_LIGHT_ENTITY_DROWN =
             ENTITIES.register("aqueous_light", () -> EntityType.Builder.<AqueousLightEntity>of(AqueousLightEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(100).build(new ResourceLocation(LOTM.MOD_ID, "aqueous_light").toString()));
