@@ -1,33 +1,46 @@
 package net.swimmingtuna.lotm.entity;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
-import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
-import net.swimmingtuna.lotm.networking.packet.NonVisibleS2C;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 import org.jetbrains.annotations.NotNull;
 
-public class BlackHoleEntity extends AbstractHurtingProjectile {
+import java.util.Objects;
 
-    // Entity data accessors for ring rotation
+public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEntity {
+
+    // Custom ChatFormatting for ORANGE
+    private static final ChatFormatting ORANGE = ChatFormatting.getByCode('6');
+
     private static final EntityDataAccessor<Float> RING_ROTATION_X = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> RING_ROTATION_Y = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> RING_ROTATION_Z = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> RING_ROTATION_SPEED = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
+
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public BlackHoleEntity(EntityType<? extends BlackHoleEntity> entityType, Level level) {
         super(entityType, level);
@@ -43,10 +56,9 @@ public class BlackHoleEntity extends AbstractHurtingProjectile {
         this.entityData.define(RING_ROTATION_X, 0.0f);
         this.entityData.define(RING_ROTATION_Y, 0.0f);
         this.entityData.define(RING_ROTATION_Z, 0.0f);
-        this.entityData.define(RING_ROTATION_SPEED, 95.0f); // Default rotation speed
+        this.entityData.define(RING_ROTATION_SPEED, 250.0f);
     }
 
-    // Getter methods for ring rotation
     public float getRingRotationX() {
         return this.entityData.get(RING_ROTATION_X);
     }
@@ -63,7 +75,6 @@ public class BlackHoleEntity extends AbstractHurtingProjectile {
         return this.entityData.get(RING_ROTATION_SPEED);
     }
 
-    // Setter methods for ring rotation
     public void setRingRotationX(float rotation) {
         this.entityData.set(RING_ROTATION_X, rotation);
     }
@@ -94,6 +105,19 @@ public class BlackHoleEntity extends AbstractHurtingProjectile {
     public boolean shouldRender(double pX, double pY, double pZ) {
         return true;
     }
+
+    @Override
+    public @NotNull AABB getBoundingBoxForCulling() {
+        return new AABB(
+                this.getX() - 1000,
+                this.getY() - 1000,
+                this.getZ() - 1000,
+                this.getX() + 1000,
+                this.getY() + 1000,
+                this.getZ() + 1000
+        );
+    }
+
 
     @Override
     protected void onHit(HitResult pResult) {
@@ -134,11 +158,38 @@ public class BlackHoleEntity extends AbstractHurtingProjectile {
     public void tick() {
         super.tick();
 
-        // Continuously rotate the ring around the Y-axis (horizontal spinning)
+        this.setGlowingTag(true);
+        if (this.level() instanceof ServerLevel serverLevel) {
+            Scoreboard scoreboard = serverLevel.getScoreboard();
+            PlayerTeam team = scoreboard.getPlayerTeam("black_hole_glow");
+            if (team == null) {
+                team = scoreboard.addPlayerTeam("black_hole_glow");
+                team.setColor(Objects.requireNonNullElse(ORANGE, ChatFormatting.YELLOW));
+            }
+            if (!scoreboard.getPlayersTeam(this.getStringUUID()).equals(team)) {
+                scoreboard.addPlayerToTeam(this.getStringUUID(), team);
+            }
+        }
+
         if (!this.level().isClientSide) {
             float currentRotationY = getRingRotationY();
             float rotationSpeed = getRingRotationSpeed();
             setRingRotationY((currentRotationY + rotationSpeed) % 360.0f);
         }
+    }
+
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "controller", 0, this::predicate));
+    }
+
+    private PlayState predicate(AnimationState<BlackHoleEntity> animationState) {
+        return PlayState.STOP;
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }
