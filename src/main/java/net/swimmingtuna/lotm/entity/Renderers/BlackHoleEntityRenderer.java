@@ -25,6 +25,7 @@ public class BlackHoleEntityRenderer extends EntityRenderer<BlackHoleEntity> {
 
     public boolean SHOULD_RENDER_GLOW = true;
     public static final ResourceLocation BLACK_HOLE_RING = new ResourceLocation(LOTM.MOD_ID, "textures/entity/black_hole_ring.png");
+    public static final ResourceLocation BLACK = new ResourceLocation(LOTM.MOD_ID, "textures/block/black.png");
 
     public BlackHoleEntityRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -78,13 +79,17 @@ public class BlackHoleEntityRenderer extends EntityRenderer<BlackHoleEntity> {
     }
 
     private void renderOuterGlow(PoseStack poseStack, MultiBufferSource bufferSource) {
-        RenderType renderType = createGlowingSphereRenderType();
+        RenderType renderType = createGlowingRenderType();
         VertexConsumer consumer = bufferSource.getBuffer(renderType);
         Matrix4f matrix4f = poseStack.last().pose();
         Matrix3f matrix3f = poseStack.last().normal();
-        float outerGlowSize = 3.0f;
-        renderSphere(consumer, matrix4f, matrix3f, outerGlowSize, 0.5f, 0.5f, 0.5f, 0.8f, 15728880);
-
+        float outerGlowRadius = 3.0f;
+        float red = 0.5f;
+        float green = 0.5f;
+        float blue = 0.5f;
+        float alpha = 0.08f;
+        int packedLight = 15728880;
+        renderSphere(consumer, matrix4f, matrix3f, outerGlowRadius, red, green, blue, alpha, packedLight);
     }
 
     private void renderSphere(VertexConsumer consumer, Matrix4f matrix4f, Matrix3f matrix3f, float radius, float red, float green, float blue, float alpha, int packedLight) {
@@ -118,7 +123,7 @@ public class BlackHoleEntityRenderer extends EntityRenderer<BlackHoleEntity> {
 
     private void renderRing(VertexConsumer consumer, Matrix4f matrix4f, Matrix3f matrix3f, float radius, float alpha) {
         float thickness = 0.4f;
-        int segments = 12;
+        int segments = 18;
 
         for (int i = 0; i < segments; i++) {
             float angle1 = (float) (2 * Math.PI * i / segments);

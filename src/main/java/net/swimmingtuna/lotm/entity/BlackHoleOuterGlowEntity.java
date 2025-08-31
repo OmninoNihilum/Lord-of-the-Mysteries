@@ -6,7 +6,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
@@ -19,6 +18,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -26,34 +26,33 @@ import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEntity {
+public class BlackHoleOuterGlowEntity extends AbstractHurtingProjectile implements GeoEntity {
 
-    // Custom ChatFormatting for ORANGE
-    private static final ChatFormatting ORANGE = ChatFormatting.getByCode('6');
 
-    private static final EntityDataAccessor<Float> RING_ROTATION_X = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<Float> RING_ROTATION_Y = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<Float> RING_ROTATION_Z = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<Float> RING_ROTATION_SPEED = SynchedEntityData.defineId(BlackHoleEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> SIZE = SynchedEntityData.defineId(BlackHoleOuterGlowEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> RING_ROTATION_X = SynchedEntityData.defineId(BlackHoleOuterGlowEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> RING_ROTATION_Y = SynchedEntityData.defineId(BlackHoleOuterGlowEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> RING_ROTATION_Z = SynchedEntityData.defineId(BlackHoleOuterGlowEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> RING_ROTATION_SPEED = SynchedEntityData.defineId(BlackHoleOuterGlowEntity.class, EntityDataSerializers.FLOAT);
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
-    public BlackHoleEntity(EntityType<? extends BlackHoleEntity> entityType, Level level) {
+    public BlackHoleOuterGlowEntity(EntityType<? extends BlackHoleOuterGlowEntity> entityType, Level level) {
         super(entityType, level);
     }
 
-    public BlackHoleEntity(Level level, LivingEntity shooter, double offsetX, double offsetY, double offsetZ) {
-        super(EntityInit.BLACK_HOLE_ENTITY.get(), shooter, offsetX, offsetY, offsetZ, level);
+    public BlackHoleOuterGlowEntity(Level level, LivingEntity shooter, double offsetX, double offsetY, double offsetZ) {
+        super(EntityInit.BLACK_HOLE_GLOW_ENTITY.get(), shooter, offsetX, offsetY, offsetZ, level);
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(SIZE, 0.0f);
         this.entityData.define(RING_ROTATION_X, 0.0f);
         this.entityData.define(RING_ROTATION_Y, 0.0f);
         this.entityData.define(RING_ROTATION_Z, 0.0f);
@@ -158,47 +157,30 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
     @Override
     public void tick() {
         super.tick();
-
         this.setGlowingTag(true);
-        if (this.level() instanceof ServerLevel serverLevel) {
-            Scoreboard scoreboard = serverLevel.getScoreboard();
-            PlayerTeam team = scoreboard.getPlayerTeam("black_hole_glow");
-            if (team == null) {
-                team = scoreboard.addPlayerTeam("black_hole_glow");
-                team.setColor(Objects.requireNonNullElse(ORANGE, ChatFormatting.YELLOW));
-            }
-
-            PlayerTeam currentTeam = scoreboard.getPlayersTeam(this.getStringUUID());
-            if (currentTeam == null || !currentTeam.equals(team)) {
-                scoreboard.addPlayerToTeam(this.getStringUUID(), team);
-            }
-        }
-
         if (!this.level().isClientSide) {
             float currentRotationY = getRingRotationY();
             float rotationSpeed = getRingRotationSpeed();
             setRingRotationY((currentRotationY + rotationSpeed) % 360.0f);
-            //blackHoleTick();
-        }
-    }
-
-
-    public void blackHoleTick() {
-        boolean found = false;
-        for (BlackHoleOuterGlowEntity glowEntity : this.level().getEntitiesOfClass(BlackHoleOuterGlowEntity.class, this.getBoundingBox().inflate(40))) {
-            if (glowEntity.getPersistentData().contains("blackHoleGlowOwner")) {
-                UUID uuid = glowEntity.getPersistentData().getUUID("blackHoleGlowOwner");
-                if (uuid == this.getUUID()) {
-                    glowEntity.teleportTo(this.getX(), this.getY(), this.getZ());
-                    found = true;
+            int blackHoleFound = 0;
+            boolean uuidMatches = false;
+            for (BlackHoleEntity blackHoleEntity : this.level().getEntitiesOfClass(BlackHoleEntity.class, this.getBoundingBox().inflate(40))) {
+                blackHoleFound++;
+                if (this.getPersistentData().contains("blackHoleGlowOwner")) {
+                    UUID uuid = this.getPersistentData().getUUID("blackHoleGlowOwner");
+                    if (uuid == blackHoleEntity.getUUID()) {
+                        uuidMatches = true;
+                    }
                 }
             }
-        }
-        if (!found) {
-            BlackHoleOuterGlowEntity blackHoleOuterGlowEntity = new BlackHoleOuterGlowEntity(EntityInit.BLACK_HOLE_GLOW_ENTITY.get(), this.level());
-            blackHoleOuterGlowEntity.getPersistentData().putUUID("blackHoleGlowOwner", this.getUUID());
-            blackHoleOuterGlowEntity.teleportTo(this.getX(), this.getY(), this.getZ());
-            this.level().addFreshEntity(blackHoleOuterGlowEntity);
+            if (this.tickCount >= 20) {
+                if (blackHoleFound == 0) {
+                    //this.discard();
+                } else if (!uuidMatches) {
+                    //this.discard();
+                }
+            }
+
         }
     }
 
@@ -209,7 +191,7 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
         controllers.add(new AnimationController<>(this, "controller", 0, this::predicate));
     }
 
-    private PlayState predicate(AnimationState<BlackHoleEntity> animationState) {
+    private PlayState predicate(AnimationState<BlackHoleOuterGlowEntity> animationState) {
         return PlayState.STOP;
     }
 
