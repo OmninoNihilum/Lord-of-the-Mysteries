@@ -9,8 +9,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ConcealedDataProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
     public static Capability<IConcealedDataCapability> CONCEALED_DATA = CapabilityManager.get(new CapabilityToken<IConcealedDataCapability>() {});
@@ -18,16 +17,16 @@ public class ConcealedDataProvider implements ICapabilityProvider, INBTSerializa
     private ConcealedDataCapability concealedData = null;
     private final LazyOptional<IConcealedDataCapability> optional = LazyOptional.of(this::createConcealedData);
 
-    private ConcealedDataCapability createConcealedData() {
-        if (this.concealedData == null) {
+    private ConcealedDataCapability createConcealedData(){
+        if(this.concealedData == null){
             this.concealedData = new ConcealedDataCapability();
         }
         return this.concealedData;
     }
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CONCEALED_DATA) {
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction direction) {
+        if(cap == CONCEALED_DATA){
             return optional.cast();
         }
         return LazyOptional.empty();
@@ -39,7 +38,7 @@ public class ConcealedDataProvider implements ICapabilityProvider, INBTSerializa
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        createConcealedData().deserializeNBT(nbt);
+    public void deserializeNBT(CompoundTag tag) {
+        createConcealedData().deserializeNBT(tag);
     }
 }

@@ -2,8 +2,11 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -14,12 +17,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -27,15 +30,13 @@ import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
-import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SpatialMaze extends SimpleAbilityItem {
     public SpatialMaze(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 1, 1500, 1200);
+        super(properties, BeyonderClassInit.APPRENTICE, 1, 70, 200);
     }
     public static HashMap<UUID, BlockPos> mazes = new HashMap<>();
 
@@ -45,8 +46,6 @@ public class SpatialMaze extends SimpleAbilityItem {
             if (!checkAll(livingEntity)) {
                 return InteractionResult.FAIL;
             }
-            useSpirituality(livingEntity);
-            addCooldown(livingEntity);
             createMaze(livingEntity, interactionTarget);
         }
         return InteractionResult.SUCCESS;
@@ -71,7 +70,7 @@ public class SpatialMaze extends SimpleAbilityItem {
         int height = 4;
 
         BlockPos origin = buildOuterLayer(user, target);
-        UUID sealUUID = SealedUtils.seal(target, user.getUUID(), BeyonderUtil.getSequence(user), ABILITIES_SEAL_TYPES.ALL, null, false, null);
+        UUID sealUUID = SealedUtils.seal(target, user.getUUID(), user.getName().getString(), BeyonderUtil.getSequence(user), ABILITIES_SEAL_TYPES.ALL, null, false, null, SEAL_TYPES.SPATIAL_MAZE);
         target.getPersistentData().putUUID("mazeSealUUID", sealUUID);
 
         for (int y = 0; y < maze.length; y++) {
@@ -160,7 +159,7 @@ public class SpatialMaze extends SimpleAbilityItem {
             for (int y = 0; y < 10; y++) {
                 for (int z = 0; z <= 160; z++) {
                     BlockPos currentPos = destination.offset(x, y, z);
-                    BeyonderUtil.setAsBlockIgnoreConfig(user, currentPos, BlockInit.VOID_BLOCK.get());
+                    level.setBlock(currentPos, BlockInit.VOID_BLOCK.get().defaultBlockState(), 0);
                 }
             }
         }
@@ -193,6 +192,12 @@ public class SpatialMaze extends SimpleAbilityItem {
                             if (isWest) xMod = 1.2;
                         }
 
+                        CompoundTag tag = target.getPersistentData();
+                        tag.putDouble("mazeExitX", target.getX());
+                        tag.putDouble("mazeExitY", target.getY());
+                        tag.putDouble("mazeExitZ", target.getZ());
+                        tag.putString("mazeExitDimension", target.level().dimension().location().toString());
+
                         ApprenticeDoorEntity door = new ApprenticeDoorEntity(level, user.getUUID(), sealUUID, BeyonderUtil.getSequence(user), yaw, (float) target.getX(), (float) target.getY(), (float) target.getZ(), target.level());
                         door.setPos(pos.getX() + xMod + 0.5, pos.getY(), pos.getZ() + zMod + 0.5);
                         level.addFreshEntity(door);
@@ -200,6 +205,26 @@ public class SpatialMaze extends SimpleAbilityItem {
                 }
             }
         }
+    }
+
+    public static void removeSeal(LivingEntity entity){
+        if(entity.level().isClientSide) return;
+        clearMaze(entity);
+
+        CompoundTag tag = entity.getPersistentData();
+        double x = tag.getDouble("mazeExitX");
+        double y = tag.getDouble("mazeExitY");
+        double z = tag.getDouble("mazeExitZ");
+        String dimString = tag.getString("mazeExitDimension");
+
+        MinecraftServer server = entity.getServer();
+        if(server == null) return;
+
+        ResourceKey<Level> id = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimString));
+        Level level = server.getLevel(id);
+        if(level == null) return;
+
+        BeyonderUtil.trueTeleportEntity(entity, level, x, y, z);
     }
 
     public static void clearMaze(LivingEntity entity){
@@ -216,7 +241,7 @@ public class SpatialMaze extends SimpleAbilityItem {
                 for (int y = 0; y < 10; y++) {
                     for (int z = 0; z <= 160; z++) {
                         BlockPos currentPos = destination.offset(x, y, z);
-                        BeyonderUtil.setAir(entity, currentPos);
+                        level.setBlock(currentPos, Blocks.AIR.defaultBlockState(), 0);
                     }
                 }
             }
@@ -349,15 +374,5 @@ public class SpatialMaze extends SimpleAbilityItem {
 
             return maze;
         }
-    }
-
-    @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use on a target, trap them in a maze which they will be forced to escape before leaving. In this maze, most teleportation abilities won't work and the maze can't be broken easily."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1500").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Minute").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
-        tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
-        super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 }

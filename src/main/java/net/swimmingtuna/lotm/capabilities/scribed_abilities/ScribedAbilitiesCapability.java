@@ -35,6 +35,11 @@ public class ScribedAbilitiesCapability implements IScribedAbilitiesCapability, 
     }
 
     @Override
+    public void setAmount(Item ability, int amount){
+        this.scribedAbilities.put(ability, amount);
+    }
+
+    @Override
     public int getRemainUses(Item ability) {
         return scribedAbilities.getOrDefault(ability, 0);
     }

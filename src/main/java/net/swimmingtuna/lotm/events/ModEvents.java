@@ -43,6 +43,8 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
+import net.swimmingtuna.lotm.capabilities.concealed_space.ConcealedSpaceUtils;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
@@ -69,6 +71,7 @@ import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientRecipesJEISyncS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
+import net.swimmingtuna.lotm.networking.packet.UnsealMenuC2S;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ClientData.*;
@@ -78,6 +81,7 @@ import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderRecipeData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
+import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -365,18 +369,41 @@ public class ModEvents {
     @SubscribeEvent
     public static void entityInteractEvent(PlayerInteractEvent.EntityInteract event) {
         MercuryLiquefication.mercuryArmorRightClick(event);
+
+        // Send from CLIENT to SERVER
+        if (event.getLevel().isClientSide() && event.getEntity().getMainHandItem().isEmpty()) {
+            if (ClientWormOfStarData.getWormCount() > 1) {
+                LOTMNetworkHandler.sendToServer(new UnsealMenuC2S(event.getTarget().getId()));
+            }
+        }
     }
 
     @SubscribeEvent
     public static void rightClickEmpty(PlayerInteractEvent.RightClickEmpty event) {
         MercuryLiquefication.mercuryRightClick(event);
+
+        // Send from CLIENT to SERVER
+        if (event.getLevel().isClientSide() && event.getEntity().getMainHandItem().isEmpty()) {
+            if (ClientWormOfStarData.getWormCount() > 1) {
+                LOTMNetworkHandler.sendToServer(new UnsealMenuC2S(event.getEntity().getId()));
+            }
+        }
     }
 
 
-    //@SubscribeEvent
-    //public static void entityTravelToDimensionEvent(EntityTravelToDimensionEvent event) {
-    //    event.setCanceled(true);
-    //}
+    @SubscribeEvent
+    public static void onEntityTravelDimension(EntityTravelToDimensionEvent event){
+        Entity entity = event.getEntity();
+        ResourceKey<Level> originalDim = entity.level().dimension();
+        ResourceKey<Level> targetDim = event.getDimension();
+        if(entity instanceof LivingEntity living){
+            if(ConcealedSpaceUtils.insideConcealedSpace(living)){
+                if(originalDim.equals(DimensionInit.CONCEALED_SPACE_LEVEL_KEY)){
+                    ConcealedUtils.removeConcealment(living, ConcealedSpaceUtils.getSpaceUUID(living));
+                }
+            }
+        }
+    }
 
 
     @SubscribeEvent
@@ -405,6 +432,7 @@ public class ModEvents {
                 Conceptualization.conceptualizationTick(event);
                 Starfall.starfallTick(event);
                 SealedUtils.timerTick(livingEntity);
+                ConcealedUtils.timerTick(livingEntity);
                 SailorClass.rainEyesTickEvent(event);
                 BeyonderUtil.effectTick(event);
                 GravityManipulation.gravityManipulationTickEvent(event);
@@ -857,8 +885,12 @@ public class ModEvents {
             }
         }
         if (!level.isClientSide()) {
+            if(ConcealedSpaceUtils.insideConcealedSpace(livingEntity)){
+                if(level.dimension().equals(DimensionInit.CONCEALED_SPACE_LEVEL_KEY)){
+                    ConcealedUtils.removeConcealment(livingEntity, ConcealedSpaceUtils.getSpaceUUID(livingEntity));
+                }
+            }
             if (livingEntity instanceof Player pPlayer) {
-                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
                 ProbabilityManipulationWipe.wipeProbablility(tag);
             }
             boolean isValidPlayerAttack = false;
@@ -949,6 +981,7 @@ public class ModEvents {
                     }
                 }
             }
+            SealedUtils.removeAllSeals(livingEntity);
         }
     }
 

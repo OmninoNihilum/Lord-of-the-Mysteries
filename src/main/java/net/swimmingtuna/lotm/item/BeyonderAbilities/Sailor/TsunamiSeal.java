@@ -95,10 +95,10 @@ public class TsunamiSeal extends LeftClickHandlerSkillP {
         if (!entity.level().isClientSide()) {
             int sealCounter = tag.getInt("sailorSeal");
             if (sealCounter >= 3) {
-                entity.fallDistance = 0;
                 int sealX = tag.getInt("sailorSealX");
                 int sealY = tag.getInt("sailorSealY");
                 int sealZ = tag.getInt("sailorSealZ");
+                entity.fallDistance = 0;
                 entity.teleportTo(sealX, sealY + 1000, sealZ);
                 BlockPos playerPos = entity.blockPosition();
                 double radius = 6.0;
@@ -137,6 +137,10 @@ public class TsunamiSeal extends LeftClickHandlerSkillP {
                 }
             }
             if (sealCounter == 1) {
+                int sealX = tag.getInt("sailorSealX");
+                int sealY = tag.getInt("sailorSealY");
+                int sealZ = tag.getInt("sailorSealZ");
+                entity.teleportTo(sealX, sealY, sealZ);
                 double minRemovalRadius = 6.0;
                 double maxRemovalRadius = 11.0;
                 BlockPos playerPos = entity.blockPosition();

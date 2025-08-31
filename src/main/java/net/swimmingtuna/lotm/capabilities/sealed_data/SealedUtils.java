@@ -1,11 +1,13 @@
 package net.swimmingtuna.lotm.capabilities.sealed_data;
 
-import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.item.Item;
-import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.entity.SpatialCageEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SpatialMaze;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
@@ -53,9 +55,12 @@ public class SealedUtils {
         return getSealedData(entity).map(data -> data.sealsCreators().size()).orElse(0);
     }
 
-    @Nullable
     public static UUID getCreator(LivingEntity entity, UUID sealUUID) {
         return getSealedData(entity).map(data -> data.sealsCreators().get(sealUUID)).orElse(null);
+    }
+
+    public static String getCreatorName(LivingEntity entity, UUID sealUUID){
+        return getSealedData(entity).map(data -> data.sealsCreatorsNames().get(sealUUID)).orElse("");
     }
 
     public static int getSealSequence(LivingEntity entity, UUID sealUUID){
@@ -129,9 +134,19 @@ public class SealedUtils {
         return sequences;
     }
 
+    public static SEAL_TYPES getSealType(LivingEntity entity, UUID sealUUID){
+        return getSealedData(entity).map(data -> data.sealsTypes().get(sealUUID)).orElse(SEAL_TYPES.NONE);
+    }
+
     public static void setCreator(LivingEntity entity, UUID sealUUID, UUID creatorUUID){
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             data.setCreator(sealUUID, creatorUUID);
+        });
+    }
+
+    public static void setCreatorName(LivingEntity entity, UUID sealUUID, String creatorName){
+        entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
+            data.setCreatorName(sealUUID, creatorName);
         });
     }
 
@@ -157,11 +172,7 @@ public class SealedUtils {
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             data.setSealedAbilitiesType(sealUUID, type);
         });
-        if (type != ABILITIES_SEAL_TYPES.NONE) {
-            int wormCount = entity.getPersistentData().getInt("wormOfStar");
-            BeyonderUtil.removeTags(entity);
-            entity.getPersistentData().putInt("wormCount", wormCount);
-        }
+        if(type != ABILITIES_SEAL_TYPES.NONE) BeyonderUtil.removeTags(entity);
     }
 
     public static void setSealedAbilitiesList(LivingEntity entity, UUID sealUUID, HashSet<SimpleAbilityItem> abilities){
@@ -173,6 +184,12 @@ public class SealedUtils {
     public static void setSealedAbilitiesSequences(LivingEntity entity, UUID sealUUID, HashSet<Integer> sequences){
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             data.setSealedAbilitiesSequence(sealUUID, sequences);
+        });
+    }
+
+    public static void setSealType(LivingEntity entity, UUID sealUUID, SEAL_TYPES type){
+        entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
+            data.setSealType(sealUUID, type);
         });
     }
 
@@ -198,25 +215,31 @@ public class SealedUtils {
         return allAbilities;
     }
 
-    public static UUID seal(LivingEntity entity, UUID creator, int sequence){
+    public static UUID seal(LivingEntity entity, UUID creator, String creatorName, int sequence, SEAL_TYPES type){
         UUID sealUUID = generateValidUUID(entity);
         setCreator(entity, sealUUID, creator);
+        setCreatorName(entity, sealUUID, creatorName);
         setSequence(entity, sealUUID, sequence);
+        setSealType(entity, sealUUID, type);
         return sealUUID;
     }
 
-    public static UUID seal(LivingEntity entity, UUID creator, int sequence, int timer) {
+    public static UUID seal(LivingEntity entity, UUID creator, String creatorName, int sequence, int timer, SEAL_TYPES type){
         UUID sealUUID = generateValidUUID(entity);
         setCreator(entity, sealUUID, creator);
+        setCreatorName(entity, sealUUID, creatorName);
         setSequence(entity, sealUUID, sequence);
         toggleTimer(entity, sealUUID);
         setTimer(entity, sealUUID, timer);
+        setSealType(entity, sealUUID, type);
         return sealUUID;
     }
 
-    public static UUID seal(LivingEntity entity, UUID creator, int sequence, int timer, ABILITIES_SEAL_TYPES sealType, @Nullable HashSet<SimpleAbilityItem> abilities, boolean isBlacklist, @Nullable HashSet<Integer> sequences){
+    public static UUID seal(LivingEntity entity, UUID creator, String creatorName, int sequence, int timer, ABILITIES_SEAL_TYPES sealType, @Nullable HashSet<SimpleAbilityItem> abilities, boolean isBlacklist, @Nullable HashSet<Integer> sequences, SEAL_TYPES type){
+        int wormCount = entity.getPersistentData().getInt("wormOfStar");
         UUID sealUUID = generateValidUUID(entity);
         setCreator(entity, sealUUID, creator);
+        setCreatorName(entity, sealUUID, creatorName);
         setSequence(entity, sealUUID, sequence);
         toggleTimer(entity, sealUUID);
         setTimer(entity, sealUUID, timer);
@@ -226,12 +249,15 @@ public class SealedUtils {
             else setSealedAbilitiesList(entity, sealUUID, getBlacklistedAbilities(abilities));
         }
         if(sequences != null) setSealedAbilitiesSequences(entity, sealUUID, sequences);
+        setSealType(entity, sealUUID, type);
+        entity.getPersistentData().putInt("wormOfStar", wormCount);
         return sealUUID;
     }
 
-    public static UUID seal(LivingEntity entity, UUID creator, int sequence, ABILITIES_SEAL_TYPES sealType, @Nullable HashSet<SimpleAbilityItem> abilities, boolean isBlacklist, @Nullable HashSet<Integer> sequences){
+    public static UUID seal(LivingEntity entity, UUID creator, String creatorName, int sequence, ABILITIES_SEAL_TYPES sealType, @Nullable HashSet<SimpleAbilityItem> abilities, boolean isBlacklist, @Nullable HashSet<Integer> sequences, SEAL_TYPES type){
         UUID sealUUID = generateValidUUID(entity);
         setCreator(entity, sealUUID, creator);
+        setCreatorName(entity, sealUUID, creatorName);
         setSequence(entity, sealUUID, sequence);
         setSealedAbilitiesType(entity, sealUUID, sealType);
         if(abilities != null){
@@ -239,65 +265,88 @@ public class SealedUtils {
             else setSealedAbilitiesList(entity, sealUUID, getBlacklistedAbilities(abilities));
         }
         if(sequences != null) setSealedAbilitiesSequences(entity, sealUUID, sequences);
+        setSealType(entity, sealUUID, type);
         return sealUUID;
     }
 
     public static void removeSeal(LivingEntity entity, UUID sealUUID){
+        SEAL_TYPES type = getSealType(entity, sealUUID);
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             data.removeSeal(sealUUID);
         });
+        doWhenRemoved(entity, type);
     }
 
-    public static void timerTick(LivingEntity entity) {
+    public static void removeAllSeals(LivingEntity entity){
+        for(UUID seal : getAllSeals(entity)){
+            removeSeal(entity, seal);
+        }
+    }
+
+    public static void timerTick(LivingEntity entity){
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             HashSet<UUID> sealsWithTimers = data.sealsWithTimers();
             if (sealsWithTimers.isEmpty()) return;
             List<UUID> sealsToRemove = new ArrayList<>();
             for (UUID seal : sealsWithTimers) {
                 int currentTime = data.sealsTimers().getOrDefault(seal, 0);
-                int sealStrengthenData = Math.max(1,BeyonderUtil.getSealStrength(entity));
-                int subtractionAmount = 1;
-                if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 0)) {
-                    subtractionAmount = 5;
-                } else {
-                    for (LivingEntity ally : BeyonderUtil.getAllies(entity)) {
-                        if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(ally, BeyonderClassInit.APPRENTICE.get(), 0)) {
-                            subtractionAmount = 2;
-                        }
-                    }
-                }
-                float random = BeyonderUtil.getPositiveRandomInRange(sealStrengthenData);
-                int newTime = currentTime - subtractionAmount;
-                if (Conceptualization.isConceptualized(entity)) {
-                    sealsToRemove.add(seal);
-                } else if (newTime <= 0) {
+                int newTime = currentTime - 1;
+
+                if (newTime <= 0) {
                     sealsToRemove.add(seal);
                 } else {
-                    if (sealStrengthenData > 1) {
-                        if (random < 1) {
-                            data.setTimer(seal, newTime);
-                        }
-                    } else {
-                        data.setTimer(seal, newTime);
-                    }
+                    data.setTimer(seal, newTime);
                 }
             }
             for (UUID sealToRemove : sealsToRemove) {
-                data.removeSeal(sealToRemove);
+                removeSeal(entity, sealToRemove);
             }
         });
     }
 
-    public static int getBreakFreeCost(int sequence){
-        return BREAK_SEAL_COST.get(sequence);
+    public static void doWhenRemoved(LivingEntity entity, SEAL_TYPES type){
+        if(type.equals(SEAL_TYPES.SPATIAL_CAGE)){
+            SpatialCageEntity.unsetSealed(entity);
+        } else if(type.equals(SEAL_TYPES.SPATIAL_MAZE)) {
+            SpatialMaze.removeSeal(entity);
+        }
     }
 
-    public static void removeAllSeals(LivingEntity entity) {
-        entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
-            HashSet<UUID> allSeals = new HashSet<>(data.sealsCreators().keySet());
-            for (UUID sealUUID : allSeals) {
-                data.removeSeal(sealUUID);
-            }
-        });
+    public static int getBreakFreeCost(LivingEntity breaker, LivingEntity sealed, UUID sealUUID){
+        int breakerSequence = BeyonderUtil.getSequence(breaker);
+        int sealSequence = getSealSequence(sealed, sealUUID);
+        if(BeyonderUtil.currentPathwayAndSequenceMatchesNoException(breaker, BeyonderClassInit.APPRENTICE.get(), 2)) {
+            breakerSequence--;
+            sealSequence++;
+        }
+        int cost = BREAK_SEAL_COST.getOrDefault(sealSequence, 0);
+        cost = (int) Math.max(0, cost*(1+0.2*(breakerSequence - sealSequence)));
+        return cost;
+    }
+
+    public static BeyonderClass pathwayByType(SEAL_TYPES type){
+        BeyonderClass pathway;
+
+        if(type.equals(SEAL_TYPES.TSUNAMI_SEAL)) pathway = BeyonderClassInit.SAILOR.get();
+        else if(type.equals(SEAL_TYPES.STORM_SEAL)) pathway = BeyonderClassInit.SAILOR.get();
+        else if(type.equals(SEAL_TYPES.SPATIAL_CAGE)) pathway = BeyonderClassInit.APPRENTICE.get();
+        else if(type.equals(SEAL_TYPES.PLANES_WALKER_SEAL)) pathway = BeyonderClassInit.APPRENTICE.get();
+        else if(type.equals(SEAL_TYPES.SPATIAL_MAZE)) pathway = BeyonderClassInit.APPRENTICE.get();
+        else pathway = BeyonderClassInit.APPRENTICE.get();
+
+        return pathway;
+    }
+
+    public static String nameByType(SEAL_TYPES type){
+        String name;
+
+        if(type.equals(SEAL_TYPES.TSUNAMI_SEAL)) name = "Tsunami Seal";
+        else if(type.equals(SEAL_TYPES.STORM_SEAL)) name = "Storm Seal";
+        else if(type.equals(SEAL_TYPES.SPATIAL_CAGE)) name = "Spatial Cage Seal";
+        else if(type.equals(SEAL_TYPES.PLANES_WALKER_SEAL)) name = "Abilities Seal";
+        else if(type.equals(SEAL_TYPES.SPATIAL_MAZE)) name = "Spatial Maze Seal";
+        else name = "Seal";
+
+        return name;
     }
 }

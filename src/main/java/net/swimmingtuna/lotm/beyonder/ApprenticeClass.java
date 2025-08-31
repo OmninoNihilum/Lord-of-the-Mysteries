@@ -30,6 +30,7 @@ import net.swimmingtuna.lotm.attributes.PathwayAttributes.ApprenticeAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
+import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedUtils;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -143,6 +144,7 @@ public class ApprenticeClass implements BeyonderClass {
                         ReplicatedEntityUtils.setMaxEntities(pPlayer, 5);
                         ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 1);
                     }
+                    ScribedUtils.seq2FixCount(player);
                     break;
                 case 1:
                     maxWormCount = 16000;
@@ -158,6 +160,7 @@ public class ApprenticeClass implements BeyonderClass {
                         ReplicatedEntityUtils.setMaxEntities(pPlayer, 10);
                         ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 4);
                     }
+                    ScribedUtils.seq2FixCount(player);
                     break;
                 case 0:
                     maxWormCount = 80000;
@@ -173,6 +176,7 @@ public class ApprenticeClass implements BeyonderClass {
                         ReplicatedEntityUtils.setMaxEntities(pPlayer, 20);
                         ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 10);
                     }
+                    ScribedUtils.seq2FixCount(player);
                     break;
             }
             if (sequenceLevel <= 4) {
@@ -246,6 +250,7 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(2, ItemInit.REPLICATE.get());
         items.put(2, ItemInit.SEALING.get());
         items.put(2, ItemInit.TELEPORTATION.get());
+        //items.put(2, ItemInit.UNSEAL.get());
 
         items.put(1, ItemInit.SPACE_FRAGMENTATION.get());
         items.put(1, ItemInit.SPATIAL_SEAL.get());

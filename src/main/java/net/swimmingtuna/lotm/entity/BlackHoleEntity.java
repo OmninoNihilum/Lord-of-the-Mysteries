@@ -87,6 +87,16 @@ public class BlackHoleEntity extends AbstractHurtingProjectile {
     }
 
     @Override
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldRender(double pX, double pY, double pZ) {
+        return true;
+    }
+
+    @Override
     protected void onHit(HitResult pResult) {
         return;
     }

@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.swimmingtuna.lotm.entity.Renderers.BlackHoleEntityRenderer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -55,6 +56,23 @@ public class LOTMRenderTypes extends RenderType {
                     .setTextureState(RenderStateShard.MultiTextureStateShard.builder()
                             .add(TheEndPortalRenderer.END_SKY_LOCATION, false, false)
                             .add(TheEndPortalRenderer.END_PORTAL_LOCATION, false, false)
+                            .build())
+                    .setCullState(RenderStateShard.NO_CULL)
+                    .createCompositeState(false)
+    );
+
+    public static final RenderType BLACK_HOLE_RING = RenderType.create(
+            "end_portal_no_cull",
+            DefaultVertexFormat.POSITION,
+            VertexFormat.Mode.QUADS,
+            256,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(RenderStateShard.RENDERTYPE_END_PORTAL_SHADER)
+                    .setTextureState(RenderStateShard.MultiTextureStateShard.builder()
+                            .add(TheEndPortalRenderer.END_SKY_LOCATION, false, false)
+                            .add(BlackHoleEntityRenderer.BLACK_HOLE_RING, false, false)
                             .build())
                     .setCullState(RenderStateShard.NO_CULL)
                     .createCompositeState(false)

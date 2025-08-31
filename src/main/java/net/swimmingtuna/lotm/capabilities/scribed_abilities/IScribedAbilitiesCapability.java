@@ -16,4 +16,6 @@ public interface IScribedAbilitiesCapability {
     int getRemainUses(Item ability);
 
     int getScribedAbilitiesCount();
+
+    void setAmount(Item ability, int amount);
 }

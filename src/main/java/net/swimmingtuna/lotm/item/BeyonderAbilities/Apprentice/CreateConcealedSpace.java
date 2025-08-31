@@ -19,8 +19,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.capabilities.concealed_data.CONCEALMENT_TYPES;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
-import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedUtils;
+import net.swimmingtuna.lotm.capabilities.concealed_space.ConcealedSpaceUtils;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
@@ -32,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CreateConcealedSpace extends SimpleAbilityItem {
@@ -51,11 +54,24 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
+    public static boolean insideOwnSpace(LivingEntity entity){
+        for(UUID concealment : ConcealedUtils.getAllConcealments(entity)){
+            if(ConcealedUtils.getConcealmentType(entity, concealment).equals(CONCEALMENT_TYPES.CONCEALED_SPACE)){
+                if(ConcealedUtils.getCreator(entity, concealment).equals(entity.getUUID())){
+                    System.out.println("true");
+                    return true;
+                }
+            }
+        }
+        System.out.println("false");
+        return false;
+    }
+
     private static void concealedSpace(LivingEntity entity) {
         if (entity.level().isClientSide()) return;
-        if (!ConcealedUtils.hasConcealedSpace(entity)) createConcealedSpace(entity);
+        if (!ConcealedSpaceUtils.hasConcealedSpace(entity)) createConcealedSpace(entity);
         else {
-            if (IsConcealedUtils.getIsConcealed(entity)) {
+            if (insideOwnSpace(entity)) {
                 if (entity.isShiftKeyDown()) {
                     changeConcealedSpaceSpawn(entity);
                 }
@@ -85,12 +101,12 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
         ResourceKey<Level> dimensionKey = DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
         ServerLevel level = server.getLevel(dimensionKey);
 
-        if (sequence == ConcealedUtils.getConcealedSpaceSequence(entity)) return;
+        if (sequence == ConcealedSpaceUtils.getConcealedSpaceSequence(entity)) return;
 
         int diameter = 43 - 4 * sequence;
         int radius = (diameter - 1) / 2;
 
-        BlockPos destination = ConcealedUtils.getConcealedSpaceCenter(entity);
+        BlockPos destination = ConcealedSpaceUtils.getConcealedSpaceCenter(entity);
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int dx = -radius; dx <= radius; dx++) {
@@ -105,11 +121,11 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
                 }
             }
         }
-        ConcealedUtils.setConcealedSpaceSequence(entity, sequence);
+        ConcealedSpaceUtils.setSequence(entity, sequence);
     }
 
     private static void changeConcealedSpaceSpawn(LivingEntity entity) {
-        ConcealedUtils.setConcealedSpaceSpawn(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
+        ConcealedSpaceUtils.setConcealedSpaceSpawn(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
         if (entity instanceof Player player) {
             player.displayClientMessage(Component.literal("Spawn changed").withStyle(BeyonderUtil.getStyle(player)), true);
         }
@@ -120,9 +136,7 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
             ItemStack stack = new ItemStack(ItemInit.CONCEALED_DOOR.get());
             CompoundTag tag = stack.getOrCreateTag();
             entity.setItemInHand(InteractionHand.OFF_HAND, stack);
-            tag.putInt("concealedSpaceSequence", BeyonderUtil.getSequence(entity));
             tag.putUUID("concealedSpaceOwner", entity.getUUID());
-            tag.putLong("concealedSpaceLocation", ConcealedUtils.getConcealedSpaceSpawn(entity).asLong());
         }
     }
 
@@ -190,10 +204,7 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
             }
         }
 
-        ConcealedUtils.setConcealedSpaceOwnership(entity, true);
-        ConcealedUtils.setConcealedSpaceSequence(entity, sequence);
-        ConcealedUtils.setConcealedSpaceCenter(entity, destination);
-        ConcealedUtils.setConcealedSpaceSpawn(entity, destination);
+        ConcealedSpaceUtils.createConcealedSpace(entity, destination);
         createDoorEnterConcealedSpace(entity);
     }
 
@@ -203,12 +214,12 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
         ResourceKey<Level> dimensionKey = DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
         ServerLevel concealedDimension = server.getLevel(dimensionKey);
 
-        ConcealedUtils.setConcealedSpaceExit(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
-        ConcealedUtils.setConcealedSpaceExitDimension(entity, entity.level());
+        ConcealedSpaceUtils.setConcealedSpaceExit(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
+        ConcealedSpaceUtils.setConcealedSpaceExitDimension(entity, entity.level());
 
-        int x = ConcealedUtils.getConcealedSpaceSpawn(entity).getX();
-        int y = ConcealedUtils.getConcealedSpaceSpawn(entity).getY();
-        int z = ConcealedUtils.getConcealedSpaceSpawn(entity).getZ();
+        int x = ConcealedSpaceUtils.getConcealedSpaceSpawn(entity).getX();
+        int y = ConcealedSpaceUtils.getConcealedSpaceSpawn(entity).getY();
+        int z = ConcealedSpaceUtils.getConcealedSpaceSpawn(entity).getZ();
 
         float yaw = -entity.getYRot() + 180;
         ApprenticeDoorEntity.DoorAnimationKind animationKind = ApprenticeDoorEntity.DoorAnimationKind.BELLOW;
@@ -231,7 +242,7 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
     }
 
     private static void createDoorLeaveConcealedSpace(LivingEntity entity) {
-        Level level = ConcealedUtils.getConcealedSpaceExitDimension(entity);
+        Level level = ConcealedSpaceUtils.getConcealedSpaceExitDimension(entity);
         if (level == null) return;
 
         float yaw = -entity.getYRot() + 180;
@@ -242,9 +253,9 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
             animationKind = ApprenticeDoorEntity.DoorAnimationKind.FADE_IN;
         }
 
-        int x = ConcealedUtils.getConcealedSpaceExit(entity).getX();
-        int y = ConcealedUtils.getConcealedSpaceExit(entity).getY();
-        int z = ConcealedUtils.getConcealedSpaceExit(entity).getZ();
+        int x = ConcealedSpaceUtils.getConcealedSpaceExit(entity).getX();
+        int y = ConcealedSpaceUtils.getConcealedSpaceExit(entity).getY();
+        int z = ConcealedSpaceUtils.getConcealedSpaceExit(entity).getZ();
 
         ApprenticeDoorEntity leaveDoor = new ApprenticeDoorEntity(entity.level(), entity.getUUID(), BeyonderUtil.getSequence(entity), 150, yaw, x, y, z, false, level, animationKind);
         leaveDoor.setPos(getHorizontalLookCoordinates(entity, 2)[0], entity.getY(), getHorizontalLookCoordinates(entity, 2)[1]);
@@ -269,9 +280,9 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (livingEntity.getHealth() < livingEntity.getMaxHealth() / 8 && !IsConcealedUtils.getIsConcealed(livingEntity)) {
+        if (livingEntity.getHealth() < livingEntity.getMaxHealth() / 8 && !insideOwnSpace(livingEntity)) {
             return 80;
-        } else if (IsConcealedUtils.getIsConcealed(livingEntity) && livingEntity.getHealth() > livingEntity.getMaxHealth() - 5) {
+        } else if (insideOwnSpace(livingEntity) && livingEntity.getHealth() > livingEntity.getMaxHealth() - 5) {
             return 100;
         }
         return 0;

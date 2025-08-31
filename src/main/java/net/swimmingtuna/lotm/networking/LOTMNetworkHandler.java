@@ -48,6 +48,11 @@ public class LOTMNetworkHandler {
                 .encoder(LuckManipulationLeftClickC2S::toByte)
                 .consumerMainThread(LuckManipulationLeftClickC2S::handle)
                 .add();
+        INSTANCE.messageBuilder(UnsealMenuC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(UnsealMenuC2S::new)
+                .encoder(UnsealMenuC2S::toByte)
+                .consumerMainThread(UnsealMenuC2S::handle)
+                .add();
         INSTANCE.messageBuilder(DimensionalSightCompleteDataPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(DimensionalSightCompleteDataPacketS2C::new)
                 .encoder(DimensionalSightCompleteDataPacketS2C::encode)

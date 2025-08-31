@@ -60,7 +60,8 @@ public class ScribeAbilities extends LeftClickHandlerSkill {
         if (offHand instanceof SimpleAbilityItem ability) {
             if(livingEntity instanceof Player player){
                 if(ScribedUtils.hasAbility(player, ability)){
-                    player.displayClientMessage(Component.literal("Scribed copies: ").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN).append(Component.literal(String.valueOf(ScribedUtils.getRemainingUses(player, ability))).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                    if(BeyonderUtil.getSequence(livingEntity) > 2) player.displayClientMessage(Component.literal("Scribed copies: ").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN).append(Component.literal(String.valueOf(ScribedUtils.getRemainingUses(player, ability))).withStyle(ChatFormatting.WHITE).withStyle(ChatFormatting.BOLD)), true);
+                    else player.displayClientMessage(Component.literal("You have replicated this ability and can use it as many times as you want.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                 }else{
                     player.displayClientMessage(Component.literal("Haven`t scribed this ability yet.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), true);
                 }
@@ -72,9 +73,10 @@ public class ScribeAbilities extends LeftClickHandlerSkill {
         Item offHand = livingEntity.getOffhandItem().getItem();
         if (offHand instanceof SimpleAbilityItem ability) {
             if(ScribedUtils.hasAbility(livingEntity, ability)){
-                ScribedUtils.useScribedAbility(livingEntity, ability);
+                ScribedUtils.setAmount(livingEntity, ability, ScribedUtils.getRemainingUses(livingEntity, ability) - 1);
                 if (livingEntity instanceof Player player) {
-                    player.displayClientMessage(Component.literal("1 copy deleted.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+                    if(BeyonderUtil.getSequence(livingEntity) > 2) player.displayClientMessage(Component.literal("1 copy deleted.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+                    else player.displayClientMessage(Component.literal("Ability deleted deleted.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                 }
             }else if(livingEntity instanceof Player player){
                 player.displayClientMessage(Component.literal("All copies have been deleted, or haven`t scribed this ability yet.").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), true);

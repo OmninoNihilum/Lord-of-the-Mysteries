@@ -3051,10 +3051,12 @@ public class BeyonderUtil {
                     if (BeyonderUtil.scribeLookingAtYou(living, entity)) {
                         if (checkValidAbilityCopy(new ItemStack(ability))) {
                             if (ScribedUtils.getAbilitiesCount(living) < entity.getPersistentData().getInt("maxScribedAbilities")) {
-                                if (copyAbilityTest(entity, getSequence(entity), abilitySequence)) {
-                                    if (!pendingAbilityCopies.containsKey(entity.getUUID())) {
-                                        entity.getPersistentData().putInt("timerCopiedAbility", 200);
-                                        pendingAbilityCopies.put(entity.getUUID(), ability);
+                                if(!(getSequence(entity) <= 2 && ScribedUtils.hasAbility(entity, ability))) {
+                                    if (copyAbilityTest(entity, getSequence(entity), abilitySequence)) {
+                                        if (!pendingAbilityCopies.containsKey(entity.getUUID())) {
+                                            entity.getPersistentData().putInt("timerCopiedAbility", 200);
+                                            pendingAbilityCopies.put(entity.getUUID(), ability);
+                                        }
                                     }
                                 }
                             }
@@ -3063,6 +3065,21 @@ public class BeyonderUtil {
                 }
             }
         }
+    }
+
+    public static void trueTeleportEntity(LivingEntity entity, Level destination, double x, double y, double z){
+        teleportEntityThroughDimensions(entity, destination.dimension().location(), x, y, z);
+    }
+
+    public static boolean breakSeal(LivingEntity breaker, LivingEntity sealed, UUID sealUUID){
+        int cost = SealedUtils.getBreakFreeCost(breaker, sealed, sealUUID);
+        int spirituality = getSpirituality(breaker);
+        if(spirituality >= cost){
+            useSpirituality(breaker, cost);
+            SealedUtils.removeSeal(sealed, sealUUID);
+            return true;
+        }
+        return false;
     }
 
     public static void confirmCopyAbility(Player player) {

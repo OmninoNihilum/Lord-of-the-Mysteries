@@ -12,6 +12,7 @@ import java.util.*;
 
 public class SealedDataCapability implements ISealedDataCapability, INBTSerializable<CompoundTag> {
     private HashMap<UUID, UUID> sealsCreators = new HashMap<>();
+    private HashMap<UUID, String> sealsCreatorsNames = new HashMap<>();
     private HashMap<UUID, Integer> sealsSequences = new HashMap<>();
     private HashMap<UUID, Boolean> sealsHasTimers = new HashMap<>();
     private HashMap<UUID, Integer> sealsTimers = new HashMap<>();
@@ -19,10 +20,16 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
     private HashMap<UUID, ABILITIES_SEAL_TYPES> sealedAbilitiesType = new HashMap<>();
     private HashMap<UUID, HashSet<SimpleAbilityItem>> sealedAbilitiesList = new HashMap<>();
     private HashMap<UUID, HashSet<Integer>> sealedAbilitiesSequences = new HashMap<>();
+    private HashMap<UUID, SEAL_TYPES> sealsTypes = new HashMap<>();
 
     @Override
     public HashMap<UUID, UUID> sealsCreators() {
         return this.sealsCreators;
+    }
+
+    @Override
+    public HashMap<UUID, String> sealsCreatorsNames(){
+        return this.sealsCreatorsNames;
     }
 
     @Override
@@ -61,8 +68,18 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
     }
 
     @Override
+    public HashMap<UUID, SEAL_TYPES> sealsTypes(){
+        return this.sealsTypes;
+    }
+
+    @Override
     public void setCreator(UUID sealUUID, UUID creator) {
         this.sealsCreators.put(sealUUID, creator);
+    }
+
+    @Override
+    public void setCreatorName(UUID sealUUID, String creatorName){
+        this.sealsCreatorsNames.put(sealUUID, creatorName);
     }
 
     @Override
@@ -97,8 +114,14 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
     }
 
     @Override
+    public void setSealType(UUID sealUUID, SEAL_TYPES sealType){
+        this.sealsTypes.put(sealUUID, sealType);
+    }
+
+    @Override
     public void removeSeal(UUID sealUUID){
         sealsCreators.remove(sealUUID);
+        sealsCreatorsNames.remove(sealUUID);
         sealsSequences.remove(sealUUID);
         sealsHasTimers.remove(sealUUID);
         sealsTimers.remove(sealUUID);
@@ -106,6 +129,7 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
         sealedAbilitiesType.remove(sealUUID);
         sealedAbilitiesList.remove(sealUUID);
         sealedAbilitiesSequences.remove(sealUUID);
+        sealsTypes.remove(sealUUID);
     }
 
     @Override
@@ -122,6 +146,17 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
             creatorsTag.add(entryTag);
         }
         tag.put("sealsCreators", creatorsTag);
+
+        ListTag creatorsNamesTag = new ListTag();
+        for (Map.Entry<UUID, String> entry : this.sealsCreatorsNames.entrySet()){
+            CompoundTag entryTag = new CompoundTag();
+
+            entryTag.putUUID("sealUUID", entry.getKey());
+            entryTag.putString("creatorName", entry.getValue());
+
+            creatorsNamesTag.add(entryTag);
+        }
+        tag.put("sealsCreatorsNames", creatorsNamesTag);
 
         ListTag sequencesTag = new ListTag();
         for (Map.Entry<UUID, Integer> entry : this.sealsSequences.entrySet()){
@@ -211,12 +246,24 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
         }
         tag.put("sealedAbilitiesSequence", sealedAbilitiesSequenceTag);
 
+        ListTag sealTypeTag = new ListTag();
+        for (Map.Entry<UUID, SEAL_TYPES> entry : this.sealsTypes.entrySet()){
+            CompoundTag entryTag = new CompoundTag();
+
+            entryTag.putUUID("sealUUID", entry.getKey());
+            entryTag.putString("sealType", entry.getValue().name());
+
+            sealTypeTag.add(entryTag);
+        }
+        tag.put("sealsTypes", sealTypeTag);
+
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
         sealsCreators.clear();
+        sealsCreatorsNames.clear();
         sealsSequences.clear();
         sealsHasTimers.clear();
         sealsTimers.clear();
@@ -224,6 +271,7 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
         sealedAbilitiesType.clear();
         sealedAbilitiesList.clear();
         sealedAbilitiesSequences.clear();
+        sealsTypes.clear();
 
         ListTag creatorsTag = tag.getList("sealsCreators", 10); // 10 = CompoundTag
         for (int i = 0; i < creatorsTag.size(); i++) {
@@ -231,6 +279,14 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
             UUID sealUUID = entry.getUUID("sealUUID");
             UUID creatorUUID = entry.getUUID("creatorUUID");
             sealsCreators.put(sealUUID, creatorUUID);
+        }
+
+        ListTag creatorsNamesTag = tag.getList("sealsCreatorsNames", 10);
+        for (int i = 0; i < creatorsNamesTag.size(); i++){
+            CompoundTag entry = creatorsNamesTag.getCompound(i);
+            UUID sealUUID = entry.getUUID("sealUUID");
+            String creatorName = entry.getString("creatorName");
+            sealsCreatorsNames.put(sealUUID, creatorName);
         }
 
         ListTag sequencesTag = tag.getList("sealsSequences", 10);
@@ -302,10 +358,19 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
             }
             sealedAbilitiesSequences.put(sealUUID, sequencesSet);
         }
+
+        ListTag sealTypeTag = tag.getList("sealsTypes", 10);
+        for (int i = 0; i < sealTypeTag.size(); i++) {
+            CompoundTag entry = sealTypeTag.getCompound(i);
+            UUID sealUUID = entry.getUUID("sealUUID");
+            SEAL_TYPES type = SEAL_TYPES.valueOf(entry.getString("sealType"));
+            sealsTypes.put(sealUUID, type);
+        }
     }
 
     public void copyFrom(SealedDataCapability other) {
         this.sealsCreators = new HashMap<>(other.sealsCreators);
+        this.sealsCreatorsNames = new HashMap<>(other.sealsCreatorsNames);
         this.sealsSequences = new HashMap<>(other.sealsSequences);
         this.sealsHasTimers = new HashMap<>(other.sealsHasTimers);
         this.sealsTimers = new HashMap<>(other.sealsTimers);
@@ -318,5 +383,6 @@ public class SealedDataCapability implements ISealedDataCapability, INBTSerializ
         }
 
         this.sealedAbilitiesSequences = new HashMap<>(other.sealedAbilitiesSequences);
+        this.sealsTypes = new HashMap<>(other.sealsTypes);
     }
 }

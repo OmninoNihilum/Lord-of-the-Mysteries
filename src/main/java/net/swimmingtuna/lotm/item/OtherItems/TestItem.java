@@ -19,9 +19,11 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.entity.DragonBreathEntity;
+import net.swimmingtuna.lotm.entity.SpatialCageEntity;
 import net.swimmingtuna.lotm.entity.StarfallEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
@@ -72,6 +74,8 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
         if (!level.isClientSide()) {
+            SpatialCageEntity.setSealed(livingEntity, livingEntity, BeyonderUtil.getSequence(livingEntity) - 1, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_CAGE.get()));
+
             if (livingEntity instanceof Player player) {
                 BeyonderUtil.setSpirituality(livingEntity, BeyonderUtil.getMaxSpirituality(player));
                 for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
@@ -81,23 +85,6 @@ public class TestItem extends SimpleAbilityItem {
                     }
                 }
             }
-            StarfallEntity starfall = new StarfallEntity(EntityInit.STARFALL_ENTITY.get(), livingEntity.level());
-            Vec3 lookVec = livingEntity.getLookAngle();
-            double dirX = lookVec.x;
-            double dirY = lookVec.y;
-            double dirZ = lookVec.z;
-
-            double spawnX = livingEntity.getX() + dirX * 5.0;
-            double spawnY = livingEntity.getY() + dirY * 5.0;
-            double spawnZ = livingEntity.getZ() + dirZ * 5.0;
-            starfall.teleportTo(spawnX, spawnY, spawnZ);
-
-            double speed = 20.0;
-            starfall.setMaxLife(200);
-            starfall.setRandomColor();
-            starfall.setDeltaMovement(dirX * speed, dirY * speed, dirZ * speed);
-            starfall.hurtMarked = true;
-            livingEntity.level().addFreshEntity(starfall);
             /*
             MinecraftServer server = livingEntity.getServer();
             if (server != null && livingEntity instanceof Player pPlayer) {

@@ -22,8 +22,11 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.capabilities.concealed_data.CONCEALMENT_TYPES;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
-import net.swimmingtuna.lotm.capabilities.is_concealed_data.IsConcealedUtils;
+import net.swimmingtuna.lotm.capabilities.concealed_space.ConcealedSpaceUtils;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
+import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -275,7 +278,12 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             if (getDoorMode() == DoorMode.MAZE) {
                 if (BeyonderUtil.isEntityColliding(this, this.level(), 1.0)) {
                     LivingEntity entity = BeyonderUtil.checkLivingEntityCollision(this, this.level(), 1.0);
-                    if (entity != null && entity.isShiftKeyDown()) teleport(entity);
+                    if (entity != null && entity.isShiftKeyDown()) {
+                        teleport(entity);
+                    }
+                }
+                if (!this.level().getBlockState(new BlockPos(this.getBlockX(), this.getBlockY()-1, this.getBlockZ())).getBlock().equals(BlockInit.VOID_BLOCK.get())){
+                    delete();
                 }
             }
         }
@@ -318,12 +326,23 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     public LivingEntity getCreator() {
         if (this.creator == null) return null;
 
-        // Try to get the entity, but don't fail if it's not loaded yet
-        LivingEntity entity = BeyonderUtil.getLivingEntityFromUUID(this.level(), this.creator);
-        if (entity == null && !this.level().isClientSide()) {
-            LOTM.LOGGER.warn("Creator with UUID {} not found in level {}", this.creator, this.level().dimension().location());
+        if (!this.level().isClientSide()) {
+            MinecraftServer server = this.level().getServer();
+            if (server != null) {
+                Entity player = server.getPlayerList().getPlayer(this.creator);
+                if (player instanceof LivingEntity living) {
+                    return living;
+                }
+
+                for (ServerLevel world : server.getAllLevels()) {
+                    Entity e = world.getEntity(this.creator);
+                    if (e instanceof LivingEntity living) {
+                        return living;
+                    }
+                }
+            }
         }
-        return entity;
+        return null;
     }
 
     public int getSequence() {
@@ -607,19 +626,21 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         if (getDoorMode() == DoorMode.CONCEALED_SPACE) {
             if (isFreeToUse() && entity != null) {
                 if (getEnterConcealedSpace()) {
-                    ConcealedUtils.setConcealedSpaceExit(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
-                    ConcealedUtils.setConcealedSpaceExitDimension(entity, entity.level());
+                    ConcealedSpaceUtils.setConcealedSpaceExit(entity, new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ()));
+                    ConcealedSpaceUtils.setConcealedSpaceExitDimension(entity, entity.level());
 
-                    IsConcealedUtils.setConcealmentOwner(entity, this.creator);
-                    IsConcealedUtils.setIsConcealed(entity, true);
-                    IsConcealedUtils.setConcealmentSequence(entity, getSequence());
+                    UUID uuid = ConcealedUtils.conceal(entity, creator, getSequence(), CONCEALMENT_TYPES.CONCEALED_SPACE);
+                    ConcealedSpaceUtils.setSpaceUUID(entity, uuid);
                 } else {
-                    IsConcealedUtils.setConcealmentOwner(entity, new UUID(0, 0));
-                    IsConcealedUtils.setIsConcealed(entity, false);
-                    IsConcealedUtils.setConcealmentSequence(entity, 9);
+                    ConcealedUtils.removeConcealment(entity, ConcealedSpaceUtils.getSpaceUUID(entity));
                 }
                 this.entityData.set(LIFE, 30);
                 BeyonderUtil.teleportEntity(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
+            }
+        }
+        if (getDoorMode() == DoorMode.MAZE){
+            if (entity != null){
+                SealedUtils.removeSeal(entity, entity.getPersistentData().getUUID("mazeSealUUID"));
             }
         }
     }

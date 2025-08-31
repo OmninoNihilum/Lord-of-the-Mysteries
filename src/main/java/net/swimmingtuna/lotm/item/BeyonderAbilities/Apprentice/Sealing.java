@@ -22,6 +22,7 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
+import net.swimmingtuna.lotm.capabilities.sealed_data.SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -80,8 +81,12 @@ public class Sealing extends LeftClickHandlerSkill {
             else sealingChoice = 9;
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEALING.get());
 
-            if(BeyonderUtil.getSequence(target) > 3) SealedUtils.seal(target, livingEntity.getUUID(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.ALL, null, false, null);
-            else SealedUtils.seal(target, livingEntity.getUUID(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.SEQUENCE, null, false, new HashSet<>(sealingChoice));
+            if (BeyonderUtil.getSequence(target) > 3) {
+                SealedUtils.seal(target, livingEntity.getUUID(), livingEntity.getName().getString(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.ALL, null, false, null, SEAL_TYPES.PLANES_WALKER_SEAL);
+            }
+            else {
+                SealedUtils.seal(target, livingEntity.getUUID(), livingEntity.getName().getString(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.SEQUENCE, null, false, new HashSet<>(sealingChoice), SEAL_TYPES.PLANES_WALKER_SEAL);
+            }
         }
     }
 
