@@ -40,11 +40,10 @@ public class BlackHoleEntity extends AbstractHurtingProjectile {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        // Initialize ring rotation values - starting horizontal (0 degrees on X-axis)
         this.entityData.define(RING_ROTATION_X, 0.0f);
         this.entityData.define(RING_ROTATION_Y, 0.0f);
         this.entityData.define(RING_ROTATION_Z, 0.0f);
-        this.entityData.define(RING_ROTATION_SPEED, 2.0f); // Default rotation speed
+        this.entityData.define(RING_ROTATION_SPEED, 95.0f); // Default rotation speed
     }
 
     // Getter methods for ring rotation

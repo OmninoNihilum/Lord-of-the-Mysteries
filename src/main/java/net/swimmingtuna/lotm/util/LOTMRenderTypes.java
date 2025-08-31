@@ -78,6 +78,8 @@ public class LOTMRenderTypes extends RenderType {
                     .createCompositeState(false)
     );
 
+
+
     public static final RenderType NO_CULL_SOLID = RenderType.create(
             "black_hole_no_cull",
             DefaultVertexFormat.BLOCK,
