@@ -122,19 +122,10 @@ public class DoorLayering extends SimpleAbilityItem {
         LivingEntity living = event.getEntity();
         CompoundTag tag = living.getPersistentData();
         int timer = tag.getInt("doorLayeringCounter");
-        float originalScale = tag.getFloat("originalBlackholeScale");
-        int gravityResetTimer = tag.getInt("resetBlackholeScale");
         int doorX = tag.getInt("doorLayeringX");
         int doorY = tag.getInt("doorLayeringY");
         int doorZ = tag.getInt("doorLayeringZ");
         int damage = tag.getInt("doorLayeringDamage");
-        if (gravityResetTimer >= 1) {
-            tag.putInt("resetBlackholeScale", gravityResetTimer - 1);
-            if (gravityResetTimer == 1) {
-                BeyonderUtil.setScale(living, originalScale);
-                tag.putInt("resetBlackholeScale", 0);
-            }
-        }
         if (timer >= 1) {
             tag.putInt("doorLayeringCounter", timer - 1);
             BlockPos pos = new BlockPos(doorX, doorY, doorZ);

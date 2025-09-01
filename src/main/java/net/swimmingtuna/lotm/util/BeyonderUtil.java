@@ -3254,21 +3254,23 @@ public class BeyonderUtil {
                 }
             }
         }
-        List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
-        for (Entity pEntity : entities) {
-            if (pEntity instanceof LivingEntity livingEntity) {
-                double distance = Math.sqrt(pEntity.blockPosition().distSqr(hitPos));
-                double normalizedDistance = Math.min(distance / radius, 1.0);
-                float damageMultiplier = (float) (1.0 - (0.6 * normalizedDistance));
-                float finalDamage = damage * damageMultiplier;
-                if (entity instanceof Projectile projectile) {
-                    if (projectile.getOwner() == null) {
-                        livingEntity.hurt(BeyonderUtil.genericSource(projectile, livingEntity), finalDamage);
+        if (damage != 0) {
+            List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
+            for (Entity pEntity : entities) {
+                if (pEntity instanceof LivingEntity livingEntity) {
+                    double distance = Math.sqrt(pEntity.blockPosition().distSqr(hitPos));
+                    double normalizedDistance = Math.min(distance / radius, 1.0);
+                    float damageMultiplier = (float) (1.0 - (0.6 * normalizedDistance));
+                    float finalDamage = damage * damageMultiplier;
+                    if (entity instanceof Projectile projectile) {
+                        if (projectile.getOwner() == null) {
+                            livingEntity.hurt(BeyonderUtil.genericSource(projectile, livingEntity), finalDamage);
+                        } else {
+                            livingEntity.hurt(BeyonderUtil.genericSource(projectile.getOwner(), livingEntity), finalDamage);
+                        }
                     } else {
-                        livingEntity.hurt(BeyonderUtil.genericSource(projectile.getOwner(), livingEntity), finalDamage);
+                        livingEntity.hurt(BeyonderUtil.genericSource(entity, livingEntity), finalDamage);
                     }
-                } else {
-                    livingEntity.hurt(BeyonderUtil.genericSource(entity, livingEntity), finalDamage);
                 }
             }
         }

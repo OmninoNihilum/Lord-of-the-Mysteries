@@ -65,7 +65,7 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionWea
 public class ServerEvents {
 
 
-    @SubscribeEvent
+    //@SubscribeEvent
     public static void onChatMessage(ServerChatEvent event) {
         Level level = event.getPlayer().serverLevel();
         ServerPlayer player = event.getPlayer();
@@ -117,10 +117,8 @@ public class ServerEvents {
                     }
                     if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 0)) {
                         if (message.contains(" to ")) {
-                            LOTM.LOGGER.info("1");
                             String[] messageParts = message.split(" to ", 2);
                             if (messageParts.length == 2) {
-                                LOTM.LOGGER.info("2");
                                 String targetPlayerName = messageParts[0].trim();
                                 String destination = messageParts[1].trim();
                                 Player targetPlayer = null;
@@ -131,16 +129,13 @@ public class ServerEvents {
                                     }
                                 }
                                 if (targetPlayer == null) {
-                                    LOTM.LOGGER.info("NOT FOUND");
                                     player.sendSystemMessage(Component.literal("Player '" + targetPlayerName + "' not found!").withStyle(ChatFormatting.RED));
                                     return;
                                 }
 
                                 Level destinationLevel = player.level();
                                 if (coordsTravel(destination)) {
-                                    LOTM.LOGGER.info("3 - Coordinates detected");
                                     if (hasDimensionId(destination)) {
-                                        LOTM.LOGGER.info("4 - Dimension detected");
                                         destinationLevel = getLevelFromId(Objects.requireNonNull(player.getServer()), getDimensionId(destination), destinationLevel);
                                     }
 
