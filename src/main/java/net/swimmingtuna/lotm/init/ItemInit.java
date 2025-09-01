@@ -402,15 +402,15 @@ public class ItemInit {
             () -> new Starfall(new Item.Properties().stacksTo(1)));
 
     //0
-    public static final RegistryObject<Item> DOOR_CONCEALMENT = ITEMS.register("doorconcealment",
-            () -> new DoorConcealment(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> DOOR_LAYERING = ITEMS.register("doorlayering",
-            () -> new Item(new Item.Properties().stacksTo(1))); //black hole
     public static final RegistryObject<Item> DOOR_GAMMA_RAY_BURST = ITEMS.register("doorgammarayburst",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> REPLICATION = ITEMS.register("replication",
             () -> new Item(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> DOOR_CONCEALMENT = ITEMS.register("doorconcealment",
+            () -> new DoorConcealment(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DOOR_LAYERING = ITEMS.register("doorlayering",
+            () -> new DoorLayering(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_SEAL_STRENGTHENING = ITEMS.register("doorsealstrengthening",
             () -> new DoorSealStrenghtening(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CONCEPTUALIZATION = ITEMS.register("conceptualization",

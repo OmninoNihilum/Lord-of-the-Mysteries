@@ -1,5 +1,6 @@
 package net.swimmingtuna.lotm.entity;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -15,11 +16,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.concealed_data.CONCEALMENT_TYPES;
@@ -50,7 +48,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         EXILE,
         CONCEALED_SPACE,
         MAZE,
-        STARFALL
+        STARFALL,
+        BLACKHOLE
     }
 
     public enum DoorAnimationKind {
@@ -177,6 +176,19 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.creator = creator.getUUID();
     }
 
+    //Black Hole
+    public ApprenticeDoorEntity(LivingEntity creator, int life, Level level, float yaw, float pitch) {
+        this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
+        this.entityData.set(DOOR_MODE, DoorMode.BLACKHOLE);
+        this.entityData.set(DOOR_ANIMATION_KIND, DoorAnimationKind.FADE_IN);
+        this.entityData.set(SEQUENCE, BeyonderUtil.getSequence(creator));
+        this.entityData.set(LIFE, life);
+        this.entityData.set(FULL_LIFE, life);
+        this.entityData.set(YAW, yaw);
+        this.entityData.set(PITCH, pitch);
+        this.creator = creator.getUUID();
+    }
+
 
     @Override
     public void tick() {
@@ -194,6 +206,9 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                     int z = this.getPersistentData().getInt("apprenticeDoorTeleportZ");
                     this.teleportTo(x, y, z);
                 }
+                handleLife();
+            }
+            if (getDoorMode() == DoorMode.BLACKHOLE) {
                 handleLife();
             }
             if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
@@ -282,7 +297,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         teleport(entity);
                     }
                 }
-                if (!this.level().getBlockState(new BlockPos(this.getBlockX(), this.getBlockY()-1, this.getBlockZ())).getBlock().equals(BlockInit.VOID_BLOCK.get())){
+                if (!this.level().getBlockState(new BlockPos(this.getBlockX(), this.getBlockY() - 1, this.getBlockZ())).getBlock().equals(BlockInit.VOID_BLOCK.get())) {
                     delete();
                 }
             }
@@ -386,6 +401,28 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
 
     private void handleLife() {
         int life = getLife();
+        if (getDoorMode() == DoorMode.BLACKHOLE) {
+            int doorConsumedCount = this.getPersistentData().getInt("doorConsumedCount");
+            int damage = Math.max(2, this.getPersistentData().getInt("doorLayeringDamage"));
+            if (doorConsumedCount >= 60) {
+                BlackHoleEntity blackHoleEntity = new BlackHoleEntity(EntityInit.BLACK_HOLE_ENTITY.get(), this.level());
+                blackHoleEntity.teleportTo(this.getX(), this.getY(), this.getZ());
+                BeyonderUtil.setTargetScale(blackHoleEntity, damage);
+                this.level().addFreshEntity(blackHoleEntity);
+                this.discard();
+            }
+            int removedCount = 0;
+            for (ApprenticeDoorEntity apprenticeDoor : this.level().getEntitiesOfClass(ApprenticeDoorEntity.class, this.getBoundingBox().inflate(25))) {
+                if (removedCount >= 3) {
+                    break;
+                }
+                if (!apprenticeDoor.getPersistentData().getBoolean("countedForDoorLayering")) {
+                    apprenticeDoor.getPersistentData().putBoolean("countedForDoorLayering", true);
+                    removedCount++;
+                }
+            }
+            this.getPersistentData().putInt("doorConsumedCount", doorConsumedCount + removedCount);
+        }
         if (getDoorMode() == DoorMode.STARFALL) {
             boolean x = this.getPersistentData().getBoolean("largeStarfall");
             int targetX = 0;
@@ -638,8 +675,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 BeyonderUtil.teleportEntity(entity, getDimensionDestination(), getTeleportX(), getTeleportY(), getTeleportZ());
             }
         }
-        if (getDoorMode() == DoorMode.MAZE){
-            if (entity != null){
+        if (getDoorMode() == DoorMode.MAZE) {
+            if (entity != null) {
                 SealedUtils.removeSeal(entity, entity.getPersistentData().getUUID("mazeSealUUID"));
             }
         }

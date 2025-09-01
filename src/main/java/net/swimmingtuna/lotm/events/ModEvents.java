@@ -429,6 +429,7 @@ public class ModEvents {
                 MatterAccelerationBlocks.matterAccelerationBlocksMobTick(event);
                 BeyonderEntityData.regenerateSpirituality(event);
                 //regular ticks
+                DoorLayering.doorLayeringTick(event);
                 Conceptualization.conceptualizationTick(event);
                 Starfall.starfallTick(event);
                 SealedUtils.timerTick(livingEntity);

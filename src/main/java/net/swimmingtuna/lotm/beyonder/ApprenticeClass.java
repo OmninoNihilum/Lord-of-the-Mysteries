@@ -259,10 +259,9 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(1, ItemInit.SPATIAL_MAZE.get());
 
         items.put(0, ItemInit.SECRET_KEEPING.get());
-        //items.put(0, ItemInit.DOOR_SPATIAL_LOCK_ON.get());
-        //items.put(0, ItemInit.DOOR_DIMENSION_CLOSING.get());
-        //items.put(0, ItemInit.DOOR_SEALED_SPACE.get());
-        //items.put(0, ItemInit.DOOR_LAYERING.get());
+        items.put(0, ItemInit.DOOR_LAYERING.get());
+        items.put(0, ItemInit.DOOR_CONCEALMENT.get());
+        items.put(0, ItemInit.DOOR_SEAL_STRENGTHENING.get());
         //items.put(0, ItemInit.DOOR_GAMMA_RAY_BURST.get());
         items.put(0, ItemInit.CONCEPTUALIZATION.get());
         //items.put(0, ItemInit.REPLICATION.get());

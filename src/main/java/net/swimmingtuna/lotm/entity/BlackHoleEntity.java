@@ -7,6 +7,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
@@ -19,6 +20,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -178,30 +180,17 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
             float currentRotationY = getRingRotationY();
             float rotationSpeed = getRingRotationSpeed();
             setRingRotationY((currentRotationY + rotationSpeed) % 360.0f);
-            //blackHoleTick();
-        }
-    }
-
-
-    public void blackHoleTick() {
-        boolean found = false;
-        for (BlackHoleOuterGlowEntity glowEntity : this.level().getEntitiesOfClass(BlackHoleOuterGlowEntity.class, this.getBoundingBox().inflate(40))) {
-            if (glowEntity.getPersistentData().contains("blackHoleGlowOwner")) {
-                UUID uuid = glowEntity.getPersistentData().getUUID("blackHoleGlowOwner");
-                if (uuid == this.getUUID()) {
-                    glowEntity.teleportTo(this.getX(), this.getY(), this.getZ());
-                    found = true;
+            float scale = BeyonderUtil.getScale(this);
+            for (Entity entity : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(scale * 10))) {
+                if (entity == this) {
+                    continue;
+                }
+                if (!(entity instanceof LivingEntity)) {
+                    entity.discard();
                 }
             }
         }
-        if (!found) {
-            BlackHoleOuterGlowEntity blackHoleOuterGlowEntity = new BlackHoleOuterGlowEntity(EntityInit.BLACK_HOLE_GLOW_ENTITY.get(), this.level());
-            blackHoleOuterGlowEntity.getPersistentData().putUUID("blackHoleGlowOwner", this.getUUID());
-            blackHoleOuterGlowEntity.teleportTo(this.getX(), this.getY(), this.getZ());
-            this.level().addFreshEntity(blackHoleOuterGlowEntity);
-        }
     }
-
 
 
     @Override
