@@ -408,6 +408,9 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 BlackHoleEntity blackHoleEntity = new BlackHoleEntity(EntityInit.BLACK_HOLE_ENTITY.get(), this.level());
                 blackHoleEntity.teleportTo(this.getX(), this.getY(), this.getZ());
                 BeyonderUtil.setTargetScale(blackHoleEntity, damage);
+                if (this.creator != null) {
+                    blackHoleEntity.setOwner(this.getCreator());
+                }
                 this.level().addFreshEntity(blackHoleEntity);
                 this.discard();
             }

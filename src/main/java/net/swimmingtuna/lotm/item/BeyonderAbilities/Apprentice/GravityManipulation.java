@@ -77,6 +77,9 @@ public class GravityManipulation extends SimpleAbilityItem {
                         if (entity == livingEntity) {
                             continue;
                         }
+                        if (BeyonderUtil.isImmuneToGravity(entity)) {
+                            continue;
+                        }
                         entity.getPersistentData().putInt("affectedByGravityManipulation", 20);
                     }
                     for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {

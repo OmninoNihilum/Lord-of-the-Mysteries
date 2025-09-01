@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.entity;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -10,14 +11,17 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -30,8 +34,12 @@ import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import static net.swimmingtuna.lotm.util.BeyonderUtil.findSurfaceY;
 
 public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEntity {
 
@@ -185,13 +193,49 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
                 if (entity == this) {
                     continue;
                 }
+                double distanceToBlackHole = entity.distanceTo(this);
+                double deltaX = this.getX() - entity.getX();
+                double deltaY = this.getY() - entity.getY();
+                double deltaZ = this.getZ() - entity.getZ();
+                double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+                if (distance > 0) {
+                    deltaX /= distance;
+                    deltaY /= distance;
+                    deltaZ /= distance;
+                }
                 if (!(entity instanceof LivingEntity)) {
-                    entity.discard();
+                    double pullStrength = Math.min(2.0, (scale * 15.0) / Math.max(1.0, distanceToBlackHole));
+                    entity.setDeltaMovement(entity.getDeltaMovement().x + deltaX * pullStrength * 0.3, entity.getDeltaMovement().y + deltaY * pullStrength * 0.3, entity.getDeltaMovement().z + deltaZ * pullStrength * 0.3);
+                    if (distanceToBlackHole <= 2.0) {
+                        entity.discard();
+                    }
+
+
+                } else if (entity instanceof LivingEntity living) {
+                    if (BeyonderUtil.isImmuneToGravity(living)) {
+                        continue;
+                    }
+                    double pullStrength = Math.min(1.5, (scale * 10.0) / Math.max(1.0, distanceToBlackHole));
+                    living.setDeltaMovement(living.getDeltaMovement().x + deltaX * pullStrength * 0.2, living.getDeltaMovement().y + deltaY * pullStrength * 0.15, living.getDeltaMovement().z + deltaZ * pullStrength * 0.2);
+                    if (living.distanceTo(this) <= 30) {
+                        if (this.getOwner() != null) {
+                            living.hurt(BeyonderUtil.genericSource(this.getOwner(), living), 45 - living.distanceTo(this));
+                        }
+                        BeyonderUtil.setGray(living, 60);
+                    }
+                    if (living.distanceTo(this) <= 10) {
+                        BeyonderUtil.applyStun(living, 20);
+                    }
+
+                    living.getPersistentData().putInt("resetBlackholeScale", 10);
+                    living.getPersistentData().putFloat("originalBlackholeScale", BeyonderUtil.getScale(living));
+                    if (living.getPersistentData().getInt("resetBlackholeScale") >= 1) {
+                        BeyonderUtil.setScale(living, BeyonderUtil.getRandomInRange(6));
+                    }
                 }
             }
         }
     }
-
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {

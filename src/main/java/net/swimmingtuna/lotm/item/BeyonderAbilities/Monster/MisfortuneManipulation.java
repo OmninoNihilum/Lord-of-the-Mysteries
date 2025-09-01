@@ -270,10 +270,12 @@ public class MisfortuneManipulation extends LeftClickHandlerSkill {
             int gravity = tag.getInt("monsterMisfortuneManipulationGravity");
             if (gravity >= 1) {
                 tag.putInt("monsterMisfortuneManipulationGravity", gravity - 1);
-                livingEntity.push(0, -10, 0);
-                livingEntity.hurtMarked = true;
-                Vec3 motion = livingEntity.getDeltaMovement();
-                livingEntity.setDeltaMovement(motion.x, -2, motion.z);
+                if (!BeyonderUtil.isImmuneToGravity(livingEntity)) {
+                    livingEntity.push(0, -10, 0);
+                    livingEntity.hurtMarked = true;
+                    Vec3 motion = livingEntity.getDeltaMovement();
+                    livingEntity.setDeltaMovement(motion.x, -2, motion.z);
+                }
             }
         }
     }

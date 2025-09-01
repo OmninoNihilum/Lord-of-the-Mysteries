@@ -2360,8 +2360,6 @@ public class BeyonderUtil {
                 }
             }
         }
-
-        // Fallback: return world spawn Y if no suitable surface found
         return targetWorld.getSharedSpawnPos().getY();
     }
 
@@ -3437,6 +3435,14 @@ public class BeyonderUtil {
         }
         return entity.level().dimension() == DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
     }
+
+    public static boolean isImmuneToGravity(LivingEntity entity) {
+        if (currentPathwayAndSequenceMatchesNoException(entity, BeyonderClassInit.APPRENTICE.get(), 2)) {
+            return true;
+        }
+        return false;
+    }
+
 
     public static void removeTags(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
