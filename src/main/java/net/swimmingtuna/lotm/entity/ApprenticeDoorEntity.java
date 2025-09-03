@@ -590,7 +590,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                             starfall.setOwner(owner);
                         }
                     }
-                    starfall.setMaxLife(200);
+                    starfall.setMaxLife(160);
                     starfall.setColorMode(StarfallEntity.ColorMode.YELLOW);
                     starfall.setDeltaMovement(dirX * speed, dirY * speed, dirZ * speed);
                     starfall.hurtMarked = true;

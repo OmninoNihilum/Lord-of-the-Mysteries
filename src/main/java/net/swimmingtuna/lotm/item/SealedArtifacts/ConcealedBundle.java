@@ -26,7 +26,9 @@ public class ConcealedBundle extends Item {
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!world.isClientSide) {
-            if(hand == InteractionHand.OFF_HAND && !player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) return InteractionResultHolder.fail(stack);
+            if(hand == InteractionHand.OFF_HAND && !player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
+                return InteractionResultHolder.fail(stack);
+            }
             CompoundTag tag = stack.getOrCreateTag();
             if(tag.getInt("concealedBundleUses") <= tag.getInt("concealedBundleMaxDurability") || tag.getBoolean("concealedBundleUnbreakable")) {
                 if(!tag.getBoolean("concealedBundleUnbreakable")) tag.putInt("concealedBundleUses", tag.getInt("concealedBundleUses") + 1);
@@ -62,8 +64,11 @@ public class ConcealedBundle extends Item {
                 if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(player, BeyonderClassInit.APPRENTICE.get(), 4)) {
                     if(player.isShiftKeyDown()) {
                         CompoundTag tag = stack.getOrCreateTag();
-                        if(!tag.getBoolean("concealedBundleUnbreakable")) player.displayClientMessage((Component.literal("Concealed Bag remaining uses: " + (stack.getOrCreateTag().getInt("concealedBundleMaxDurability") - stack.getOrCreateTag().getInt("concealedBundleUses"))).withStyle(BeyonderUtil.getStyle(player))), true);
-                        else player.displayClientMessage(Component.literal("The Concealed Bag connection with the Spirit World is perfectly tight, and it doesn't seem it's going to diminish anytime soon. ").withStyle(BeyonderUtil.getStyle(player)), true);
+                        if(!tag.getBoolean("concealedBundleUnbreakable")) {
+                            player.displayClientMessage((Component.literal("Concealed Bag remaining uses: " + (stack.getOrCreateTag().getInt("concealedBundleMaxDurability") - stack.getOrCreateTag().getInt("concealedBundleUses"))).withStyle(BeyonderUtil.getStyle(player))), true);
+                        } else {
+                            player.displayClientMessage(Component.literal("The Concealed Bag connection with the Spirit World is perfectly tight, and it doesn't seem it's going to diminish anytime soon. ").withStyle(BeyonderUtil.getStyle(player)), true);
+                        }
                     }
                 }
             }

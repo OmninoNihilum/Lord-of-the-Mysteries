@@ -65,7 +65,7 @@ import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionWea
 public class ServerEvents {
 
 
-    //@SubscribeEvent
+    @SubscribeEvent
     public static void onChatMessage(ServerChatEvent event) {
         Level level = event.getPlayer().serverLevel();
         ServerPlayer player = event.getPlayer();
@@ -497,7 +497,7 @@ public class ServerEvents {
             int wormOfStarAmount = tag.getInt("wormOfStar");
             if (wormOfStarSeparationAmount > wormOfStarAmount) {
                 player.displayClientMessage(Component.literal("You don't have enough Worms of Star! You have: " + wormOfStarAmount).withStyle(ChatFormatting.BLUE), true);
-                event.setCanceled(true); // Cancel the chat message
+                event.setCanceled(true);
                 return;
             }
             tag.putInt("wormOfStar", wormOfStarAmount - wormOfStarSeparationAmount);

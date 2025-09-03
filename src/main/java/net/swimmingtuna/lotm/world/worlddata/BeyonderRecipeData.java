@@ -4,12 +4,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.swimmingtuna.lotm.capabilities.unlocked_recipes.UnlockedRecipesUtils;
+import net.swimmingtuna.lotm.compat.JEI.BeyonderJEIRecipe;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientRecipesJEISyncS2C;
 
@@ -29,33 +31,6 @@ public class BeyonderRecipeData extends SavedData {
             List<ItemStack> supplementaryIngredients
     ) {
 
-        public void toNetwork(FriendlyByteBuf buf) {
-            buf.writeInt(mainIngredients.size());
-            for (ItemStack stack : mainIngredients) {
-                buf.writeItem(stack);
-            }
-            buf.writeInt(supplementaryIngredients.size());
-            for (ItemStack stack : supplementaryIngredients) {
-                buf.writeItem(stack);
-            }
-        }
-
-        public static RecipeIngredients fromNetwork(FriendlyByteBuf buf) {
-            int mainSize = buf.readInt();
-            List<ItemStack> main = new ArrayList<>();
-            for (int i = 0; i < mainSize; i++) {
-                main.add(buf.readItem());
-            }
-
-            int suppSize = buf.readInt();
-            List<ItemStack> supp = new ArrayList<>();
-            for (int i = 0; i < suppSize; i++) {
-                supp.add(buf.readItem());
-            }
-
-            return new RecipeIngredients(main, supp);
-        }
-
         @Override
         public List<ItemStack> mainIngredients() {
             return new ArrayList<>(mainIngredients);
@@ -66,7 +41,6 @@ public class BeyonderRecipeData extends SavedData {
             return new ArrayList<>(supplementaryIngredients);
         }
     }
-
 
     private BeyonderRecipeData() {
         super();
@@ -85,7 +59,7 @@ public class BeyonderRecipeData extends SavedData {
         );
     }
 
-    public boolean setRecipe(ItemStack potion, List<ItemStack> mainIngredients, List<ItemStack> supplementaryIngredients) {
+    public boolean setRecipe(ItemStack potion, List<ItemStack> mainIngredients, List<ItemStack> supplementaryIngredients, ServerLevel level) {
         // Check if recipe already exists
         ItemStack existingKey = findExistingRecipe(potion);
         if (existingKey != null) {
@@ -105,8 +79,62 @@ public class BeyonderRecipeData extends SavedData {
 
         beyonderRecipes.put(potion.copy(), new RecipeIngredients(mainCopy, suppCopy));
         setDirty();
-        LOTMNetworkHandler.sendToAllPlayers(new ClientRecipesJEISyncS2C(Map.of(potion.copy(), new RecipeIngredients(mainCopy, suppCopy))));
+        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
+            LOTMNetworkHandler.sendToPlayer(
+                    new ClientRecipesJEISyncS2C(List.of(
+                            new BeyonderJEIRecipe(potion.copy(),
+                                    mainCopy,
+                                    suppCopy
+                            )
+                    ),
+                            UnlockedRecipesUtils.getUnlockedRecipesNames(player)
+                    ), player
+            );
+        }
         return true;
+    }
+
+    public List<BeyonderJEIRecipe> getRecipeAsJEIRecipeFormatByPotion(ItemStack potion) {
+        RecipeIngredients recipe = getRecipeIngredientByPotion(potion);
+        if (recipe == null) {
+            return new ArrayList<>();
+        }
+        return List.of(
+                new BeyonderJEIRecipe(
+                        potion,
+                        recipe.mainIngredients,
+                        recipe.supplementaryIngredients
+                )
+        );
+    }
+
+    public List<BeyonderJEIRecipe> getRecipeAsJEIRecipeFormatByPotions(List<ItemStack> potion) {
+        List<BeyonderJEIRecipe> recipes = new ArrayList<>();
+        for (ItemStack itemStack : potion) {
+            RecipeIngredients recipe = getRecipeIngredientByPotion(itemStack);
+            if (recipe != null){
+                recipes.add(new BeyonderJEIRecipe(
+                        itemStack,
+                        recipe.mainIngredients,
+                        recipe.supplementaryIngredients
+                ));
+            }
+        }
+        return recipes;
+    }
+
+    public List<BeyonderJEIRecipe> getRecipesAsJEIRecipeFormat() {
+        List<BeyonderJEIRecipe> recipes = new ArrayList<>();
+        for (Map.Entry<ItemStack, RecipeIngredients> entry : beyonderRecipes.entrySet()) {
+            recipes.add(
+                    new BeyonderJEIRecipe(
+                            entry.getKey().copy(),
+                            entry.getValue().mainIngredients(),
+                            entry.getValue().supplementaryIngredients()
+                    )
+            );
+        }
+        return recipes;
     }
 
     public boolean removeRecipe(ItemStack potion) {
@@ -133,6 +161,20 @@ public class BeyonderRecipeData extends SavedData {
         setDirty();
     }
 
+    private RecipeIngredients getRecipeIngredientByPotion(ItemStack potion) {
+        var filteredResult = beyonderRecipes
+                .entrySet()
+                .stream()
+                .filter(
+                        itemStackRecipeIngredientsEntry ->
+                                itemStackRecipeIngredientsEntry
+                                        .getKey()
+                                        .getDisplayName()
+                                        .equals(potion.getDisplayName())
+                )
+                .findFirst();
+        return filteredResult.map(Map.Entry::getValue).orElse(null);
+    }
 
     public Map<ItemStack, RecipeIngredients> getBeyonderRecipes() {
         return new HashMap<>(beyonderRecipes);
@@ -200,7 +242,6 @@ public class BeyonderRecipeData extends SavedData {
                 supplementaryIngredientsTag.add(ingredientTag);
             }
             recipeTag.put("supplementaryIngredients", supplementaryIngredientsTag);
-
             recipeList.add(recipeTag);
         }
 

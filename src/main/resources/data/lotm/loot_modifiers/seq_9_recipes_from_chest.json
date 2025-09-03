@@ -1,0 +1,33 @@
+{
+  "type": "lotm:add_item",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/simple_dungeon"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/spawn_bonus_chest"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/ruined_portal"
+        }
+      ]
+    },
+    {
+      "chance": 0.5,
+      "condition": "minecraft:random_chance"
+    }
+  ],
+  "item": [
+    "lotm:recipes/spectator_9_recipe",
+    "lotm:recipes/warrior_9_recipe",
+    "lotm:recipes/monster_9_recipe",
+    "lotm:recipes/sailor_9_recipe",
+    "lotm:recipes/apprentice_9_recipe"
+  ]
+}

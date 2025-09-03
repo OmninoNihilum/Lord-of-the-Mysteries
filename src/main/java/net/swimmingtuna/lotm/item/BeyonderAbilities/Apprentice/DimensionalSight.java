@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.DimensionalSightSealEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -43,7 +44,7 @@ public class
 DimensionalSight extends SimpleAbilityItem {
 
     public DimensionalSight(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 2, 1000, 6000);
+        super(properties, BeyonderClassInit.APPRENTICE, 2, 1000, 3600,500,500);
     }
 
     @Override
@@ -52,21 +53,10 @@ DimensionalSight extends SimpleAbilityItem {
             if (!checkAll(player)) {
                 return InteractionResult.FAIL;
             }
-            addCooldown(player, this, 400);
+            addCooldown(player);
             useSpirituality(player);
             dimensionalSight(player, pInteractionTarget);
         }
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    public InteractionResult useAbility(Level level, LivingEntity player, InteractionHand hand) {
-        if (!checkAll(player)) {
-            return InteractionResult.FAIL;
-        }
-        addCooldown(player);
-        useSpirituality(player);
-        dimensionalSight(player);
         return InteractionResult.SUCCESS;
     }
 
@@ -113,62 +103,6 @@ DimensionalSight extends SimpleAbilityItem {
         }
     }
 
-    public void dimensionalSight(LivingEntity livingEntity) {
-        if (!livingEntity.level().isClientSide()) {
-            if (livingEntity.isShiftKeyDown()) {
-                int amount = 0;
-                for (DimensionalSightSealEntity dimensionalSightSealEntity : livingEntity.level().getEntitiesOfClass(DimensionalSightSealEntity.class, livingEntity.getBoundingBox().inflate(10))) {
-                    if (dimensionalSightSealEntity.getOwner() == livingEntity) {
-                        amount++;
-                        livingEntity.getPersistentData().putInt("dimensionalSightSealBackX", (int) livingEntity.getX());
-                        livingEntity.getPersistentData().putInt("dimensionalSightSealBackY", (int) livingEntity.getY());
-                        livingEntity.getPersistentData().putInt("dimensionalSightSealBackZ", (int) livingEntity.getZ());
-                        livingEntity.getPersistentData().putInt("dimensionalSightSealX", (int) dimensionalSightSealEntity.getSealX());
-                        livingEntity.getPersistentData().putInt("dimensionalSightSealY", (int) dimensionalSightSealEntity.getSealY());
-                        livingEntity.getPersistentData().putInt("dimensionalSightSealZ", (int) dimensionalSightSealEntity.getSealZ());
-                        livingEntity.getPersistentData().putInt("dimensionalSightSealTeleportTimer", 1);
-                        dimensionalSightSealEntity.setShouldMessage(false);
-                        dimensionalSightSealEntity.tickCount = dimensionalSightSealEntity.getMaxLife() - 1;
-                        BlockPos sealPos = new BlockPos((int) dimensionalSightSealEntity.getSealX(), (int) dimensionalSightSealEntity.getSealY(), (int) dimensionalSightSealEntity.getSealZ());
-                        int radius = 20;
-                        for (int x = -radius; x <= radius; x++) {
-                            for (int y = -radius; y <= radius; y++) {
-                                for (int z = -radius; z <= radius; z++) {
-                                    double distance = Math.sqrt(x * x + y * y + z * z);
-                                    if (distance >= radius - 0.5 && distance <= radius + 0.5) {
-                                        BlockPos blockPos = sealPos.offset(x, y, z);
-                                        if (livingEntity.level().getBlockState(blockPos) == BlockInit.VOID_BLOCK.get().defaultBlockState()) {
-                                            BeyonderUtil.setAir(livingEntity, blockPos);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (amount >= 1) {
-                    this.addCooldown(livingEntity);
-                }
-            }
-            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
-            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.scryUniqueID != null && dimensionalSightTileEntity.getCasterUUID() != null && dimensionalSightTileEntity.getCasterUUID().equals(livingEntity.getUUID())) {
-                DimensionalSightSealEntity sightSealEntity = new DimensionalSightSealEntity(EntityInit.DIMENSIONAL_SIGHT_SEAL_ENTITY.get(), livingEntity.level());
-                sightSealEntity.setSealX((float) dimensionalSightTileEntity.getScryTarget().getX());
-                sightSealEntity.setSealY((float) dimensionalSightTileEntity.getScryTarget().getY());
-                sightSealEntity.setSealZ((float) dimensionalSightTileEntity.getScryTarget().getZ());
-                sightSealEntity.setOwner(livingEntity);
-                Vec3 lookVec = livingEntity.getLookAngle().scale(-10);
-                BlockPos pos = livingEntity.getOnPos();
-                sightSealEntity.setMaxLife((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.DIMENSIONAL_SIGHT.get()));
-                sightSealEntity.teleportTo(pos.getX() + lookVec.z(), pos.getY() + lookVec.y(), pos.getZ() + lookVec.z());
-                livingEntity.level().addFreshEntity(sightSealEntity);
-                dimensionalSightTileEntity.removeThis();
-                this.addCooldown(livingEntity);
-            }
-
-        }
-    }
-
     public static BlockPos findSuitableBlockPos(Level level, BlockPos playerPos) {
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
@@ -193,9 +127,10 @@ DimensionalSight extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use on an entity, mark it with a dimensional sight in front of you, able to see all their surrounding blocks and themselves. You can also type the name of a player into chat to view them from anywhere."));
+        tooltipComponents.add(Component.literal("Use this ability on a dimensional sight, regardless of cooldown, to trap the target in a seal that you can carry around with you. You can punch this seal twice in order to break the seal and teleport all trapped entities to it."));
         tooltipComponents.add(Component.literal("You can use MOST Door pathway abilities while near and looking at a dimensional sight in order to have your abilities be cast at it's location."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1000").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("5 Minutes").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("3").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);

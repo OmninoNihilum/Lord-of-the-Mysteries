@@ -24,10 +24,15 @@ import net.swimmingtuna.lotm.item.OtherItems.*;
 import net.swimmingtuna.lotm.item.SealedArtifacts.*;
 import net.swimmingtuna.lotm.util.ModArmorMaterials;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
 public class ItemInit {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, LOTM.MOD_ID);
 
+    public static List<RegistryObject<Item>> POTION_ITEMS = new ArrayList<>();
 
 
 
@@ -428,89 +433,117 @@ public class ItemInit {
 
 
     //POTIONS
-    public static final RegistryObject<Item> SPECTATOR_9_POTION = ITEMS.register("spectator_9_potion",
+    public static final RegistryObject<Item> SPECTATOR_9_POTION = registerSpecial("spectator_9_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 9));
-    public static final RegistryObject<Item> SPECTATOR_8_POTION = ITEMS.register("spectator_8_potion",
+    public static final RegistryObject<Item> SPECTATOR_8_POTION = registerSpecial("spectator_8_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 8));
-    public static final RegistryObject<Item> SPECTATOR_7_POTION = ITEMS.register("spectator_7_potion",
+    public static final RegistryObject<Item> SPECTATOR_7_POTION = registerSpecial("spectator_7_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 7));
-    public static final RegistryObject<Item> SPECTATOR_6_POTION = ITEMS.register("spectator_6_potion",
+    public static final RegistryObject<Item> SPECTATOR_6_POTION = registerSpecial("spectator_6_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 6));
-    public static final RegistryObject<Item> SPECTATOR_5_POTION = ITEMS.register("spectator_5_potion",
+    public static final RegistryObject<Item> SPECTATOR_5_POTION = registerSpecial("spectator_5_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 5));
-    public static final RegistryObject<Item> SPECTATOR_4_POTION = ITEMS.register("spectator_4_potion",
+    public static final RegistryObject<Item> SPECTATOR_4_POTION = registerSpecial("spectator_4_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 4));
-    public static final RegistryObject<Item> SPECTATOR_3_POTION = ITEMS.register("spectator_3_potion",
+    public static final RegistryObject<Item> SPECTATOR_3_POTION = registerSpecial("spectator_3_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 3));
-    public static final RegistryObject<Item> SPECTATOR_2_POTION = ITEMS.register("spectator_2_potion",
+    public static final RegistryObject<Item> SPECTATOR_2_POTION = registerSpecial("spectator_2_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 2));
-    public static final RegistryObject<Item> SPECTATOR_1_POTION = ITEMS.register("spectator_1_potion",
+    public static final RegistryObject<Item> SPECTATOR_1_POTION = registerSpecial("spectator_1_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 1));
-    public static final RegistryObject<Item> SPECTATOR_0_POTION = ITEMS.register("spectator_0_potion",
+    public static final RegistryObject<Item> SPECTATOR_0_POTION = registerSpecial("spectator_0_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SPECTATOR, 0));
-    public static final RegistryObject<Item> SAILOR_9_POTION = ITEMS.register("sailor_9_potion",
+    public static final RegistryObject<Item> SAILOR_9_POTION = registerSpecial("sailor_9_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 9));
-    public static final RegistryObject<Item> SAILOR_8_POTION = ITEMS.register("sailor_8_potion",
+    public static final RegistryObject<Item> SAILOR_8_POTION = registerSpecial("sailor_8_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 8));
-    public static final RegistryObject<Item> SAILOR_7_POTION = ITEMS.register("sailor_7_potion",
+    public static final RegistryObject<Item> SAILOR_7_POTION = registerSpecial("sailor_7_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 7));
-    public static final RegistryObject<Item> SAILOR_6_POTION = ITEMS.register("sailor_6_potion",
+    public static final RegistryObject<Item> SAILOR_6_POTION = registerSpecial("sailor_6_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 6));
-    public static final RegistryObject<Item> SAILOR_5_POTION = ITEMS.register("sailor_5_potion",
+    public static final RegistryObject<Item> SAILOR_5_POTION = registerSpecial("sailor_5_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 5));
-    public static final RegistryObject<Item> SAILOR_4_POTION = ITEMS.register("sailor_4_potion",
+    public static final RegistryObject<Item> SAILOR_4_POTION = registerSpecial("sailor_4_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 4));
-    public static final RegistryObject<Item> SAILOR_3_POTION = ITEMS.register("sailor_3_potion",
+    public static final RegistryObject<Item> SAILOR_3_POTION = registerSpecial("sailor_3_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 3));
-    public static final RegistryObject<Item> SAILOR_2_POTION = ITEMS.register("sailor_2_potion",
+    public static final RegistryObject<Item> SAILOR_2_POTION = registerSpecial("sailor_2_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 2));
-    public static final RegistryObject<Item> SAILOR_1_POTION = ITEMS.register("sailor_1_potion",
+    public static final RegistryObject<Item> SAILOR_1_POTION = registerSpecial("sailor_1_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 1));
-    public static final RegistryObject<Item> SAILOR_0_POTION = ITEMS.register("sailor_0_potion",
+    public static final RegistryObject<Item> SAILOR_0_POTION = registerSpecial("sailor_0_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.SAILOR, 0));
-    public static final RegistryObject<Item> MONSTER_9_POTION = ITEMS.register("monster_9_potion",
+    public static final RegistryObject<Item> MONSTER_9_POTION = registerSpecial("monster_9_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 9));
-    public static final RegistryObject<Item> MONSTER_8_POTION = ITEMS.register("monster_8_potion",
+    public static final RegistryObject<Item> MONSTER_8_POTION = registerSpecial("monster_8_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 8));
-    public static final RegistryObject<Item> MONSTER_7_POTION = ITEMS.register("monster_7_potion",
+    public static final RegistryObject<Item> MONSTER_7_POTION = registerSpecial("monster_7_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 7));
-    public static final RegistryObject<Item> MONSTER_6_POTION = ITEMS.register("monster_6_potion",
+    public static final RegistryObject<Item> MONSTER_6_POTION = registerSpecial("monster_6_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 6));
-    public static final RegistryObject<Item> MONSTER_5_POTION = ITEMS.register("monster_5_potion",
+    public static final RegistryObject<Item> MONSTER_5_POTION = registerSpecial("monster_5_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 5));
-    public static final RegistryObject<Item> MONSTER_4_POTION = ITEMS.register("monster_4_potion",
+    public static final RegistryObject<Item> MONSTER_4_POTION = registerSpecial("monster_4_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 4));
-    public static final RegistryObject<Item> MONSTER_3_POTION = ITEMS.register("monster_3_potion",
+    public static final RegistryObject<Item> MONSTER_3_POTION = registerSpecial("monster_3_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 3));
-    public static final RegistryObject<Item> MONSTER_2_POTION = ITEMS.register("monster_2_potion",
+    public static final RegistryObject<Item> MONSTER_2_POTION = registerSpecial("monster_2_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 2));
-    public static final RegistryObject<Item> MONSTER_1_POTION = ITEMS.register("monster_1_potion",
+    public static final RegistryObject<Item> MONSTER_1_POTION = registerSpecial("monster_1_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 1));
-    public static final RegistryObject<Item> MONSTER_0_POTION = ITEMS.register("monster_0_potion",
+    public static final RegistryObject<Item> MONSTER_0_POTION = registerSpecial("monster_0_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.MONSTER, 0));
-    public static final RegistryObject<Item> WARRIOR_9_POTION = ITEMS.register("warrior_9_potion",
+    public static final RegistryObject<Item> WARRIOR_9_POTION = registerSpecial("warrior_9_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 9));
-    public static final RegistryObject<Item> WARRIOR_8_POTION = ITEMS.register("warrior_8_potion",
+    public static final RegistryObject<Item> WARRIOR_8_POTION = registerSpecial("warrior_8_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 8));
-    public static final RegistryObject<Item> WARRIOR_7_POTION = ITEMS.register("warrior_7_potion",
+    public static final RegistryObject<Item> WARRIOR_7_POTION = registerSpecial("warrior_7_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 7));
-    public static final RegistryObject<Item> WARRIOR_6_POTION = ITEMS.register("warrior_6_potion",
+    public static final RegistryObject<Item> WARRIOR_6_POTION = registerSpecial("warrior_6_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 6));
-    public static final RegistryObject<Item> WARRIOR_5_POTION = ITEMS.register("warrior_5_potion",
+    public static final RegistryObject<Item> WARRIOR_5_POTION = registerSpecial("warrior_5_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 5));
-    public static final RegistryObject<Item> WARRIOR_4_POTION = ITEMS.register("warrior_4_potion",
+    public static final RegistryObject<Item> WARRIOR_4_POTION = registerSpecial("warrior_4_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 4));
-    public static final RegistryObject<Item> WARRIOR_3_POTION = ITEMS.register("warrior_3_potion",
+    public static final RegistryObject<Item> WARRIOR_3_POTION = registerSpecial("warrior_3_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 3));
-    public static final RegistryObject<Item> WARRIOR_2_POTION = ITEMS.register("warrior_2_potion",
+    public static final RegistryObject<Item> WARRIOR_2_POTION = registerSpecial("warrior_2_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 2));
-    public static final RegistryObject<Item> WARRIOR_1_POTION = ITEMS.register("warrior_1_potion",
+    public static final RegistryObject<Item> WARRIOR_1_POTION = registerSpecial("warrior_1_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 1));
-    public static final RegistryObject<Item> WARRIOR_0_POTION = ITEMS.register("warrior_0_potion",
+    public static final RegistryObject<Item> WARRIOR_0_POTION = registerSpecial("warrior_0_potion",
             () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.WARRIOR, 0));
+
+    public static final RegistryObject<Item> APPRENTICE_9_POTION = registerSpecial("apprentice_9_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 9));
+    public static final RegistryObject<Item> APPRENTICE_8_POTION = registerSpecial("apprentice_8_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 8));
+    public static final RegistryObject<Item> APPRENTICE_7_POTION = registerSpecial("apprentice_7_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 7));
+    public static final RegistryObject<Item> APPRENTICE_6_POTION = registerSpecial("apprentice_6_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 6));
+    public static final RegistryObject<Item> APPRENTICE_5_POTION = registerSpecial("apprentice_5_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 5));
+    public static final RegistryObject<Item> APPRENTICE_4_POTION = registerSpecial("apprentice_4_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 4));
+    public static final RegistryObject<Item> APPRENTICE_3_POTION = registerSpecial("apprentice_3_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 3));
+    public static final RegistryObject<Item> APPRENTICE_2_POTION = registerSpecial("apprentice_2_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 2));
+    public static final RegistryObject<Item> APPRENTICE_1_POTION = registerSpecial("apprentice_1_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 1));
+    public static final RegistryObject<Item> APPRENTICE_0_POTION = registerSpecial("apprentice_0_potion",
+            () -> new BeyonderPotion(new Item.Properties().stacksTo(1), BeyonderClassInit.APPRENTICE, 0));
+
+
     public static final RegistryObject<Item> BEYONDER_RESET_POTION = ITEMS.register("beyonder_reset_potion",
             () -> new BeyonderResetPotion(new Item.Properties().stacksTo(1)));
 
+    private static RegistryObject<Item> registerSpecial(String name, Supplier<Item> supplier) {
+        RegistryObject<Item> obj = ITEMS.register(name, supplier);
+        POTION_ITEMS.add(obj);
+        return obj;
+    }
 
     //SEALED ARTIFACTS
     public static final RegistryObject<Item> DEATHKNELL = ITEMS.register("deathknell",
@@ -597,6 +630,113 @@ public class ItemInit {
             () -> new DollStructure(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SEAL_ICON = ITEMS.register("seal_icon",
             () -> new Item(new Item.Properties().stacksTo(1)));
+
+    //Recipes for potions
+    public static final RegistryObject<Item> SPECTATOR_9_RECIPE = ITEMS.register("recipes/spectator_9_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_9_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_8_RECIPE = ITEMS.register("recipes/spectator_8_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_8_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_7_RECIPE = ITEMS.register("recipes/spectator_7_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_7_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_6_RECIPE = ITEMS.register("recipes/spectator_6_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_6_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_5_RECIPE = ITEMS.register("recipes/spectator_5_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_5_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_4_RECIPE = ITEMS.register("recipes/spectator_4_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_4_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_3_RECIPE = ITEMS.register("recipes/spectator_3_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_3_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_2_RECIPE = ITEMS.register("recipes/spectator_2_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_2_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_1_RECIPE = ITEMS.register("recipes/spectator_1_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_1_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SPECTATOR_0_RECIPE = ITEMS.register("recipes/spectator_0_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SPECTATOR_0_POTION.get().getDefaultInstance()));
+
+    public static final RegistryObject<Item> WARRIOR_9_RECIPE = ITEMS.register("recipes/warrior_9_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_9_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_8_RECIPE = ITEMS.register("recipes/warrior_8_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_8_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_7_RECIPE = ITEMS.register("recipes/warrior_7_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_7_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_6_RECIPE = ITEMS.register("recipes/warrior_6_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_6_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_5_RECIPE = ITEMS.register("recipes/warrior_5_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_5_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_4_RECIPE = ITEMS.register("recipes/warrior_4_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_4_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_3_RECIPE = ITEMS.register("recipes/warrior_3_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_3_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_2_RECIPE = ITEMS.register("recipes/warrior_2_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_2_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_1_RECIPE = ITEMS.register("recipes/warrior_1_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_1_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> WARRIOR_0_RECIPE = ITEMS.register("recipes/warrior_0_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), WARRIOR_0_POTION.get().getDefaultInstance()));
+
+    public static final RegistryObject<Item> APPRENTICE_9_RECIPE = ITEMS.register("recipes/apprentice_9_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_9_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_8_RECIPE = ITEMS.register("recipes/apprentice_8_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_8_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_7_RECIPE = ITEMS.register("recipes/apprentice_7_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_7_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_6_RECIPE = ITEMS.register("recipes/apprentice_6_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_6_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_5_RECIPE = ITEMS.register("recipes/apprentice_5_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_5_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_4_RECIPE = ITEMS.register("recipes/apprentice_4_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_4_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_3_RECIPE = ITEMS.register("recipes/apprentice_3_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_3_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_2_RECIPE = ITEMS.register("recipes/apprentice_2_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_2_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_1_RECIPE = ITEMS.register("recipes/apprentice_1_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_1_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> APPRENTICE_0_RECIPE = ITEMS.register("recipes/apprentice_0_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), APPRENTICE_0_POTION.get().getDefaultInstance()));
+
+    public static final RegistryObject<Item> SAILOR_9_RECIPE = ITEMS.register("recipes/sailor_9_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_9_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_8_RECIPE = ITEMS.register("recipes/sailor_8_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_8_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_7_RECIPE = ITEMS.register("recipes/sailor_7_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_7_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_6_RECIPE = ITEMS.register("recipes/sailor_6_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_6_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_5_RECIPE = ITEMS.register("recipes/sailor_5_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_5_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_4_RECIPE = ITEMS.register("recipes/sailor_4_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_4_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_3_RECIPE = ITEMS.register("recipes/sailor_3_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_3_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_2_RECIPE = ITEMS.register("recipes/sailor_2_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_2_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_1_RECIPE = ITEMS.register("recipes/sailor_1_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_1_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> SAILOR_0_RECIPE = ITEMS.register("recipes/sailor_0_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), SAILOR_0_POTION.get().getDefaultInstance()));
+
+    public static final RegistryObject<Item> MONSTER_9_RECIPE = ITEMS.register("recipes/monster_9_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_9_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_8_RECIPE = ITEMS.register("recipes/monster_8_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_8_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_7_RECIPE = ITEMS.register("recipes/monster_7_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_7_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_6_RECIPE = ITEMS.register("recipes/monster_6_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_6_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_5_RECIPE = ITEMS.register("recipes/monster_5_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_5_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_4_RECIPE = ITEMS.register("recipes/monster_4_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_4_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_3_RECIPE = ITEMS.register("recipes/monster_3_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_3_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_2_RECIPE = ITEMS.register("recipes/monster_2_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_2_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_1_RECIPE = ITEMS.register("recipes/monster_1_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_1_POTION.get().getDefaultInstance()));
+    public static final RegistryObject<Item> MONSTER_0_RECIPE = ITEMS.register("recipes/monster_0_recipe",
+            () -> new UnlockRecipeItem(new Item.Properties().stacksTo(1), MONSTER_0_POTION.get().getDefaultInstance()));
+
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

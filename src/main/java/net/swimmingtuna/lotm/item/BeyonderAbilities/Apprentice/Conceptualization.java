@@ -165,16 +165,29 @@ public class Conceptualization extends LeftClickHandlerSkillP {
                     return !effect.isBeneficial();
                 });
                 BeyonderUtil.startFlying(living, 0.18f, 20);
-                if (BeyonderUtil.getSpirituality(living) < 15) {
+                int damage = (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.CONCEPTUALIZATION.get());
+                if (BeyonderUtil.getSpirituality(living) < damage) {
                     BeyonderUtil.setInvisible(living, false, 0);
                     tag.putBoolean("doorConceptualization", false);
+                    living.sendSystemMessage(Component.literal("Your Conceptualization was turned off due to a lack of spirituality").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
                 } else {
-                    BeyonderUtil.useSpirituality(living, 20);
+                    BeyonderUtil.useSpirituality(living, damage);
                     if (living.level() instanceof ServerLevel serverLevel) {
                         for (Player player : serverLevel.players()) {
                             if (player != living) {
+                                for (int i = 0; i <= 2; i++) {
+                                    float scale = BeyonderUtil.getScale(living);
+                                    float random = BeyonderUtil.getRandomInRange(scale) * 5;
+                                    float random2 = BeyonderUtil.getRandomInRange(scale) * 5;
+                                    float random3 = BeyonderUtil.getRandomInRange(scale) * 5;
+                                    float random4 = BeyonderUtil.getRandomInRange(scale) * 5;
+                                    BeyonderUtil.sendPlayerParticle(player, ParticleInit.YELLOW_FLASH_PARTICLE.get(), living.getX() + random, living.getY() + random4, living.getZ() + random2, 0,0,0);
+                                    BeyonderUtil.sendPlayerParticle(player, ParticleInit.AQUA_FLASH_PARTICLE.get(), living.getX() + random2, living.getY() + random3, living.getZ() + random, 0,0,0);
+                                    BeyonderUtil.sendPlayerParticle(player, ParticleInit.PURPLE_FLASH_PARTICLE.get(), living.getX() + random3, living.getY() + random2, living.getZ() + random4, 0,0,0);
+                                    BeyonderUtil.sendPlayerParticle(player, ParticleInit.WHITE_FLASH_PARTICLE.get(), living.getX() + random4, living.getY() + random, living.getZ() + random3, 0,0,0);
+                                }
+                            } else if (BeyonderUtil.getRandomInRange(10) > 9) {
                                 for (int i = 0; i <= 1; i++) {
-                                    //WHITE FLASH //AQUA FLASH //PURPLE FLASH //YELLOW FLASH
                                     float scale = BeyonderUtil.getScale(living);
                                     float random = BeyonderUtil.getRandomInRange(scale) * 5;
                                     float random2 = BeyonderUtil.getRandomInRange(scale) * 5;
@@ -186,19 +199,6 @@ public class Conceptualization extends LeftClickHandlerSkillP {
                                     BeyonderUtil.sendPlayerParticle(player, ParticleInit.WHITE_FLASH_PARTICLE.get(), living.getX() + random4, living.getY() + random, living.getZ() + random3, 0,0,0);
                                 }
                             }
-                        }
-                        for (int i = 0; i <= 1; i++) {
-                            //WHITE FLASH //AQUA FLASH //PURPLE FLASH //YELLOW FLASH
-                            float scale = BeyonderUtil.getScale(living);
-                            float random = BeyonderUtil.getRandomInRange(scale) * 5;
-                            float random2 = BeyonderUtil.getRandomInRange(scale) * 5;
-                            float random3 = BeyonderUtil.getRandomInRange(scale) * 5;
-                            float random4 = BeyonderUtil.getRandomInRange(scale) * 5;
-                            //WHITE FLASH //AQUA FLASH //PURPLE FLASH //YELLOW FLASH
-                            serverLevel.sendParticles(ParticleInit.YELLOW_FLASH_PARTICLE.get(), living.getX() + random, living.getY() + random4, living.getZ() + random2, 0, 0, 0, 0, 0);
-                            serverLevel.sendParticles(ParticleInit.AQUA_FLASH_PARTICLE.get(), living.getX() + random2, living.getY() + random3, living.getZ() + random3, 0, 0, 0, 0, 0);
-                            serverLevel.sendParticles(ParticleInit.PURPLE_FLASH_PARTICLE.get(), living.getX() + random3, living.getY() + random2, living.getZ() + random4, 0, 0, 0, 0, 0);
-                            serverLevel.sendParticles(ParticleInit.WHITE_FLASH_PARTICLE.get(), living.getX() + random4, living.getY() + random, living.getZ() + random, 0, 0, 0, 0, 0);
                         }
                     }
                     if (living.tickCount % 20 == 0) {
@@ -225,6 +225,7 @@ public class Conceptualization extends LeftClickHandlerSkillP {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Use to enable/disable conceptualization on yourself, or conceptualize a target. If used on yourself, you will be immune to any damage or negative effects entirely. If used on a target, they will have the same effect, but also be unable to do anything for some time. The weaker the entity, the longer they will be conceptualized."));
+        tooltipComponents.add(Component.literal("Less particles will be shown for you"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("300 per second if used on self. Depends on strength of target if used on one.").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

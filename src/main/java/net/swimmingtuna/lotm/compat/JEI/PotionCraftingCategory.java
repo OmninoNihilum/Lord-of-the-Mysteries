@@ -73,4 +73,5 @@ public class PotionCraftingCategory implements IRecipeCategory<BeyonderJEIRecipe
         builder.addSlot(RecipeIngredientRole.OUTPUT, xCoordinates[xCoordinates.length - 1], yCoordinates[yCoordinates.length - 1])
                 .addItemStack(recipe.result());
     }
+
 }

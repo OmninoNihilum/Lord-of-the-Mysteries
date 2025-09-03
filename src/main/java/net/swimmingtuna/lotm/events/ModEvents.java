@@ -1,6 +1,7 @@
 package net.swimmingtuna.lotm.events;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -43,16 +45,19 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.concealed_space.ConcealedSpaceUtils;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
+import net.swimmingtuna.lotm.capabilities.unlocked_recipes.UnlockedRecipesUtils;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
 import net.swimmingtuna.lotm.entity.*;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.AllyMaker;
@@ -70,6 +75,7 @@ import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
 import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientRecipesJEISyncS2C;
+import net.swimmingtuna.lotm.networking.packet.DimensionalSightSealC2S;
 import net.swimmingtuna.lotm.networking.packet.SyncSequencePacketS2C;
 import net.swimmingtuna.lotm.networking.packet.UnsealMenuC2S;
 import net.swimmingtuna.lotm.util.AllyInformation.PlayerAllyData;
@@ -168,6 +174,7 @@ public class ModEvents {
         }
         Player player = event.getEntity();
         if (!player.level().isClientSide()) {
+            LOTMNetworkHandler.sendToPlayer(new ClientRecipesJEISyncS2C(BeyonderRecipeData.getInstance(((ServerPlayer) player).serverLevel()).getRecipesAsJEIRecipeFormat(), UnlockedRecipesUtils.getUnlockedRecipesNames(player)), (ServerPlayer) player);
             BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
             LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(holder.getSequence()), (ServerPlayer) player);
             CompoundTag persistentData = player.getPersistentData();
@@ -382,10 +389,20 @@ public class ModEvents {
     public static void rightClickEmpty(PlayerInteractEvent.RightClickEmpty event) {
         MercuryLiquefication.mercuryRightClick(event);
 
-        // Send from CLIENT to SERVER
         if (event.getLevel().isClientSide() && event.getEntity().getMainHandItem().isEmpty()) {
             if (ClientWormOfStarData.getWormCount() > 1) {
                 LOTMNetworkHandler.sendToServer(new UnsealMenuC2S(event.getEntity().getId()));
+            }
+        }
+        if (event.getLevel().isClientSide() && ClientSequenceData.getCurrentSequence() <= 3) {
+            Player player = event.getEntity();
+            ItemStack heldItem = player.getMainHandItem();
+            if (heldItem.isEmpty()) {
+                heldItem = player.getOffhandItem();
+            }
+            if (heldItem.getItem() instanceof DimensionalSight) {
+                LOTM.LOGGER.info("Sending DimensionalSightSeal packet to server");
+                LOTMNetworkHandler.sendToServer(new DimensionalSightSealC2S());
             }
         }
     }
@@ -1019,9 +1036,6 @@ public class ModEvents {
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
         int sequence = holder.getSequence();
         if (!player.level().isClientSide()) {
-            if (player instanceof ServerPlayer serverPlayer) {
-                LOTMNetworkHandler.sendToPlayer(new ClientRecipesJEISyncS2C(BeyonderRecipeData.getInstance(((ServerPlayer) player).serverLevel()).getBeyonderRecipes()), serverPlayer);
-            }
             LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(holder.getSequence()), (ServerPlayer) player);
             if (persistentData.contains("DemiseCounter")) {
                 int demiseCounter = persistentData.getInt("DemiseCounter");

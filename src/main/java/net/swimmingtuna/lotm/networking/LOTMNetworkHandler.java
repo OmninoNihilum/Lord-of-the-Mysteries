@@ -48,6 +48,11 @@ public class LOTMNetworkHandler {
                 .encoder(LuckManipulationLeftClickC2S::toByte)
                 .consumerMainThread(LuckManipulationLeftClickC2S::handle)
                 .add();
+        INSTANCE.messageBuilder(DimensionalSightSealC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(DimensionalSightSealC2S::new)
+                .encoder(DimensionalSightSealC2S::toBytes)
+                .consumerMainThread(DimensionalSightSealC2S::handle)
+                .add();
         INSTANCE.messageBuilder(UnsealMenuC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(UnsealMenuC2S::new)
                 .encoder(UnsealMenuC2S::toByte)
@@ -341,6 +346,16 @@ public class LOTMNetworkHandler {
                 .decoder(ClientRecipesJEISyncS2C::decode)
                 .encoder(ClientRecipesJEISyncS2C::encode)
                 .consumerMainThread(ClientRecipesJEISyncS2C::handle)
+                .add();
+        INSTANCE.messageBuilder(BeyonderRecipeDataAndScreenRenderRequestC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(BeyonderRecipeDataAndScreenRenderRequestC2S::decode)
+                .encoder(BeyonderRecipeDataAndScreenRenderRequestC2S::encode)
+                .consumerMainThread(BeyonderRecipeDataAndScreenRenderRequestC2S::handle)
+                .add();
+        INSTANCE.messageBuilder(ClientRecipeUnlockScreenRenderS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientRecipeUnlockScreenRenderS2C::decode)
+                .encoder(ClientRecipeUnlockScreenRenderS2C::encode)
+                .consumerMainThread(ClientRecipeUnlockScreenRenderS2C::handle)
                 .add();
 
     }

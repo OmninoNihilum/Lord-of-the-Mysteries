@@ -76,17 +76,6 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
     public void tick(){
         super.tick();
         if(!this.level().isClientSide){
-            /*
-            this.setGlowingTag(true);
-
-            if (this.level() instanceof ServerLevel serverLevel) {
-                Scoreboard scoreboard = serverLevel.getScoreboard();
-                PlayerTeam team = scoreboard.addPlayerTeam("space_fragmentation_glow");
-                team.setColor(ChatFormatting.BLACK);
-                scoreboard.addPlayerToTeam(this.getStringUUID(), team);
-            }
-
-             */
             if (this.tickCount >= 210) {
                 this.discard();
             }
@@ -108,6 +97,7 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
                     coloredBoxEntity.teleportTo(this.getX(), this.getY() + 5, this.getZ());
                     coloredBoxEntity.setColorMode(ColoredBoxEntity.ColorMode.GRAY);
                     coloredBoxEntity.setMaxHealth(209);
+                    coloredBoxEntity.setOwnerUUID(owner.getUUID());
                     BeyonderUtil.setScale(coloredBoxEntity, (float) this.getArea() / 5);
                     coloredBoxEntity.getPersistentData().putUUID("createdBySpaceFragmentation", this.getUUID());
                     this.level().addFreshEntity(coloredBoxEntity);

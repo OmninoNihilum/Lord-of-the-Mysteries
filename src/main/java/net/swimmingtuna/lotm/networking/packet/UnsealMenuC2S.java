@@ -54,7 +54,6 @@ public class UnsealMenuC2S implements LeftClickType {
                 }
             }
             if (targetEntity == null) {
-                LOTM.sendMessageToAllPlayers("6");
                 return;
             }
             final LivingEntity finalTarget = targetEntity;

@@ -56,9 +56,10 @@ public class SpatialTearing extends LeftClickHandlerSkillP {
             rift.setMaxLife((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_TEARING.get()));
             level.addFreshEntity(rift);
         } else {
+            int x = livingEntity.getPersistentData().getInt("wandererTearing");
             SpaceRiftEntity rift = new SpaceRiftEntity(EntityInit.SPACE_RIFT_ENTITY.get(), livingEntity.level());
             rift.setOwner(livingEntity);
-            Vec3 scale = livingEntity.getLookAngle().scale(20);
+            Vec3 scale = livingEntity.getLookAngle().scale(x);
             rift.teleportTo(livingEntity.getX() + scale.x(), livingEntity.getY() + scale.y(), livingEntity.getZ() + scale.z());
             BeyonderUtil.setScale(rift, 6 - BeyonderUtil.getSequence(livingEntity));
             rift.setMaxLife((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_TEARING.get()));
@@ -69,6 +70,7 @@ public class SpatialTearing extends LeftClickHandlerSkillP {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, create a tear in space 20 blocks in front of you, sucking in all entities and dealing massive damage to anything caught"));
+        tooltipComponents.add(Component.literal("Shift to increase spawn distance."));
         tooltipComponents.add(Component.literal("Left click for Spatial Authority: Cage."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2500").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("45 Seconds").withStyle(ChatFormatting.YELLOW)));

@@ -21,9 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Blink;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorGammaRayBurst;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorLayering;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
@@ -113,6 +111,9 @@ public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
         //MATTER ACCELERATION SELF
         if (livingEntity.isSpectator()) return;
         if (!livingEntity.level().isClientSide()) {
+            int sealSize = livingEntity.getPersistentData().getInt("keyOfStarsSealScale");
+            int fragmentationDistance = livingEntity.getPersistentData().getInt("keyOfStarsFragmentation");
+            int tearingDistance = livingEntity.getPersistentData().getInt("wandererTearing");
             int gammaRayDistance = livingEntity.getPersistentData().getInt("doorGammaRay");
             int doorLayeringDistance = livingEntity.getPersistentData().getInt("doorLayering");
             int matterAccelerationDistance = livingEntity.getPersistentData().getInt("tyrantSelfAcceleration");
@@ -123,7 +124,7 @@ public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
                 if (livingEntity.getMainHandItem().getItem() instanceof DoorGammaRayBurst && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 0)) {
                     livingEntity.getPersistentData().putInt("doorGammaRay", gammaRayDistance + 2);
                     if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Door Gamma Ray Burst Spawn Distance is " + gammaRayDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        player.displayClientMessage(Component.literal("Door: Gamma Ray Burst Spawn Distance is " + gammaRayDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
                     }
                     if (gammaRayDistance >= 201) {
                         if (livingEntity instanceof Player player) {
@@ -132,10 +133,48 @@ public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
                         livingEntity.getPersistentData().putInt("doorGammaRay", 0);
                     }
                 }
+                if (livingEntity.getMainHandItem().getItem() instanceof SpatialSeal && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 1)) {
+                    if (livingEntity.tickCount % 2 == 0) {
+                        livingEntity.getPersistentData().putInt("keyOfStarsSealScale", Math.max(5,sealSize + 1));
+                    }
+                    if (livingEntity instanceof Player player) {
+                        player.displayClientMessage(Component.literal("Protective Seal Size is " + sealSize).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    }
+                    if (sealSize >= 26) {
+                        if (livingEntity instanceof Player player) {
+                            player.displayClientMessage(Component.literal("Protective Seal Size is 5").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        }
+                        livingEntity.getPersistentData().putInt("keyOfStarsSealScale", 5);
+                    }
+                }
+                if (livingEntity.getMainHandItem().getItem() instanceof SpatialTearing && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 3)) {
+                    livingEntity.getPersistentData().putInt("wandererTearing", tearingDistance + 2);
+                    if (livingEntity instanceof Player player) {
+                        player.displayClientMessage(Component.literal("Spatial Authority: Tear Spawn Distance is " + tearingDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    }
+                    if (tearingDistance >= 101) {
+                        if (livingEntity instanceof Player player) {
+                            player.displayClientMessage(Component.literal("Spatial Authority: Tear Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        }
+                        livingEntity.getPersistentData().putInt("wandererTearing", 0);
+                    }
+                }
+                if (livingEntity.getMainHandItem().getItem() instanceof SpaceFragmentation && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 1)) {
+                    livingEntity.getPersistentData().putInt("keyOfStarsFragmentation", fragmentationDistance + 2);
+                    if (livingEntity instanceof Player player) {
+                        player.displayClientMessage(Component.literal("Spatial Authority: Fragmentation Spawn Distance is " + fragmentationDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    }
+                    if (fragmentationDistance >= 151) {
+                        if (livingEntity instanceof Player player) {
+                            player.displayClientMessage(Component.literal("Spatial Authority: Fragmentation Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        }
+                        livingEntity.getPersistentData().putInt("keyOfStarsFragmentation", 0);
+                    }
+                }
                 if (livingEntity.getMainHandItem().getItem() instanceof DoorLayering && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 0)) {
                     livingEntity.getPersistentData().putInt("doorLayering", doorLayeringDistance + 2);
                     if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Door Layering Spawn Distance is " + doorLayeringDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        player.displayClientMessage(Component.literal("Door: Layering Spawn Distance is " + doorLayeringDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
                     }
                     if (doorLayeringDistance >= 201) {
                         if (livingEntity instanceof Player player) {

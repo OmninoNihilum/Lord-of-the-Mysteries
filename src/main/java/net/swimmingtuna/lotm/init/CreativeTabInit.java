@@ -4,6 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -13,11 +14,75 @@ public class CreativeTabInit {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LOTM.MOD_ID);
 
+
+    public static final RegistryObject<CreativeModeTab> RECIPE_TAB = CREATIVE_MODE_TABS.register("potion_recipe_tab",
+            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ItemInit.SAILOR_0_POTION.get()))
+                    .title(Component.translatable("creativetab.potion_recipes_tab"))
+                    .displayItems(((pParameters, pOutput) -> {
+                        pOutput.accept(ItemInit.SPECTATOR_9_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_8_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_7_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_6_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_5_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_4_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_3_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_2_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_1_RECIPE.get());
+                        pOutput.accept(ItemInit.SPECTATOR_0_RECIPE.get());
+
+                        pOutput.accept(ItemInit.WARRIOR_9_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_8_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_7_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_6_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_5_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_4_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_3_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_2_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_1_RECIPE.get());
+                        pOutput.accept(ItemInit.WARRIOR_0_RECIPE.get());
+
+                        pOutput.accept(ItemInit.APPRENTICE_9_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_8_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_7_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_6_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_5_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_4_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_3_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_2_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_1_RECIPE.get());
+                        pOutput.accept(ItemInit.APPRENTICE_0_RECIPE.get());
+
+                        pOutput.accept(ItemInit.MONSTER_9_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_8_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_7_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_6_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_5_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_4_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_3_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_2_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_1_RECIPE.get());
+                        pOutput.accept(ItemInit.MONSTER_0_RECIPE.get());
+
+                        pOutput.accept(ItemInit.SAILOR_9_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_8_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_7_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_6_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_5_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_4_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_3_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_2_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_1_RECIPE.get());
+                        pOutput.accept(ItemInit.SAILOR_0_RECIPE.get());
+                    })).build()
+    );
+
+
     public static final RegistryObject<CreativeModeTab> ABILITIES_TAB = CREATIVE_MODE_TABS.register("abilities_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(ItemInit.AWE.get()))
                     .title(Component.translatable("creativetab.abilities_tab"))
                     .icon(() -> new ItemStack(ItemInit.ABILITYICONTAB.get()))
                     .displayItems((parameters, event) -> {
+                        event.accept(Items.BUNDLE);
                         event.accept(ItemInit.ASTROLABE.get());
                         event.accept(ItemInit.WORM_OF_STAR.get());
                         event.accept(ItemInit.MIND_READING.get());

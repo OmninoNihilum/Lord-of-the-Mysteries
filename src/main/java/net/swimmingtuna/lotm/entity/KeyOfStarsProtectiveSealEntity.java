@@ -159,7 +159,6 @@ public class KeyOfStarsProtectiveSealEntity extends Entity {
                         this.setRegeneration(Math.max(1,10 - (BeyonderUtil.getSequence(owner) * 2)));
                     }
                 }
-
                 for (Entity entity : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate((this.getMaxSize() * 3.1) + 2))) {
                     if (!BeyonderUtil.isEntityAlly(owner, entity) && entity != this && entity != owner && !(entity instanceof ItemEntity)) {
                         int sequence = 9;

@@ -65,7 +65,7 @@ public class Teleportation extends SimpleAbilityItem {
 
     public static void removeCopies(LivingEntity player){
         for (PlayerMobEntity playerMobEntity : BeyonderUtil.getAllPlayerMobEntities(player.level())) {
-            if (playerMobEntity.getCreator().is(player) && playerMobEntity.getPersistentData().getBoolean("shouldFlicker")) {
+            if (playerMobEntity.getCreator() != null && playerMobEntity.getCreator().is(player) && playerMobEntity.getPersistentData().getBoolean("shouldFlicker")) {
                 playerMobEntity.remove(Entity.RemovalReason.DISCARDED);
             }
         }

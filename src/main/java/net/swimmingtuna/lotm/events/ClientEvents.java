@@ -7,6 +7,7 @@ import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -22,8 +23,12 @@ import net.swimmingtuna.lotm.client.AbilityOverlay;
 import net.swimmingtuna.lotm.client.FlashOverlay;
 import net.swimmingtuna.lotm.client.SpiritualityBarOverlay;
 import net.swimmingtuna.lotm.client.WormOfStarOverlay;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DimensionalSight;
 import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.DimensionalSightSealC2S;
 import net.swimmingtuna.lotm.util.ClientData.ClientGrayscaleData;
+import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 import net.swimmingtuna.lotm.util.ClientData.ClientShouldntRenderInvisibilityData;
 import net.swimmingtuna.lotm.util.ClientUtil;
 import net.swimmingtuna.lotm.util.SpiritWorld.SpiritWorldHandler;
@@ -35,6 +40,8 @@ import static net.swimmingtuna.lotm.util.ClientUtil.renderGrayscaleUsingGUI;
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientEvents {
     public static ShaderInstance VOID_SHADER;
+    private static long lastRightClickTime = 0;
+    private static final long COOLDOWN_MS = 250;
 
     /*
     @SubscribeEvent
@@ -68,6 +75,33 @@ public class ClientEvents {
         // Decrement the timer and render overlay before GUI rendering
         if (ClientGrayscaleData.isActive()) {
             renderGrayscaleUsingGUI(event.getGuiGraphics());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseInput(InputEvent.MouseButton event) {
+        if (event.getButton() == 1 && event.getAction() == 1) {
+            handleRightClick();
+        }
+    }
+
+    private static void handleRightClick() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) {
+            return;
+        }
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastRightClickTime < COOLDOWN_MS) {
+            return;
+        }
+        lastRightClickTime = currentTime;
+        Player player = mc.player;
+        if (ClientSequenceData.getCurrentSequence() <= 3) {
+            ItemStack mainHand = player.getMainHandItem();
+            ItemStack offHand = player.getOffhandItem();
+            if (mainHand.getItem() instanceof DimensionalSight || offHand.getItem() instanceof DimensionalSight) {
+                LOTMNetworkHandler.sendToServer(new DimensionalSightSealC2S());
+            }
         }
     }
 

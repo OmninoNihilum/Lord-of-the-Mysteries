@@ -28,10 +28,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.attributes.PathwayAttributes.ApprenticeAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
-import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedUtils;
-import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
@@ -41,7 +39,6 @@ import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
-import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -330,19 +327,32 @@ public class ApprenticeClass implements BeyonderClass {
             if (livingEntity.getPersistentData().getInt("spaceFragmentationCopies") >= 1) {
                 livingEntity.getPersistentData().putInt("spaceFragmentationCopies", livingEntity.getPersistentData().getInt("spaceFragmentationCopies") - 1);
             }
+            if (livingEntity.getPersistentData().getInt("dontSendCooldownMessage") >= 1) {
+                livingEntity.getPersistentData().putInt("dontSendCooldownMessage", livingEntity.getPersistentData().getInt("dontSendCooldownMessage") - 1);
+            }
+            if (livingEntity.getPersistentData().getInt("dimensionalSightUsed") >= 1) {
+                livingEntity.getPersistentData().putInt("dimensionalSightUsed", livingEntity.getPersistentData().getInt("dimensionalSightUsed") - 1);
+            }
             if (livingEntity.getPersistentData().getInt("mazeTrap") >= 1) {
                 CompoundTag tag = livingEntity.getPersistentData();
                 int timer = tag.getInt("mazeTrap");
                 int x = tag.getInt("mazeTrapX");
                 int y = tag.getInt("mazeTrapY");
                 int z = tag.getInt("mazeTrapZ");
-                if (timer >= 1 ) {
+                if (timer >= 1) {
                     if (livingEntity.isAlive()) {
                         livingEntity.getPersistentData().putInt("ignoreShouldntRender", 10);
                         LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(livingEntity.getUUID(), 20));
+                        BeyonderUtil.setInvisible(livingEntity, true, 10);
+                    }
+                    if (tag.getInt("luckIgnoreDamage") == 0) {
+                        tag.putInt("luckIgnoreDamage", 1);
                     }
                     tag.putInt("mazeTrap", timer - 1);
                     if (timer == 1) {
+                        if (tag.getInt("luckIgnoreDamage") == 1) {
+                            tag.putInt("luckIgnoreDamage", 0);
+                        }
                         BeyonderUtil.trueTeleportEntity(livingEntity, livingEntity.level(), x, y, z);
                         tag.putInt("mazeTrap", 0);
                     } else {
@@ -401,7 +411,10 @@ public class ApprenticeClass implements BeyonderClass {
             BlockPos belowPos = pos.below();
             BlockState blockBelow = level.getBlockState(belowPos);
             BlockState currentBlock = level.getBlockState(pos);
-            if (blockBelow.getBlock() instanceof LiquidBlock || currentBlock.getBlock() instanceof LiquidBlock) {
+            if ((blockBelow.getBlock() instanceof LiquidBlock || currentBlock.getBlock() instanceof LiquidBlock)) {
+                if (isSolidBlockInFront(livingEntity, level, 3)) {
+                    return;
+                }
                 if (!livingEntity.isShiftKeyDown()) {
                     if (livingEntity.getDeltaMovement().y < 0) {
                         Vec3 lookVec = livingEntity.getLookAngle().scale(2);
@@ -417,5 +430,21 @@ public class ApprenticeClass implements BeyonderClass {
                 }
             }
         }
+    }
+
+    private static boolean isSolidBlockInFront(LivingEntity entity, Level level, int distance) {
+        Vec3 lookVec = entity.getLookAngle();
+        Vec3 currentPos = entity.position();
+        for (int i = 1; i <= distance; i++) {
+            Vec3 checkPos = currentPos.add(lookVec.scale(i));
+            BlockPos blockPos = new BlockPos((int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
+            BlockPos eyeLevelPos = blockPos.above();
+            BlockState blockState = level.getBlockState(blockPos);
+            BlockState eyeLevelBlockState = level.getBlockState(eyeLevelPos);
+            if (blockState.isSolidRender(level, blockPos) || eyeLevelBlockState.isSolidRender(level, eyeLevelPos)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

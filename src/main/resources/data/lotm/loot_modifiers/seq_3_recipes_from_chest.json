@@ -1,0 +1,20 @@
+{
+  "type": "lotm:add_item",
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/end_city_treasure"
+    },
+    {
+      "chance": 0.1,
+      "condition": "minecraft:random_chance"
+    }
+  ],
+  "item": [
+    "lotm:recipes/spectator_3_recipe",
+    "lotm:recipes/warrior_3_recipe",
+    "lotm:recipes/monster_3_recipe",
+    "lotm:recipes/sailor_3_recipe",
+    "lotm:recipes/apprentice_3_recipe"
+  ]
+}

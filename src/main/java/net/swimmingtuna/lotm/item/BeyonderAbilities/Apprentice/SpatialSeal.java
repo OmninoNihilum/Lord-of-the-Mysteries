@@ -40,6 +40,8 @@ import virtuoel.pehkui.api.ScaleTypes;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class SpatialSeal extends LeftClickHandlerSkillP {
 
@@ -53,27 +55,46 @@ public class SpatialSeal extends LeftClickHandlerSkillP {
             return InteractionResult.FAIL;
         }
         useSpirituality(player);
-        addCooldown(player);
         createSpatialSeal(player);
         return InteractionResult.SUCCESS;
     }
 
-    public static void createSpatialSeal(LivingEntity living) {
+    public void createSpatialSeal(LivingEntity living) {
         if (!living.level().isClientSide()) {
-            int damage = (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.SPATIAL_SEAL.get());
-            KeyOfStarsProtectiveSealEntity spatialSealEntity = new KeyOfStarsProtectiveSealEntity(EntityInit.PROTECTIVE_SEAL_ENTITY.get(), living.level());
-            ScaleData scaleData = ScaleTypes.BASE.getScaleData(spatialSealEntity);
-            scaleData.setTargetScale(25);
-            spatialSealEntity.setOwnerUUID(living.getUUID());
-            spatialSealEntity.teleportTo(living.getX(), living.getY(), living.getZ());
-            spatialSealEntity.setMaxHealth(damage * 150);
-            living.level().addFreshEntity(spatialSealEntity);
+            int amount = 0;
+            for (KeyOfStarsProtectiveSealEntity sealEntity : living.level().getEntitiesOfClass(KeyOfStarsProtectiveSealEntity.class, living.getBoundingBox().inflate(50))) {
+                amount++;
+                if (living.isShiftKeyDown()) {
+                    if (sealEntity.getOwnerUUID().isPresent()) {
+                        Optional<UUID> uuid = sealEntity.getOwnerUUID();
+                        UUID newUUID = uuid.get();
+                        if (newUUID == living.getUUID()) {
+                            sealEntity.discard();
+                        }
+                    }
+                }
+            }
+            if (amount == 0) {
+                int damage = (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.SPATIAL_SEAL.get());
+                KeyOfStarsProtectiveSealEntity spatialSealEntity = new KeyOfStarsProtectiveSealEntity(EntityInit.PROTECTIVE_SEAL_ENTITY.get(), living.level());
+                ScaleData scaleData = ScaleTypes.BASE.getScaleData(spatialSealEntity);
+                int x = living.getPersistentData().getInt("keyOfStarsSealScale");
+                scaleData.setTargetScale(x);
+                spatialSealEntity.setOwnerUUID(living.getUUID());
+                spatialSealEntity.teleportTo(living.getX(), living.getY(), living.getZ());
+                spatialSealEntity.setMaxHealth(damage * 150);
+                living.level().addFreshEntity(spatialSealEntity);
+                addCooldown(living);
+            } else if (living instanceof Player player) {
+                player.displayClientMessage(Component.literal("You need to be 50 blocks away from a protective seal to create one."), true);
+            }
         }
     }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Use in order to create a spatial seal that only you and your allies can freely enter. Any non-ally or projectile owned by a non-ally that tries to enter will be teleported away and hurt the barrier corresponding to their strength. However, the barrier will regenerate on it's own with starlight."));
+        tooltipComponents.add(Component.literal("Shift while using this ability to remove any protective seals you own that you're in or near the center of."));
         tooltipComponents.add(Component.literal("Shift while holding this item to increase/decrease max size of the seal."));
         tooltipComponents.add(Component.literal("Left click for Spatial Authority: Fragmentation."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50 + Amount of damage").withStyle(ChatFormatting.YELLOW)));

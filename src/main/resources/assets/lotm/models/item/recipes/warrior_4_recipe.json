@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lotm:item/recipes/4_potion_recipe"
+  }
+}

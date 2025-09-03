@@ -251,13 +251,10 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
                     int actualReduction = Math.min(maxReduction * (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEPARATE_WORM_OF_STAR.get()), wormOfStarAmount);
                     int newCooldown = cooldown - actualReduction;
                     tag.putInt("wormOfStar", wormOfStarAmount - actualReduction);
-                    LOTM.sendMessageToAllPlayers("ACTUAL REDUCTION IS " + actualReduction);
                     if (player instanceof ServerPlayer serverPlayer) {
                         LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
                     }
                     player.getCooldowns().addCooldown(item, newCooldown);
-                    LOTM.sendMessageToAllPlayers("OLD COOLDOWN IS " + cooldown);
-                    LOTM.sendMessageToAllPlayers("NEW COOLDOWN IS " + newCooldown);
                 }
             } else {
                 player.getCooldowns().addCooldown(item, cooldown);
@@ -410,11 +407,6 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
     public boolean useSpirituality(LivingEntity living) {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        if (stackTrace.length > 2) {
-            StackTraceElement caller = stackTrace[2]; // [0] is getStackTrace, [1] is this method, [2] is caller
-            System.out.println("useSpirituality called from: " + caller.getClassName() + "." + caller.getMethodName());
-        }
         if (BeyonderUtil.getSpirituality(living) >= getRequiredSpirituality()) {
             useSpirituality(living, requiredSpirituality);
             return true;

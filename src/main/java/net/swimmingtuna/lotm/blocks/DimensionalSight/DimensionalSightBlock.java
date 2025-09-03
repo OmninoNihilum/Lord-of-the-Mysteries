@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.swimmingtuna.lotm.LOTM;
 import org.jetbrains.annotations.Nullable;
 
 public class DimensionalSightBlock extends DimensionalSightBlockTileEntity<DimensionalSightTileEntity> {
@@ -30,9 +31,7 @@ public class DimensionalSightBlock extends DimensionalSightBlockTileEntity<Dimen
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (!pLevel.isClientSide()) {
             BlockEntity entity = pLevel.getBlockEntity(pPos);
-            if (entity instanceof DimensionalSightTileEntity dimensionalSightTileEntity) {
 
-            }
         }
 
         return InteractionResult.sidedSuccess(pLevel.isClientSide());

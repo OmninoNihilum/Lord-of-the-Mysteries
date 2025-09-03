@@ -74,13 +74,12 @@ import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
-import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
-import net.swimmingtuna.lotm.entity.CustomFallingBlockEntity;
-import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.entity.*;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Ability;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DimensionalSight;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.TravelersDoorWaypoint;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationWipe;
@@ -824,7 +823,14 @@ public class BeyonderUtil {
         }
 
         if (player.getCooldowns().isOnCooldown(item)) {
-            player.sendSystemMessage(Component.literal("Ability ").append(itemName).append(" is on cooldown!").withStyle(ChatFormatting.RED));
+            if (item instanceof DimensionalSight) {
+                player.getPersistentData().putInt("dimensionalSightUsed", 2);
+                player.getPersistentData().putInt("dontSendCooldownMessage", 2);
+                LOTMNetworkHandler.sendToServer(new DimensionalSightSealC2S());
+            }
+            if (player.getPersistentData().getInt("dontSendCooldownMessage") == 0) {
+                player.sendSystemMessage(Component.literal("Ability ").append(itemName).append(" is on cooldown!").withStyle(ChatFormatting.RED));
+            }
             return;
         }
 
@@ -1539,8 +1545,9 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.CREATE_CONCEALED_BUNDLE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
         damageMap.put(ItemInit.CREATE_CONCEALED_SPACE.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
         damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.05f), -abilityStrengthened));
+        damageMap.put(ItemInit.CONCEPTUALIZATION.get(), applyAbilityStrengthened((15.0f + (sequence * 2f)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
-        damageMap.put(ItemInit.DOOR_CONCEALMENT.get(), applyAbilityStrengthened(((7200.0f / abilityWeakness) - (sequence * 1200)), abilityStrengthened));
+        damageMap.put(ItemInit.DOOR_CONCEALMENT.get(), applyAbilityStrengthened(((72000.0f / abilityWeakness) - (sequence * 1200)), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_GAMMA_RAY_BURST.get(), applyAbilityStrengthened((25.0f - (sequence * abilityWeakness)), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_LAYERING.get(), applyAbilityStrengthened((Math.max(1.0f, 8.0f - ((sequence) * abilityWeakness))), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, abilityStrengthened));
@@ -3051,7 +3058,7 @@ public class BeyonderUtil {
                     if (BeyonderUtil.scribeLookingAtYou(living, entity)) {
                         if (checkValidAbilityCopy(new ItemStack(ability))) {
                             if (ScribedUtils.getAbilitiesCount(living) < entity.getPersistentData().getInt("maxScribedAbilities")) {
-                                if(!(getSequence(entity) <= 2 && ScribedUtils.hasAbility(entity, ability))) {
+                                if (!(getSequence(entity) <= 2 && ScribedUtils.hasAbility(entity, ability))) {
                                     if (copyAbilityTest(entity, getSequence(entity), abilitySequence)) {
                                         if (!pendingAbilityCopies.containsKey(entity.getUUID())) {
                                             entity.getPersistentData().putInt("timerCopiedAbility", 200);
@@ -3067,14 +3074,14 @@ public class BeyonderUtil {
         }
     }
 
-    public static void trueTeleportEntity(LivingEntity entity, Level destination, double x, double y, double z){
+    public static void trueTeleportEntity(LivingEntity entity, Level destination, double x, double y, double z) {
         teleportEntityThroughDimensions(entity, destination.dimension().location(), x, y, z);
     }
 
-    public static boolean breakSeal(LivingEntity breaker, LivingEntity sealed, UUID sealUUID){
+    public static boolean breakSeal(LivingEntity breaker, LivingEntity sealed, UUID sealUUID) {
         int cost = SealedUtils.getBreakFreeCost(breaker, sealed, sealUUID);
         int spirituality = getSpirituality(breaker);
-        if(spirituality >= cost){
+        if (spirituality >= cost) {
             useSpirituality(breaker, cost);
             SealedUtils.removeSeal(sealed, sealUUID);
             return true;
@@ -3633,6 +3640,40 @@ public class BeyonderUtil {
                     return true;
                 }
                 return BeyonderUtil.areAllies(living, owner);
+            }
+        } else if (possibleAlly instanceof ApprenticeDoorEntity apprenticeDoor) {
+            if (apprenticeDoor.getCreator() != null) {
+                if (apprenticeDoor.getCreator() == living) {
+                    return true;
+                }
+                return BeyonderUtil.areAllies(living, apprenticeDoor.getCreator());
+            }
+        } else if (possibleAlly instanceof ColoredBoxEntity coloredBoxEntity) {
+            if (coloredBoxEntity.getOwnerUUID().isPresent()) {
+                UUID ownerUUID = coloredBoxEntity.getOwnerUUID().get();
+                LivingEntity livingEntity = getLivingEntityFromUUID(living.level(), ownerUUID);
+                if (livingEntity == living) {
+                    return true;
+                }
+                return BeyonderUtil.areAllies(living, livingEntity);
+            }
+        } else if (possibleAlly instanceof GuardianBoxEntity guardianBoxEntity) {
+            if (guardianBoxEntity.getOwnerUUID().isPresent()) {
+                UUID ownerUUID = guardianBoxEntity.getOwnerUUID().get();
+                LivingEntity livingEntity = getLivingEntityFromUUID(living.level(), ownerUUID);
+                if (livingEntity == living) {
+                    return true;
+                }
+                return BeyonderUtil.areAllies(living, livingEntity);
+            }
+        }  else if (possibleAlly instanceof KeyOfStarsProtectiveSealEntity sealEntity) {
+            if (sealEntity.getOwnerUUID().isPresent()) {
+                UUID ownerUUID = sealEntity.getOwnerUUID().get();
+                LivingEntity livingEntity = getLivingEntityFromUUID(living.level(), ownerUUID);
+                if (livingEntity == living) {
+                    return true;
+                }
+                return BeyonderUtil.areAllies(living, livingEntity);
             }
         }
         return false;

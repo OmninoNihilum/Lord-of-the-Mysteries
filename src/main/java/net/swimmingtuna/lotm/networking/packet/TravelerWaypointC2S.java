@@ -35,7 +35,7 @@ public class TravelerWaypointC2S implements LeftClickType {
             if(player.isShiftKeyDown()){
                 TravelersDoorWaypoint.toggleInstant(player);
                 tag.putInt("waypointMessageCooldown", 30);
-                player.displayClientMessage(Component.literal("Instant waypoint: " + tag.getBoolean("doorWaypointIsInstant")).withStyle(BeyonderUtil.getStyle(player)), true);
+                player.displayClientMessage(Component.literal("Instant waypoint: " + (tag.getBoolean("doorWaypointIsInstant") ? "On" : "Off")).withStyle(BeyonderUtil.getStyle(player)), true);
                 return;
             }
             int currentWaypoint = tag.getInt("doorWaypoint");

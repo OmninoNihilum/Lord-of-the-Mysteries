@@ -76,8 +76,12 @@ public class Symbolization extends SimpleAbilityItem {
                 float scale = BeyonderUtil.getScale(living);
                 float random = BeyonderUtil.getRandomInRange(scale) * 2;
                 if (living.level() instanceof ServerLevel serverLevel) {
-                    for (int i = 0; i <= 1; i++) {
-                        serverLevel.sendParticles(ParticleInit.SYMBOLIZATION_PARTICLE.get(), living.getX() + random, living.getY() + random, living.getZ() + random, 0, 0, 0, 0, 0);
+                    for (Player player : serverLevel.players()) {
+                        if (player != living) {
+                            BeyonderUtil.sendPlayerParticle(player, ParticleInit.SYMBOLIZATION_PARTICLE.get(), living.getX() + random, living.getY() + random, living.getZ() + random, 0, 0, 0);
+                        } else if (BeyonderUtil.getRandomInRange(10) > 9) {
+                            BeyonderUtil.sendPlayerParticle(player, ParticleInit.SYMBOLIZATION_PARTICLE.get(), living.getX() + random, living.getY() + random, living.getZ() + random, 0, 0, 0);
+                        }
                     }
                 }
                 if (living.tickCount % 20 == 0) {
@@ -111,6 +115,7 @@ public class Symbolization extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Transform into a conceptual entity, immune to nearly every form of damage, bar any immense amounts. In exchange, the power of all your moves will be halved."));
+        tooltipComponents.add(Component.literal("Less particles will be shown for you"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("Blink Distance").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("None").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));

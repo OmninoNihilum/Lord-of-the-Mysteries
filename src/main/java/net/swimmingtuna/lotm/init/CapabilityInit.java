@@ -31,6 +31,9 @@ import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedAbilitiesProv
 import net.swimmingtuna.lotm.capabilities.sealed_data.ISealedDataCapability;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataCapability;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataProvider;
+import net.swimmingtuna.lotm.capabilities.unlocked_recipes.IUnlockedRecipesDataCapability;
+import net.swimmingtuna.lotm.capabilities.unlocked_recipes.UnlockedRecipesDataCapability;
+import net.swimmingtuna.lotm.capabilities.unlocked_recipes.UnlockedRecipesDataProvider;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
 public class CapabilityInit {
@@ -46,6 +49,7 @@ public class CapabilityInit {
         event.register(IDollDataCapability.class);
         event.register(IReplicatedEntityCapability.class);
         event.register(ISealedDataCapability.class);
+        event.register(IUnlockedRecipesDataCapability.class);
     }
 
     @SubscribeEvent
@@ -98,6 +102,12 @@ public class CapabilityInit {
                         new ReplicatedEntityProvider()
                 );
             }
+            if (!player.getCapability(UnlockedRecipesDataProvider.UNLOCKED_DATA).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "unlocked_recipe_data"),
+                        new UnlockedRecipesDataProvider()
+                );
+            }
         }
     }
 
@@ -109,6 +119,11 @@ public class CapabilityInit {
         original.getCapability(ConcealedSpaceProvider.CONCEALED_SPACE).ifPresent(oldData -> {
             clone.getCapability(ConcealedSpaceProvider.CONCEALED_SPACE).ifPresent(newData -> {
                 ((ConcealedSpaceCapability) newData).copyFrom((ConcealedSpaceCapability) oldData);
+            });
+        });
+        original.getCapability(UnlockedRecipesDataProvider.UNLOCKED_DATA).ifPresent(oldData -> {
+            clone.getCapability(UnlockedRecipesDataProvider.UNLOCKED_DATA).ifPresent(newData -> {
+                ((UnlockedRecipesDataCapability) newData).copyFrom((UnlockedRecipesDataCapability) oldData);
             });
         });
         original.getCapability(ConcealedDataProvider.CONCEALED_DATA).ifPresent(oldData -> {

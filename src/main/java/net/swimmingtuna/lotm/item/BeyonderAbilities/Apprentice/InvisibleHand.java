@@ -266,7 +266,7 @@ public class InvisibleHand extends LeftClickHandlerSkill {
                         double x = blockHit.getLocation().x();
                         double y = blockHit.getLocation().y();
                         double z = blockHit.getLocation().z();
-                        target.setPos(x, y, z);
+                        target.teleportTo(x, y, z);
                         if (target instanceof ServerPlayer serverPlayer) {
                             serverPlayer.connection.teleport(x, y, z, serverPlayer.getYRot(), serverPlayer.getXRot());
                         }

@@ -56,10 +56,11 @@ public class SpaceFragmentation extends LeftClickHandlerSkillP {
             fragment.teleportTo(scryEntity.getX(), scryEntity.getY(), scryEntity.getZ());
             level.addFreshEntity(fragment);
         } else {
+            int x = livingEntity.getPersistentData().getInt("keyOfStarsFragmentation");
             SpaceFragmentationEntity fragment = new SpaceFragmentationEntity(EntityInit.SPACE_FRAGMENTATION_ENTITY.get(), livingEntity.level());
             fragment.setOwner(livingEntity);
             fragment.setArea(damage);
-            Vec3 scale = livingEntity.getLookAngle().scale(40);
+            Vec3 scale = livingEntity.getLookAngle().scale(x);
             fragment.teleportTo(livingEntity.getX() + scale.x(), livingEntity.getY() + scale.y(), livingEntity.getZ() + scale.z());
             level.addFreshEntity(fragment);
         }
@@ -68,6 +69,7 @@ public class SpaceFragmentation extends LeftClickHandlerSkillP {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, create a gash in space in front of you. Entities near this gash will be stuck in space and time, unable to move or act until the gash disappears. You can walk into this to split yourself temporarily into 7 distinct entities."));
+        tooltipComponents.add(Component.literal("Shift to increase spawn distance."));
         tooltipComponents.add(Component.literal("Left click for Spatial Authority: Protective Seal."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("5000").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Minute").withStyle(ChatFormatting.YELLOW)));

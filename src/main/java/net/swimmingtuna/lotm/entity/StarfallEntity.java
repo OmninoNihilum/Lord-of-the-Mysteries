@@ -204,6 +204,9 @@ public class StarfallEntity extends AbstractHurtingProjectile {
             BeyonderUtil.sendAlwaysVisibleParticle(ParticleInit.FLASH_PARTICLE.get(), this.getX(), this.getY(), this.getZ());
             BeyonderUtil.updateLocationClientSide(this);
         }
+        if (this.tickCount >= this.getMaxLife()) {
+            this.discard();
+        }
         if (this.getOwner() != null) {
             for (Entity living : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 5))) {
                 if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner && living instanceof LivingEntity livingEntity) {

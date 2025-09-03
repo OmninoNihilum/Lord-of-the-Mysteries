@@ -1,45 +1,33 @@
 package net.swimmingtuna.lotm.networking.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import net.swimmingtuna.lotm.compat.JEI.BeyonderJEIRecipe;
 import net.swimmingtuna.lotm.compat.JEI.JEILordOfTheMysteries;
-import net.swimmingtuna.lotm.world.worlddata.BeyonderRecipeData;
 
-import java.util.Map;
+import java.util.List;
 import java.util.function.Supplier;
 
-public record ClientRecipesJEISyncS2C(Map<ItemStack, BeyonderRecipeData.RecipeIngredients> beyonderRecipes) {
+public record ClientRecipesJEISyncS2C(List<BeyonderJEIRecipe> beyonderRecipes, List<String> unlockedRecipes) {
 
     public ClientRecipesJEISyncS2C(FriendlyByteBuf buf) {
-        // key: ItemStack
-        // value: RecipeIngredients
-        this(buf.readMap(
-                FriendlyByteBuf::readItem, // key: ItemStack
-                BeyonderRecipeData.RecipeIngredients::fromNetwork // value: RecipeIngredients
-        ));
+        this(buf.readList(BeyonderJEIRecipe::fromNetwork),
+                buf.readList(FriendlyByteBuf::readUtf));
     }
 
     public static void encode(ClientRecipesJEISyncS2C packet, FriendlyByteBuf buf) {
-        buf.writeMap(
-                packet.beyonderRecipes(),
-                FriendlyByteBuf::writeItem, // key: ItemStack
-                (buffer, ingredients) -> ingredients.toNetwork(buffer) // value: RecipeIngredients
-        );
+        buf.writeCollection(packet.beyonderRecipes(), (buffer, recipe) -> recipe.toNetwork(buffer));
+        buf.writeCollection(packet.unlockedRecipes(), FriendlyByteBuf::writeUtf);
     }
 
     public static void handle(ClientRecipesJEISyncS2C packet, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            JEILordOfTheMysteries.registerRecipesToJei(packet.beyonderRecipes());
+            JEILordOfTheMysteries.registerRecipesToJei(packet.beyonderRecipes(), packet.unlockedRecipes);
         });
         ctx.get().setPacketHandled(true);
     }
 
     public static ClientRecipesJEISyncS2C decode(FriendlyByteBuf buf) {
-        Map<ItemStack, BeyonderRecipeData.RecipeIngredients> recipes = buf.readMap(
-                FriendlyByteBuf::readItem, // key: ItemStack
-                BeyonderRecipeData.RecipeIngredients::fromNetwork // value: RecipeIngredients
-        );
-        return new ClientRecipesJEISyncS2C(recipes);
+        return new ClientRecipesJEISyncS2C(buf);
     }
 }
