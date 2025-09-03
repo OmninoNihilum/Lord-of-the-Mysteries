@@ -15,6 +15,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -44,7 +45,12 @@ public class GravityManipulation extends SimpleAbilityItem {
 
     private void gravityManipulationTickEvent(LivingEntity player) {
         if (!player.level().isClientSide()) {
-           player.getPersistentData().putInt("keyOfStarsGravityManipulation", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.GRAVITY_MANIPULATION.get()));
+            DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
+            if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
+                dimensionalSightTileEntity.getScryTarget().getPersistentData().putInt("affectedByGravityManipulation", 500);
+            } else {
+                player.getPersistentData().putInt("keyOfStarsGravityManipulation", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.GRAVITY_MANIPULATION.get()));
+            }
         }
     }
 
@@ -138,10 +144,9 @@ public class GravityManipulation extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, summon a door that will pull in and exile all those to a dimension where they will encounter either freezing temperature, a burning hell, an area with constant calamities, or rogue beyonders. They will be in this dimension for 20 seconds before coming back"));
-        tooltipComponents.add(Component.literal("Mobs exiled will not have their health drop below 20."));
-        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("700").withStyle(ChatFormatting.YELLOW)));
-        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("40 Seconds").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Upon use, use gravity to push all entities nearby into the ground for a while, in this state, they won't be able to go up and if they're on the ground, they'll be pressed into it and take damage."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2000").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("50 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
@@ -153,8 +158,8 @@ public class GravityManipulation extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null) {
-            return 70;
+        if (target != null && !BeyonderUtil.isImmuneToGravity(target)) {
+            return 100 - (BeyonderUtil.getSequence(target) * 10);
         }
         return 0;
     }

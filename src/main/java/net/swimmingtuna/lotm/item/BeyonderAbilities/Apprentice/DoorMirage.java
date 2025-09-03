@@ -175,13 +175,13 @@ public class DoorMirage extends SimpleAbilityItem {
             return 0;
         }
         if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 2 && livingEntity.getPersistentData().getBoolean("doorMirageIsActive")) {
-            return 80;
+            return 50;
         }
         if (target != null && !livingEntity.getPersistentData().getBoolean("doorMirageIsActive") && BeyonderUtil.getSpirituality(livingEntity) > BeyonderUtil.getMaxSpirituality(livingEntity) / 2) {
-            return 80;
+            return 50;
         }
         if (target == null && livingEntity.getPersistentData().getBoolean("doorMirageIsActive")) {
-            return 100;
+            return 80;
         }
         return 0;
     }

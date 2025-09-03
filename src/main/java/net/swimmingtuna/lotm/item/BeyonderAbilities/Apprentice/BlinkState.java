@@ -183,13 +183,13 @@ public class BlinkState extends SimpleAbilityItem {
             return 0;
         }
         if (target != null && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) / 3 && livingEntity.getPersistentData().getBoolean("blinkStateTimer")) {
-            return 80;
+            return 55;
         }
         if (target != null && !livingEntity.getPersistentData().getBoolean("blinkStateTimer") && BeyonderUtil.getSpirituality(livingEntity) > BeyonderUtil.getMaxSpirituality(livingEntity) / 3) {
-            return 80;
+            return 55;
         }
         if (target == null && livingEntity.getPersistentData().getBoolean("blinkStateTimer")) {
-            return 100;
+            return 80;
         }
         return 0;
     }

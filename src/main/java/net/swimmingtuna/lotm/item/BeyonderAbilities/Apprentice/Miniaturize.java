@@ -63,7 +63,7 @@ public class Miniaturize extends SimpleAbilityItem {
     }
 
     public Miniaturize(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 2, 1500, 1200);
+        super(properties, BeyonderClassInit.APPRENTICE, 2, 1500, 1200,15,15);
     }
 
     @Override
@@ -336,9 +336,7 @@ public class Miniaturize extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use on an entity with low health, miniaturize them and get them as an item, causing you to be able to place them back down again at the state they were miniaturized in."));
-        tooltipComponents.add(Component.literal("vv WORK IN PROGRESS vv").withStyle(ChatFormatting.RED));
         tooltipComponents.add(Component.literal("You can also use this while not looking at an entity to miniaturize the area around you into your inventory."));
-        tooltipComponents.add(Component.literal("^^ WORK IN PROGRESS ^^").withStyle(ChatFormatting.RED));
         tooltipComponents.add(Component.literal("Shift to increase miniaturized area."));
         tooltipComponents.add(Component.literal("Cooldown and spirituality will vary depending on strength of target compared to yourself."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("~1500").withStyle(ChatFormatting.YELLOW)));

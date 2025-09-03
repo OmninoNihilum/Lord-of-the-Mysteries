@@ -165,6 +165,14 @@ public class SailorClass implements BeyonderClass {
             }
         }
 
+        for (List<ItemStack> levelItems : orderedItems.values()) {
+            levelItems.sort((stack1, stack2) -> {
+                String name1 = stack1.getItem().getDescriptionId();
+                String name2 = stack2.getItem().getDescriptionId();
+                return name1.compareToIgnoreCase(name2);
+            });
+        }
+
         int slotIndex = 0;
         for (int i = 9; i >= sequenceLevel; i--) {
             List<ItemStack> levelItems = orderedItems.get(i);

@@ -74,7 +74,7 @@ public class BlinkAfterimage extends LeftClickHandlerSkillP {
         Level level = livingEntity.level();
         if (!level.isClientSide() && !event.isCanceled()) {
             if (tag.getBoolean("travelerAfterimage")) {
-                float amount = 40 + (event.getAmount() * BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINKAFTERIMAGE.get()));
+                float amount = 40 + ((event.getAmount() * 3) * BeyonderUtil.getDamage(livingEntity).get(ItemInit.BLINKAFTERIMAGE.get()));
                 if (BeyonderUtil.getSpirituality(livingEntity) >= amount) {
                     BeyonderUtil.useSpirituality(livingEntity, (int) ((int) amount * 1.3f));
                     int teleportDistance = (int) Math.ceil(event.getAmount());
@@ -209,7 +209,7 @@ public class BlinkAfterimage extends LeftClickHandlerSkillP {
         if (!livingEntity.getPersistentData().getBoolean("travelerAfterimage") && target != null && BeyonderUtil.getSpirituality(livingEntity) > BeyonderUtil.getMaxSpirituality(livingEntity) / 2) {
             return 80;
         } else if (target == null && livingEntity.getPersistentData().getBoolean("travelerAfterimage")) {
-            return 100;
+            return 80;
         }
         return 0;
     }

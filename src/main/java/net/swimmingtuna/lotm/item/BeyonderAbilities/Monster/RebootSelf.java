@@ -14,10 +14,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -25,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class RebootSelf extends SimpleAbilityItem {
+public class RebootSelf extends LeftClickHandlerSkillP {
 
     public RebootSelf(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 1, 2000, 900);
@@ -62,7 +66,8 @@ public class RebootSelf extends SimpleAbilityItem {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use if you're shifting, save your current state including health, spirituality, potion effects, luck, misfortune, sanity, and corruption. If not shifting, load your saved state"));
+        tooltipComponents.add(Component.literal("Upon use if you're shifting, save your current state including all persistent data, health, spirituality, potion effects, and item cooldowns. If not shifting, load your saved state"));
+        tooltipComponents.add(Component.literal("Left click for Fate Authority: Cycle of Fate."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2000").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("45 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -71,6 +76,9 @@ public class RebootSelf extends SimpleAbilityItem {
     }
 
     private static void saveDataReboot(LivingEntity player, CompoundTag tag) {
+        CompoundTag backupTag = new CompoundTag();
+        backupTag.merge(tag);
+        tag.put("monsterRebootAllData", backupTag);
         Collection<MobEffectInstance> activeEffects = player.getActiveEffects();
         tag.putInt("monsterRebootPotionEffectsCount", activeEffects.size());
         int i = 0;
@@ -80,19 +88,8 @@ public class RebootSelf extends SimpleAbilityItem {
             tag.put("monsterRebootPotionEffect_" + i, effectTag);
             i++;
         }
-        double luck = tag.getDouble("luck");
-        double misfortune = tag.getDouble("misfortune");
-        double sanity = tag.getDouble("sanity");
-        double corruption = tag.getDouble("corruption");
-        int age = tag.getInt("age");
-        tag.putInt("monsterRebootAge", age);
-        tag.putInt("monsterRebootLuck", (int) luck);
-        tag.putInt("monsterRebootMisfortune", (int) misfortune);
-        tag.putInt("monsterRebootSanity", (int) sanity);
-        tag.putInt("monsterRebootCorruption", (int) corruption);
-        tag.putInt("monsterRebootHealth", (int) player.getHealth());
-        tag.putInt("monsterRebootSpirituality", (int) BeyonderUtil.getSpirituality(player));
-        tag.putInt("monsterRebootAgeDecay", tag.getInt("ageDecay"));
+        tag.putFloat("monsterRebootHealth", player.getHealth());
+        tag.putInt("monsterRebootSpirituality", BeyonderUtil.getSpirituality(player));
         List<Item> beyonderAbilities = BeyonderUtil.getAbilities(player);
         if (player instanceof Player pPlayer) {
             for (Item item : beyonderAbilities) {
@@ -105,18 +102,22 @@ public class RebootSelf extends SimpleAbilityItem {
     }
 
     private static void restoreDataReboot(LivingEntity player, CompoundTag tag) {
-        for (MobEffectInstance activeEffect : new ArrayList<>(player.getActiveEffects())) {
+        if (!tag.contains("monsterRebootAllData")) {
+            if (player instanceof Player pPlayer) {
+                pPlayer.displayClientMessage(Component.literal("No saved state found!").withStyle(ChatFormatting.RED), true);
+            }
+            return;
+        }
+        CompoundTag backupTag = tag.getCompound("monsterRebootAllData");
+        Collection<MobEffectInstance> currentEffects = new ArrayList<>(player.getActiveEffects());
+        for (MobEffectInstance activeEffect : currentEffects) {
             player.removeEffect(activeEffect.getEffect());
         }
-        int age = tag.getInt("monsterRebootAge");
-        int sanity = tag.getInt("monsterRebootSanity");
-        int luck = tag.getInt("monsterRebootLuck");
-        int misfortune = tag.getInt("monsterRebootMisfortune");
-        int corruption = tag.getInt("monsterRebootCorruption");
-        int health = tag.getInt("monsterRebootHealth");
-        int spirituality = tag.getInt("monsterRebootSpirituality");
+        CompoundTag rebootBackup = tag.getCompound("monsterRebootAllData").copy();
+        tag.getAllKeys().clear();
+        tag.merge(backupTag);
+        tag.put("monsterRebootAllData", rebootBackup);
         int effectCount = tag.getInt("monsterRebootPotionEffectsCount");
-        int ageDecay = tag.getInt("monsterRebootAgeDecay");
         for (int i = 0; i < effectCount; i++) {
             CompoundTag effectTag = tag.getCompound("monsterRebootPotionEffect_" + i);
             MobEffectInstance effect = MobEffectInstance.load(effectTag);
@@ -124,14 +125,10 @@ public class RebootSelf extends SimpleAbilityItem {
                 player.addEffect(effect);
             }
         }
-        tag.putInt("ageDecay", ageDecay);
-        tag.putInt("age", age);
-        tag.putDouble("sanity", sanity);
-        tag.putDouble("corruption", corruption);
-        tag.putDouble("luck", luck);
-        tag.putDouble("misfortune", misfortune);
-        BeyonderUtil.setSpirituality(player, spirituality);
-        player.setHealth(Math.max(1, health));
+        float savedHealth = tag.getFloat("monsterRebootHealth");
+        int savedSpirituality = tag.getInt("monsterRebootSpirituality");
+        player.setHealth(Math.max(1, savedHealth));
+        BeyonderUtil.setSpirituality(player, savedSpirituality);
         List<Item> beyonderAbilities = BeyonderUtil.getAbilities(player);
         for (Item item : beyonderAbilities) {
             if (player instanceof Player pPlayer) {
@@ -153,13 +150,18 @@ public class RebootSelf extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         CompoundTag tag = livingEntity.getPersistentData();
-        if (tag.getInt("monsterRebootHealth") == 0) {
+        if (!tag.contains("monsterRebootHealth") || tag.getFloat("monsterRebootHealth") == 0) {
             if (livingEntity.getHealth() >= livingEntity.getMaxHealth() - 1) {
                 return 100;
             }
-        } else if (livingEntity.getMaxHealth() / livingEntity.getHealth() < 0.3) {
+        } else if (livingEntity.getHealth() / livingEntity.getMaxHealth() < 0.3) {
             return 100;
         }
         return 0;
+    }
+
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.CYCLEOFFATE.get()));
     }
 }

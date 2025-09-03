@@ -231,7 +231,7 @@ public class Exile extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (target != null) {
-            return 70;
+            return (int) (livingEntity.getHealth() / livingEntity.getMaxHealth());
         }
         return 0;
     }

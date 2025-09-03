@@ -18,7 +18,6 @@ public class ClientLevelMixin {
     private void onRemoveEntity(int entityId, Entity.RemovalReason reason, CallbackInfo ci) {
         ClientLevel level = (ClientLevel) (Object) this;
         Entity entity = level.getEntity(entityId);
-
         if (entity != null && ClientIgnoreShouldntRenderData.getIgnoreData(entity.getUUID()) >= 1) {
             ci.cancel();
         }

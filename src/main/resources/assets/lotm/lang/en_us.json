@@ -335,21 +335,19 @@
   "item.lotm.miniaturize": "Miniaturize",
   "item.lotm.replicate": "Replicate",
   "item.lotm.sealing": "Sealing",
-  "item.lotm.teleportationafterimage": "Teleportation Authority: Omnipresence",
   "item.lotm.space_fragmentation": "Spatial Authority: Fragmentation",
   "item.lotm.spatialseal": "Spatial Authority: Protective Seal",
 
   "item.lotm.gravitymanipulation": "Gravity Manipulation",
   "item.lotm.spatialmaze": "Spatial/Sealing Authority: Space-Time Maze",
   "item.lotm.starfall": "Starfall",
-  "item.lotm.doorspatiallockon": "Door: Spatial Lock-On",
-  "item.lotm.doorconcealment": "Door: Concealment",
-  "item.lotm.doorsealstrengthening": "Door: Seal Strengthening",
-  "item.lotm.doorlayering": "Door: Layering",
+  "item.lotm.doorconcealment": "Concealment Authority: Concealment",
+  "item.lotm.doorsealstrengthening": "Door Authority: Seal Strengthening",
+  "item.lotm.doorlayering": "Door Authority: Layering",
   "item.lotm.conceptualization": "Conceptualization",
   "item.lotm.replication": "Replication",
-  "item.lotm.doorgammarayburst": "Door: Gamma Ray Burst",
-  "item.lotm.secretkeeping": "Secret Keeping",
+  "item.lotm.doorgammarayburst": "Door Authority: Gamma Ray Burst",
+  "item.lotm.secretkeeping": "Concealment Authority: Secret Keeping",
 
 
 

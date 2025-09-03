@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -19,14 +20,12 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.SealingLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
@@ -40,7 +39,7 @@ import java.util.List;
 
 public class Sealing extends LeftClickHandlerSkill {
     public Sealing(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 2, 3000, 1500);
+        super(properties, BeyonderClassInit.APPRENTICE, 2, 3000, 1500,50,50);
     }
 
     @Override
@@ -77,14 +76,18 @@ public class Sealing extends LeftClickHandlerSkill {
         if (!livingEntity.level().isClientSide() && !target.level().isClientSide()) {
             CompoundTag userTag = livingEntity.getPersistentData();
             int sealingChoice;
-            if(userTag.contains("planeswalkerSealingChoice")) sealingChoice = userTag.getInt("planeswalkerSealingChoice");
-            else sealingChoice = 9;
+            if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
+                sealingChoice = BeyonderUtil.getSequence(mob.getTarget());
+            } else if (userTag.contains("planeswalkerSealingChoice")) {
+                sealingChoice = userTag.getInt("planeswalkerSealingChoice");
+            } else {
+                sealingChoice = 9;
+            }
             int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SEALING.get());
 
             if (BeyonderUtil.getSequence(target) > 3) {
                 SealedUtils.seal(target, livingEntity.getUUID(), livingEntity.getName().getString(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.ALL, null, false, null, SEAL_TYPES.PLANES_WALKER_SEAL);
-            }
-            else {
+            } else {
                 SealedUtils.seal(target, livingEntity.getUUID(), livingEntity.getName().getString(), BeyonderUtil.getSequence(livingEntity), damage, ABILITIES_SEAL_TYPES.SEQUENCE, null, false, new HashSet<>(sealingChoice), SEAL_TYPES.PLANES_WALKER_SEAL);
             }
         }
@@ -128,8 +131,8 @@ public class Sealing extends LeftClickHandlerSkill {
     private Multimap<Attribute, AttributeModifier> createAttributeMap() {
         ImmutableMultimap.Builder<Attribute, AttributeModifier> attributeBuilder = ImmutableMultimap.builder();
         attributeBuilder.putAll(super.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND));
-        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 15, AttributeModifier.Operation.ADDITION)); // adds a 12 block reach for interacting with entities
-        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 15, AttributeModifier.Operation.ADDITION)); // adds a 12 block reach for interacting with blocks, pretty much useless for this item
+        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 50, AttributeModifier.Operation.ADDITION)); // adds a 12 block reach for interacting with entities
+        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 50, AttributeModifier.Operation.ADDITION)); // adds a 12 block reach for interacting with blocks, pretty much useless for this item
         return attributeBuilder.build();
     }
 
@@ -141,10 +144,11 @@ public class Sealing extends LeftClickHandlerSkill {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (target != null) {
-            return 60;
+            return 70;
         }
         return 0;
     }
+
     @Override
     public LeftClickType getleftClickEmpty() {
         return new SealingLeftClickC2S();

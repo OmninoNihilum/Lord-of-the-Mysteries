@@ -410,6 +410,11 @@ public abstract class SimpleAbilityItem extends Item implements Ability {
     }
 
     public boolean useSpirituality(LivingEntity living) {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        if (stackTrace.length > 2) {
+            StackTraceElement caller = stackTrace[2]; // [0] is getStackTrace, [1] is this method, [2] is caller
+            System.out.println("useSpirituality called from: " + caller.getClassName() + "." + caller.getMethodName());
+        }
         if (BeyonderUtil.getSpirituality(living) >= getRequiredSpirituality()) {
             useSpirituality(living, requiredSpirituality);
             return true;

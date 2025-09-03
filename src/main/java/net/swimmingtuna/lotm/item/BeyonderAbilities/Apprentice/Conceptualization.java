@@ -1,6 +1,8 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -8,12 +10,18 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
@@ -25,6 +33,7 @@ import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
+import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -33,7 +42,7 @@ import java.util.List;
 public class Conceptualization extends LeftClickHandlerSkillP {
 
     public Conceptualization(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 0, 0, 20);
+        super(properties, BeyonderClassInit.APPRENTICE, 0, 0, 20, 30,30);
     }
 
     boolean shouldUseSpirituality = true;
@@ -64,7 +73,7 @@ public class Conceptualization extends LeftClickHandlerSkillP {
             if (!checkAll(player, BeyonderClassInit.APPRENTICE.get(), 0,10000 / sequence,true)) {
                 return InteractionResult.FAIL;
             }
-            conceptualizeTarget(interactionTarget);
+            conceptualizeTarget(player, interactionTarget);
             useSpirituality(player, 10000 / sequence);
             addCooldown(player, this, 2400 / sequence);
 
@@ -72,7 +81,7 @@ public class Conceptualization extends LeftClickHandlerSkillP {
         return InteractionResult.SUCCESS;
     }
 
-    public void conceptualizeTarget(LivingEntity target) {
+    public void conceptualizeTarget(LivingEntity user,LivingEntity target) {
         int sequence = BeyonderUtil.getSequence(target);
         if (sequence == -1) {
             sequence = 9;
@@ -80,7 +89,15 @@ public class Conceptualization extends LeftClickHandlerSkillP {
         if (sequence == 0) {
             sequence = 1;
         }
-        target.getPersistentData().putInt("doorConceptualizationPassive", 6000 / (10 - sequence));
+        if (user instanceof Mob mob) {
+            float health = mob.getHealth();
+            float targetHealth = mob.getHealth();
+            if (targetHealth < health || mob.getPersistentData().getBoolean("doorConceptualization")) {
+                conceptualize(mob);
+            } else {
+                target.getPersistentData().putInt("doorConceptualizationPassive", 6000 / (10 - sequence));
+            }
+        }
     }
 
     public void conceptualize(LivingEntity player) {
@@ -127,13 +144,11 @@ public class Conceptualization extends LeftClickHandlerSkillP {
                 BeyonderUtil.applyStun(living, 10);
                 if (living.level() instanceof ServerLevel serverLevel) {
                     for (int i = 0; i <= 1; i++) {
-                        //WHITE FLASH //AQUA FLASH //PURPLE FLASH //YELLOW FLASH
                         float scale = BeyonderUtil.getScale(living);
                         float random = BeyonderUtil.getRandomInRange(scale) * 5;
                         float random2 = BeyonderUtil.getRandomInRange(scale) * 5;
                         float random3 = BeyonderUtil.getRandomInRange(scale) * 5;
                         float random4 = BeyonderUtil.getRandomInRange(scale) * 5;
-                        //WHITE FLASH //AQUA FLASH //PURPLE FLASH //YELLOW FLASH
                         serverLevel.sendParticles(ParticleInit.YELLOW_FLASH_PARTICLE.get(), living.getX() + random, living.getY() + random4, living.getZ() + random2, 0, 0, 0, 0, 0);
                         serverLevel.sendParticles(ParticleInit.AQUA_FLASH_PARTICLE.get(), living.getX() + random2, living.getY() + random3, living.getZ() + random3, 0, 0, 0, 0, 0);
                         serverLevel.sendParticles(ParticleInit.PURPLE_FLASH_PARTICLE.get(), living.getX() + random3, living.getY() + random2, living.getZ() + random4, 0, 0, 0, 0, 0);
@@ -157,7 +172,7 @@ public class Conceptualization extends LeftClickHandlerSkillP {
                     BeyonderUtil.useSpirituality(living, 20);
                     if (living.level() instanceof ServerLevel serverLevel) {
                         for (Player player : serverLevel.players()) {
-                            //if (player != living) {
+                            if (player != living) {
                                 for (int i = 0; i <= 1; i++) {
                                     //WHITE FLASH //AQUA FLASH //PURPLE FLASH //YELLOW FLASH
                                     float scale = BeyonderUtil.getScale(living);
@@ -170,9 +185,8 @@ public class Conceptualization extends LeftClickHandlerSkillP {
                                     BeyonderUtil.sendPlayerParticle(player, ParticleInit.PURPLE_FLASH_PARTICLE.get(), living.getX() + random3, living.getY() + random2, living.getZ() + random4, 0,0,0);
                                     BeyonderUtil.sendPlayerParticle(player, ParticleInit.WHITE_FLASH_PARTICLE.get(), living.getX() + random4, living.getY() + random, living.getZ() + random3, 0,0,0);
                                 }
-                            //}
+                            }
                         }
-                        /*
                         for (int i = 0; i <= 1; i++) {
                             //WHITE FLASH //AQUA FLASH //PURPLE FLASH //YELLOW FLASH
                             float scale = BeyonderUtil.getScale(living);
@@ -186,8 +200,6 @@ public class Conceptualization extends LeftClickHandlerSkillP {
                             serverLevel.sendParticles(ParticleInit.PURPLE_FLASH_PARTICLE.get(), living.getX() + random3, living.getY() + random2, living.getZ() + random4, 0, 0, 0, 0, 0);
                             serverLevel.sendParticles(ParticleInit.WHITE_FLASH_PARTICLE.get(), living.getX() + random4, living.getY() + random, living.getZ() + random, 0, 0, 0, 0, 0);
                         }
-
-                         */
                     }
                     if (living.tickCount % 20 == 0) {
                         BeyonderUtil.setInvisible(living, true, 30);
@@ -225,17 +237,35 @@ public class Conceptualization extends LeftClickHandlerSkillP {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
     }
 
+    private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            return this.lazyAttributeMap.get();
+        }
+        return super.getDefaultAttributeModifiers(slot);
+    }
+
+    private Multimap<Attribute, AttributeModifier> createAttributeMap() {
+        ImmutableMultimap.Builder<Attribute, AttributeModifier> attributeBuilder = ImmutableMultimap.builder();
+        attributeBuilder.putAll(super.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND));
+        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 30, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with entities
+        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 30, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with blocks, p much useless for this item
+        return attributeBuilder.build();
+    }
+
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null && target.getHealth() <= livingEntity.getHealth()) {
-            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", (int) target.distanceTo(livingEntity));
-            return (int) (100 - (target.getHealth()));
-        } else if (livingEntity.getHealth() <= 20) {
-            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", 100);
-            return 80;
-        }
-        if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") == 0 && target == null) {
-            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", 5);
+        CompoundTag tag = livingEntity.getPersistentData();
+        boolean conceptualization = tag.getBoolean("doorConceptualization");
+        if (target == null && conceptualization) {
+            return 100;
+        } else if (target != null && conceptualization && BeyonderUtil.getSpirituality(livingEntity) < BeyonderUtil.getMaxSpirituality(livingEntity) * 0.3) {
+            return 70;
+        } else if (target != null && !conceptualization) {
+            return (int) (BeyonderUtil.getSpirituality(livingEntity) / (BeyonderUtil.getMaxSpirituality(livingEntity) * 0.6f)) * 100;
         }
         return 0;
     }

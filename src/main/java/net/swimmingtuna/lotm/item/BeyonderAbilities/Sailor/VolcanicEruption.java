@@ -24,7 +24,10 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
@@ -36,7 +39,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class VolcanicEruption extends SimpleAbilityItem {
+public class VolcanicEruption extends LeftClickHandlerSkillP {
 
     public VolcanicEruption(Properties properties) {
         super(properties, BeyonderClassInit.SAILOR, 2, 600, 400);
@@ -146,6 +149,7 @@ public class VolcanicEruption extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, summons a volcanic eruption from under the 10 nearest entities near you. You can also target this on a specific entity to make the eruption last twice as long."));
+        tooltipComponents.add(Component.literal("Left click for Calamity Authority: Extreme Coldness."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("600").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("20 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -165,5 +169,8 @@ public class VolcanicEruption extends SimpleAbilityItem {
         }
         return 0;
     }
-
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.EXTREME_COLDNESS.get()));
+    }
 }

@@ -316,8 +316,6 @@ public class ItemInit {
             () -> new BeamOfTwilight(new Item.Properties().stacksTo(1)));
 
     //APPRENTICE
-
-    //9
     public static final RegistryObject<Item> CREATEDOOR = ITEMS.register("createdoor",
             () -> new CreateDoor(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> TRICKBURNING = ITEMS.register("trickburning",
@@ -374,8 +372,6 @@ public class ItemInit {
             () -> new SpatialCage(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SPATIAL_TEARING = ITEMS.register("spatialtearing",
             () -> new SpatialTearing(new Item.Properties().stacksTo(1)));
-
-    //2
     public static final RegistryObject<Item> SYMBOLIZATION = ITEMS.register("symbolization",
             () -> new Symbolization(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DIMENSIONAL_SIGHT = ITEMS.register("dimensionalsight",
@@ -388,8 +384,6 @@ public class ItemInit {
             () -> new Teleportation(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> MINIATURIZE = ITEMS.register("miniaturize",
             () -> new Miniaturize(new Item.Properties().stacksTo(1)));
-
-    //1
     public static final RegistryObject<Item> SPACE_FRAGMENTATION = ITEMS.register("space_fragmentation",
             () -> new SpaceFragmentation(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> GRAVITY_MANIPULATION = ITEMS.register("gravitymanipulation",
@@ -400,13 +394,8 @@ public class ItemInit {
             () -> new SpatialSeal(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> STARFALL = ITEMS.register("starfall",
             () -> new Starfall(new Item.Properties().stacksTo(1)));
-
-    //0
     public static final RegistryObject<Item> DOOR_GAMMA_RAY_BURST = ITEMS.register("doorgammarayburst",
             () -> new DoorGammaRayBurst(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> REPLICATION = ITEMS.register("replication",
-            () -> new Item(new Item.Properties().stacksTo(1)));
-
     public static final RegistryObject<Item> DOOR_CONCEALMENT = ITEMS.register("doorconcealment",
             () -> new DoorConcealment(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DOOR_LAYERING = ITEMS.register("doorlayering",

@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 public class DragonBreathEntity extends BeamEntity {
     private static final EntityDataAccessor<Integer> DURATION = SynchedEntityData.defineId(DragonBreathEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> CAUSE_FIRE = SynchedEntityData.defineId(DragonBreathEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> GAMMA_RAY = SynchedEntityData.defineId(DragonBreathEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> SIZE = SynchedEntityData.defineId(DragonBreathEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> CHARGE = SynchedEntityData.defineId(DragonBreathEntity.class, EntityDataSerializers.INT);
 
@@ -39,7 +38,6 @@ public class DragonBreathEntity extends BeamEntity {
         this.entityData.define(DURATION, 4);
         this.entityData.define(CHARGE, 20);
         this.entityData.define(CAUSE_FIRE, true);
-        this.entityData.define(GAMMA_RAY, false);
         this.entityData.define(SIZE, 1);
     }
 
@@ -48,9 +46,6 @@ public class DragonBreathEntity extends BeamEntity {
         super.readAdditionalSaveData(compound);
         if (compound.contains("duration")) {
             this.setDuration(compound.getInt("duration"));
-        }
-        if (compound.contains("gammaRay")) {
-            this.setGammaRay(compound.getBoolean("gammaRay"));
         }
         if (compound.contains("charge")) {
             this.setCharge(compound.getInt("charge"));
@@ -69,7 +64,6 @@ public class DragonBreathEntity extends BeamEntity {
         compound.putInt("duration", this.getDuration());
         compound.putInt("charge", this.getCharge());
         compound.putBoolean("cause_fire", this.causesFire());
-        compound.putBoolean("gammaRay", this.isGammaRay());
         compound.putInt("size", this.getSize());
     }
 
@@ -112,14 +106,6 @@ public class DragonBreathEntity extends BeamEntity {
 
     public void setCausesFire(boolean fire) {
         this.entityData.set(CAUSE_FIRE, fire);
-    }
-
-    public boolean isGammaRay() {
-        return this.entityData.get(GAMMA_RAY);
-    }
-
-    public void setGammaRay(boolean gammaRay) {
-        this.entityData.set(GAMMA_RAY, gammaRay);
     }
 
     @Override

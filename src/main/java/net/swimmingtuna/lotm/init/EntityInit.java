@@ -121,7 +121,7 @@ public class EntityInit {
                     .sized(2.0f,2.0f).clientTrackingRange(300).build("meteor_no_hurt"));
     public static final RegistryObject<EntityType<ApprenticeDoorEntity>> APPRENTICE_DOOR_ENTITY =
             ENTITIES.register("apprentice_door_entity", () -> EntityType.Builder.<ApprenticeDoorEntity>of(ApprenticeDoorEntity::new, MobCategory.MISC)
-                    .sized(0.5f,2f).clientTrackingRange(400).build("apprentice_door_entity"));
+                    .sized(0.5f,2f).clientTrackingRange(400).updateInterval(1).build("apprentice_door_entity"));
     public static final RegistryObject<EntityType<FlashEntity>> FLASH_ENTITY =
             ENTITIES.register("flash", () -> EntityType.Builder.<FlashEntity>of(FlashEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(200).build(new ResourceLocation(LOTM.MOD_ID, "flash").toString()));

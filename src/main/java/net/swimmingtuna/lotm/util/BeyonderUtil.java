@@ -725,7 +725,6 @@ public class BeyonderUtil {
                 abilityNames.add(ItemInit.DOOR_LAYERING.get());
                 abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
                 abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
-                abilityNames.add(ItemInit.REPLICATION.get());
                 abilityNames.add(ItemInit.SECRET_KEEPING.get());
             }
         }
@@ -1189,6 +1188,7 @@ public class BeyonderUtil {
     }
 
     public static void leftClick(Player pPlayer) {
+        System.out.println("[DEBUG] Left click from: " + pPlayer.getName().getString() + " on side: " + (pPlayer.level().isClientSide() ? "CLIENT" : "SERVER"));
         ItemStack heldItem = pPlayer.getMainHandItem();
         Item item = heldItem.getItem();
         int activeSlot = pPlayer.getInventory().selected;
@@ -1552,6 +1552,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.SPATIAL_CAGE.get(), applyAbilityStrengthened((400.0f - sequence * 100) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SEPARATE_WORM_OF_STAR.get(), applyAbilityStrengthened(1.0f * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.SEALING.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
+        damageMap.put(ItemInit.SPATIAL_MAZE.get(), applyAbilityStrengthened((1200.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_SEAL.get(), applyAbilityStrengthened((30.0f - sequence * 6.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.STARFALL.get(), applyAbilityStrengthened((50.0f - sequence * 10.0f) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.SPATIAL_TEARING.get(), applyAbilityStrengthened((600 - sequence * 100.0f) / abilityWeakness, -abilityStrengthened));
@@ -1764,7 +1765,6 @@ public class BeyonderUtil {
         abilityNames.add(ItemInit.DOOR_LAYERING.get());
         abilityNames.add(ItemInit.DOOR_GAMMA_RAY_BURST.get());
         abilityNames.add(ItemInit.CONCEPTUALIZATION.get());
-        abilityNames.add(ItemInit.REPLICATION.get());
         abilityNames.add(ItemInit.SECRET_KEEPING.get());
         return abilityNames;
     }
@@ -3432,8 +3432,10 @@ public class BeyonderUtil {
         return null;
     }
 
-    public static boolean isConcealed(LivingEntity entity) {
+    public static boolean isConcealed(Entity entity) {
         if (entity.getPersistentData().getInt("doorConcealment") >= 1) {
+            return true;
+        } else if (entity.getPersistentData().getInt("monsterReincarnationCounter") >= 1) {
             return true;
         }
         return entity.level().dimension() == DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
@@ -3468,6 +3470,7 @@ public class BeyonderUtil {
             if (!calledBySealedUtils) {
                 SealedUtils.removeAllSeals(livingEntity);
             }
+            tag.putInt("mazeTrap", 0);
             tag.putInt("doorLayeringCounter", 0);
             tag.putInt("doorLayering", 0);
             tag.putInt("starfallEntitySearch", 0);
@@ -3593,6 +3596,7 @@ public class BeyonderUtil {
             tag.putBoolean("planeswalkerSymbolization", false);
             tag.putInt("starfallTimer", 0);
             tag.putInt("waitOnWormLogic", 100);
+            tag.putInt("doorLayeringDamage", 0);
         }
     }
 

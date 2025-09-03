@@ -27,10 +27,14 @@ import org.joml.Vector3f;
 public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
     private static final ResourceLocation TEXTURE = new ResourceLocation(LOTM.MOD_ID, "textures/models/dragon_breath.png");
     private static final ResourceLocation CHARGE = new ResourceLocation(LOTM.MOD_ID, "textures/models/dragon_breath_charge.png");
+    private static final ResourceLocation GAMMA_TEXTURE = new ResourceLocation(LOTM.MOD_ID, "textures/models/gamma_ray.png");
+    private static final ResourceLocation GAMMA_CHARGE = new ResourceLocation(LOTM.MOD_ID, "textures/models/gamma_ray_charge.png");
     private static final int TEXTURE_WIDTH = 16;
     private static final int TEXTURE_HEIGHT = 512;
     private static final float BEAM_RADIUS = 0.5F;
     private boolean clearerView = true;
+    private boolean cachedGammaRay = false;
+    private int lastEntityId = -1;
 
     private final DragonBreathModel model;
 
@@ -42,13 +46,15 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
     @Override
     public void render(DragonBreathEntity pEntity, float pEntityYaw, float pPartialTick, @NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBuffer, int pPackedLight) {
-        this.clearerView = Minecraft.getInstance().player == pEntity.getOwner() && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
+        if (lastEntityId != pEntity.getId()) {
+            cachedGammaRay = pEntity.isGammaRay();
+            lastEntityId = pEntity.getId();
+        }
+        this.clearerView = pEntity.getIsLivingOwner() && Minecraft.getInstance().player == pEntity.getOwner() && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
         float yaw = pEntity.renderYaw;
         float pitch = pEntity.renderPitch;
-        Vector3f color = null;
-        if (pEntity.isGammaRay()) {
-            color = ParticleColors.DARK_BLUE;
-        } else if (pEntity.causesFire()) {
+        Vector3f color;
+        if (pEntity.causesFire()) {
             color = ParticleColors.FIRE_YELLOW;
         } else {
             color = ParticleColors.FIRE_ORANGE;
@@ -58,13 +64,16 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
         pPoseStack.pushPose();
         pPoseStack.scale(entitySize, entitySize, entitySize);
-        pPoseStack.pushPose();
-        pPoseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
-        pPoseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-        VertexConsumer charge = pBuffer.getBuffer(LOTMRenderTypes.glow(CHARGE));
-        this.model.setupAnim(pEntity, 0.0F, 0.0F, age, 0.0F, 0.0F);
-        this.model.renderToBuffer(pPoseStack, charge, pPackedLight, OverlayTexture.NO_OVERLAY, color.x, color.y, color.z, 1.0F);
-        pPoseStack.popPose();
+        if (!pEntity.isGammaRay()) {
+            pPoseStack.pushPose();
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
+            pPoseStack.mulPose(Axis.XP.rotationDegrees(pitch));
+            VertexConsumer charge = pBuffer.getBuffer(LOTMRenderTypes.glow(CHARGE));
+            this.model.setupAnim(pEntity, 0.0F, 0.0F, age, 0.0F, 0.0F);
+            this.model.renderToBuffer(pPoseStack, charge, pPackedLight, OverlayTexture.NO_OVERLAY, color.x, color.y, color.z, 1.0F);
+            pPoseStack.popPose();
+        }
+
         if (pEntity.getTime() >= pEntity.getCharge()) {
             double collidePosX = pEntity.collidePosX;
             double collidePosY = pEntity.collidePosY;
@@ -80,8 +89,11 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
             pPoseStack.pushPose();
             pPoseStack.translate(0.0F, (pEntity.getBbHeight() / 2.0F) - 0.5F, 0.0F);
             VertexConsumer beam = pBuffer.getBuffer(LOTMRenderTypes.glow(TEXTURE));
+            if (pEntity.isGammaRay()) {
+                beam = pBuffer.getBuffer(LOTMRenderTypes.glow(GAMMA_TEXTURE));
+            }
             float brightness = 1.0F - ((float) pEntity.getTime() / (pEntity.getCharge() + pEntity.getDuration() + pEntity.getFrames()));
-            this.renderBeam(length, yaw, pitch, frame, pPoseStack, beam, brightness, pPackedLight, entitySize);
+            this.renderBeam(length, yaw, pitch, frame, pPoseStack, beam, brightness, pPackedLight, entitySize, pEntity.isGammaRay());
             pPoseStack.popPose();
         }
 
@@ -124,14 +136,12 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, -scaledRadius, maxU, minV, brightness, packedLight);
     }
 
-    private void renderBeam(float length, float yaw, float pitch, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float entitySize) {
+    private void renderBeam(float length, float yaw, float pitch, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float entitySize, boolean isGammaRay) {
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
         poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-
         this.drawCube(length, frame, poseStack, consumer, brightness, packedLight, entitySize);
-
         poseStack.popPose();
     }
 

@@ -22,8 +22,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -34,7 +38,7 @@ import java.util.List;
 
 import static net.swimmingtuna.lotm.util.BeyonderUtil.setPathwayAndSequence;
 
-public class FateReincarnation extends SimpleAbilityItem {
+public class FateReincarnation extends LeftClickHandlerSkillP {
 
     public FateReincarnation(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 1, 1250, 14400);
@@ -110,6 +114,7 @@ public class FateReincarnation extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, reincarnates randomly up to 5000 blocks away in both directions, as a non-sequence player. You will automatically advance through the monster pathway over the course of two hours, until you reach your original sequence."));
+        tooltipComponents.add(Component.literal("Left click for Fate Authority: Fated Connection."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("1250").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Hours").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -248,4 +253,8 @@ public class FateReincarnation extends SimpleAbilityItem {
         return 0;
     }
 
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.FATEDCONNECTION.get()));
+    }
 }

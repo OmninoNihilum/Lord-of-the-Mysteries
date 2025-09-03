@@ -141,7 +141,8 @@ public class Astrolabe extends Item {
                     // Find the nearest entity of the specified type
                     Entity nearestEntity = nearbyEntities.stream()
                             .filter(entity -> entity.getType() == entityType)
-                            .filter(entity -> !entity.equals(player)) // Exclude the searching player
+                            .filter(entity -> !entity.equals(player))
+                            .filter(entity -> !BeyonderUtil.isConcealed(entity))// Exclude the searching player
                             .min((e1, e2) -> Double.compare(
                                     player.distanceToSqr(e1),
                                     player.distanceToSqr(e2)

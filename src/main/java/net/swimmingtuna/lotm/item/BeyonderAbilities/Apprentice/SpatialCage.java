@@ -22,7 +22,10 @@ import net.swimmingtuna.lotm.entity.SpatialCageEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,9 +33,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 
-public class SpatialCage extends SimpleAbilityItem {
+public class SpatialCage extends LeftClickHandlerSkillP {
     public SpatialCage(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 3, 800, 1000);
+        super(properties, BeyonderClassInit.APPRENTICE, 3, 800, 1000,50,50);
     }
 
     @Override
@@ -43,7 +46,7 @@ public class SpatialCage extends SimpleAbilityItem {
             }
             if (interactionTarget.getPersistentData().contains("spatialCageSealUUID")){
                 if(livingEntity instanceof Player player){
-                    player.displayClientMessage(Component.literal("Target is already on a Spatial Cage").withStyle(ChatFormatting.RED), true);
+                    player.displayClientMessage(Component.literal("Target is already in a Spatial Cage").withStyle(ChatFormatting.RED), true);
                 }
                 return InteractionResult.FAIL;
             }
@@ -90,14 +93,15 @@ public class SpatialCage extends SimpleAbilityItem {
     private Multimap<Attribute, AttributeModifier> createAttributeMap() {
         ImmutableMultimap.Builder<Attribute, AttributeModifier> attributeBuilder = ImmutableMultimap.builder();
         attributeBuilder.putAll(super.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND));
-        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 20, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with entities
-        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 20, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with blocks, p much useless for this item
+        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 50, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with entities
+        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 50, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with blocks, p much useless for this item
         return attributeBuilder.build();
     }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        tooltipComponents.add(Component.literal("Upon use, creates a powerful seal that can affect beings a full sequence above you."));
+        tooltipComponents.add(Component.literal("Upon use, creates a powerful seal that can affect beings a full sequence above you, sealing them in a cage for a long duration. At Sequence 0, use this ability"));
+        tooltipComponents.add(Component.literal("Left click for Spatial Authority: Tearing."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("800").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("50 Seconds").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(getPathwayText(this.requiredClass.get()));
@@ -112,9 +116,14 @@ public class SpatialCage extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (target != null && target.getHealth() > livingEntity.getHealth()) {
-            return 100;
+        if (target != null) {
+            return (int) (livingEntity.getHealth() / livingEntity.getMaxHealth());
         }
         return 0;
+    }
+
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.SPATIAL_TEARING.get()));
     }
 }

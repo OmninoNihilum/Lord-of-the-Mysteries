@@ -37,9 +37,11 @@ import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorConcealment;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.networking.packet.SyncShouldntRenderHandPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -173,8 +175,8 @@ public class ApprenticeClass implements BeyonderClass {
 
                     tag.putInt("maxScribedAbilities", 50);
                     if (player instanceof Player pPlayer) {
-                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 20);
-                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 10);
+                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 45);
+                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 10000000);
                     }
                     ScribedUtils.seq2FixCount(player);
                     break;
@@ -262,9 +264,8 @@ public class ApprenticeClass implements BeyonderClass {
         items.put(0, ItemInit.DOOR_LAYERING.get());
         items.put(0, ItemInit.DOOR_CONCEALMENT.get());
         items.put(0, ItemInit.DOOR_SEAL_STRENGTHENING.get());
-        //items.put(0, ItemInit.DOOR_GAMMA_RAY_BURST.get());
+        items.put(0, ItemInit.DOOR_GAMMA_RAY_BURST.get());
         items.put(0, ItemInit.CONCEPTUALIZATION.get());
-        //items.put(0, ItemInit.REPLICATION.get());
 
         return items;
     }
@@ -328,6 +329,26 @@ public class ApprenticeClass implements BeyonderClass {
             DoorConcealment.concealmentTick(event);
             if (livingEntity.getPersistentData().getInt("spaceFragmentationCopies") >= 1) {
                 livingEntity.getPersistentData().putInt("spaceFragmentationCopies", livingEntity.getPersistentData().getInt("spaceFragmentationCopies") - 1);
+            }
+            if (livingEntity.getPersistentData().getInt("mazeTrap") >= 1) {
+                CompoundTag tag = livingEntity.getPersistentData();
+                int timer = tag.getInt("mazeTrap");
+                int x = tag.getInt("mazeTrapX");
+                int y = tag.getInt("mazeTrapY");
+                int z = tag.getInt("mazeTrapZ");
+                if (timer >= 1 ) {
+                    if (livingEntity.isAlive()) {
+                        livingEntity.getPersistentData().putInt("ignoreShouldntRender", 10);
+                        LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(livingEntity.getUUID(), 20));
+                    }
+                    tag.putInt("mazeTrap", timer - 1);
+                    if (timer == 1) {
+                        BeyonderUtil.trueTeleportEntity(livingEntity, livingEntity.level(), x, y, z);
+                        tag.putInt("mazeTrap", 0);
+                    } else {
+                        BeyonderUtil.trueTeleportEntity(livingEntity, livingEntity.level(), x, y + 130, z);
+                    }
+                }
             }
         }
         if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 40 == 0) {

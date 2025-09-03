@@ -27,7 +27,10 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +40,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CreateConcealedSpace extends SimpleAbilityItem {
+public class CreateConcealedSpace extends LeftClickHandlerSkillP {
 
     public CreateConcealedSpace(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 4, 400, 300);
@@ -265,6 +268,7 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, Conceal a part of the Spirit World, to be used at you will."));
+        tooltipComponents.add(Component.literal("Left click for Create Concealed Bundle."));
         tooltipComponents.add(Component.literal("If used while sneaking, in your off hand, you will receive a special door that leads to the users Concealed Space."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("400").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("15 Seconds").withStyle(ChatFormatting.YELLOW)));
@@ -280,11 +284,11 @@ public class CreateConcealedSpace extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
-        if (livingEntity.getHealth() < livingEntity.getMaxHealth() / 8 && !insideOwnSpace(livingEntity)) {
-            return 80;
-        } else if (insideOwnSpace(livingEntity) && livingEntity.getHealth() > livingEntity.getMaxHealth() - 5) {
-            return 100;
-        }
         return 0;
+    }
+
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.CREATE_CONCEALED_BUNDLE.get()));
     }
 }

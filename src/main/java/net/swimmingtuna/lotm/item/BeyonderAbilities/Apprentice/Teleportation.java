@@ -276,7 +276,13 @@ public class Teleportation extends SimpleAbilityItem {
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (PlayerMobEntity.isCopy(livingEntity)) {
             return 0;
+        } else {
+            if (target != null) {
+                return 65;
+            } else {
+                removeCopies(livingEntity);
+                return 0;
+            }
         }
-        return 0;
     }
 }

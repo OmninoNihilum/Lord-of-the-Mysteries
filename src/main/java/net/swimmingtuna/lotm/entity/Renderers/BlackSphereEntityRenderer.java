@@ -24,11 +24,11 @@ public class BlackSphereEntityRenderer extends EntityRenderer<BlackSphereEntity>
     @Override
     public void render(BlackSphereEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         poseStack.pushPose();
-        float animationDuration = 60.0f;
+        float animationDuration = 40.0f;
         float currentTick = entity.tickCount + partialTick;
         float progress = Math.min(currentTick / animationDuration, 1.0f);
-        float startScale = 20.0f;
-        float endScale = 12.0f;
+        float startScale = 30.0f;
+        float endScale = 15.0f;
         float scale = startScale + (endScale - startScale) * progress;
         poseStack.scale(scale, scale, scale);
         renderCore(poseStack, bufferSource, packedLight);

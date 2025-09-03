@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
+import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateDragonBreathS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -50,7 +51,13 @@ public abstract class BeamEntity extends LOTMProjectile {
 
     public @Nullable Direction side = null;
 
+    // Add fixed direction storage for non-living owners
+    private Vec3 fixedDirection = null;
+    private Vec3 fixedStartPos = null;
+
+    private static final EntityDataAccessor<Boolean> GAMMA_RAY = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> TWILIGHT = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> LIVINGOWNER = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DESTROY_BLOCKS = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DRAGON_BREATH = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Float> DAMAGE = SynchedEntityData.defineId(BeamEntity.class, EntityDataSerializers.FLOAT);
@@ -80,6 +87,21 @@ public abstract class BeamEntity extends LOTMProjectile {
         this.setPower(power);
     }
 
+    // Add method to set fixed direction for non-living owners
+    public void setFixedDirection(Vec3 direction) {
+        this.fixedDirection = direction.normalize();
+        this.fixedStartPos = this.position();
+
+        // Calculate yaw and pitch from direction for rendering
+        double horizontalDistance = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
+        float yaw = (float) Math.toDegrees(Math.atan2(direction.z, direction.x)) - 90.0f;
+        float pitch = (float) -Math.toDegrees(Math.atan2(direction.y, horizontalDistance));
+
+        this.renderYaw = yaw;
+        this.renderPitch = pitch;
+        this.setYaw((float) Math.toRadians(yaw));
+        this.setPitch((float) Math.toRadians(pitch));
+    }
 
     public abstract int getFrames();
 
@@ -90,7 +112,6 @@ public abstract class BeamEntity extends LOTMProjectile {
     public void setRange(int range) {
         this.entityData.set(RANGE, range);
     }
-
 
     public float getDamage() {
         return this.entityData.get(DAMAGE);
@@ -134,7 +155,6 @@ public abstract class BeamEntity extends LOTMProjectile {
 
     public abstract int getDuration();
 
-
     public abstract int getCharge();
 
     protected boolean causesFire() {
@@ -148,7 +168,6 @@ public abstract class BeamEntity extends LOTMProjectile {
     protected boolean isStill() {
         return false;
     }
-
 
     protected Vec3 calculateSpawnPos(LivingEntity owner) {
         return new Vec3(owner.getX(), owner.getEyeY() - (this.getBbHeight() / 2.0F) + 0.5, owner.getZ()).add(RotationUtil.getTargetAdjustedLookAngle(owner));
@@ -164,6 +183,10 @@ public abstract class BeamEntity extends LOTMProjectile {
     @Override
     public void tick() {
         super.tick();
+        if (!this.level().isClientSide()) {
+            this.setPos(this.getX(), this.getY(), this.getZ());
+            this.hasImpulse = true;
+        }
         this.prevCollidePosX = this.collidePosX;
         this.prevCollidePosY = this.collidePosY;
         this.prevCollidePosZ = this.collidePosZ;
@@ -175,8 +198,9 @@ public abstract class BeamEntity extends LOTMProjectile {
             this.update();
         }
 
-
-        if (this.getOwner() instanceof LivingEntity owner) {
+        // Modified owner check to handle non-living owners
+        Entity owner = this.getOwner();
+        if (owner != null || !this.getIsLivingOwner()) {
             if (!this.on && this.animation == 0) {
                 this.discard();
             }
@@ -215,14 +239,10 @@ public abstract class BeamEntity extends LOTMProjectile {
                 if (!this.isStill()) {
                     this.calculateEndPos();
                 }
-
-                // Corrected collision detection start position
                 List<Entity> entities = this.checkCollisions(
-                        new Vec3(this.getX(), this.getY(), this.getZ()), // Corrected start position
+                        new Vec3(this.getX(), this.getY(), this.getZ()),
                         new Vec3(this.endPosX, this.endPosY, this.endPosZ)
                 );
-
-                // Handle entity collisions and effects
                 for (Entity entity : entities) {
                     if (entity == owner) continue;
                     if (getIsDragonBreath() && this.getOwner() != null && this.getOwner() instanceof LivingEntity livingOwner && entity instanceof LivingEntity livingEntity && !BeyonderUtil.areAllies(livingOwner, livingEntity)) {
@@ -250,6 +270,16 @@ public abstract class BeamEntity extends LOTMProjectile {
                             }
                         }
                     }
+                    if (isGammaRay() && this.getOwner() != null && this.getOwner() instanceof LivingEntity livingOwner && entity instanceof LivingEntity livingEntity) {
+                        int noRegeneration = livingEntity.getPersistentData().getInt("LOTMNoRegeneration");
+                        BeyonderUtil.applyNoRegeneration(livingEntity, noRegeneration + 5);
+                        livingEntity.hurt(BeyonderUtil.magicSource(livingOwner, livingEntity), this.getDamage());
+                    } else if (isGammaRay() && this.getOwner() == null && entity instanceof LivingEntity livingEntity) {
+                        livingEntity.hurt(BeyonderUtil.magicSource(this, livingEntity), getDamage());
+                        int noRegeneration = livingEntity.getPersistentData().getInt("LOTMNoRegeneration");
+                        BeyonderUtil.applyNoRegeneration(livingEntity, noRegeneration + 5);
+                    }
+
                     if (entity instanceof LivingEntity livingEntity && getIsDragonBreath() && this.getOwner() != null && this.getOwner() instanceof LivingEntity livingOwner && !BeyonderUtil.areAllies(livingOwner, livingEntity) && this.tickCount >= this.getCharge() + this.getDuration() - 20) {
                         BeyonderUtil.applyFrenzy(livingEntity, this.getFrenzyTime());
                     }
@@ -259,11 +289,140 @@ public abstract class BeamEntity extends LOTMProjectile {
                     }
                 }
 
-                // Handle block breaking and fire
+                if (!this.level().isClientSide && this.getIsLivingOwner() && owner instanceof LivingEntity livingOwner) {
+                    this.handleBlockDestruction(livingOwner);
+                } else if (!this.level().isClientSide && !this.getIsLivingOwner()) {
+                    this.handleBlockDestructionNonLiving();
+                }
             }
 
             if (this.getTime() - this.getCharge() >= this.getDuration()) {
                 this.on = false;
+            }
+        }
+    }
+
+    private void handleBlockDestructionNonLiving() {
+        double radius = this.getSize();
+        Vec3 from = new Vec3(this.getX(), this.getY(), this.getZ());
+        Vec3 to = new Vec3(this.collidePosX, this.collidePosY, this.collidePosZ);
+        Vec3 dir = to.subtract(from).normalize();
+
+        AABB bounds = new AABB(
+                Math.min(from.x, this.collidePosX) - radius,
+                Math.min(from.y, this.collidePosY) - radius,
+                Math.min(from.z, this.collidePosZ) - radius,
+                Math.max(from.x, this.collidePosX) + radius,
+                Math.max(from.y, this.collidePosY) + radius,
+                Math.max(from.z, this.collidePosZ) + radius
+        );
+
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = (int) Math.floor(bounds.minX); x <= Math.ceil(bounds.maxX); x++) {
+            for (int y = (int) Math.floor(bounds.minY); y <= Math.ceil(bounds.maxY); y++) {
+                for (int z = (int) Math.floor(bounds.minZ); z <= Math.ceil(bounds.maxZ); z++) {
+                    mutablePos.set(x, y, z);
+                    Vec3 point = new Vec3(x + 0.5, y + 0.5, z + 0.5);
+                    Vec3 fromToPoint = point.subtract(from);
+                    double dot = fromToPoint.dot(dir);
+                    Vec3 projection = dir.scale(dot);
+                    Vec3 distanceVec = fromToPoint.subtract(projection);
+                    double distance = distanceVec.length();
+
+                    if (distance <= radius) {
+                        if (getDestroyBlocks()) {
+                            if (this.breaksBlocks() && !EXCLUDED_BLOCKS.contains(this.level().getBlockState(mutablePos).getBlock())) {
+                                this.level().destroyBlock(mutablePos, false);
+                            }
+                        }
+
+                        if (this.tickCount % 5 == 0 && getIsTwilight() &&
+                                this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() &&
+                                this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState()) {
+                            if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
+                                BeyonderUtil.setAsBlock(this, mutablePos, Blocks.DIRT);
+                            } else {
+                                this.level().destroyBlock(mutablePos, false);
+                            }
+                        }
+
+                        if (this.causesFire()) {
+                            if (this.random.nextInt(3) == 0 &&
+                                    this.level().getBlockState(mutablePos).isAir() &&
+                                    this.level().getBlockState(mutablePos.below()).isSolidRender(this.level(), mutablePos.below())) {
+                                BeyonderUtil.setAsBlock(this, mutablePos, Blocks.FIRE);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private void handleBlockDestruction(LivingEntity owner) {
+        double radius = this.getSize();
+        Vec3 from = new Vec3(this.getX(), this.getY(), this.getZ());
+        Vec3 to = new Vec3(this.collidePosX, this.collidePosY, this.collidePosZ);
+        Vec3 dir = to.subtract(from).normalize();
+
+        AABB bounds = new AABB(
+                Math.min(from.x, this.collidePosX) - radius,
+                Math.min(from.y, this.collidePosY) - radius,
+                Math.min(from.z, this.collidePosZ) - radius,
+                Math.max(from.x, this.collidePosX) + radius,
+                Math.max(from.y, this.collidePosY) + radius,
+                Math.max(from.z, this.collidePosZ) + radius
+        );
+        boolean isLookingDown = false;
+        if (owner != null) {
+            float pitch = owner.getXRot();
+            isLookingDown = pitch > 70.0f;
+        }
+
+        double ownerGroundY = owner != null ? owner.getY() : Double.MAX_VALUE;
+        double ownerRadius = owner != null ? owner.getBbWidth() / 2.0 : 1.0;
+
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = (int) Math.floor(bounds.minX); x <= Math.ceil(bounds.maxX); x++) {
+            for (int y = (int) Math.floor(bounds.minY); y <= Math.ceil(bounds.maxY); y++) {
+                for (int z = (int) Math.floor(bounds.minZ); z <= Math.ceil(bounds.maxZ); z++) {
+                    mutablePos.set(x, y, z);
+                    Vec3 point = new Vec3(x + 0.5, y + 0.5, z + 0.5);
+                    Vec3 fromToPoint = point.subtract(from);
+                    double dot = fromToPoint.dot(dir);
+                    Vec3 projection = dir.scale(dot);
+                    Vec3 distanceVec = fromToPoint.subtract(projection);
+                    double distance = distanceVec.length();
+
+                    if (distance <= radius) {
+                        boolean isNearOwnerFeet = false;
+                        double blockDistanceFromOwner = Math.sqrt(Math.pow(x + 0.5 - owner.getX(), 2) + Math.pow(z + 0.5 - owner.getZ(), 2));
+                        isNearOwnerFeet = blockDistanceFromOwner <= (ownerRadius + 0.5) && y <= ownerGroundY + 1;
+                        boolean shouldDestroy = getDestroyBlocks() && (!isNearOwnerFeet || isLookingDown);
+
+                        if (shouldDestroy) {
+                            if (this.breaksBlocks() && !EXCLUDED_BLOCKS.contains(this.level().getBlockState(mutablePos).getBlock())) {
+                                this.level().destroyBlock(mutablePos, false);
+                            }
+                        } else if (this.tickCount % 5 == 0 && getIsTwilight() &&
+                                this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() &&
+                                this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState() &&
+                                (!isNearOwnerFeet || isLookingDown)) { // Same logic for twilight effect
+                            if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
+                                BeyonderUtil.setAsBlock(this, mutablePos, Blocks.DIRT);
+                            } else {
+                                this.level().destroyBlock(mutablePos, false);
+                            }
+                        }
+
+                        if (this.causesFire()) {
+                            if (this.random.nextInt(3) == 0 &&
+                                    this.level().getBlockState(mutablePos).isAir() &&
+                                    this.level().getBlockState(mutablePos.below()).isSolidRender(this.level(), mutablePos.below())) {
+                                BeyonderUtil.setAsBlock(this, mutablePos, Blocks.FIRE);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -273,10 +432,12 @@ public abstract class BeamEntity extends LOTMProjectile {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(GAMMA_RAY, false);
         this.entityData.define(DAMAGE, 20.0F);
         this.entityData.define(DATA_YAW, 0.0F);
         this.entityData.define(DATA_PITCH, 0.0F);
         this.entityData.define(DRAGON_BREATH, false);
+        this.entityData.define(LIVINGOWNER, true);
         this.entityData.define(FRENZY_TIME, 1);
         this.entityData.define(SIZE, 1);
         this.entityData.define(DESTROY_BLOCKS, true);
@@ -290,6 +451,9 @@ public abstract class BeamEntity extends LOTMProjectile {
         if (compound.contains("damage")) {
             this.setDamage(compound.getFloat("damage"));
         }
+        if (compound.contains("gammaRay")) {
+            this.setGammaRay(compound.getBoolean("gammaRay"));
+        }
         if (compound.contains("range")) {
             this.setRange(compound.getInt("range"));
         }
@@ -302,6 +466,9 @@ public abstract class BeamEntity extends LOTMProjectile {
         if (compound.contains("dragon_breath")) {
             this.setIsDragonbreath(compound.getBoolean("dragon_breath"));
         }
+        if (compound.contains("livingOwner")) {
+            this.setIsLivingOwner(compound.getBoolean("livingOwner"));
+        }
         if (compound.contains("frenzy_time")) {
             this.setFrenzyTime(compound.getInt("frenzy_time"));
         }
@@ -309,10 +476,26 @@ public abstract class BeamEntity extends LOTMProjectile {
             this.setSize(compound.getInt("size"));
         }
         if (compound.contains("destroy_blocks")) {
-            this.setSize(compound.getInt("destroy_blocks"));
+            this.setDestroyBlocks(compound.getBoolean("destroy_blocks")); // Fixed bug here
         }
         if (compound.contains("twilight")) {
-            this.setSize(compound.getInt("twilight"));
+            this.setIsTwilight(compound.getBoolean("twilight")); // Fixed bug here
+        }
+
+        // Add serialization for fixed direction
+        if (compound.contains("fixedDirectionX")) {
+            this.fixedDirection = new Vec3(
+                    compound.getDouble("fixedDirectionX"),
+                    compound.getDouble("fixedDirectionY"),
+                    compound.getDouble("fixedDirectionZ")
+            );
+        }
+        if (compound.contains("fixedStartPosX")) {
+            this.fixedStartPos = new Vec3(
+                    compound.getDouble("fixedStartPosX"),
+                    compound.getDouble("fixedStartPosY"),
+                    compound.getDouble("fixedStartPosZ")
+            );
         }
     }
 
@@ -320,16 +503,29 @@ public abstract class BeamEntity extends LOTMProjectile {
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putFloat("damage", this.getDamage());
+        compound.putBoolean("gammaRay", this.isGammaRay());
         compound.putFloat("data_yaw", this.getYaw());
         compound.putFloat("data_pitch", this.getPitch());
+        compound.putBoolean("livingOwner", this.getIsLivingOwner());
         compound.putBoolean("dragon_breath", this.getIsDragonBreath());
         compound.putInt("frenzy_time", this.getFrenzyTime());
         compound.putInt("size", this.getSize());
         compound.putBoolean("destroy_blocks", this.getDestroyBlocks());
         compound.putBoolean("twilight", this.getIsTwilight());
         compound.putInt("range", (int) this.getRange());
-    }
 
+        // Add serialization for fixed direction
+        if (this.fixedDirection != null) {
+            compound.putDouble("fixedDirectionX", this.fixedDirection.x);
+            compound.putDouble("fixedDirectionY", this.fixedDirection.y);
+            compound.putDouble("fixedDirectionZ", this.fixedDirection.z);
+        }
+        if (this.fixedStartPos != null) {
+            compound.putDouble("fixedStartPosX", this.fixedStartPos.x);
+            compound.putDouble("fixedStartPosY", this.fixedStartPos.y);
+            compound.putDouble("fixedStartPosZ", this.fixedStartPos.z);
+        }
+    }
 
     public int getSize() {
         return this.entityData.get(SIZE);
@@ -337,6 +533,14 @@ public abstract class BeamEntity extends LOTMProjectile {
 
     public void setSize(int size) {
         this.entityData.set(SIZE, size);
+    }
+
+    public boolean getIsLivingOwner() {
+        return this.entityData.get(LIVINGOWNER);
+    }
+
+    public void setIsLivingOwner(boolean isLivingOwner) {
+        this.entityData.set(LIVINGOWNER, isLivingOwner);
     }
 
     public float getYaw() {
@@ -347,6 +551,14 @@ public abstract class BeamEntity extends LOTMProjectile {
         this.entityData.set(DATA_YAW, yaw);
     }
 
+    public boolean isGammaRay() {
+        return this.entityData.get(GAMMA_RAY);
+    }
+
+    public void setGammaRay(boolean gammaRay) {
+        this.entityData.set(GAMMA_RAY, gammaRay);
+    }
+
     public float getPitch() {
         return this.entityData.get(DATA_PITCH);
     }
@@ -355,9 +567,8 @@ public abstract class BeamEntity extends LOTMProjectile {
         this.entityData.set(DATA_PITCH, pitch);
     }
 
-
     public List<Entity> checkCollisions(Vec3 from, Vec3 to) {
-        if (!(this.getOwner() instanceof LivingEntity owner)) return List.of();
+        Entity owner = this.getOwner(); // Changed to Entity instead of casting to LivingEntity
         BlockHitResult result = this.level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         if (result.getType() != HitResult.Type.MISS) {
             Vec3 pos = result.getLocation();
@@ -381,67 +592,6 @@ public abstract class BeamEntity extends LOTMProjectile {
                 Math.max(from.y, this.collidePosY) + radius,
                 Math.max(from.z, this.collidePosZ) + radius
         );
-
-        // Replace the block destruction logic in the checkCollisions method
-// (around lines 250-290 in your original code)
-
-        if (!this.level().isClientSide) {
-            // Check if owner is looking downward (pitch > 70 degrees - really looking at ground)
-            boolean isLookingDown = false;
-            if (owner != null) {
-                float pitch = owner.getXRot(); // Positive values = looking down
-                isLookingDown = pitch > 70.0f; // 90 degrees is straight down, so 70 is 20 degrees from straight down
-            }
-
-            // Get owner's ground level and size for comparison
-            double ownerGroundY = owner != null ? owner.getY() : Double.MAX_VALUE;
-            double ownerRadius = owner != null ? owner.getBbWidth() / 2.0 : 1.0; // Use owner's actual width
-
-            BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-            for (int x = (int) Math.floor(bounds.minX); x <= Math.ceil(bounds.maxX); x++) {
-                for (int y = (int) Math.floor(bounds.minY); y <= Math.ceil(bounds.maxY); y++) {
-                    for (int z = (int) Math.floor(bounds.minZ); z <= Math.ceil(bounds.maxZ); z++) {
-                        mutablePos.set(x, y, z);
-                        Vec3 point = new Vec3(x + 0.5, y + 0.5, z + 0.5);
-                        Vec3 fromToPoint = point.subtract(from);
-                        double dot = fromToPoint.dot(dir);
-                        Vec3 projection = dir.scale(dot);
-                        Vec3 distanceVec = fromToPoint.subtract(projection);
-                        double distance = distanceVec.length();
-
-                        if (distance <= radius) {
-                            boolean isNearOwnerFeet = false;
-                            double blockDistanceFromOwner = Math.sqrt(Math.pow(x + 0.5 - owner.getX(), 2) + Math.pow(z + 0.5 - owner.getZ(), 2));
-                            isNearOwnerFeet = blockDistanceFromOwner <= (ownerRadius + 0.5) && y <= ownerGroundY + 1;
-                            boolean shouldDestroy = getDestroyBlocks() && (!isNearOwnerFeet || isLookingDown);
-
-                            if (shouldDestroy) {
-                                if (this.breaksBlocks() && !EXCLUDED_BLOCKS.contains(this.level().getBlockState(mutablePos).getBlock())) {
-                                    this.level().destroyBlock(mutablePos, false);
-                                }
-                            } else if (this.tickCount % 5 == 0 && getIsTwilight() &&
-                                    this.level().getBlockState(mutablePos) != Blocks.BEDROCK.defaultBlockState() &&
-                                    this.level().getBlockState(mutablePos) != Blocks.WATER.defaultBlockState() &&
-                                    (!isNearOwnerFeet || isLookingDown)) { // Same logic for twilight effect
-                                if (this.level().getBlockState(mutablePos) != Blocks.DIRT.defaultBlockState() && this.level().getBlockState(mutablePos) != Blocks.AIR.defaultBlockState()) {
-                                    BeyonderUtil.setAsBlock(this, mutablePos, Blocks.DIRT);
-                                } else {
-                                    this.level().destroyBlock(mutablePos, false);
-                                }
-                            }
-
-                            if (this.causesFire()) {
-                                if (this.random.nextInt(3) == 0 &&
-                                        this.level().getBlockState(mutablePos).isAir() &&
-                                        this.level().getBlockState(mutablePos.below()).isSolidRender(this.level(), mutablePos.below())) {
-                                    BeyonderUtil.setAsBlock(this, mutablePos, Blocks.FIRE);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         double entityDetectionRadius = radius * 1.5;
 
@@ -551,7 +701,16 @@ public abstract class BeamEntity extends LOTMProjectile {
     }
 
     private void update() {
-        if (this.getOwner() instanceof LivingEntity owner) {
+        if (!this.getIsLivingOwner()) {
+            this.prevYaw = this.renderYaw;
+            this.prevPitch = this.renderPitch;
+            if (this.fixedStartPos != null) {
+                this.setPos(this.fixedStartPos.x, this.fixedStartPos.y, this.fixedStartPos.z);
+            }
+            this.setYaw((float) Math.toRadians(this.renderYaw));
+            this.setPitch((float) Math.toRadians(this.renderPitch));
+
+        } else if (this.getOwner() instanceof LivingEntity owner) {
             float yaw = owner.getYRot();
             float pitch = owner.getXRot();
             this.renderYaw = yaw;
@@ -564,64 +723,87 @@ public abstract class BeamEntity extends LOTMProjectile {
         }
     }
 
-
-
     private void calculateEndPos() {
         Vec3 direction;
         Vec3 startPos;
 
-        if (this.getOwner() instanceof LivingEntity owner) {
-            float scale = 1.0f;
-            try {
-                scale = BeyonderUtil.getScale(owner);
-            } catch (Exception ignored) {
-            }
-
-            // Get the player's look direction
-            direction = owner.getLookAngle();
-
-            // Start raycast from player's eye position
-            startPos = owner.getEyePosition();
-
-            // Perform raycast to find what the player is looking at
-            Vec3 endPos = performRaycast(startPos, direction, scale);
-
-            this.endPosX = endPos.x;
-            this.endPosY = endPos.y;
-            this.endPosZ = endPos.z;
-            this.endPos = endPos;
-
-        } else {
-            // Fallback for non-living entities
-            if (this.level().isClientSide) {
-                direction = new Vec3(
-                        Math.cos(this.renderYaw) * Math.cos(this.renderPitch),
-                        Math.sin(this.renderPitch),
-                        Math.sin(this.renderYaw) * Math.cos(this.renderPitch)
-                ).normalize();
+        if (this.getIsLivingOwner()) {
+            if (this.getOwner() instanceof LivingEntity owner) {
+                float scale = 1.0f;
+                try {
+                    scale = BeyonderUtil.getScale(owner);
+                } catch (Exception ignored) {
+                }
+                direction = owner.getLookAngle();
+                startPos = owner.getEyePosition();
+                Vec3 endPos = performRaycast(startPos, direction, scale);
+                this.endPosX = endPos.x;
+                this.endPosY = endPos.y;
+                this.endPosZ = endPos.z;
+                this.endPos = endPos;
             } else {
-                direction = new Vec3(Math.cos(this.getYaw()) * Math.cos(this.getPitch()), Math.sin(this.getPitch()), Math.sin(this.getYaw()) * Math.cos(this.getPitch())).normalize();
+                if (this.level().isClientSide) {
+                    direction = new Vec3(
+                            -Math.sin(Math.toRadians(this.renderYaw)) * Math.cos(Math.toRadians(this.renderPitch)),
+                            -Math.sin(Math.toRadians(this.renderPitch)),
+                            Math.cos(Math.toRadians(this.renderYaw)) * Math.cos(Math.toRadians(this.renderPitch))
+                    ).normalize();
+                } else {
+                    direction = new Vec3(
+                            -Math.sin(this.getYaw()) * Math.cos(this.getPitch()),
+                            -Math.sin(this.getPitch()),
+                            Math.cos(this.getYaw()) * Math.cos(this.getPitch())
+                    ).normalize();
+                }
+                startPos = new Vec3(this.getX(), this.getY(), this.getZ());
+                Vec3 end = startPos.add(direction.scale(this.getRange()));
+                this.endPosX = end.x;
+                this.endPosY = end.y;
+                this.endPosZ = end.z;
+                this.endPos = end;
             }
-
-            startPos = new Vec3(this.getX(), this.getY(), this.getZ());
-            Vec3 end = startPos.add(direction.scale(this.getRange()));
-            this.endPosX = end.x;
-            this.endPosY = end.y;
-            this.endPosZ = end.z;
-            this.endPos = end;
+        } else {
+            if (this.fixedDirection != null && this.fixedStartPos != null) {
+                direction = this.fixedDirection;
+                startPos = this.fixedStartPos;
+                Vec3 endPos = performRaycast(startPos, direction, 1.0f);
+                this.endPosX = endPos.x;
+                this.endPosY = endPos.y;
+                this.endPosZ = endPos.z;
+                this.endPos = endPos;
+            } else {
+                direction = new Vec3(
+                        -Math.sin(Math.toRadians(this.renderYaw)) * Math.cos(Math.toRadians(this.renderPitch)),
+                        -Math.sin(Math.toRadians(this.renderPitch)),
+                        Math.cos(Math.toRadians(this.renderYaw)) * Math.cos(Math.toRadians(this.renderPitch))
+                ).normalize();
+                startPos = new Vec3(this.getX(), this.getY(), this.getZ());
+                Vec3 endPos = performRaycast(startPos, direction, 1.0f);
+                this.endPosX = endPos.x;
+                this.endPosY = endPos.y;
+                this.endPosZ = endPos.z;
+                this.endPos = endPos;
+            }
         }
     }
 
     private Vec3 performRaycast(Vec3 startPos, Vec3 direction, float scale) {
-        double maxDistance = 50.0;
+        double maxDistance = this.getRange();
         maxDistance *= Math.max(1.0, scale * 0.5);
         Vec3 endPos = startPos.add(direction.scale(maxDistance));
-        BlockHitResult blockHit = this.level().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, this.getOwner()));
+        BlockHitResult blockHit = this.level().clip(new ClipContext(
+                startPos,
+                endPos,
+                ClipContext.Block.OUTLINE,
+                ClipContext.Fluid.ANY,
+                this
+        ));
         EntityHitResult entityHit = getEntityHitResult(startPos, direction, maxDistance);
         Vec3 finalEndPos;
         if (entityHit != null && blockHit.getType() != HitResult.Type.MISS) {
             double entityDistance = startPos.distanceTo(entityHit.getLocation());
             double blockDistance = startPos.distanceTo(blockHit.getLocation());
+
             if (entityDistance < blockDistance) {
                 finalEndPos = entityHit.getLocation();
             } else {
@@ -632,11 +814,12 @@ public abstract class BeamEntity extends LOTMProjectile {
         } else if (blockHit.getType() != HitResult.Type.MISS) {
             finalEndPos = blockHit.getLocation();
         } else {
-            finalEndPos = startPos.add(direction.scale(50.0));
+            finalEndPos = startPos.add(direction.scale(maxDistance));
         }
 
         return finalEndPos;
     }
+
 
     private EntityHitResult getEntityHitResult(Vec3 startPos, Vec3 direction, double maxDistance) {
         Vec3 endPos = startPos.add(direction.scale(maxDistance));

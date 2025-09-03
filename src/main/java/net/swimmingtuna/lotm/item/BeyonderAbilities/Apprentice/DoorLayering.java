@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
@@ -25,14 +26,17 @@ import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DoorLayering extends SimpleAbilityItem {
+public class DoorLayering extends LeftClickHandlerSkillP {
 
     public DoorLayering(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 0, 10000, 1200, 100, 100);
@@ -75,6 +79,9 @@ public class DoorLayering extends SimpleAbilityItem {
                 livingEntity.getPersistentData().putInt("doorLayeringZ", (int) dimensionalSightTileEntity.getScryTarget().getZ());
                 livingEntity.getPersistentData().putInt("doorLayeringDamage", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.DOOR_LAYERING.get()));
             } else {
+                if (livingEntity instanceof Mob mob && mob.getTarget() != null) {
+                    doorLayeringDistance = (int) mob.distanceTo(mob.getTarget());
+                }
                 Vec3 scale = livingEntity.getLookAngle().scale(doorLayeringDistance);
                 Vec3 playerPos = livingEntity.position();
                 BlockPos pos = new BlockPos((int) (playerPos.x + scale.x()), (int) (playerPos.y + scale.y()), (int) (playerPos.z + scale.z()));
@@ -152,6 +159,8 @@ public class DoorLayering extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, layer doors in front of you over and over, causing the gravity around them to be so strong it creates a black hole."));
+        tooltipComponents.add(Component.literal("Left click for Door Authority: Gamma Ray Burst."));
+        tooltipComponents.add(Component.literal("Shift to increase distance that the doors spawn."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("10000").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Minute").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -170,5 +179,10 @@ public class DoorLayering extends SimpleAbilityItem {
             return 90;
         }
         return 0;
+    }
+
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.DOOR_GAMMA_RAY_BURST.get()));
     }
 }

@@ -29,7 +29,10 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
@@ -38,8 +41,7 @@ import virtuoel.pehkui.api.ScaleTypes;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class SpatialSeal extends SimpleAbilityItem {
-
+public class SpatialSeal extends LeftClickHandlerSkillP {
 
     public SpatialSeal(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 1, 0, 2400);
@@ -73,6 +75,7 @@ public class SpatialSeal extends SimpleAbilityItem {
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Use in order to create a spatial seal that only you and your allies can freely enter. Any non-ally or projectile owned by a non-ally that tries to enter will be teleported away and hurt the barrier corresponding to their strength. However, the barrier will regenerate on it's own with starlight."));
         tooltipComponents.add(Component.literal("Shift while holding this item to increase/decrease max size of the seal."));
+        tooltipComponents.add(Component.literal("Left click for Spatial Authority: Fragmentation."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("50 + Amount of damage").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Minutes").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -88,5 +91,10 @@ public class SpatialSeal extends SimpleAbilityItem {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         return 0;
+    }
+
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.SPACE_FRAGMENTATION.get()));
     }
 }

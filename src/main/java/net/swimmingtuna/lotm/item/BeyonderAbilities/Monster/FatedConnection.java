@@ -18,13 +18,16 @@ import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.item.OtherItems.LuckyGoldCoin;
+import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class FatedConnection extends SimpleAbilityItem {
+public class FatedConnection extends LeftClickHandlerSkillP {
 
     public FatedConnection(Properties properties) {
         super(properties, BeyonderClassInit.MONSTER, 1, 200, 2400);
@@ -65,6 +68,7 @@ public class FatedConnection extends SimpleAbilityItem {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, if you're holding a gold nugget in your off hand, transforms it into a lucky gold coin. Give this to someone to be able to use /fatedconnection (ability) (player) to use any of your abilities through them. Keep in note, if it's a targeted ability, they will need to look at the target/block."));
+        tooltipComponents.add(Component.literal("Left click for Fate Authority: Reboot Self."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("200").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Minutes").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -81,4 +85,8 @@ public class FatedConnection extends SimpleAbilityItem {
         return 0;
     }
 
+    @Override
+    public <T> LeftClickType getleftClickEmpty(T item) {
+        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.REBOOTSELF.get()));
+    }
 }

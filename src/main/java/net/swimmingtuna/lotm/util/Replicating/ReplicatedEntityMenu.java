@@ -2,6 +2,7 @@ package net.swimmingtuna.lotm.util.Replicating;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,6 +15,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClientData.ClientSequenceData;
 
 import java.util.List;
 
@@ -51,20 +54,30 @@ public class ReplicatedEntityMenu extends AbstractContainerMenu {
             Slot slot = this.slots.get(slotId);
             if (slot != null && slot.hasItem()) {
                 ItemStack clickedItem = slot.getItem();
-                if (clickedItem.hasTag() && clickedItem.getTag().contains("ReplicatedData")) {
-                    CompoundTag dataTag = clickedItem.getTag().getCompound("ReplicatedData");
-                    ReplicatedEntityDataHolder holder = ReplicatedEntityDataHolder.deserialize(dataTag);
-
-                    PlayerMobEntity replicatedEntity = ReplicatedEntityUtils.getEntity(player, holder);
-                    replicatedEntity.setPos(player.getX(), player.getY(), player.getZ());
-                    player.level().addFreshEntity(replicatedEntity);
+                if (clickedItem.getTag() != null) {
+                    if (clickedItem.hasTag() && clickedItem.getTag().contains("ReplicatedData")) {
+                        CompoundTag dataTag = clickedItem.getTag().getCompound("ReplicatedData");
+                        ReplicatedEntityDataHolder holder = ReplicatedEntityDataHolder.deserialize(dataTag);
+                        int sequence = 4;
+                        PlayerMobEntity replicatedEntity = ReplicatedEntityUtils.getEntity(player, holder);
+                        if (!player.level().isClientSide()) {
+                            sequence = BeyonderUtil.getSequence(replicatedEntity);
+                        }
+                        replicatedEntity.setPos(player.getX(), player.getY(), player.getZ());
+                        if (BeyonderUtil.getSpirituality(player) > 10000 - (sequence * 1000)) {
+                            player.level().addFreshEntity(replicatedEntity);
+                            BeyonderUtil.useSpirituality(player, 10000 - (sequence * 1000));
+                        } else {
+                            player.sendSystemMessage(Component.literal("You don't have enough spirituality to replicate this entity."));
+                        }
+                    }
                 }
             }
         }
     }
 
     private SimpleContainer createContainer(List<ReplicatedEntityDataHolder> entities) {
-        SimpleContainer container = new SimpleContainer(45); // 9x5 grid
+        SimpleContainer container = new SimpleContainer(45);
         int index = 0;
         for (ReplicatedEntityDataHolder entity : entities) {
             if (index >= container.getContainerSize()) break;

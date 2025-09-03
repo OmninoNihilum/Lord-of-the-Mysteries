@@ -401,7 +401,6 @@ public class LOTM {
             event.accept(ItemInit.DOOR_LAYERING);
             event.accept(ItemInit.DOOR_GAMMA_RAY_BURST);
             event.accept(ItemInit.CONCEPTUALIZATION);
-            event.accept(ItemInit.REPLICATION);
             event.accept(ItemInit.SECRET_KEEPING);
             event.accept(ItemInit.ASTROLABE);
             event.accept(ItemInit.WORM_OF_STAR);

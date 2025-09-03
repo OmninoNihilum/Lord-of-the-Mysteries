@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -18,8 +19,10 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.SealStrengtheningLeftClickC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
+import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
+import net.swimmingtuna.lotm.world.worlddata.SealStrengthenData;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -56,7 +59,7 @@ public class DoorSealStrenghtening extends LeftClickHandlerSkill {
 
     private void sealAmplification(LivingEntity player) {
         int value = player.getPersistentData().getInt("sealStrengtheningItemValue");
-        if (!player.level().isClientSide() && player.level() instanceof ServerLevel serverLevel) {
+        if (!player.level().isClientSide() && player.level() instanceof ServerLevel) {
             BeyonderUtil.setSealStrengthen(player, value);
         }
     }
@@ -64,7 +67,8 @@ public class DoorSealStrenghtening extends LeftClickHandlerSkill {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, increases the strength of all seals by the amount set, with the timer going down on each seal that amount slower."));
-        tooltipComponents.add(Component.literal("Left Click to increase strenghtening"));
+        tooltipComponents.add(Component.literal("Shift + Left Click to increase strenghtening"));
+        tooltipComponents.add(Component.literal("Left click for Door Authority: Layering."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("0").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(SimpleAbilityItem.getPathwayText(this.requiredClass.get()));
@@ -79,10 +83,12 @@ public class DoorSealStrenghtening extends LeftClickHandlerSkill {
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
         if (!livingEntity.level().isClientSide() && livingEntity.level() instanceof ServerLevel serverLevel) {
-            CalamityEnhancementData data = CalamityEnhancementData.getInstance(serverLevel);
-            if (data.getCalamityEnhancement() < 2) {
-                livingEntity.getPersistentData().putInt("sealStrengtheningItemValue", 2);
-                return 50;
+            if (livingEntity instanceof Mob mob && mob.getTarget() == null) {
+                SealStrengthenData data = SealStrengthenData.getInstance(serverLevel);
+                if (data.getSealStrengthen() < 2) {
+                    livingEntity.getPersistentData().putInt("sealStrengtheningItemValue", 2);
+                    return 50;
+                }
             }
         }
         return 0;

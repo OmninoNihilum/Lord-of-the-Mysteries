@@ -1,5 +1,7 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -13,30 +15,40 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SpatialMaze extends SimpleAbilityItem {
     public SpatialMaze(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 1, 70, 200);
+        super(properties, BeyonderClassInit.APPRENTICE, 1, 2500, 2400,200,200);
     }
     public static HashMap<UUID, BlockPos> mazes = new HashMap<>();
 
@@ -47,58 +59,87 @@ public class SpatialMaze extends SimpleAbilityItem {
                 return InteractionResult.FAIL;
             }
             createMaze(livingEntity, interactionTarget);
+            useSpirituality(livingEntity);
+            addCooldown(livingEntity);
         }
         return InteractionResult.SUCCESS;
     }
 
+    private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            return this.lazyAttributeMap.get();
+        }
+        return super.getDefaultAttributeModifiers(slot);
+    }
+
+    private Multimap<Attribute, AttributeModifier> createAttributeMap() {
+        ImmutableMultimap.Builder<Attribute, AttributeModifier> attributeBuilder = ImmutableMultimap.builder();
+        attributeBuilder.putAll(super.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND));
+        attributeBuilder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_ENTITY_REACH, "Reach modifier", 200, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with entities
+        attributeBuilder.put(ForgeMod.BLOCK_REACH.get(), new AttributeModifier(ReachChangeUUIDs.BEYONDER_BLOCK_REACH, "Reach modifier", 200, AttributeModifier.Operation.ADDITION)); //adds a 12 block reach for interacting with blocks, p much useless for this item
+        return attributeBuilder.build();
+    }
+
     public void createMaze(LivingEntity user, LivingEntity target) {
-        MinecraftServer server = target.getServer();
-        if (server == null) return;
+        if (target instanceof Player) {
+            MinecraftServer server = target.getServer();
+            if (server == null) return;
 
-        ResourceKey<Level> dimensionKey = DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
-        ServerLevel level = server.getLevel(dimensionKey);
+            ResourceKey<Level> dimensionKey = DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
+            ServerLevel level = server.getLevel(dimensionKey);
 
-        Maze gen = new Maze(20, 20, System.currentTimeMillis());
-        int[][] maze = gen.generate();
+            Maze gen = new Maze(20, 20, System.currentTimeMillis());
+            int[][] maze = gen.generate();
 
-        int endX = maze[0].length - 1;
-        int endZ = maze.length - 1;
+            int endX = maze[0].length - 1;
+            int endZ = maze.length - 1;
 
-        int roomSize = 3;
-        int pathLength = 5;
-        int pathWidth = 3;
-        int height = 4;
+            int roomSize = 3;
+            int pathLength = 5;
+            int pathWidth = 3;
+            int height = 4;
 
-        BlockPos origin = buildOuterLayer(user, target);
-        UUID sealUUID = SealedUtils.seal(target, user.getUUID(), user.getName().getString(), BeyonderUtil.getSequence(user), ABILITIES_SEAL_TYPES.ALL, null, false, null, SEAL_TYPES.SPATIAL_MAZE);
-        target.getPersistentData().putUUID("mazeSealUUID", sealUUID);
+            BlockPos origin = buildOuterLayer(user, target);
+            UUID sealUUID = SealedUtils.seal(target, user.getUUID(), user.getName().getString(), BeyonderUtil.getSequence(user), ABILITIES_SEAL_TYPES.ALL, null, false, null, SEAL_TYPES.SPATIAL_MAZE);
+            target.getPersistentData().putUUID("mazeSealUUID", sealUUID);
 
-        for (int y = 0; y < maze.length; y++) {
-            if (origin == null) break;
-            for (int x = 0; x < maze[0].length; x++) {
-                int cell = maze[y][x];
+            for (int y = 0; y < maze.length; y++) {
+                if (origin == null) break;
+                for (int x = 0; x < maze[0].length; x++) {
+                    int cell = maze[y][x];
 
-                int worldX = x * (roomSize + pathLength);
-                int worldZ = y * (roomSize + pathLength);
-                BlockPos roomOrigin = origin.offset(worldX, 0, worldZ);
+                    int worldX = x * (roomSize + pathLength);
+                    int worldZ = y * (roomSize + pathLength);
+                    BlockPos roomOrigin = origin.offset(worldX, 0, worldZ);
 
-                boolean isExit = x == endX && y == endZ;
+                    boolean isExit = x == endX && y == endZ;
 
-                buildRoom(level, roomOrigin, roomSize, height, roomSize, isExit, user, target, sealUUID);
+                    buildRoom(level, roomOrigin, roomSize, height, roomSize, isExit, user, target, sealUUID);
 
-                if ((cell & 2) != 0) {
-                    BlockPos corridorOrigin = roomOrigin.offset(roomSize, 0, (roomSize - pathWidth) / 2);
-                    buildRoom(level, corridorOrigin, pathLength, height, pathWidth, false, user, target, sealUUID);
-                }
+                    if ((cell & 2) != 0) {
+                        BlockPos corridorOrigin = roomOrigin.offset(roomSize, 0, (roomSize - pathWidth) / 2);
+                        buildRoom(level, corridorOrigin, pathLength, height, pathWidth, false, user, target, sealUUID);
+                    }
 
-                if ((cell & 1) != 0) {
-                    BlockPos corridorOrigin = roomOrigin.offset((roomSize - pathWidth) / 2, 0, roomSize);
-                    buildRoom(level, corridorOrigin, pathWidth, height, pathLength, false, user, target, sealUUID);
+                    if ((cell & 1) != 0) {
+                        BlockPos corridorOrigin = roomOrigin.offset((roomSize - pathWidth) / 2, 0, roomSize);
+                        buildRoom(level, corridorOrigin, pathWidth, height, pathLength, false, user, target, sealUUID);
+                    }
                 }
             }
+            if (origin != null) {
+                BeyonderUtil.teleportEntityThroughDimensions(target, dimensionKey.location(), origin.getX() + 1.5, origin.getY(), origin.getZ() + 1.5);
+            }
+        } else {
+            target.getPersistentData().putInt("mazeTrap", (int) (float) BeyonderUtil.getDamage(user).get(ItemInit.SPATIAL_MAZE.get()));
+            target.getPersistentData().putInt("mazeTrapX", (int) target.getX());
+            target.getPersistentData().putInt("mazeTrapY", (int) target.getY());
+            target.getPersistentData().putInt("mazeTrapZ", (int) target.getZ());
         }
-
-        BeyonderUtil.teleportEntityThroughDimensions(target, dimensionKey.location(), origin.getX() + 1.5, origin.getY(), origin.getZ() + 1.5);
     }
 
     private static BlockPos buildOuterLayer(LivingEntity user, LivingEntity target){
@@ -265,6 +306,9 @@ public class SpatialMaze extends SimpleAbilityItem {
 
     @Override
     public int getPriority(LivingEntity livingEntity, LivingEntity target) {
+        if (target != null && target.getHealth() > livingEntity.getHealth()) {
+            return 40;
+        }
         return 0;
     }
 
@@ -374,5 +418,16 @@ public class SpatialMaze extends SimpleAbilityItem {
 
             return maze;
         }
+    }
+
+
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        tooltipComponents.add(Component.literal("Upon use, traps the target in a near unbreakable maze that they must escape in order to return to the overworld."));
+        tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("2400").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("2 Minutes").withStyle(ChatFormatting.YELLOW)));
+        tooltipComponents.add(getPathwayText(this.requiredClass.get()));
+        tooltipComponents.add(getClassText(this.requiredSequence, this.requiredClass.get()));
+        super.baseHoverText(stack, level, tooltipComponents, isAdvanced);
     }
 }

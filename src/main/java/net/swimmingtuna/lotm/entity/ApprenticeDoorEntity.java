@@ -421,13 +421,17 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     private void handleLife() {
         int life = getLife();
         if (getDoorMode() == DoorMode.GAMMARAY) {
+            if (!this.level().isClientSide()) {
+                this.setPos(this.getX(), this.getY(), this.getZ());
+                this.hasImpulse = true;
+            }
             this.getPersistentData().putInt("ignoreShouldntRender", 10);
             //max life is 340
             CompoundTag tag = this.getPersistentData();
             int x = tag.getInt("gammaRayTargetX");
             int y = tag.getInt("gammaRayTargetY");
             int z = tag.getInt("gammaRayTargetZ");
-            if (this.tickCount == 80) {
+            if (this.tickCount == 40) {
                 BlackSphereEntity blackSphereEntity = new BlackSphereEntity(EntityInit.BLACK_SPHERE_ENTITY.get(), this.level());
                 if (this.creator != null) {
                     blackSphereEntity.setOwner(this.getCreator());
@@ -925,5 +929,10 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return geoCache;
+    }
+
+    @Override
+    public boolean shouldBeSaved() {
+        return true; // Always save this entity to NBT
     }
 }

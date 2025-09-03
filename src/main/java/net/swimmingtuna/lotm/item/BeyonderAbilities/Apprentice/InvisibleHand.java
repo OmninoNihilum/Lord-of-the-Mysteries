@@ -52,7 +52,7 @@ import static net.swimmingtuna.lotm.util.BeyonderUtil.getLivingEntityFromUUID;
 
 public class InvisibleHand extends LeftClickHandlerSkill {
     public InvisibleHand(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0);
+        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0, 25,25);
     }
 
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);

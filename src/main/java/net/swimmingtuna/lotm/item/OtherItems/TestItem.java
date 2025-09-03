@@ -74,8 +74,7 @@ public class TestItem extends SimpleAbilityItem {
     @Override
     public InteractionResult useAbility(Level level, LivingEntity livingEntity, InteractionHand hand) {
         if (!level.isClientSide()) {
-            SpatialCageEntity.setSealed(livingEntity, livingEntity, BeyonderUtil.getSequence(livingEntity) - 1, (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SPATIAL_CAGE.get()));
-
+            BeyonderUtil.applyParalysis(livingEntity, 100);
             if (livingEntity instanceof Player player) {
                 BeyonderUtil.setSpirituality(livingEntity, BeyonderUtil.getMaxSpirituality(player));
                 for (int i = 0; i < player.getInventory().getContainerSize(); i++) {

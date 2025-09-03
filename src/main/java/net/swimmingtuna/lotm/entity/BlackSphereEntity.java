@@ -21,6 +21,7 @@ import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
 import net.swimmingtuna.lotm.networking.packet.NonVisibleS2C;
+import net.swimmingtuna.lotm.util.EntityUtil.BeamEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class BlackSphereEntity extends AbstractHurtingProjectile {
@@ -146,15 +147,33 @@ public class BlackSphereEntity extends AbstractHurtingProjectile {
     @Override
     public void tick() {
         super.tick();
-        if (this.tickCount == 80) {
-            shootDragonBreathAtTarget(30, 150, 4);
+        if (!this.level().isClientSide()) {
+            this.setPos(this.getX(), this.getY(), this.getZ());
+            this.hasImpulse = true;
         }
-        if (this.tickCount >= 260) {
-            this.getPersistentData().putInt("ignoreShouldntRender", 0);
-            this.discard();
-        } else {
-            LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.uuid, 400));
-            this.getPersistentData().putInt("ignoreShouldntRender", 10);
+        if (this.getOwner() != null) {
+            if (this.tickCount == 55) {
+                shootDragonBreathAtTarget(30, 150, 4);
+            }
+            if (this.tickCount >= 260) {
+                this.getPersistentData().putInt("ignoreShouldntRender", 0);
+                this.discard();
+                for (BlackSphereEntity blackSphereEntity : this.level().getEntitiesOfClass(BlackSphereEntity.class, this.getBoundingBox().inflate(50))) {
+                    if (blackSphereEntity.tickCount >= 100 && blackSphereEntity.getOwner() != null && blackSphereEntity.getOwner() == this.getOwner()) {
+                        blackSphereEntity.getPersistentData().putInt("ignoreShouldntRender", 0);
+                        LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(blackSphereEntity.uuid, 0));
+                        blackSphereEntity.discard();
+                    }
+                }
+                for (BeamEntity beamEntity : this.level().getEntitiesOfClass(BeamEntity.class, this.getBoundingBox().inflate(3))) {
+                    if (!beamEntity.getIsLivingOwner()) {
+                        beamEntity.discard();
+                    }
+                }
+            } else {
+                LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.uuid, 20));
+                this.getPersistentData().putInt("ignoreShouldntRender", 10);
+            }
         }
     }
 
@@ -163,27 +182,39 @@ public class BlackSphereEntity extends AbstractHurtingProjectile {
             Vec3 targetPos = new Vec3(getTargetX(), getTargetY(), getTargetZ());
             Vec3 currentPos = this.position();
             Vec3 direction = targetPos.subtract(currentPos).normalize();
+            Vec3 forwardSpawnPos = currentPos.add(direction.scale(5));
+            Vec3 backwardSpawnPos = currentPos.add(direction.scale(-5));
             DragonBreathEntity dragonBreath = new DragonBreathEntity(EntityInit.DRAGON_BREATH_ENTITY.get(), owner.level());
-            dragonBreath.setDamage((damage));
-            dragonBreath.endPos = targetPos;
+            dragonBreath.setDamage(damage);
             dragonBreath.setOwner(owner);
             dragonBreath.setRange((int) range);
             dragonBreath.setSize((int) size);
             dragonBreath.setGammaRay(true);
             dragonBreath.setIsDragonbreath(false);
             dragonBreath.setDestroyBlocks(false);
-            dragonBreath.setDuration(50);
+            dragonBreath.setDuration(45);
             dragonBreath.setCharge(20);
-            dragonBreath.teleportTo(this.getX(), this.getY(), this.getZ());
-            double deltaX = targetPos.x - currentPos.x;
-            double deltaY = targetPos.y - currentPos.y;
-            double deltaZ = targetPos.z - currentPos.z;
-            double horizontalDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-            float yaw = (float) Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90.0f;
-            float pitch = (float) -Math.toDegrees(Math.atan2(deltaY, horizontalDistance));
-            dragonBreath.setYaw((float) Math.toRadians(yaw));
-            dragonBreath.setPitch((float) Math.toRadians(pitch));
+            dragonBreath.setIsLivingOwner(false);
+            dragonBreath.setCausesFire(false);
+            dragonBreath.teleportTo(forwardSpawnPos.x(), forwardSpawnPos.y(), forwardSpawnPos.z());
+            dragonBreath.setFixedDirection(direction);
             this.level().addFreshEntity(dragonBreath);
+            Vec3 oppositeDirection = direction.scale(-1);
+            DragonBreathEntity oppositeBreath = new DragonBreathEntity(EntityInit.DRAGON_BREATH_ENTITY.get(), owner.level());
+            oppositeBreath.setDamage(damage);
+            oppositeBreath.setOwner(owner);
+            oppositeBreath.setRange((int) range);
+            oppositeBreath.setSize((int) size);
+            oppositeBreath.setGammaRay(true);
+            oppositeBreath.setIsDragonbreath(false);
+            oppositeBreath.setDestroyBlocks(false);
+            oppositeBreath.setDuration(45);
+            oppositeBreath.setCharge(20);
+            oppositeBreath.setIsLivingOwner(false);
+            oppositeBreath.setCausesFire(false);
+            oppositeBreath.teleportTo(backwardSpawnPos.x(), backwardSpawnPos.y(), backwardSpawnPos.z());
+            oppositeBreath.setFixedDirection(oppositeDirection);
+            this.level().addFreshEntity(oppositeBreath);
         }
     }
 }
