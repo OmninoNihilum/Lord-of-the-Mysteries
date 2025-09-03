@@ -236,56 +236,60 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
                 }
             }
 
-            int radius = (int) (scale * 12);
-            if (radius < 1) radius = 1;
+            if (this.tickCount >= 30) {
+                int radius = (int) (scale * 12);
+                if (radius < 1) {
+                    radius = 1;
+                }
 
-            if (radius != cachedRadius || activeRelativeOffsets == null) {
-                activeRelativeOffsets = getOrCreateRelativeSphereOffsets(radius);
-                offsetIndex = 0;
-                cachedRadius = radius;
-            }
-
-            int maxBlocksPerTick = Math.max(1, Math.min(200, (int) (scale * 20)));
-            int processed = 0;
-            BlockPos centerBlockPos = this.blockPosition();
-            while (processed < maxBlocksPerTick && !activeRelativeOffsets.isEmpty()) {
-                if (offsetIndex >= activeRelativeOffsets.size()) {
+                if (radius != cachedRadius || activeRelativeOffsets == null) {
+                    activeRelativeOffsets = getOrCreateRelativeSphereOffsets(radius);
                     offsetIndex = 0;
+                    cachedRadius = radius;
                 }
-                BlockPos rel = activeRelativeOffsets.get(offsetIndex++);
-                BlockPos abs = centerBlockPos.offset(rel);
 
-                BlockState blockState = this.level().getBlockState(abs);
-
-                if (!blockState.isAir()) {
-                    int dx = rel.getX(), dy = rel.getY(), dz = rel.getZ();
-                    if (dx * dx + dy * dy + dz * dz <= radius * radius) {
-                        DustParticleOptions dustParticle = new DustParticleOptions(new Vector3f(0.0f, 0.0f, 0.0f), 1.0f);
-                        double particleX = abs.getX() + 0.5;
-                        double particleY = abs.getY() + 0.5;
-                        double particleZ = abs.getZ() + 0.5;
-                        double dirX = centerX - particleX;
-                        double dirY = centerY - particleY;
-                        double dirZ = centerZ - particleZ;
-                        double distance = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-                        if (distance > 0) {
-                            dirX /= distance;
-                            dirY /= distance;
-                            dirZ /= distance;
-                            double step = 0.5;
-                            int steps = (int) (distance / step);
-                            for (int i = 0; i <= steps; i++) {
-                                double px = particleX + dirX * (i * step);
-                                double py = particleY + dirY * (i * step);
-                                double pz = particleZ + dirZ * (i * step);
-                                BeyonderUtil.sendParticles(this, dustParticle, px, py, pz, 0, 0, 0);
-                            }
-                        }
-                        setAir(this, abs);
+                int maxBlocksPerTick = Math.max(1, Math.min(200, (int) (scale * 20)));
+                int processed = 0;
+                BlockPos centerBlockPos = this.blockPosition();
+                while (processed < maxBlocksPerTick && !activeRelativeOffsets.isEmpty()) {
+                    if (offsetIndex >= activeRelativeOffsets.size()) {
+                        offsetIndex = 0;
                     }
-                }
+                    BlockPos rel = activeRelativeOffsets.get(offsetIndex++);
+                    BlockPos abs = centerBlockPos.offset(rel);
 
-                processed++;
+                    BlockState blockState = this.level().getBlockState(abs);
+
+                    if (!blockState.isAir()) {
+                        int dx = rel.getX(), dy = rel.getY(), dz = rel.getZ();
+                        if (dx * dx + dy * dy + dz * dz <= radius * radius) {
+                            DustParticleOptions dustParticle = new DustParticleOptions(new Vector3f(0.0f, 0.0f, 0.0f), 1.0f);
+                            double particleX = abs.getX() + 0.5;
+                            double particleY = abs.getY() + 0.5;
+                            double particleZ = abs.getZ() + 0.5;
+                            double dirX = centerX - particleX;
+                            double dirY = centerY - particleY;
+                            double dirZ = centerZ - particleZ;
+                            double distance = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+                            if (distance > 0) {
+                                dirX /= distance;
+                                dirY /= distance;
+                                dirZ /= distance;
+                                double step = 0.5;
+                                int steps = (int) (distance / step);
+                                for (int i = 0; i <= steps; i++) {
+                                    double px = particleX + dirX * (i * step);
+                                    double py = particleY + dirY * (i * step);
+                                    double pz = particleZ + dirZ * (i * step);
+                                    BeyonderUtil.sendParticles(this, dustParticle, px, py, pz, 0, 0, 0);
+                                }
+                            }
+                            setAir(this, abs);
+                        }
+                    }
+
+                    processed++;
+                }
             }
         }
     }

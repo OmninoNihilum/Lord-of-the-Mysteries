@@ -18,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.capabilities.concealed_data.CONCEALMENT_TYPES;
@@ -27,9 +28,13 @@ import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.ClientData.ClientIgnoreShouldntRenderData;
 import net.swimmingtuna.lotm.util.CustomEntityDataSerializers;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
+import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.*;
@@ -49,7 +54,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         CONCEALED_SPACE,
         MAZE,
         STARFALL,
-        BLACKHOLE
+        BLACKHOLE,
+        GAMMARAY
     }
 
     public enum DoorAnimationKind {
@@ -189,6 +195,19 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
         this.creator = creator.getUUID();
     }
 
+    //Gamma Ray
+    public ApprenticeDoorEntity(Level level, LivingEntity creator, int life, float yaw, float pitch) {
+        this(EntityInit.APPRENTICE_DOOR_ENTITY.get(), level);
+        this.entityData.set(DOOR_MODE, DoorMode.GAMMARAY);
+        this.entityData.set(DOOR_ANIMATION_KIND, DoorAnimationKind.FADE_IN);
+        this.entityData.set(SEQUENCE, BeyonderUtil.getSequence(creator));
+        this.entityData.set(LIFE, life);
+        this.entityData.set(FULL_LIFE, life);
+        this.entityData.set(YAW, yaw);
+        this.entityData.set(PITCH, pitch);
+        this.creator = creator.getUUID();
+    }
+
 
     @Override
     public void tick() {
@@ -208,7 +227,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 }
                 handleLife();
             }
-            if (getDoorMode() == DoorMode.BLACKHOLE) {
+            if (getDoorMode() == DoorMode.BLACKHOLE || getDoorMode() == DoorMode.GAMMARAY) {
                 handleLife();
             }
             if (getDoorMode() == DoorMode.TELEPORT_ONLY) {
@@ -401,6 +420,27 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
 
     private void handleLife() {
         int life = getLife();
+        if (getDoorMode() == DoorMode.GAMMARAY) {
+            this.getPersistentData().putInt("ignoreShouldntRender", 10);
+            //max life is 340
+            CompoundTag tag = this.getPersistentData();
+            int x = tag.getInt("gammaRayTargetX");
+            int y = tag.getInt("gammaRayTargetY");
+            int z = tag.getInt("gammaRayTargetZ");
+            if (this.tickCount == 80) {
+                BlackSphereEntity blackSphereEntity = new BlackSphereEntity(EntityInit.BLACK_SPHERE_ENTITY.get(), this.level());
+                if (this.creator != null) {
+                    blackSphereEntity.setOwner(this.getCreator());
+                }
+                blackSphereEntity.setTargetX(x);
+                blackSphereEntity.setTargetY(y);
+                blackSphereEntity.setTargetZ(z);
+                blackSphereEntity.teleportTo(this.getX(), this.getY(), this.getZ());
+                this.level().addFreshEntity(blackSphereEntity);
+                this.delete();
+                this.discard();
+            }
+        }
         if (getDoorMode() == DoorMode.BLACKHOLE) {
             int doorConsumedCount = this.getPersistentData().getInt("doorConsumedCount");
             int damage = Math.max(2, this.getPersistentData().getInt("doorLayeringDamage"));
@@ -809,6 +849,25 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             tag.putUUID("sealUUID", this.sealUUID);
         }
     }
+
+    @Override
+    public @NotNull AABB getBoundingBoxForCulling() {
+        return new AABB(
+                this.getX() - 500,
+                this.getY() - 500,
+                this.getZ() - 500,
+                this.getX() + 500,
+                this.getY() + 500,
+                this.getZ() + 500
+        );
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double pDistance) { return true; }
+
+    @Override
+    public boolean shouldRender(double pX, double pY, double pZ) { return true; }
+
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {

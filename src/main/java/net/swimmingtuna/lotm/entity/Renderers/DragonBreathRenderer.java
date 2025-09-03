@@ -42,15 +42,13 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
     @Override
     public void render(DragonBreathEntity pEntity, float pEntityYaw, float pPartialTick, @NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBuffer, int pPackedLight) {
-        this.clearerView = Minecraft.getInstance().player == pEntity.getOwner() &&
-                Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
-
-        // Use direct rotation values - no interpolation to avoid spinning
+        this.clearerView = Minecraft.getInstance().player == pEntity.getOwner() && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
         float yaw = pEntity.renderYaw;
         float pitch = pEntity.renderPitch;
-
         Vector3f color = null;
-        if (pEntity.causesFire()) {
+        if (pEntity.isGammaRay()) {
+            color = ParticleColors.DARK_BLUE;
+        } else if (pEntity.causesFire()) {
             color = ParticleColors.FIRE_YELLOW;
         } else {
             color = ParticleColors.FIRE_ORANGE;
@@ -60,8 +58,6 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
         pPoseStack.pushPose();
         pPoseStack.scale(entitySize, entitySize, entitySize);
-
-        // Render charge effect
         pPoseStack.pushPose();
         pPoseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
         pPoseStack.mulPose(Axis.XP.rotationDegrees(pitch));
@@ -69,23 +65,18 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
         this.model.setupAnim(pEntity, 0.0F, 0.0F, age, 0.0F, 0.0F);
         this.model.renderToBuffer(pPoseStack, charge, pPackedLight, OverlayTexture.NO_OVERLAY, color.x, color.y, color.z, 1.0F);
         pPoseStack.popPose();
-
-        // Render beam (after charge time)
         if (pEntity.getTime() >= pEntity.getCharge()) {
-            // Use direct collision positions for now to eliminate all interpolation
             double collidePosX = pEntity.collidePosX;
             double collidePosY = pEntity.collidePosY;
             double collidePosZ = pEntity.collidePosZ;
             double posX = pEntity.getX();
             double posY = pEntity.getY();
             double posZ = pEntity.getZ();
-
             float length = (float) Math.sqrt(Math.pow(collidePosX - posX, 2) + Math.pow(collidePosY - posY, 2) + Math.pow(collidePosZ - posZ, 2));
             int frame = Mth.floor((pEntity.animation - 1 + pPartialTick) * 2);
             if (frame < 0) {
                 frame = pEntity.getFrames() * 2;
             }
-
             pPoseStack.pushPose();
             pPoseStack.translate(0.0F, (pEntity.getBbHeight() / 2.0F) - 0.5F, 0.0F);
             VertexConsumer beam = pBuffer.getBuffer(LOTMRenderTypes.glow(TEXTURE));
@@ -106,35 +97,27 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
         Matrix4f matrix4f = pose.pose();
         Matrix3f matrix3f = pose.normal();
         float offset = this.clearerView ? -1.0F : 0.0F;
-
-        // Scale the beam radius based on entity size
         float scaledRadius = BEAM_RADIUS * scale;
-
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, offset, scaledRadius, minU, minV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, length, scaledRadius, minU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, length, scaledRadius, maxU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, scaledRadius, maxU, minV, brightness, packedLight);
-
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, -scaledRadius, minU, minV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, length, -scaledRadius, minU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, length, -scaledRadius, maxU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, offset, -scaledRadius, maxU, minV, brightness, packedLight);
-
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, length, -scaledRadius, minU, minV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, length, scaledRadius, minU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, length, scaledRadius, maxU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, length, -scaledRadius, maxU, minV, brightness, packedLight);
-
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, offset, -scaledRadius, minU, minV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, offset, scaledRadius, minU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, scaledRadius, maxU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, -scaledRadius, maxU, minV, brightness, packedLight);
-
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, length, -scaledRadius, minU, minV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, length, scaledRadius, minU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, offset, scaledRadius, maxU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, -scaledRadius, offset, -scaledRadius, maxU, minV, brightness, packedLight);
-
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, length, -scaledRadius, minU, minV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, length, scaledRadius, minU, maxV, brightness, packedLight);
         this.drawVertex(matrix4f, matrix3f, consumer, scaledRadius, offset, scaledRadius, maxU, maxV, brightness, packedLight);
@@ -143,11 +126,9 @@ public class DragonBreathRenderer extends EntityRenderer<DragonBreathEntity> {
 
     private void renderBeam(float length, float yaw, float pitch, int frame, PoseStack poseStack, VertexConsumer consumer, float brightness, int packedLight, float entitySize) {
         poseStack.pushPose();
-
-        // Simple, direct rotation approach
         poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
         poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // Align with forward direction
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 
         this.drawCube(length, frame, poseStack, consumer, brightness, packedLight, entitySize);
 

@@ -1541,6 +1541,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.CREATEDOOR.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.05f), -abilityStrengthened));
         damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_CONCEALMENT.get(), applyAbilityStrengthened(((7200.0f / abilityWeakness) - (sequence * 1200)), abilityStrengthened));
+        damageMap.put(ItemInit.DOOR_GAMMA_RAY_BURST.get(), applyAbilityStrengthened((25.0f - (sequence * abilityWeakness)), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_LAYERING.get(), applyAbilityStrengthened((Math.max(1.0f, 8.0f - ((sequence) * abilityWeakness))), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_SEAL_STRENGTHENING.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));

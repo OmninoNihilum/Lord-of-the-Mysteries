@@ -18,9 +18,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Blink;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorGammaRayBurst;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.DoorLayering;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -111,12 +113,25 @@ public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
         //MATTER ACCELERATION SELF
         if (livingEntity.isSpectator()) return;
         if (!livingEntity.level().isClientSide()) {
+            int gammaRayDistance = livingEntity.getPersistentData().getInt("doorGammaRay");
             int doorLayeringDistance = livingEntity.getPersistentData().getInt("doorLayering");
             int matterAccelerationDistance = livingEntity.getPersistentData().getInt("tyrantSelfAcceleration");
             int blinkDistance = livingEntity.getPersistentData().getInt("BlinkDistance");
             int luckGiftingAmount = livingEntity.getPersistentData().getInt("monsterLuckGifting");
             int doorBlinkDistance = livingEntity.getPersistentData().getInt("trickmasterBlinkDistance");
             if (livingEntity.isShiftKeyDown()) {
+                if (livingEntity.getMainHandItem().getItem() instanceof DoorGammaRayBurst && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                    livingEntity.getPersistentData().putInt("doorGammaRay", gammaRayDistance + 2);
+                    if (livingEntity instanceof Player player) {
+                        player.displayClientMessage(Component.literal("Door Gamma Ray Burst Spawn Distance is " + gammaRayDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    }
+                    if (gammaRayDistance >= 201) {
+                        if (livingEntity instanceof Player player) {
+                            player.displayClientMessage(Component.literal("Door Gamma Ray Burst Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        }
+                        livingEntity.getPersistentData().putInt("doorGammaRay", 0);
+                    }
+                }
                 if (livingEntity.getMainHandItem().getItem() instanceof DoorLayering && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 0)) {
                     livingEntity.getPersistentData().putInt("doorLayering", doorLayeringDistance + 2);
                     if (livingEntity instanceof Player player) {

@@ -403,7 +403,7 @@ public class ItemInit {
 
     //0
     public static final RegistryObject<Item> DOOR_GAMMA_RAY_BURST = ITEMS.register("doorgammarayburst",
-            () -> new Item(new Item.Properties().stacksTo(1)));
+            () -> new DoorGammaRayBurst(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> REPLICATION = ITEMS.register("replication",
             () -> new Item(new Item.Properties().stacksTo(1)));
 

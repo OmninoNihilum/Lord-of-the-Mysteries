@@ -117,8 +117,8 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
         if (!livingEntity.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(livingEntity);
             HurricaneOfLightEntity hurricaneOfLightEntity = new HurricaneOfLightEntity(livingEntity.level(), livingEntity, 0, 0, 0);
-            hurricaneOfLightEntity.setHurricaneRadius((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()));
-            hurricaneOfLightEntity.setHurricaneHeight((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.5f));
+            hurricaneOfLightEntity.setHurricaneRadius((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.6));
+            hurricaneOfLightEntity.setHurricaneHeight((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.3f));
             hurricaneOfLightEntity.setHurricaneLifecount(300 - (sequence * 20));
             hurricaneOfLightEntity.setHurricaneDestroy(true);
             hurricaneOfLightEntity.setHurricaneMov(livingEntity.getLookAngle().scale(0.5f).toVector3f());
@@ -130,8 +130,8 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
         if (!livingEntity.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(livingEntity);
             HurricaneOfLightEntity hurricaneOfLightEntity = new HurricaneOfLightEntity(livingEntity.level(), livingEntity, 0, 0, 0);
-            hurricaneOfLightEntity.setHurricaneRadius((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.6f));
-            hurricaneOfLightEntity.setHurricaneHeight((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.6f));
+            hurricaneOfLightEntity.setHurricaneRadius((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.5f));
+            hurricaneOfLightEntity.setHurricaneHeight((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.SWORDOFDAWN.get()) * 0.3f));
             hurricaneOfLightEntity.setHurricaneLifecount(300 - (sequence * 20));
             hurricaneOfLightEntity.setHurricaneDestroy(true);
             hurricaneOfLightEntity.setHurricaneMov(livingEntity.getLookAngle().scale(0.5f).toVector3f());
@@ -143,8 +143,8 @@ public class HurricaneOfLightEntity extends AbstractHurtingProjectile {
         if (!livingEntity.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(livingEntity);
             HurricaneOfLightEntity hurricaneOfLightEntity = new HurricaneOfLightEntity(livingEntity.level(), livingEntity, 0, 0, 0);
-            hurricaneOfLightEntity.setHurricaneRadius((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTSWORD.get()));
-            hurricaneOfLightEntity.setHurricaneHeight((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTSWORD.get()) * 0.5f));
+            hurricaneOfLightEntity.setHurricaneRadius((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTSWORD.get()) * 0.6));
+            hurricaneOfLightEntity.setHurricaneHeight((int) ((int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTSWORD.get()) * 0.3f));
             hurricaneOfLightEntity.setHurricaneLifecount(500 - (sequence * 100));
             hurricaneOfLightEntity.setHurricaneDestroy(true);
             hurricaneOfLightEntity.setHurricaneMov(livingEntity.getLookAngle().scale(0.75f).toVector3f());

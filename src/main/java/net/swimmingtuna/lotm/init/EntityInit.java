@@ -86,6 +86,9 @@ public class EntityInit {
     public static final RegistryObject<EntityType<CircleEntity>> CIRCLE_ENTITY =
             ENTITIES.register("circle", () -> EntityType.Builder.<CircleEntity>of(CircleEntity::new, MobCategory.MISC)
                     .sized(1.0f,1.0f).build("circle"));
+    public static final RegistryObject<EntityType<BlackSphereEntity>> BLACK_SPHERE_ENTITY =
+            ENTITIES.register("black_sphere_entity", () -> EntityType.Builder.<BlackSphereEntity>of(BlackSphereEntity::new, MobCategory.MISC)
+                    .sized(1.0f,1.0f).clientTrackingRange(400).build(new ResourceLocation(LOTM.MOD_ID, "black_sphere_entity").toString()));
     public static final RegistryObject<EntityType<DivineHandRightEntity>> DIVINE_HAND_RIGHT_ENTITY =
             ENTITIES.register("divine_hand_right_entity", () -> EntityType.Builder.<DivineHandRightEntity>of(DivineHandRightEntity::new, MobCategory.MISC)
                     .sized(1.0f,1.0f).build("divine_hand_right_entity"));
@@ -118,7 +121,7 @@ public class EntityInit {
                     .sized(2.0f,2.0f).clientTrackingRange(300).build("meteor_no_hurt"));
     public static final RegistryObject<EntityType<ApprenticeDoorEntity>> APPRENTICE_DOOR_ENTITY =
             ENTITIES.register("apprentice_door_entity", () -> EntityType.Builder.<ApprenticeDoorEntity>of(ApprenticeDoorEntity::new, MobCategory.MISC)
-                    .sized(0.5f,2f).clientTrackingRange(100).build("apprentice_door_entity"));
+                    .sized(0.5f,2f).clientTrackingRange(400).build("apprentice_door_entity"));
     public static final RegistryObject<EntityType<FlashEntity>> FLASH_ENTITY =
             ENTITIES.register("flash", () -> EntityType.Builder.<FlashEntity>of(FlashEntity::new, MobCategory.MISC)
                     .sized(0.5f,0.5f).clientTrackingRange(200).build(new ResourceLocation(LOTM.MOD_ID, "flash").toString()));

@@ -2,6 +2,7 @@ package net.swimmingtuna.lotm.entity.Renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.swimmingtuna.lotm.LOTM;
@@ -36,5 +37,10 @@ public class ApprenticeDoorRenderer extends GeoEntityRenderer<ApprenticeDoorEnti
         super.applyRotations(entity, poseStack, ageInTicks, rotationYaw, partialTicks);
         poseStack.mulPose(Axis.YP.rotationDegrees(entity.getYaw()));
         poseStack.mulPose(Axis.XP.rotationDegrees(entity.getPitch()));
+    }
+
+    @Override
+    public boolean shouldRender(ApprenticeDoorEntity pLivingEntity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
+        return true;
     }
 }
