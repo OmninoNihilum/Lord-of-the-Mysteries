@@ -5,10 +5,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.AABB;
+import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.client.Configs;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,7 +35,26 @@ public abstract class EntityMixin {
         CompoundTag tag = entity.getPersistentData();
         int timer = tag.getInt("twilightManifestationTimer");
         int cancelTickTimer = tag.getInt("cancelTick");
-        if (!entity.level().isClientSide()) {
+        if (!entity.level().isClientSide() && !(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrb)) {
+            if (tag.getInt("shouldntDestroyBlocks") >= 1) {
+                tag.putInt("shouldntDestroyBlocks", tag.getInt("shouldntDestroyBlocks") - 1);
+            }
+            int checkTimer = 40;
+            if (entity instanceof Projectile) {
+                checkTimer = 5;
+            }
+            if (entity.tickCount % checkTimer == 0) {
+                if (!Configs.COMMON.shouldDestroyBlocks.get()) {
+                    BeyonderUtil.putShouldntDestroyBlocks(entity, 45);
+                } else if (Configs.COMMON.factionsEnabled.get()) {
+                    if (BeyonderUtil.isChunkProtected(entity, entity.blockPosition())) {
+                        BeyonderUtil.putShouldntDestroyBlocks(entity, 45);
+                    }
+                }
+            }
+            if (tag.getInt("ignoreShouldntRender") >= 1) {
+                tag.putInt("ignoreShouldntRender", tag.getInt("ignoreShouldntRender") - 1);
+            }
             if (timer > 1) {
                 tag.putInt("twilightManifestationTimer", timer - 1);
                 if (tag.getInt("unableToUseAbility") == 0) {

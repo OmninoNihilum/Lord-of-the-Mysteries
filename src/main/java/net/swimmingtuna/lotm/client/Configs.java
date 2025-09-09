@@ -38,6 +38,7 @@ public class Configs {
         public ForgeConfigSpec.BooleanValue mobsShouldActivateCalamities;
         public ForgeConfigSpec.BooleanValue mobsShouldOnlyUseAbilitiesOnPlayers;
         public ForgeConfigSpec.BooleanValue shouldUseAbilitiesNearSpawn;
+        public ForgeConfigSpec.BooleanValue factionsEnabled;
 
         //PLAYER MOB CONFIGS
         public ForgeConfigSpec.ConfigValue<List<? extends String>> mainItems;
@@ -62,7 +63,7 @@ public class Configs {
 
             shouldNpcSpawn = builder
                     .comment("Disables or enables whether NPCs should naturally spawn in the world.")
-                            .define("NPC Should Spawn", true);
+                    .define("NPC Should Spawn", true);
 
             shouldDropCharacteristic = builder
                     .comment("If enabled, when killed by a player, you will drop a beyonder characteristic which can be used to make potions, substituting main ingredients.")
@@ -87,6 +88,10 @@ public class Configs {
             shouldUseAbilitiesNearSpawn = builder
                     .comment("If disabled, abilities won't be able to be used near spawn.")
                     .define("Can Use Abilities Near Spawn", true);
+
+            factionsEnabled = builder
+                    .comment("If enabled, you can use commands to make factions and play with them as you would with a plugin.")
+                    .define("Should have factions", false);
 
 
             builder.pop()

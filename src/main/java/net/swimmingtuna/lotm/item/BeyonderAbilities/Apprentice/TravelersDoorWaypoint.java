@@ -62,6 +62,15 @@ public class TravelersDoorWaypoint extends LeftClickHandlerSkill {
         return level.dimension() != DimensionInit.CONCEALED_SPACE_LEVEL_KEY;
     }
 
+    // Helper method to format coordinates without unnecessary .0
+    private static String formatCoordinate(double coord) {
+        if (coord == Math.floor(coord)) {
+            return String.format("%.0f", coord);
+        } else {
+            return String.format("%.1f", coord);
+        }
+    }
+
     private void setWaypoint(LivingEntity entity, CompoundTag tag) {
         if (!entity.level().isClientSide) {
             if(!isValidDimension(entity.level())){
@@ -76,7 +85,12 @@ public class TravelersDoorWaypoint extends LeftClickHandlerSkill {
             tag.putDouble("y" + waypoint, entity.getY());
             tag.putDouble("z" + waypoint, entity.getZ());
             tag.putString("dimension" + waypoint, entity.level().dimension().location().toString());
-            String coords = String.format("Waypoint %d set at: %.1f, %.1f, %.1f, in The %s Dimension", waypoint, entity.getX(), entity.getY(), entity.getZ(), getDimensionName(entity.level().dimension().location().getPath()));
+            String coords = String.format("Waypoint %d set at: %s, %s, %s, in The %s Dimension",
+                    waypoint,
+                    formatCoordinate(entity.getX()),
+                    formatCoordinate(entity.getY()),
+                    formatCoordinate(entity.getZ()),
+                    getDimensionName(entity.level().dimension().location().getPath()));
             if (entity instanceof Player player) {
                 tag.putInt("waypointMessageCooldown", 30);
                 player.displayClientMessage(Component.literal(coords).withStyle(BeyonderUtil.getStyle(player)), true);
@@ -120,11 +134,15 @@ public class TravelersDoorWaypoint extends LeftClickHandlerSkill {
                 String coords;
                 boolean isInstant = tag.getBoolean("doorWaypointIsInstant");
                 if(!isInstant){
-                    coords = String.format("Door created leading to %.1f, %.1f, %.1f, in The %s Dimension", x, y, z, getDimensionName(destination.dimension().location().getPath()));
+                    coords = String.format("Door created leading to %s, %s, %s, in The %s Dimension",
+                            formatCoordinate(x), formatCoordinate(y), formatCoordinate(z),
+                            getDimensionName(destination.dimension().location().getPath()));
                     if(!waypointName.isEmpty()) coords = String.format("Door created leading to Waypoint %s", waypointName);
                     spawnDoor(livingEntity, x, y, z, destination);
                 }else{
-                    coords = String.format("Teleported to %.1f, %.1f, %.1f, in The %s Dimension", x, y, z, getDimensionName(destination.dimension().location().getPath()));
+                    coords = String.format("Teleported to %s, %s, %s, in The %s Dimension",
+                            formatCoordinate(x), formatCoordinate(y), formatCoordinate(z),
+                            getDimensionName(destination.dimension().location().getPath()));
                     if(!waypointName.isEmpty()) coords = String.format("Teleported to Waypoint %s", waypointName);
                     BeyonderUtil.teleportEntity(livingEntity, destination, x, y, z);
                 }
@@ -182,7 +200,12 @@ public class TravelersDoorWaypoint extends LeftClickHandlerSkill {
                     tag.putInt("waypointMessageCooldown", tag.getInt("waypointMessageCooldown") - 1);
                 }else{
                     if (tag.contains("x" + currentWaypoint)) {
-                        String coords = String.format("Waypoint %d: %.1f, %.1f, %.1f, in The %s Dimension", currentWaypoint, x, y, z, getDimensionName(getLevelFromId(Objects.requireNonNull(player.getServer()), dimensionName).dimension().location().getPath()));
+                        String coords = String.format("Waypoint %d: %s, %s, %s, in The %s Dimension",
+                                currentWaypoint,
+                                formatCoordinate(x),
+                                formatCoordinate(y),
+                                formatCoordinate(z),
+                                getDimensionName(getLevelFromId(Objects.requireNonNull(player.getServer()), dimensionName).dimension().location().getPath()));
                         if(!waypointName.isEmpty()) coords = String.format("Waypoint %d: %s", currentWaypoint, waypointName);
                         player.displayClientMessage(Component.literal(coords)
                                 .withStyle(BeyonderUtil.getStyle(player)), true);

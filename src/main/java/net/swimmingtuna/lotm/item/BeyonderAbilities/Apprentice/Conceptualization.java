@@ -39,7 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Conceptualization extends LeftClickHandlerSkillP {
+public class Conceptualization extends SimpleAbilityItem {
 
     public Conceptualization(Properties properties) {
         super(properties, BeyonderClassInit.APPRENTICE, 0, 0, 20, 30,30);
@@ -269,9 +269,5 @@ public class Conceptualization extends LeftClickHandlerSkillP {
             return (int) (BeyonderUtil.getSpirituality(livingEntity) / (BeyonderUtil.getMaxSpirituality(livingEntity) * 0.6f)) * 100;
         }
         return 0;
-    }
-    @Override
-    public <T> LeftClickType getleftClickEmpty(T item) {
-        return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.BLINKAFTERIMAGE.get()));
     }
 }

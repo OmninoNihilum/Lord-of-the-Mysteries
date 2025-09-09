@@ -100,7 +100,7 @@ public class SpatialCage extends LeftClickHandlerSkillP {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        tooltipComponents.add(Component.literal("Upon use, creates a powerful seal that can affect beings a full sequence above you, sealing them in a cage for a long duration. At Sequence 0, use this ability"));
+        tooltipComponents.add(Component.literal("Upon use, creates a powerful seal that can affect beings a full sequence above you, sealing them in a cage for a long duration. At Sequence 0, use this ability on nothing to put all entities around you in a cage."));
         tooltipComponents.add(Component.literal("Left click for Spatial Authority: Tearing."));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("800").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("50 Seconds").withStyle(ChatFormatting.YELLOW)));

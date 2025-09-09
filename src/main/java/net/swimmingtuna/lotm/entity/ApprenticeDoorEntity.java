@@ -431,7 +431,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             int x = tag.getInt("gammaRayTargetX");
             int y = tag.getInt("gammaRayTargetY");
             int z = tag.getInt("gammaRayTargetZ");
-            if (this.tickCount == 40) {
+            if (this.tickCount == 20) {
                 BlackSphereEntity blackSphereEntity = new BlackSphereEntity(EntityInit.BLACK_SPHERE_ENTITY.get(), this.level());
                 if (this.creator != null) {
                     blackSphereEntity.setOwner(this.getCreator());
@@ -484,6 +484,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                 }
                 if (this.tickCount % 20 == 0 && this.tickCount != 0) {
                     StarfallEntity starfall = new StarfallEntity(EntityInit.STARFALL_ENTITY.get(), this.level());
+                    starfall.setRotatePitch((int) BeyonderUtil.getRandomInRange(10));
+                    starfall.setRotateYaw((int) BeyonderUtil.getRandomInRange(10));
                     float yaw = this.entityData.get(YAW);
                     float pitch = this.entityData.get(PITCH);
                     Vec3 directionVec;
@@ -532,7 +534,7 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
                         }
                     }
                     double speed = 10.0;
-                    starfall.setMaxLife(200);
+                    starfall.setMaxLife(140);
                     starfall.setRandomColor();
                     starfall.setDeltaMovement(dirX * speed, dirY * speed, dirZ * speed);
                     starfall.hurtMarked = true;
@@ -541,6 +543,8 @@ public class ApprenticeDoorEntity extends Entity implements GeoEntity {
             } else {
                 if (this.tickCount == 70) {
                     StarfallEntity starfall = new StarfallEntity(EntityInit.STARFALL_ENTITY.get(), this.level());
+                    starfall.setRotatePitch((int) BeyonderUtil.getRandomInRange(10));
+                    starfall.setRotateYaw((int) BeyonderUtil.getRandomInRange(10));
                     float yaw = this.entityData.get(YAW);
                     float pitch = this.entityData.get(PITCH);
                     Vec3 directionVec;

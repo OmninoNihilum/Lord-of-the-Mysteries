@@ -8,20 +8,25 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.caps.BeyonderHolder;
+import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -62,7 +67,34 @@ public class DoorGammaRayBurst extends LeftClickHandlerSkillP {
             }
             addCooldown(player);
             useSpirituality(player);
-            gammaRayBurst(player, interactionTarget);
+            gammaRayBurst(player, interactionTarget.getOnPos());
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public InteractionResult useAbilityOnBlock(UseOnContext context) {
+        if (context.getPlayer() == null) {
+            Entity entity = context.getItemInHand().getEntityRepresentation();
+            if (entity instanceof LivingEntity user) {
+                if (!checkAll(user)) {
+                    return InteractionResult.FAIL;
+                }
+                gammaRayBurst(user, context.getClickedPos());
+                useSpirituality(user);
+                addCooldown(user);
+                return InteractionResult.SUCCESS;
+            }
+        } else {
+            Player player = context.getPlayer();
+            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
+            if (!checkAll(player)) {
+                return InteractionResult.FAIL;
+            }
+            gammaRayBurst(player, context.getClickedPos());
+            useSpirituality(player);
+            addCooldown(player, this, 10 + holder.getSequence() * 2);
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS;
     }
@@ -137,10 +169,33 @@ public class DoorGammaRayBurst extends LeftClickHandlerSkillP {
         }
     }
 
-    public static void gammaRayBurst(LivingEntity livingEntity, LivingEntity living) {
+    public static void gammaRayBurst(LivingEntity livingEntity, BlockPos pos) {
         Level level = livingEntity.level();
         if (!level.isClientSide()) {
-
+            Vec3 targetPos = Vec3.atCenterOf(pos);
+            int damage = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.DOOR_GAMMA_RAY_BURST.get());
+            double sphereRadius = 120.0;
+            for (int i = 0; i < damage; i++) {
+                double theta = Math.random() * 2 * Math.PI;
+                double phi = Math.acos(1 - 2 * Math.random());
+                double x = sphereRadius * Math.sin(phi) * Math.cos(theta);
+                double y = sphereRadius * Math.cos(phi);
+                double z = sphereRadius * Math.sin(phi) * Math.sin(theta);
+                Vec3 spawnPos = targetPos.add(x, y, z);
+                Vec3 directionToCenter = targetPos.subtract(spawnPos).normalize();
+                float yaw = (float) (Math.atan2(-directionToCenter.x(), directionToCenter.z()) * 180.0 / Math.PI);
+                double horizontalDistance = Math.sqrt(directionToCenter.x() * directionToCenter.x() + directionToCenter.z() * directionToCenter.z());
+                float pitch = (float) (Math.atan2(-directionToCenter.y(), horizontalDistance) * 180.0 / Math.PI);
+                ApprenticeDoorEntity gammaRayDoor = new ApprenticeDoorEntity(livingEntity.level(), livingEntity, 340, 0, 0);
+                gammaRayDoor.getPersistentData().putInt("gammaRayTargetX", pos.getX());
+                gammaRayDoor.getPersistentData().putInt("gammaRayTargetY", pos.getY());
+                gammaRayDoor.getPersistentData().putInt("gammaRayTargetZ", pos.getZ());
+                BeyonderUtil.setScale(gammaRayDoor, 4);
+                gammaRayDoor.teleportTo(spawnPos.x, spawnPos.y, spawnPos.z);
+                gammaRayDoor.setPitch(pitch);
+                gammaRayDoor.setYaw(yaw);
+                livingEntity.level().addFreshEntity(gammaRayDoor);
+            }
         }
     }
 

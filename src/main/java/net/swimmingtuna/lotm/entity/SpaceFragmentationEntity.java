@@ -163,6 +163,7 @@ public class SpaceFragmentationEntity extends Projectile implements GeoEntity {
                             coloredCopies[i].setMaxSpirituality(BeyonderUtil.getMaxSpirituality(living) * 2);
                             coloredCopies[i].setSpirituality(BeyonderUtil.getMaxSpirituality(living) * 2);
                             coloredCopies[i].setAttackChance(100);
+                            coloredCopies[i].setCreator(living);
                             BeyonderUtil.startFlying(coloredCopies[i], 0.15f, 10000);
                             BeyonderUtil.forceAlly(living, coloredCopies[i]);
                             owner.level().addFreshEntity(coloredCopies[i]);

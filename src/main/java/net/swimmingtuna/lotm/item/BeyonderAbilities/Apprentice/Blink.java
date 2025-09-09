@@ -12,7 +12,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EndPortalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
@@ -72,7 +75,7 @@ public class Blink extends LeftClickHandlerSkillP {
                             BlockPos targetPos = playerPos.offset(x, y, z);
                             BlockPos targetPos1 = playerPos.offset(x + 1, y + 1, z + 1);
                             BlockState blockState = level.getBlockState(targetPos);
-                            if (blockState.getDestroySpeed(level, targetPos) <= 3) {
+                            if (blockState.getDestroySpeed(level, targetPos) <= 3 && blockState.getDestroySpeed(level,targetPos) >= 0 && !(blockState.getBlock() instanceof BaseEntityBlock)) {
                                 BeyonderUtil.destroyBlock(player, targetPos);
                                 BeyonderUtil.destroyBlock(player, playerPos);
                                 BeyonderUtil.destroyBlock(player, targetPos1);

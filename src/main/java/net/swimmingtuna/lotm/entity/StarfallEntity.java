@@ -14,6 +14,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.ParticleInit;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.ClientShouldntRenderS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.ArrayList;
@@ -22,12 +24,16 @@ import java.util.List;
 public class StarfallEntity extends AbstractHurtingProjectile {
     private static final EntityDataAccessor<Integer> CYCLE_FREQUENCY = SynchedEntityData.defineId(StarfallEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MAX_LIFE = SynchedEntityData.defineId(StarfallEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ROTATE_YAW = SynchedEntityData.defineId(StarfallEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ROTATE_PITCH = SynchedEntityData.defineId(StarfallEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<String> COLOR_MODE = SynchedEntityData.defineId(StarfallEntity.class, EntityDataSerializers.STRING);
 
-    // Trail system
     private final List<TrailPoint> trailPoints = new ArrayList<>();
-    private static final int MAX_TRAIL_LENGTH = 20; // Maximum number of trail points
+    private static final int MAX_TRAIL_LENGTH = 20;
     private Vec3 lastPosition = null;
+
+    private float currentYaw = 0.0f;
+    private float currentPitch = 0.0f;
 
     public StarfallEntity(EntityType<? extends AbstractHurtingProjectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -38,7 +44,6 @@ public class StarfallEntity extends AbstractHurtingProjectile {
         return 1.0F;
     }
 
-    // Trail point class to store position and age
     public static class TrailPoint {
         public final Vec3 position;
         public int age;
@@ -88,12 +93,18 @@ public class StarfallEntity extends AbstractHurtingProjectile {
     @Override
     protected void onHitBlock(BlockHitResult pResult) {
         removeTrail();
-        BeyonderUtil.destroyBlocksInSphere(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 6.0f);
+        if (BeyonderUtil.getScale(this) < 7) {
+            if (Math.random() > 0.5) {
+                BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 6.0f);
+            }
+        }
     }
 
     @Override
     protected void defineSynchedData() {
         this.entityData.define(CYCLE_FREQUENCY, 0);
+        this.entityData.define(ROTATE_PITCH, 0);
+        this.entityData.define(ROTATE_YAW, 0);
         this.entityData.define(MAX_LIFE, 100);
         this.entityData.define(COLOR_MODE, ColorMode.WHITE.name());
     }
@@ -103,7 +114,6 @@ public class StarfallEntity extends AbstractHurtingProjectile {
         return true;
     }
 
-    // Trail management methods
     public List<TrailPoint> getTrailPoints() {
         return trailPoints;
     }
@@ -111,7 +121,7 @@ public class StarfallEntity extends AbstractHurtingProjectile {
     private void updateTrail() {
         Vec3 currentPos = this.position();
         if (lastPosition == null || lastPosition.distanceTo(currentPos) > 0.1) {
-            trailPoints.add(0, new TrailPoint(currentPos, 40)); // Trail points last 40 ticks (2 seconds)
+            trailPoints.add(0, new TrailPoint(currentPos, 40));
             lastPosition = currentPos;
         }
         trailPoints.removeIf(point -> {
@@ -189,14 +199,41 @@ public class StarfallEntity extends AbstractHurtingProjectile {
         this.entityData.set(MAX_LIFE, maxLife);
     }
 
+    public int getRotateYaw() {
+        return this.entityData.get(ROTATE_YAW);
+    }
+
+    public void setRotateYaw(int rotateYaw) {
+        this.entityData.set(ROTATE_YAW, rotateYaw);
+    }
+
+    public int getRotatePitch() {
+        return this.entityData.get(ROTATE_PITCH);
+    }
+
+    public void setRotatePitch(int rotatePitch) {
+        this.entityData.set(ROTATE_PITCH, rotatePitch);
+    }
+
+    public float getCurrentYaw() {
+        return currentYaw;
+    }
+
+    public float getCurrentPitch() {
+        return currentPitch;
+    }
+
     @Override
     public void tick() {
         super.tick();
-
-        // Update trail system
         updateTrail();
 
+        currentYaw += getRotateYaw();
+        currentPitch += getRotatePitch();
+
         if (!this.level().isClientSide()) {
+            this.getPersistentData().putInt("ignoreShouldntRender", 4);
+            LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.uuid, 3));
             this.getPersistentData().putInt("matterAccelerationEntitiesTimer", 200);
             if (this.getCycleFrequency() != 0 && this.tickCount % this.getCycleFrequency() == 0) {
                 this.cycleColorMode();
@@ -208,14 +245,14 @@ public class StarfallEntity extends AbstractHurtingProjectile {
             this.discard();
         }
         if (this.getOwner() != null) {
-            for (Entity living : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 5))) {
+            for (Entity living : this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(BeyonderUtil.getScale(this) * 4))) {
                 if (this.getOwner() != null && this.getOwner() instanceof LivingEntity owner && living instanceof LivingEntity livingEntity) {
                     if (!BeyonderUtil.isEntityAlly(owner, living) && living != this.getOwner()) {
                         removeTrail();
                         livingEntity.invulnerableTime = 0;
                         livingEntity.hurtTime = 0;
                         livingEntity.hurtDuration = 0;
-                        BeyonderUtil.destroyBlocksInSphere(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 30.0f);
+                        BeyonderUtil.destroyBlocksInSphereNotHittingOwner(this, this.getOnPos(), BeyonderUtil.getScale(this) * 4.0f, BeyonderUtil.getScale(this) * 30.0f);
                         this.discard();
                     }
                 }
@@ -233,6 +270,18 @@ public class StarfallEntity extends AbstractHurtingProjectile {
         }
         if (compound.contains("maxLife")) {
             this.setMaxLife(compound.getInt("maxLife"));
+        }
+        if (compound.contains("rotateYaw")) {
+            this.setRotateYaw(compound.getInt("rotateYaw"));
+        }
+        if (compound.contains("rotatePitch")) {
+            this.setRotatePitch(compound.getInt("rotatePitch"));
+        }
+        if (compound.contains("currentYaw")) {
+            this.currentYaw = compound.getFloat("currentYaw");
+        }
+        if (compound.contains("currentPitch")) {
+            this.currentPitch = compound.getFloat("currentPitch");
         }
         if (compound.contains("trailPoints")) {
             ListTag trailList = compound.getList("trailPoints", Tag.TAG_COMPOUND);
@@ -256,8 +305,11 @@ public class StarfallEntity extends AbstractHurtingProjectile {
         compound.putString("colorMode", this.getColorMode());
         compound.putInt("cycleFrequency", this.getCycleFrequency());
         compound.putInt("maxLife", this.getMaxLife());
+        compound.putInt("rotateYaw", this.getRotateYaw());
+        compound.putInt("rotatePitch", this.getRotatePitch());
+        compound.putFloat("currentYaw", this.currentYaw);
+        compound.putFloat("currentPitch", this.currentPitch);
 
-        // Save trail points
         ListTag trailList = new ListTag();
         for (TrailPoint point : trailPoints) {
             CompoundTag pointTag = new CompoundTag();

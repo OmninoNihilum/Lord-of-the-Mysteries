@@ -59,7 +59,7 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
             boolean telekenisis = tag.getBoolean("trickmasterTelekenisis");
             tag.putBoolean("trickmasterTelekenisis", !telekenisis);
             if (player instanceof Player pPlayer) {
-                pPlayer.displayClientMessage(Component.literal("Telekenisis Turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
+                pPlayer.displayClientMessage(Component.literal("Telekinesis Turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
             }
         }
     }
@@ -93,9 +93,9 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
                     }
                 }
             } else {
+                tag.putBoolean("trickmasterTelekenisis", false);
                 if (livingEntity instanceof Player pPlayer) {
-                    tag.putBoolean("trickmasterTelekenisis", false);
-                    pPlayer.displayClientMessage(Component.literal("Telekenisis turned off due to lack of spirituality").withStyle(ChatFormatting.BOLD, ChatFormatting.RED), true);
+                    pPlayer.displayClientMessage(Component.literal("Telekinesis turned off due to lack of spirituality").withStyle(ChatFormatting.BOLD, ChatFormatting.RED), true);
                 }
             }
         }
@@ -125,7 +125,7 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.literal("Upon use, enables or disables your telekenisis. If enabled, all projectiles and other entities will be pushed away from you at the cost of spirituality for each entity pushed away."));
+        tooltipComponents.add(Component.literal("Upon use, enables or disables your telekinesis. If enabled, all projectiles and other entities will be pushed away from you at the cost of spirituality for each entity pushed away."));
         tooltipComponents.add(Component.literal("Left click for Trick: Tumble"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("Depends on strength of entity pushed.").withStyle(ChatFormatting.YELLOW)));
         tooltipComponents.add(Component.literal("Cooldown: ").append(Component.literal("1 Second.").withStyle(ChatFormatting.YELLOW)));

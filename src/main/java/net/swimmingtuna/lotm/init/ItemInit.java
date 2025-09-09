@@ -599,13 +599,13 @@ public class ItemInit {
     public static final RegistryObject<Item> LIGHTNINGRUNE = ITEMS.register("lightningstrikerune",
             () -> new LightningStrikeRune(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FLAMERUNE = ITEMS.register("flamerune",
-            () -> new LightningStrikeRune(new Item.Properties().stacksTo(1)));
+            () -> new FlameRune(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> WITHERRUNE = ITEMS.register("witherrune",
-            () -> new LightningStrikeRune(new Item.Properties().stacksTo(1)));
+            () -> new WitherRune(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FREEZERUNE = ITEMS.register("freezerune",
-            () -> new LightningStrikeRune(new Item.Properties().stacksTo(1)));
+            () -> new FreezeRune(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CONFUSIONRUNE = ITEMS.register("confusionrune",
-            () -> new LightningStrikeRune(new Item.Properties().stacksTo(1)));
+            () -> new ConfusionRune(new Item.Properties().stacksTo(1)));
 
     //OTHER
     public static final RegistryObject<Item> BEYONDER_CHARACTERISTIC = ITEMS.register("beyondercharacteristics",

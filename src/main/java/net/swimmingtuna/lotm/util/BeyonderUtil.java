@@ -48,6 +48,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -97,6 +98,7 @@ import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSword;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
+import net.swimmingtuna.lotm.world.worlddata.Faction.FactionData;
 import net.swimmingtuna.lotm.world.worlddata.PlayerMobTracker;
 import net.swimmingtuna.lotm.world.worlddata.SealStrengthenData;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
@@ -119,7 +121,7 @@ public class BeyonderUtil {
     public static final Map<UUID, SimpleAbilityItem> pendingAbilityCopies = new HashMap<>();
 
     public static void destroyBlock(Entity entity, BlockPos pos) {
-        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+        if (Configs.COMMON.shouldDestroyBlocks.get() || !isChunkProtected(entity, pos)) {
             entity.level().destroyBlock(pos, true);
         }
     }
@@ -127,18 +129,25 @@ public class BeyonderUtil {
     public static boolean canDestroyBlock(Entity entity, BlockPos pos) {
         Level level = entity.level();
         BlockState blockState = level.getBlockState(pos);
-        return blockState.getDestroySpeed(level, pos) >= 0 && blockState.getDestroySpeed(level, pos) <= 51;
+        boolean canBreak = blockState.getDestroySpeed(level, pos) >= 0 && blockState.getDestroySpeed(level, pos) <= 51;
+        return canBreak && !isChunkProtected(entity, pos);
+    }
+
+    public static boolean shouldDestroyBlocksFirstCheck() {
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            return !Configs.COMMON.factionsEnabled.get();
+        }
+        return false;
     }
 
     public static void setAir(Entity entity, BlockPos pos) {
-        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+        if (entity.getPersistentData().getInt("shouldntDestroyBlocks") == 0) {
             entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
         }
     }
 
-
     public static void setAsBlock(Entity entity, BlockPos pos, Block block) {
-        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+        if (entity.getPersistentData().getInt("shouldntDestroyBlocks") == 0) {
             entity.level().setBlock(pos, block.defaultBlockState(), 2);
         }
     }
@@ -148,15 +157,72 @@ public class BeyonderUtil {
     }
 
     public static void setAirBE(Level level, BlockPos pos) {
-        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+        if (Configs.COMMON.shouldDestroyBlocks.get() && !isChunkProtectedBE(level, pos)) {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
         }
     }
 
     public static void setBlockBE(Level level, BlockPos pos, Block block) {
-        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+        if (Configs.COMMON.shouldDestroyBlocks.get() && !isChunkProtectedBE(level, pos)) {
             level.setBlock(pos, block.defaultBlockState(), 2);
         }
+    }
+
+    public static boolean ableToDestroyBlock(Entity entity, BlockPos pos) {
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            if (!Configs.COMMON.factionsEnabled.get()) {
+                return true;
+            } else {
+                return isChunkProtected(entity, pos);
+            }
+        }
+        return true;
+    }
+
+    public static boolean ableToDestroyBlockBE(Level level, BlockPos pos) {
+        if (Configs.COMMON.shouldDestroyBlocks.get()) {
+            if (!Configs.COMMON.factionsEnabled.get()) {
+                return true;
+            } else {
+                return isChunkProtectedBE(level, pos);
+            }
+        }
+        return true;
+    }
+
+    public static boolean isChunkProtected(Entity entity, BlockPos pos) {
+        if (!Configs.COMMON.factionsEnabled.get()) {
+            return false;
+        }
+        Level level = entity.level();
+        if (level.isClientSide() || !(level instanceof ServerLevel serverLevel)) {
+            return false;
+        }
+
+        FactionData factionData = FactionData.getInstance(serverLevel);
+        ChunkPos chunkPos = new ChunkPos(pos);
+        String chunkOwner = factionData.getChunkOwner(chunkPos, serverLevel.dimension());
+        if (chunkOwner == null) {
+            return false;
+        }
+        if (entity instanceof Player player) {
+            String playerFaction = factionData.getPlayerFaction(player.getUUID());
+            return !chunkOwner.equals(playerFaction);
+        }
+        return true;
+    }
+
+    public static boolean isChunkProtectedBE(Level level, BlockPos pos) {
+        if (!Configs.COMMON.factionsEnabled.get()) {
+            return false;
+        }
+        if (level.isClientSide() || !(level instanceof ServerLevel serverLevel)) {
+            return false;
+        }
+        FactionData factionData = FactionData.getInstance(serverLevel);
+        ChunkPos chunkPos = new ChunkPos(pos);
+        String chunkOwner = factionData.getChunkOwner(chunkPos, serverLevel.dimension());
+        return chunkOwner != null;
     }
 
     public static Projectile getProjectiles(LivingEntity livingEntity, int radius) {
@@ -1317,9 +1383,6 @@ public class BeyonderUtil {
                 BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(player);
                 return holder.getSequence();
             }
-            if (living.getPersistentData().contains("separateEntitySequence")) {
-                //return living.getPersistentData().getInt("separateEntitySequence");
-            }
             float maxHp = living.getMaxHealth();
             if (maxHp <= 20) {
                 return 9;
@@ -1548,7 +1611,7 @@ public class BeyonderUtil {
         damageMap.put(ItemInit.CONCEPTUALIZATION.get(), applyAbilityStrengthened((15.0f + (sequence * 2f)) * abilityWeakness, -abilityStrengthened));
         damageMap.put(ItemInit.DIMENSIONAL_SIGHT.get(), applyAbilityStrengthened((1000.0f - sequence * 200) / abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_CONCEALMENT.get(), applyAbilityStrengthened(((72000.0f / abilityWeakness) - (sequence * 1200)), abilityStrengthened));
-        damageMap.put(ItemInit.DOOR_GAMMA_RAY_BURST.get(), applyAbilityStrengthened((25.0f - (sequence * abilityWeakness)), abilityStrengthened));
+        damageMap.put(ItemInit.DOOR_GAMMA_RAY_BURST.get(), applyAbilityStrengthened((18.0f - (sequence * abilityWeakness)), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_LAYERING.get(), applyAbilityStrengthened((Math.max(1.0f, 8.0f - ((sequence) * abilityWeakness))), abilityStrengthened));
         damageMap.put(ItemInit.DOOR_MIRAGE.get(), applyAbilityStrengthened((50.0f + (sequence * 10)) * abilityWeakness, abilityStrengthened));
         damageMap.put(ItemInit.DOOR_SEAL_STRENGTHENING.get(), applyAbilityStrengthened(1.0f * abilityWeakness + (sequence * 0.125f), -abilityStrengthened));
@@ -3252,13 +3315,19 @@ public class BeyonderUtil {
         return (range * random);
     }
 
+    public static void putShouldntDestroyBlocks(Entity entity, int timer) {
+        entity.getPersistentData().putInt("shouldntDestroyBlocks", timer);
+    }
+
     public static void destroyBlocksInSphere(Entity entity, BlockPos hitPos, double radius, float damage) {
-        for (BlockPos pos : BlockPos.betweenClosed(
-                hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                hitPos.offset((int) radius, (int) radius, (int) radius))) {
-            if (pos.distSqr(hitPos) <= radius * radius) {
-                if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
-                    setAir(entity, pos);
+        if (entity.getPersistentData().getInt("shouldntDestroyBlocks") == 0) {
+            for (BlockPos pos : BlockPos.betweenClosed(
+                    hitPos.offset((int) -radius, (int) -radius, (int) -radius),
+                    hitPos.offset((int) radius, (int) radius, (int) radius))) {
+                if (pos.distSqr(hitPos) <= radius * radius) {
+                    if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
+                        setAir(entity, pos);
+                    }
                 }
             }
         }
@@ -3285,17 +3354,22 @@ public class BeyonderUtil {
     }
 
     public static void destroyBlocksInSphereNotHittingOwner(Entity entity, BlockPos hitPos, double radius, float damage) {
-        for (BlockPos pos : BlockPos.betweenClosed(
-                hitPos.offset((int) -radius, (int) -radius, (int) -radius),
-                hitPos.offset((int) radius, (int) radius, (int) radius))) {
-            if (pos.distSqr(hitPos) <= radius * radius) {
-                if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
-                    setAir(entity, pos);
+        if (entity.getPersistentData().getInt("shouldntDestroyBlocks") == 0) {
+            for (BlockPos pos : BlockPos.betweenClosed(
+                    hitPos.offset((int) -radius, (int) -radius, (int) -radius),
+                    hitPos.offset((int) radius, (int) radius, (int) radius))) {
+                if (pos.distSqr(hitPos) <= radius * radius) {
+                    if (entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) >= 0 && entity.level().getBlockState(pos).getDestroySpeed(entity.level(), pos) <= 51) {
+                        setAir(entity, pos);
+                    }
                 }
             }
         }
         List<Entity> entities = entity.level().getEntities(entity, new AABB(hitPos.offset((int) -radius, (int) -radius, (int) -radius), hitPos.offset((int) radius, (int) radius, (int) radius)));
         for (Entity pEntity : entities) {
+            if (entity instanceof Projectile projectile && projectile.getOwner() != null) {
+                entity = projectile.getOwner();
+            }
             if (pEntity == entity) {
                 continue;
             }
@@ -3666,7 +3740,7 @@ public class BeyonderUtil {
                 }
                 return BeyonderUtil.areAllies(living, livingEntity);
             }
-        }  else if (possibleAlly instanceof KeyOfStarsProtectiveSealEntity sealEntity) {
+        } else if (possibleAlly instanceof KeyOfStarsProtectiveSealEntity sealEntity) {
             if (sealEntity.getOwnerUUID().isPresent()) {
                 UUID ownerUUID = sealEntity.getOwnerUUID().get();
                 LivingEntity livingEntity = getLivingEntityFromUUID(living.level(), ownerUUID);

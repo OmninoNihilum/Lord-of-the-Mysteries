@@ -150,14 +150,21 @@ public class BlackSphereEntity extends AbstractHurtingProjectile {
         if (!this.level().isClientSide()) {
             this.setPos(this.getX(), this.getY(), this.getZ());
             this.hasImpulse = true;
+            int amountOfBeams = 0;
+            for (BeamEntity beamEntity : this.level().getEntitiesOfClass(BeamEntity.class, this.getBoundingBox().inflate(5))) {
+                amountOfBeams++;
+            }
+            if (this.tickCount >= 50 && amountOfBeams == 0) {
+                this.getPersistentData().putInt("ignoreShouldntRender", 0);
+                LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.uuid, 0));
+                this.discard();
+            }
         }
         if (this.getOwner() != null) {
-            if (this.tickCount == 55) {
-                shootDragonBreathAtTarget(30, 150, 4);
+            if (this.tickCount == 35) {
+                shootDragonBreathAtTarget(30, 120, 2.5f);
             }
-            if (this.tickCount >= 260) {
-                this.getPersistentData().putInt("ignoreShouldntRender", 0);
-                this.discard();
+            if (this.tickCount >= 215) {
                 for (BlackSphereEntity blackSphereEntity : this.level().getEntitiesOfClass(BlackSphereEntity.class, this.getBoundingBox().inflate(50))) {
                     if (blackSphereEntity.tickCount >= 100 && blackSphereEntity.getOwner() != null && blackSphereEntity.getOwner() == this.getOwner()) {
                         blackSphereEntity.getPersistentData().putInt("ignoreShouldntRender", 0);
@@ -165,14 +172,11 @@ public class BlackSphereEntity extends AbstractHurtingProjectile {
                         blackSphereEntity.discard();
                     }
                 }
-                for (BeamEntity beamEntity : this.level().getEntitiesOfClass(BeamEntity.class, this.getBoundingBox().inflate(3))) {
-                    if (!beamEntity.getIsLivingOwner()) {
-                        beamEntity.discard();
-                    }
-                }
             } else {
-                LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.uuid, 20));
-                this.getPersistentData().putInt("ignoreShouldntRender", 10);
+                if (this.isAlive()) {
+                    LOTMNetworkHandler.sendToAllPlayers(new ClientShouldntRenderS2C(this.uuid, 20));
+                    this.getPersistentData().putInt("ignoreShouldntRender", 10);
+                }
             }
         }
     }
@@ -192,13 +196,14 @@ public class BlackSphereEntity extends AbstractHurtingProjectile {
             dragonBreath.setGammaRay(true);
             dragonBreath.setIsDragonbreath(false);
             dragonBreath.setDestroyBlocks(false);
-            dragonBreath.setDuration(45);
+            dragonBreath.setDuration(120);
             dragonBreath.setCharge(20);
             dragonBreath.setIsLivingOwner(false);
             dragonBreath.setCausesFire(false);
             dragonBreath.teleportTo(forwardSpawnPos.x(), forwardSpawnPos.y(), forwardSpawnPos.z());
             dragonBreath.setFixedDirection(direction);
             this.level().addFreshEntity(dragonBreath);
+            /*
             Vec3 oppositeDirection = direction.scale(-1);
             DragonBreathEntity oppositeBreath = new DragonBreathEntity(EntityInit.DRAGON_BREATH_ENTITY.get(), owner.level());
             oppositeBreath.setDamage(damage);
@@ -208,13 +213,24 @@ public class BlackSphereEntity extends AbstractHurtingProjectile {
             oppositeBreath.setGammaRay(true);
             oppositeBreath.setIsDragonbreath(false);
             oppositeBreath.setDestroyBlocks(false);
-            oppositeBreath.setDuration(45);
+            oppositeBreath.setDuration(120);
             oppositeBreath.setCharge(20);
             oppositeBreath.setIsLivingOwner(false);
             oppositeBreath.setCausesFire(false);
             oppositeBreath.teleportTo(backwardSpawnPos.x(), backwardSpawnPos.y(), backwardSpawnPos.z());
             oppositeBreath.setFixedDirection(oppositeDirection);
             this.level().addFreshEntity(oppositeBreath);
+
+             */
+        }
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (!this.level().isClientSide()) {
+            this.setPos(this.getX(), this.getY(), this.getZ());
+            this.hasImpulse = true;
         }
     }
 }

@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.DragonBreathEntity;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateDragonBreathS2C;
@@ -178,6 +179,10 @@ public abstract class BeamEntity extends LOTMProjectile {
         super.onAddedToWorld();
         this.update();
         this.calculateEndPos();
+        if (!this.level().isClientSide()) {
+            this.setPos(this.getX(), this.getY(), this.getZ());
+            this.hasImpulse = true;
+        }
     }
 
     @Override
@@ -239,10 +244,7 @@ public abstract class BeamEntity extends LOTMProjectile {
                 if (!this.isStill()) {
                     this.calculateEndPos();
                 }
-                List<Entity> entities = this.checkCollisions(
-                        new Vec3(this.getX(), this.getY(), this.getZ()),
-                        new Vec3(this.endPosX, this.endPosY, this.endPosZ)
-                );
+                List<Entity> entities = this.checkCollisions(new Vec3(this.getX(), this.getY(), this.getZ()), new Vec3(this.endPosX, this.endPosY, this.endPosZ));
                 for (Entity entity : entities) {
                     if (entity == owner) continue;
                     if (getIsDragonBreath() && this.getOwner() != null && this.getOwner() instanceof LivingEntity livingOwner && entity instanceof LivingEntity livingEntity && !BeyonderUtil.areAllies(livingOwner, livingEntity)) {

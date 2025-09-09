@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -175,8 +176,11 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
         }
 
         if (!this.level().isClientSide) {
+            if (this.tickCount >= 300) {
+                this.discard();
+            }
             if (this.tickCount == 1) {
-                destroyBlocksInSphere(this, this.getOnPos(), 50);
+                BeyonderUtil.destroyBlocksInSphere(this, this.getOnPos(), 50,0);
             }
             float currentRotationY = getRingRotationY();
             float rotationSpeed = getRingRotationSpeed();
@@ -207,7 +211,9 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
                             currentVelocity.y + ny * pullStrength * 0.3,
                             currentVelocity.z + nz * pullStrength * 0.3
                     );
-
+                    if (entity instanceof FallingBlockEntity) {
+                        entity.discard();
+                    }
                     if (distance <= 2.0) {
                         entity.discard();
                     }
@@ -236,7 +242,7 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
                 }
             }
 
-            if (this.tickCount >= 30) {
+            if (this.tickCount >= 30 && BeyonderUtil.shouldDestroyBlocksFirstCheck()) {
                 int radius = (int) (scale * 12);
                 if (radius < 1) {
                     radius = 1;
@@ -287,7 +293,6 @@ public class BlackHoleEntity extends AbstractHurtingProjectile implements GeoEnt
                             setAir(this, abs);
                         }
                     }
-
                     processed++;
                 }
             }

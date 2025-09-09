@@ -78,6 +78,7 @@ public class ClientEvents {
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onMouseInput(InputEvent.MouseButton event) {
         if (event.getButton() == 1 && event.getAction() == 1) {
@@ -134,6 +135,7 @@ public class ClientEvents {
         return prev + (current - prev) * partialTick;
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("flash_overlay", FlashOverlay.INSTANCE);

@@ -22,6 +22,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -292,6 +293,16 @@ public class LightningEntity extends AbstractHurtingProjectile {
             }
 
             if (!this.level().isClientSide() && this.tickCount >= 2) {
+                CompoundTag tag = this.getPersistentData();
+                if (this.tickCount % 2 == 0) {
+                    if (!Configs.COMMON.shouldDestroyBlocks.get()) {
+                        BeyonderUtil.putShouldntDestroyBlocks(this, 5);
+                    } else if (Configs.COMMON.factionsEnabled.get()) {
+                        if (BeyonderUtil.isChunkProtected(this, new BlockPos((int) this.getLastPos().x(), (int) this.getLastPos().y(), (int) this.getLastPos().z()))) {
+                            BeyonderUtil.putShouldntDestroyBlocks(this, 5);
+                        }
+                    }
+                }
                 float detectionRadius = Math.min(18, getDamage() * 0.05f);
 
                 // Validate detection radius to prevent invalid bounding boxes

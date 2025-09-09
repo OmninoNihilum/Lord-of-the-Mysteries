@@ -28,6 +28,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -102,8 +103,9 @@ public class LOTM {
         MenuInit.register(modEventBus);
         CustomEntityDataSerializers.register();
         GeckoLib.initialize();
-
-        modEventBus.addListener(ClientEvents::onRegisterOverlays);
+        if (FMLEnvironment.dist.isClient()) {
+            modEventBus.addListener(ClientEvents::onRegisterOverlays);
+        }
         BiomeModifierRegistry.BIOME_MODIFIER_SERIALIZERS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ClientConfigs.SPEC, String.format("%s-client.toml", LOTM.MOD_ID));
         MinecraftForge.EVENT_BUS.register(this);

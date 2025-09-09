@@ -1,7 +1,6 @@
 package net.swimmingtuna.lotm.events;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -24,7 +23,6 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -45,7 +43,6 @@ import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
 import net.swimmingtuna.lotm.beyonder.*;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
-import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.capabilities.concealed_data.ConcealedUtils;
 import net.swimmingtuna.lotm.capabilities.concealed_space.ConcealedSpaceUtils;
 import net.swimmingtuna.lotm.capabilities.doll_data.DollUtils;
@@ -57,8 +54,6 @@ import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
 import net.swimmingtuna.lotm.entity.*;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.init.EntityInit;
-import net.swimmingtuna.lotm.init.GameRuleInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.AllyMaker;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
@@ -86,6 +81,7 @@ import net.swimmingtuna.lotm.util.PlayerMobs.PlayerMobSequenceData;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderEntityData;
 import net.swimmingtuna.lotm.world.worlddata.BeyonderRecipeData;
 import net.swimmingtuna.lotm.world.worlddata.CalamityEnhancementData;
+import net.swimmingtuna.lotm.world.worlddata.Faction.FactionData;
 import net.swimmingtuna.lotm.world.worldgen.MirrorWorldChunkGenerator;
 import net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit;
 
@@ -441,6 +437,7 @@ public class ModEvents {
             twilightTick(event);
             envisionKingdom(livingEntity, level);
             SwordOfTwilight.twilightSwordTick(event);
+            FactionData.factionDecrementer(event);
             if (tag.getInt("inTwilight") == 0 && tag.getInt("cancelTick") == 0) {
                 //mob ticks
                 MatterAccelerationBlocks.matterAccelerationBlocksMobTick(event);
@@ -487,7 +484,6 @@ public class ModEvents {
                 calamityIncarnationTsunamiTick(livingEntity);
                 envisionBarrier(livingEntity);
                 manipulateMovement(livingEntity);
-                envisionBarrier(livingEntity);
                 consciousnessStroll(livingEntity);
                 BeyonderUtil.projectileEvent(livingEntity);
                 calamityIncarnationTornado(livingEntity);
@@ -738,6 +734,7 @@ public class ModEvents {
         DamageSource source = event.getSource();
         Entity entitySource = source.getEntity();
         if (!event.getEntity().level().isClientSide()) {
+            FactionData.factionHurtCheck(event);
             PsychologicalInvisibility.psychologicalInvisibilityAttack(event);
             Teleportation.teleportationHurtEvent(event);
             BeyonderUtil.ageHandlerHurt(event);
