@@ -12,6 +12,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -50,6 +52,7 @@ public class WindManipulationSense extends LeftClickHandlerSkillP {
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Wind Sense Turned " + (windManipulationSense ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
             }
+            EventManager.addToRegularLoop(player, EFunctions.WIND_MANIPULATION_SENSE.get());
             int sequence = BeyonderUtil.getSequence(player);
             double radius = 100 - (sequence * 10);
             for (LivingEntity otherPlayer : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius))) {
@@ -95,9 +98,16 @@ public class WindManipulationSense extends LeftClickHandlerSkillP {
         CompoundTag tag = livingEntity.getPersistentData();
         boolean windManipulationSense = tag.getBoolean("windManipulationSense");
         if (!windManipulationSense) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.WIND_MANIPULATION_SENSE.get());
             return;
         }
-        if (BeyonderUtil.getSpirituality(livingEntity) <= 1) return;
+        if (BeyonderUtil.getSpirituality(livingEntity) <= 1) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.WIND_MANIPULATION_SENSE.get());
+            if (livingEntity instanceof Player player) {
+                player.displayClientMessage(Component.literal("Wind Manipulation (Sense) turned off due to lack of spirituality").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD), true);
+            }
+            return;
+        }
         BeyonderUtil.useSpirituality(livingEntity, 1);
         double radius = 100 - (BeyonderUtil.getSequence(livingEntity) * 10);
         for (LivingEntity otherPlayer : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(radius))) {

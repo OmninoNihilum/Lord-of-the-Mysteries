@@ -6,8 +6,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -21,6 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationSelf;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -47,6 +50,48 @@ public class Blink extends LeftClickHandlerSkillP {
         useSpirituality(player, blinkDistance);
         blink(player);
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
+            if (livingEntity.isShiftKeyDown()) {
+                int doorBlinkDistance = livingEntity.getPersistentData().getInt("trickmasterBlinkDistance");
+                if (livingEntity.isShiftKeyDown()) {
+                    if (livingEntity.getMainHandItem().getItem() instanceof Blink && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 5)) {
+                        int maxBlinkDistance = 50;
+                        int blinkIncrement = 2;
+                        int sequence = BeyonderUtil.getSequence(livingEntity);
+                        if (sequence == 5) {
+                            maxBlinkDistance = 30;
+                        } else if (sequence == 4) {
+                            maxBlinkDistance = 100;
+                            blinkIncrement = 4;
+                        } else if (sequence == 3) {
+                            maxBlinkDistance = 200;
+                            blinkIncrement = 10;
+                        } else if (sequence == 2) {
+                            maxBlinkDistance = 450;
+                            blinkIncrement = 20;
+                        } else if (sequence == 1) {
+                            maxBlinkDistance = 900;
+                            blinkIncrement = 20;
+                        } else if (sequence == 0) {
+                            maxBlinkDistance = 2000;
+                            blinkIncrement = 30;
+                        }
+                        if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") < maxBlinkDistance) {
+                            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", livingEntity.getPersistentData().getInt("trickMasterBlinkDistance") + blinkIncrement);
+                        } else {
+                            livingEntity.displayClientMessage(Component.literal("Blink Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                            livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", 0);
+                        }
+                        livingEntity.displayClientMessage(Component.literal("Blink Distance is " + doorBlinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     public void blink(LivingEntity player) {

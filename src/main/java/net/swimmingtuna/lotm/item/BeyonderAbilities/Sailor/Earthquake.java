@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.swimmingtuna.lotm.entity.StoneEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -48,6 +50,8 @@ public class Earthquake extends SimpleAbilityItem {
 
     public void earthquakeAbility(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.EARTHQUAKE.get());
+
             player.getPersistentData().putInt("sailorEarthquake", 200);
         }
     }

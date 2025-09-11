@@ -17,6 +17,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.EndStoneEntity;
 import net.swimmingtuna.lotm.entity.NetherrackEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -116,13 +118,17 @@ public class MatterAccelerationBlocks extends LeftClickHandlerSkill {
                         }
                     }
                 }
+            } else {
+                EventManager.removeFromRegularLoop(mob, EFunctions.MATTER_ACCELERATION_BLOCKS.get());
             }
         }
     }
 
     public static void matterAccelerationBlocks(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.NIGHTMARE_TICK.get());
             if (player instanceof Mob mob) {
+                EventManager.addToRegularLoop(mob, EFunctions.MATTER_ACCELERATION_BLOCKS.get());
                 mob.getPersistentData().putInt("matterAccelerationMobShootTimer", (int) (float) BeyonderUtil.getDamage(mob).get(ItemInit.MATTER_ACCELERATION_BLOCKS.get()) / 10);
             }
             player.getPersistentData().putInt("matterAccelerationBlockTimer", 480);

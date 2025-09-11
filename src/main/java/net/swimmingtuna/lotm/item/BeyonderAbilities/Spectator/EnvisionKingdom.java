@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -63,7 +65,10 @@ public class EnvisionKingdom extends LeftClickHandlerSkillP {
         CompoundTag tag = livingEntity.getPersistentData();
         if (livingEntity instanceof Player player && level instanceof ServerLevel serverLevel) {
             int mindScape = tag.getInt("inMindscape");
-            if (mindScape < 1) return;
+            if (mindScape < 1) {
+                EventManager.removeFromWorldLoop(player, EFunctions.ENVISION_KINGDOM.get());
+                return;
+            }
             tag.putInt("inMindscape", mindScape + 1);
             if (mindScape >= 1200) {
                 tag.putInt("inMindscape", 0);
@@ -79,6 +84,7 @@ public class EnvisionKingdom extends LeftClickHandlerSkillP {
             if (mindscapeAbilities == 1 && !tag.getBoolean("CanFly")) {
                 livingEntity.getPersistentData().putInt("dreamIntoReality", 1);
                 BeyonderUtil.stopFlying(player);
+                EventManager.removeFromWorldLoop(player, EFunctions.ENVISION_KINGDOM.get());
             }
 
             int partIndex = mindScape - 2;
@@ -122,6 +128,7 @@ public class EnvisionKingdom extends LeftClickHandlerSkillP {
             compoundTag.putInt("mindscapePlayerLocationX", x - 77); //check if this works
             compoundTag.putInt("mindscapePlayerLocationY", y - 8);
             compoundTag.putInt("mindscapePlayerLocationZ", z - 207);
+            EventManager.addToWorldLoop(player, EFunctions.ENVISION_KINGDOM.get());
         }
     }
     @Override

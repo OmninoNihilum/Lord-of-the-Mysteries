@@ -30,6 +30,8 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.LightningEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -83,6 +85,7 @@ public class LightningRedirection extends SimpleAbilityItem {
             if (livingEntity instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Lightning Redirection Turned " + (lightningRedirection ? "Off" : "On")).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
             }
+            EventManager.addToRegularLoop(livingEntity, EFunctions.LIGHTNINGREDIRECTION.get());
         }
     }
 
@@ -165,6 +168,8 @@ public class LightningRedirection extends SimpleAbilityItem {
                         lightning.teleportTo(targetBlockPos.getX() + 0.5, targetBlockPos.getY() + 1, targetBlockPos.getZ() + 0.5);
                     }
                 }
+            } else {
+                EventManager.removeFromRegularLoop(living, EFunctions.LIGHTNINGREDIRECTION.get());
             }
         }
     }

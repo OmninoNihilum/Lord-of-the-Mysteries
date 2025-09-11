@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationSelf;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -48,6 +49,26 @@ public class EnvisionLocation extends LeftClickHandlerSkillP {
         useSpirituality(player, blinkDistance);
         envisionLocationBlink(player);
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player player && !player.isSpectator()) {
+            if (player.isShiftKeyDown()) {
+                int blinkDistance = player.getPersistentData().getInt("BlinkDistance");
+                if (player.isShiftKeyDown()) {
+                    if (player.getMainHandItem().getItem() instanceof EnvisionLocation && BeyonderUtil.currentPathwayMatches(player, BeyonderClassInit.SPECTATOR.get())) {
+                        player.getPersistentData().putInt("BlinkDistance", blinkDistance + 5);
+                        player.displayClientMessage(Component.literal("Blink Distance is " + blinkDistance).withStyle(BeyonderUtil.getStyle(player)), true);
+                        if (blinkDistance >= 201) {
+                            player.displayClientMessage(Component.literal("Blink Distance is 0").withStyle(BeyonderUtil.getStyle(player)), true);
+                            player.getPersistentData().putInt("BlinkDistance", 0);
+                        }
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     public static void envisionLocationTeleport(Entity player, double x, double y, double z) {

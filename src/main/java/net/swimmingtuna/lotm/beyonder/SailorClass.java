@@ -33,6 +33,9 @@ import net.minecraftforge.eventbus.api.Event;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.PathwayAttributes.SailorAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
+import net.swimmingtuna.lotm.events.NewEventLoop.PathwaysPassiveEvents.SailorPassiveEvents;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -93,7 +96,6 @@ public class SailorClass implements BeyonderClass {
         SailorAttributes.applyAll(entity, seq);
     }
 
-    @Override
     public void tick(LivingEntity player, int sequenceLevel) {
         if (player.tickCount % 60 != 0) {
             return;
@@ -300,6 +302,7 @@ public class SailorClass implements BeyonderClass {
                         }
                         if (mob.canBreatheUnderwater() || mob.getNavigation() instanceof WaterBoundPathNavigation || mob instanceof WaterAnimal || mob.getName().getString().toLowerCase().contains("fish")) {
                             if (mob.getPersistentData().getInt("rainEyesMobAttackTarget") == 0) {
+                                EventManager.addToRegularLoop(mob, EFunctions.RAIN_EYES.get());
                                 mob.getPersistentData().putInt("rainEyesMobAttackTarget", (int) ((int) (float) BeyonderUtil.getDamage(livingAttacker).get(ItemInit.RAIN_EYES.get()) * 0.75f));
                                 mob.getPersistentData().putUUID("rainEyesMobAttackTargetUUID", attacked.getUUID());
                             }
@@ -345,6 +348,8 @@ public class SailorClass implements BeyonderClass {
                 BeyonderUtil.sendParticles(living, ParticleTypes.RAIN, living.getX(), living.getY(), living.getZ(), 0, -1, 0);
             }
             BeyonderUtil.sendParticles(living, ParticleTypes.RAIN, living.getX(), living.getY(), living.getZ(), 0, -1, 0);
+        } else {
+            EventManager.removeFromRegularLoop(living, EFunctions.RAIN_EYES.get());
         }
     }
 
@@ -408,5 +413,16 @@ public class SailorClass implements BeyonderClass {
                 projectile.level().explode(null, blockPos.x(), blockPos.y(), blockPos.z(), 4, Level.ExplosionInteraction.BLOCK);
             }
         }
+    }
+
+
+    @Override
+    public void removeAllEvents(LivingEntity entity) {
+        SailorPassiveEvents.removeAllEvents(entity);
+    }
+
+    @Override
+    public void addAllEvents(LivingEntity entity, int sequence) {
+        SailorPassiveEvents.addAllEvents(entity, sequence);
     }
 }

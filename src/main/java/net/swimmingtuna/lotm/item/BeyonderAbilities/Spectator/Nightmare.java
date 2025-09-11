@@ -24,6 +24,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -113,6 +115,7 @@ public class Nightmare extends SimpleAbilityItem {
                 amountToAdd = 200;
             }
             if (living != livingEntity && !BeyonderUtil.areAllies(livingEntity, living)) {
+                EventManager.addToRegularLoop(living, EFunctions.NIGHTMARE_TICK.get());
                 living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 1, false, false));
                 if (tag.getInt("NightmareTimer") < 300 - amountToAdd) {
                     tag.putInt("NightmareTimer", tag.getInt("NightmareTimer") + amountToAdd);
@@ -153,6 +156,9 @@ public class Nightmare extends SimpleAbilityItem {
             }
             if (nightmareTimer >= 1) {
                 tag.putInt("NightmareTimer", nightmareTimer - 1);
+            }
+            if (nightmareTimer == 0 && matterAccelerationBlockTimer == 0) {
+                EventManager.removeFromRegularLoop(player, EFunctions.NIGHTMARE_TICK.get());
             }
         }
     }

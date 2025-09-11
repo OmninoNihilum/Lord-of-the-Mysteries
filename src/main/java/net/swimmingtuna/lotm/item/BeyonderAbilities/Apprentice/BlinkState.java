@@ -23,6 +23,8 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -59,8 +61,10 @@ public class BlinkState extends SimpleAbilityItem {
             if (blinkState) {
                 BeyonderUtil.stopFlying(player);
                 tag.putInt("doorBlinkStateDistance", 0);
+                EventManager.removeFromRegularLoop(player, EFunctions.BLINK_STATE.get());
             } else {
                 BeyonderUtil.startFlying(player, 0.2f, 20);
+                EventManager.addToRegularLoop(player, EFunctions.BLINK_STATE.get());
             }
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Blink State Turned " + (blinkState ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);

@@ -6,6 +6,8 @@ import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.item.Item;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.entity.SpatialCageEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.SpatialMaze;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -164,7 +166,7 @@ public class SealedUtils {
 
     public static void setTimer(LivingEntity entity, UUID sealUUID, int timer){
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
-            data.setTimer(sealUUID, timer);
+            data.setTimer(sealUUID, timer * BeyonderUtil.getSealStrength(entity));
         });
     }
 
@@ -221,6 +223,7 @@ public class SealedUtils {
         setCreatorName(entity, sealUUID, creatorName);
         setSequence(entity, sealUUID, sequence);
         setSealType(entity, sealUUID, type);
+        EventManager.addToRegularLoop(entity, EFunctions.SEAL.get());
         return sealUUID;
     }
 
@@ -232,6 +235,7 @@ public class SealedUtils {
         toggleTimer(entity, sealUUID);
         setTimer(entity, sealUUID, timer);
         setSealType(entity, sealUUID, type);
+        EventManager.addToRegularLoop(entity, EFunctions.SEAL.get());
         return sealUUID;
     }
 
@@ -251,6 +255,7 @@ public class SealedUtils {
         if(sequences != null) setSealedAbilitiesSequences(entity, sealUUID, sequences);
         setSealType(entity, sealUUID, type);
         entity.getPersistentData().putInt("wormOfStar", wormCount);
+        EventManager.addToRegularLoop(entity, EFunctions.SEAL.get());
         return sealUUID;
     }
 
@@ -266,6 +271,7 @@ public class SealedUtils {
         }
         if(sequences != null) setSealedAbilitiesSequences(entity, sealUUID, sequences);
         setSealType(entity, sealUUID, type);
+        EventManager.addToRegularLoop(entity, EFunctions.SEAL.get());
         return sealUUID;
     }
 
@@ -286,7 +292,9 @@ public class SealedUtils {
     public static void timerTick(LivingEntity entity){
         entity.getCapability(SealedDataProvider.SEALED_DATA).ifPresent(data -> {
             HashSet<UUID> sealsWithTimers = data.sealsWithTimers();
-            if (sealsWithTimers.isEmpty()) return;
+            if (sealsWithTimers.isEmpty()) {
+                return;
+            }
             List<UUID> sealsToRemove = new ArrayList<>();
             for (UUID seal : sealsWithTimers) {
                 int currentTime = data.sealsTimers().getOrDefault(seal, 0);
@@ -309,6 +317,9 @@ public class SealedUtils {
             SpatialCageEntity.unsetSealed(entity);
         } else if(type.equals(SEAL_TYPES.SPATIAL_MAZE)) {
             SpatialMaze.removeSeal(entity);
+        }
+        if (getAllSeals(entity).isEmpty()) {
+            EventManager.removeFromRegularLoop(entity, EFunctions.SEAL.get());
         }
     }
 

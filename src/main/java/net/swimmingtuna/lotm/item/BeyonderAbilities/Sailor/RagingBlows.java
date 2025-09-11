@@ -27,6 +27,8 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -78,6 +80,7 @@ public class RagingBlows extends SimpleAbilityItem {
 
     public static void ragingCombo(LivingEntity player, LivingEntity interactionTarget) {
         CompoundTag tag = player.getPersistentData();
+        EventManager.addToRegularLoop(player, EFunctions.RAGINGCOMBO.get());
         tag.putUUID("ragingComboUUID", interactionTarget.getUUID());
         tag.putInt("ragingCombo", 1);
     }
@@ -217,30 +220,40 @@ public class RagingBlows extends SimpleAbilityItem {
                                 if (living instanceof ServerPlayer player) {
                                     BeyonderUtil.stopForceLook(player);
                                 }
+                                EventManager.removeFromRegularLoop(living, EFunctions.RAGINGCOMBO.get());
+
                             }
                         } else {
                             tag.putInt("ragingCombo", 0);
                             if (living instanceof ServerPlayer player) {
                                 BeyonderUtil.stopForceLook(player);
                             }
+                            EventManager.removeFromRegularLoop(living, EFunctions.RAGINGCOMBO.get());
+
                         }
                     } else {
                         tag.putInt("ragingCombo", 0);
                         if (living instanceof ServerPlayer player) {
                             BeyonderUtil.stopForceLook(player);
                         }
+                        EventManager.removeFromRegularLoop(living, EFunctions.RAGINGCOMBO.get());
+
                     }
                 } else {
                     tag.putInt("ragingCombo", 0);
                     if (living instanceof ServerPlayer player) {
                         BeyonderUtil.stopForceLook(player);
                     }
+                    EventManager.removeFromRegularLoop(living, EFunctions.RAGINGCOMBO.get());
+
                 }
             }
             if (tag.getInt("ragingCombo") >= 77) {
                 if (living instanceof ServerPlayer player) {
                     BeyonderUtil.stopForceLook(player);
                 }
+                EventManager.removeFromRegularLoop(living, EFunctions.RAGINGCOMBO.get());
+
                 tag.putInt("ragingCombo", 0);
             }
         }
@@ -376,6 +389,8 @@ public class RagingBlows extends SimpleAbilityItem {
         if (!player.level().isClientSide()) {
             CompoundTag persistentData = player.getPersistentData();
             persistentData.putInt("ragingBlows", 1);
+            EventManager.removeFromRegularLoop(player, EFunctions.RAGINGCOMBO.get());
+
         }
     }
 
@@ -414,6 +429,10 @@ public class RagingBlows extends SimpleAbilityItem {
         }
         if (ragingBlows >= 100) {
             tag.putInt("ragingBlows", 0);
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.RAGINGBLOWS.get());
+        }
+        if (ragingBlows == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.RAGINGBLOWS.get());
         }
     }
 

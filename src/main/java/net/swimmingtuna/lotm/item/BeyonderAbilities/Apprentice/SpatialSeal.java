@@ -1,30 +1,17 @@
 package net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.swimmingtuna.lotm.entity.GuardianBoxEntity;
 import net.swimmingtuna.lotm.entity.KeyOfStarsProtectiveSealEntity;
-import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -33,7 +20,6 @@ import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
-import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
 import org.jetbrains.annotations.NotNull;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -57,6 +43,26 @@ public class SpatialSeal extends LeftClickHandlerSkillP {
         useSpirituality(player);
         createSpatialSeal(player);
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player player && !player.isSpectator()) {
+            if (player.isShiftKeyDown()) {
+                int sealSize = player.getPersistentData().getInt("keyOfStarsSealScale");
+                if (player.getMainHandItem().getItem() instanceof SpatialSeal && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 1)) {
+                    if (player.tickCount % 2 == 0) {
+                        player.getPersistentData().putInt("keyOfStarsSealScale", Math.max(5, sealSize + 1));
+                    }
+                    player.displayClientMessage(Component.literal("Protective Seal Size is " + sealSize).withStyle(BeyonderUtil.getStyle(player)), true);
+                    if (sealSize >= 26) {
+                        player.displayClientMessage(Component.literal("Protective Seal Size is 5").withStyle(BeyonderUtil.getStyle(player)), true);
+                        player.getPersistentData().putInt("keyOfStarsSealScale", 5);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     public void createSpatialSeal(LivingEntity living) {

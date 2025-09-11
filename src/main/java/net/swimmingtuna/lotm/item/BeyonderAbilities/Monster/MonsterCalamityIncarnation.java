@@ -23,6 +23,8 @@ import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.LightningEntity;
 import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -62,10 +64,12 @@ public class MonsterCalamityIncarnation extends LeftClickHandlerSkill {
                 tag.putInt("calamityIncarnationInMeteor", 200);
             }
             if (calamityIncarnation == 2) {
+                EventManager.addToRegularLoop(player, EFunctions.CALAMITY_INCARNATION_TORNADO.get());
                 TornadoEntity.summonCalamityTornado(player);
                 player.getPersistentData().putInt("calamityIncarnationTornado", 300);
             }
             if (calamityIncarnation == 3) {
+                EventManager.addToRegularLoop(player, EFunctions.CALAMITY_LIGHTNING_STORM.get());
                 tag.putInt("calamityIncarnationInLightning", 200);
             }
             if (calamityIncarnation == 4) {
@@ -104,6 +108,8 @@ public class MonsterCalamityIncarnation extends LeftClickHandlerSkill {
     public static void calamityIncarnationTornado(LivingEntity livingEntity) {
         if (livingEntity.getPersistentData().getInt("calamityIncarnationTornado") >= 1) {
             livingEntity.getPersistentData().putInt("calamityIncarnationTornado", livingEntity.getPersistentData().getInt("calamityIncarnationTornado") - 1);
+        } else {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.CALAMITY_INCARNATION_TORNADO.get());
         }
     }
 
@@ -132,6 +138,8 @@ public class MonsterCalamityIncarnation extends LeftClickHandlerSkill {
             lightningEntity.teleportTo(stormX + random, stormY + 60, stormZ + random);
             lightningEntity.setMaxLength(60);
             livingEntity.level().addFreshEntity(lightningEntity);
+        } else {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.CALAMITY_LIGHTNING_STORM.get());
         }
     }
 
@@ -160,6 +168,11 @@ public class MonsterCalamityIncarnation extends LeftClickHandlerSkill {
         int lightning = tag.getInt("calamityIncarnationInLightning");
         int plague = tag.getInt("calamityIncarnationInPlague");
         int immunity = tag.getInt("monsterCalamityImmunity");
+        if (meteor == 0 && tornado == 0 && lightning == 0 && plague == 0) {
+            EventManager.removeFromRegularLoop(entity, EFunctions.CALAMITY_LIGHTNING_STORM.get());
+            EventManager.removeFromRegularLoop(entity, EFunctions.CALAMITY_INCARNATION_TORNADO.get());
+            tag.putInt("monsterCalamityImmunity", immunity - 1);
+        }
         BlockPos pos = entity.getOnPos().below(1);
         if (immunity >= 1) {
             entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20, 4, false, false));

@@ -14,6 +14,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -43,6 +45,7 @@ public class AcidicRain extends SimpleAbilityItem {
 
     private void acidicRain(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.ACIDICRAIN.get());
             player.getPersistentData().putInt("sailorAcidicRain", 1);
         }
     }
@@ -61,6 +64,7 @@ public class AcidicRain extends SimpleAbilityItem {
         //ACIDIC RAIN
         int acidicRain = livingEntity.getPersistentData().getInt("sailorAcidicRain");
         if (acidicRain <= 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.ACIDICRAIN.get());
             return;
         }
         livingEntity.getPersistentData().putInt("sailorAcidicRain", acidicRain + 1);

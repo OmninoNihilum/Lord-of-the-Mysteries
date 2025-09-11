@@ -207,8 +207,8 @@ public class BeyonderEntityData extends SavedData {
                             persistentData.putInt(key, Math.max(0, currentCooldown - 20));
                         }
                     }
-                    int sequenceLevel = BeyonderUtil.getSequence(living);
-                    pathway.tick(living, sequenceLevel);
+                    //int sequenceLevel = BeyonderUtil.getSequence(living);
+                    //pathway.tick(living, sequenceLevel);
                 }
             }
         }
@@ -236,13 +236,7 @@ public class BeyonderEntityData extends SavedData {
         if (availableAbilities.isEmpty()) {
             return;
         }
-        boolean shouldUseAbility = true;
-        if (!(mob instanceof PlayerMobEntity)) {
-            if (Configs.COMMON.mobsShouldOnlyUseAbilitiesOnPlayers.get() && !(mob.getTarget() instanceof Player)) {
-                shouldUseAbility = false;
-            }
-        }
-        if (!shouldUseAbility) {
+        if (Configs.COMMON.mobsShouldOnlyUseAbilitiesOnPlayers.get() && !(mob.getTarget() instanceof Player)) {
             return;
         }
 

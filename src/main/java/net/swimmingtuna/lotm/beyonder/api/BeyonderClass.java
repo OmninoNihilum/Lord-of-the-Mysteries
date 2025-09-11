@@ -6,13 +6,14 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.IPathwayPassiveEvents;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface BeyonderClass {
+public interface BeyonderClass extends IPathwayPassiveEvents {
     List<String> sequenceNames();
 
     List<Integer> spiritualityLevels();
@@ -20,7 +21,7 @@ public interface BeyonderClass {
     List<Integer> spiritualityRegen();
 
 
-    void tick(LivingEntity player, int sequence);
+    //void tick(LivingEntity player, int sequence);
 
     Multimap<Integer, Item> getItems();
 

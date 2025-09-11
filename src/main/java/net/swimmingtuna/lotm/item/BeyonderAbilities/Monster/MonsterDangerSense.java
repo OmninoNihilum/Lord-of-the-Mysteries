@@ -11,6 +11,8 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -43,6 +45,7 @@ public class MonsterDangerSense extends SimpleAbilityItem {
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Danger Sense Turned " + (monsterDangerSense ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.GRAY), true);
             }
+            EventManager.addToRegularLoop(player, EFunctions.MONSTER_DANGER_SENSE.get());
         }
     }
 
@@ -66,6 +69,7 @@ public class MonsterDangerSense extends SimpleAbilityItem {
         CompoundTag playerPersistentData = livingEntity.getPersistentData();
         boolean monsterDangerSense = playerPersistentData.getBoolean("monsterDangerSense");
         if (!monsterDangerSense) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.MONSTER_DANGER_SENSE.get());
             return;
         }
         if (BeyonderUtil.getSpirituality(livingEntity) <= 2) {

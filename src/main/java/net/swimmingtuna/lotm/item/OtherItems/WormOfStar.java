@@ -5,6 +5,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -13,7 +14,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationSelf;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +35,24 @@ public class WormOfStar extends Item {
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         wormOfStarCopy(pPlayer, pUsedHand);
         return super.use(pLevel, pPlayer, pUsedHand);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
+            if (livingEntity.isShiftKeyDown()) {
+                if (livingEntity.getMainHandItem().getItem() instanceof WormOfStar && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 4)) {
+                    if (livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount") < BeyonderUtil.getMaxSpirituality(livingEntity)) {
+                        livingEntity.getPersistentData().putInt("wormOfStarSpiritualityAmount", livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount") + 10);
+                    } else {
+                        livingEntity.displayClientMessage(Component.literal("Worm of Star Spirituality amount is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        livingEntity.getPersistentData().putInt("wormOfStarSpiritualityAmount", 0);
+                        livingEntity.displayClientMessage(Component.literal("Worm of Star Spirituality amount is " + livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount")).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     @Override

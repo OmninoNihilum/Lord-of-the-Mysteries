@@ -12,6 +12,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -55,11 +57,13 @@ public class RainEyes extends SimpleAbilityItem {
             if (rainEyes) {
                 tag.putBoolean("rainEyes", false);
                 if (player instanceof Player pPlayer) {
+                    EventManager.removeFromRegularLoop(player, EFunctions.RAIN_EYES.get());
                     pPlayer.displayClientMessage(Component.literal("Rain eyes disabled").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 }
             } else {
                 tag.putBoolean("rainEyes", true);
                 if (player instanceof Player pPlayer) {
+                    EventManager.addToRegularLoop(player, EFunctions.RAIN_EYES.get());
                     pPlayer.displayClientMessage(Component.literal("Rain eyes enabled").withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 }
             }

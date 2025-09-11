@@ -17,6 +17,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -51,6 +53,7 @@ public class TsunamiSeal extends LeftClickHandlerSkillP {
 
     public static void startTsunami(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.TSUNAMI.get());
             player.getPersistentData().putInt("sailorTsunamiSeal", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TSUNAMI_SEAL.get()));
             float yaw = player.getYRot();
             String direction = getDirectionFromYaw(yaw);

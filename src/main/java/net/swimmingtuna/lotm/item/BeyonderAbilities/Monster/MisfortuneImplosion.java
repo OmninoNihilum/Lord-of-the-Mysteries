@@ -24,6 +24,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -79,6 +81,7 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
                     } else {
                         int duration = (int) ((5) + (misfortune / 2) + (enhancement * 3));
                         entity.getPersistentData().putInt("monsterImplosionLightning", duration);
+                        EventManager.addToRegularLoop(entity, EFunctions.MISFORTUNEIMPLOSIONLIGHTNING.get());
                         tag.putDouble("misfortune", 0);
                     }
                 }
@@ -95,6 +98,8 @@ public class MisfortuneImplosion extends SimpleAbilityItem {
             lightningBolt.setDamage(25);
             lightningBolt.teleportTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
             livingEntity.level().addFreshEntity(lightningBolt);
+        } else {
+            EventManager.removeFromRegularLoop(event.getEntity(), EFunctions.MISFORTUNEIMPLOSIONLIGHTNING.get());
         }
     }
 

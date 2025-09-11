@@ -14,6 +14,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -49,6 +51,7 @@ public class Tsunami extends LeftClickHandlerSkillP {
 
     public static void startTsunami(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.TSUNAMI.get());
             player.getPersistentData().putInt("sailorTsunami", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.TSUNAMI.get()));
             float yaw = player.getYRot();
             String direction = getDirectionFromYaw(yaw);
@@ -83,6 +86,9 @@ public class Tsunami extends LeftClickHandlerSkillP {
             tag.remove("sailorTsunamiSealX");
             tag.remove("sailorTsunamiSealY");
             tag.remove("sailorTsunamiSealZ");
+        }
+        if (tsunami == 0 && tsunamiSeal == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.TSUNAMI.get());
         }
     }
     public static String getDirectionFromYaw(float yaw) {

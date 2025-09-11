@@ -23,6 +23,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -85,8 +87,10 @@ public class TwilightAccelerate extends LeftClickHandlerSkillP {
         if (!livingEntity.level().isClientSide() && !target.level().isClientSide()) {
             CompoundTag tag = target.getPersistentData();
             if (livingEntity == target || BeyonderUtil.areAllies(livingEntity, target)) {
+                EventManager.addToRegularLoop(target, EFunctions.TWILIGHTACCELERATE.get());
                 tag.putInt("twilightAgeAccelerate", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTACCELERATE.get()));
             } else {
+                EventManager.addToRegularLoop(target, EFunctions.TWILIGHTACCELERATE.get());
                 tag.putUUID("twilightAgeAccelerateEnemyUUID", livingEntity.getUUID());
                 tag.putInt("twilightAgeAccelerateEnemy", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTACCELERATE.get()) / 2);
             }
@@ -99,6 +103,9 @@ public class TwilightAccelerate extends LeftClickHandlerSkillP {
         int x = tag.getInt("twilightAgeAccelerate");
         int y = tag.getInt("twilightAgeAccelerateEnemy");
         if (!livingEntity.level().isClientSide()) {
+            if (x == 0 && y == 0) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.TWILIGHTACCELERATE.get());
+            }
             if (x >= 1) {
                 if (x >= 2) {
                     if (livingEntity instanceof Player player) {

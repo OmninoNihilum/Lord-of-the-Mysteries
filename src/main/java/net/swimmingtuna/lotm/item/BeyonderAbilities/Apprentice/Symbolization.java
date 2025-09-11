@@ -16,6 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -53,9 +55,11 @@ public class Symbolization extends SimpleAbilityItem {
                 pPlayer.displayClientMessage(Component.literal("You are currently " + (isNowSymbolized ? "" : "NOT ") + "symbolized").withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.BOLD), true);
             }
             if (isNowSymbolized) {
+                EventManager.addToRegularLoop(player, EFunctions.SPATIAL_CAGE.get());
                 BeyonderUtil.startFlying(player, 0.15f, 20);
                 BeyonderUtil.setInvisible(player, true, 10);
             } else {
+                EventManager.removeFromRegularLoop(player, EFunctions.SPATIAL_CAGE.get());
                 BeyonderUtil.stopFlying(player);
                 BeyonderUtil.setInvisible(player, false, 0);
             }
@@ -69,6 +73,7 @@ public class Symbolization extends SimpleAbilityItem {
             CompoundTag tag = living.getPersistentData();
             BeyonderUtil.startFlying(living, 0.15f, 20);
             if (BeyonderUtil.getSpirituality(living) < 10) {
+                EventManager.removeFromRegularLoop(living, EFunctions.SPATIAL_CAGE.get());
                 BeyonderUtil.setInvisible(living, false, 0);
                 tag.putBoolean("planeswalkerSymbolization", false);
             } else {
@@ -88,6 +93,8 @@ public class Symbolization extends SimpleAbilityItem {
                     BeyonderUtil.setInvisible(living, true, 30);
                 }
             }
+        } else {
+            EventManager.removeFromRegularLoop(living, EFunctions.SPATIAL_CAGE.get());
         }
     }
 

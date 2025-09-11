@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -138,6 +139,31 @@ public class EnvisionBarrier extends LeftClickHandlerSkillP {
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player player) {
+            if (player.tickCount % 2 == 0 && !level.isClientSide()) {
+                if (player.getMainHandItem().getItem() instanceof EnvisionBarrier) {
+                    if (BeyonderUtil.getSequence(player) != 0) {
+                        return;
+                    }
+                    int barrierRadius = player.getPersistentData().getInt("BarrierRadius");
+                    if (player.isShiftKeyDown() && player.getMainHandItem().getItem() instanceof EnvisionBarrier) {
+                        barrierRadius++;
+                        barrierRadius++;
+                        player.displayClientMessage(Component.literal("Barrier Radius: " + barrierRadius).withStyle(BeyonderUtil.getStyle(player)), true);
+                    }
+                    if (barrierRadius >= BeyonderUtil.getDamage(player).get(ItemInit.ENVISION_BARRIER.get())) {
+                        barrierRadius = 0;
+                        player.displayClientMessage(Component.literal("Barrier Radius: 0").withStyle(BeyonderUtil.getStyle(player)), true);
+                    }
+                    player.getPersistentData().putInt("BarrierRadius", barrierRadius);
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     @Override

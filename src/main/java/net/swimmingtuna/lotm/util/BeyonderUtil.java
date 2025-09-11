@@ -1442,7 +1442,7 @@ public class BeyonderUtil {
     }
 
     public static Map<Item, Float> getDamage(LivingEntity livingEntity) {
-        Map<Item, Float> damageMap = new HashMap<>();
+        Map<Item, Float> damageMap = new HashMap<>(1000);
         Level level = livingEntity.level();
         int enhancement = 1;
         if (level instanceof ServerLevel serverLevel) {

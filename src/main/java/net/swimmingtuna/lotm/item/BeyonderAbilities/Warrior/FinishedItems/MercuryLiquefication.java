@@ -27,6 +27,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -186,17 +188,16 @@ public class MercuryLiquefication extends SimpleAbilityItem {
         }
         if (user.getPersistentData().getBoolean("mercuryLiquefication")) {
             if (BeyonderUtil.areAllies(user, targetEntity)) {
-                LOTM.LOGGER.info("1");
                 if (user != targetEntity) {
-                    LOTM.LOGGER.info("2");
                     long currentTime = System.currentTimeMillis();
                     if (currentTime - lastActivationTime >= COOLDOWN_MS) {
-                        LOTM.LOGGER.info("3");
                         CompoundTag tag = targetEntity.getPersistentData();
                         user.getPersistentData().putUUID("mercuryArmor", targetEntity.getUUID());
                         user.getPersistentData().putInt("mercuryArmorForm", 10);
+                        EventManager.addToRegularLoop(user, EFunctions.MERCURYLIQUEFICATIONTICK.get());
                         user.sendSystemMessage(Component.literal("Armor put on " + targetEntity.getName()));
                         targetEntity.getPersistentData().putInt("mercuryArmorEquipped", 10);
+                        EventManager.addToRegularLoop(targetEntity, EFunctions.MERCURYLIQUEFICATIONTICK.get());
                         CompoundTag armorData = new CompoundTag();
                         ListTag armorItems = new ListTag();
                         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
@@ -217,8 +218,6 @@ public class MercuryLiquefication extends SimpleAbilityItem {
                         targetEntity.setItemSlot(EquipmentSlot.FEET, createEnchantedArmor(ItemInit.SILVER_BOOTS.get().getDefaultInstance()));
                     }
                 }
-            } else {
-                LOTM.LOGGER.info(targetEntity.getName().getString() + " AND " + user.getName().getString() + " ARE NOT ALLIES.");
             }
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastActivationTime >= COOLDOWN_MS) {
@@ -316,7 +315,9 @@ public class MercuryLiquefication extends SimpleAbilityItem {
         }
         if (!livingEntity.level().isClientSide() && y == 0) {
             tag.remove("mercuryArmor");
-
+        }
+        if (y == 0 && x == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.MERCURYLIQUEFICATIONTICK.get());
         }
     }
 

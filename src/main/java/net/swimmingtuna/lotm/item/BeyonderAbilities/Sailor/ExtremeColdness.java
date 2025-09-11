@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -91,6 +93,7 @@ public class ExtremeColdness extends LeftClickHandlerSkillP {
             List<LivingEntity> entities = livingEntity.level().getEntitiesOfClass(LivingEntity.class, areaOfEffect);
             for (LivingEntity entity : entities) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity) && entity.getPersistentData().getInt("affectedBySailorExtremeColdness") == 0) {
+                    EventManager.addToRegularLoop(entity, EFunctions.AFFECTEDBYEXTREMECOLDNESS.get());
                     entity.getPersistentData().putInt("affectedBySailorExtremeColdness", 20);
                     entity.getPersistentData().putUUID("affectedBySailorExtremeColdnessUUID", livingEntity.getUUID());
                     entity.setTicksFrozen(1);
@@ -139,6 +142,9 @@ public class ExtremeColdness extends LeftClickHandlerSkillP {
         CompoundTag tag = entity.getPersistentData();
         if (!entity.level().isClientSide()) {
             int affectedBySailorExtremeColdness = tag.getInt("affectedBySailorExtremeColdness");
+            if (affectedBySailorExtremeColdness == 0) {
+                EventManager.removeFromRegularLoop(entity, EFunctions.AFFECTEDBYEXTREMECOLDNESS.get());
+            }
             if (!entity.level().isClientSide() && affectedBySailorExtremeColdness >= 1) {
                 LivingEntity causer = null;
                 if (entity.getPersistentData().contains("affectedBySailorExtremeColdnessUUID")) {

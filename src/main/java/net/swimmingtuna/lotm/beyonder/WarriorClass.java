@@ -17,6 +17,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.attributes.PathwayAttributes.WarriorAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
+import net.swimmingtuna.lotm.events.NewEventLoop.PathwaysPassiveEvents.SpectatorPassiveEvents;
+import net.swimmingtuna.lotm.events.NewEventLoop.PathwaysPassiveEvents.WarriorPassiveEvents;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -81,7 +83,6 @@ public class WarriorClass implements BeyonderClass {
         WarriorAttributes.applyAll(entity, seq);
     }
 
-    @Override
     public void tick(LivingEntity player, int sequenceLevel) {
         if (!player.level().isClientSide()) {
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(player);
@@ -493,5 +494,15 @@ public class WarriorClass implements BeyonderClass {
         } else if (sequenceLevel <= 5) {
             applyMobEffect(entity, MobEffects.DAMAGE_RESISTANCE, 20, resistance + 1, true, true);
         }
+    }
+
+    @Override
+    public void removeAllEvents(LivingEntity entity) {
+        WarriorPassiveEvents.removeAllEvents(entity);
+    }
+
+    @Override
+    public void addAllEvents(LivingEntity entity, int sequence) {
+        WarriorPassiveEvents.addAllEvents(entity, sequence);
     }
 }

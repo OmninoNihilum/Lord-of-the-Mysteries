@@ -26,8 +26,11 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.swimmingtuna.lotm.beyonder.MonsterClass;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.entity.*;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.GameRuleInit;
@@ -104,6 +107,8 @@ public class CorruptionAndLuckHandler {
             if (corruption >= 1 && livingEntity.tickCount % 200 == 0) {
                 tag.putDouble("corruption", corruption - 1);
             }
+            MonsterClass.monsterLuckIgnoreMobs(livingEntity);
+            MonsterClass.monsterLuckPoisonAttacker(livingEntity);
             if (BeyonderUtil.currentPathwayAndSequenceMatchesNoException(livingEntity, BeyonderClassInit.MONSTER.get(), 0)) {
                 for (LivingEntity living : BeyonderUtil.getAllies(livingEntity)) {
                     if (living.getPersistentData().getDouble("misfortune") >= 0) {
@@ -1238,6 +1243,7 @@ public class CorruptionAndLuckHandler {
                     }
                 }
                 if (calamityUndeadArmy == 1) {
+                    EventManager.addToRegularLoop(livingEntity, EFunctions.CALAMITY_UNDEAD_ARMY.get());
                     livingEntity.getPersistentData().putInt("calamityUndeadArmyCounter", 20);
                 }
                 if (calamityLightningBolt == 1) {

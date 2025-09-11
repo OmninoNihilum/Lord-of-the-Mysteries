@@ -21,6 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -82,6 +84,7 @@ public class TwilightFreeze extends LeftClickHandlerSkillP {
     public static void saveDataReboot(LivingEntity livingEntity, LivingEntity target, CompoundTag tag) {
         if (!livingEntity.level().isClientSide()) {
             if (livingEntity == target || BeyonderUtil.areAllies(livingEntity, target)) {
+                EventManager.addToRegularLoop(target, EFunctions.TWILIGHT_FREEZE_TICK.get());
                 Collection<MobEffectInstance> activeEffects = target.getActiveEffects();
                 tag.putInt("twilightFreezeCooldown", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTFREEZE.get()));
                 tag.putInt("twilightPotionEffectsCount", activeEffects.size());
@@ -107,6 +110,7 @@ public class TwilightFreeze extends LeftClickHandlerSkillP {
                 tag.putInt("twilightHealth", (int) target.getHealth());
                 tag.putInt("twilightSpirituality", (int) BeyonderUtil.getSpirituality(target));
             } else {
+                EventManager.addToRegularLoop(target, EFunctions.TWILIGHT_FREEZE_TICK.get());
                 tag.putInt("inTwilight", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTFREEZE.get()) / 2);
             }
         }
@@ -156,6 +160,9 @@ public class TwilightFreeze extends LeftClickHandlerSkillP {
         }
         if (!livingEntity.level().isClientSide() && livingEntity.getPersistentData().getInt("inTwilight") >= 1) {
             livingEntity.getPersistentData().putInt("inTwilight", livingEntity.getPersistentData().getInt("inTwilight") - 1);
+        }
+        if (x == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.TWILIGHT_FREEZE_TICK.get());
         }
     }
 

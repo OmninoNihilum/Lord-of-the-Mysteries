@@ -4,7 +4,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -40,6 +42,25 @@ public class SpatialTearing extends LeftClickHandlerSkillP {
         addCooldown(player);
         tearSpace(player);
         return InteractionResult.SUCCESS;
+    }
+
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
+            if (livingEntity.isShiftKeyDown()) {
+                int tearingDistance = livingEntity.getPersistentData().getInt("wandererTearing");
+                if (livingEntity.getMainHandItem().getItem() instanceof SpatialTearing && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 3)) {
+                    livingEntity.getPersistentData().putInt("wandererTearing", tearingDistance + 2);
+                    livingEntity.displayClientMessage(Component.literal("Spatial Authority: Tear Spawn Distance is " + tearingDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    if (tearingDistance >= 101) {
+                        livingEntity.displayClientMessage(Component.literal("Spatial Authority: Tear Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        livingEntity.getPersistentData().putInt("wandererTearing", 0);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     public static void tearSpace(LivingEntity livingEntity){

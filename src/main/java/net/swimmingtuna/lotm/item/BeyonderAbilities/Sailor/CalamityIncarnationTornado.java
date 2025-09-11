@@ -10,6 +10,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -43,6 +45,7 @@ public class CalamityIncarnationTornado extends LeftClickHandlerSkillP {
 
     public void calamityIncarnationTornado(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.CALAMITYINCARNATIONTSUNAMI.get());
             TornadoEntity.summonCalamityTornado(player);
             player.getPersistentData().putInt("calamityIncarnationTornado", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CALAMITY_INCARNATION_TORNADO.get()));
         }

@@ -8,11 +8,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -66,6 +68,25 @@ public class DoorLayering extends LeftClickHandlerSkillP {
         return InteractionResult.SUCCESS;
     }
 
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player player && !player.isSpectator()) {
+            if (player.isShiftKeyDown()) {
+                int doorLayeringDistance = player.getPersistentData().getInt("doorLayering");
+                if (player.isShiftKeyDown()) {
+                    if (player.getMainHandItem().getItem() instanceof DoorLayering && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                        player.getPersistentData().putInt("doorLayering", doorLayeringDistance + 2);
+                        player.displayClientMessage(Component.literal("Door: Layering Spawn Distance is " + doorLayeringDistance).withStyle(BeyonderUtil.getStyle(player)), true);
+                    }
+                    if (doorLayeringDistance >= 201) {
+                        player.getPersistentData().putInt("doorLayering", 0);
+                        player.displayClientMessage(Component.literal("Door Layering Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(player)), true);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
+    }
 
     public static void doorLayering(LivingEntity livingEntity) {
         Level level = livingEntity.level();

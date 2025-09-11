@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -18,14 +19,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.LuckGifting;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionLocation;
-import net.swimmingtuna.lotm.item.OtherItems.WormOfStar;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
@@ -107,174 +103,29 @@ public class MatterAccelerationSelf extends LeftClickHandlerSkillP {
         player.teleportTo(teleportLocation.getX() + 0.5, teleportLocation.getY(), teleportLocation.getZ() + 0.5);
     }
 
-    public static void matterAccelerationSelf(LivingEntity livingEntity) {
-        //MATTER ACCELERATION SELF
-        if (livingEntity.isSpectator()) return;
-        if (!livingEntity.level().isClientSide()) {
-            int sealSize = livingEntity.getPersistentData().getInt("keyOfStarsSealScale");
-            int fragmentationDistance = livingEntity.getPersistentData().getInt("keyOfStarsFragmentation");
-            int tearingDistance = livingEntity.getPersistentData().getInt("wandererTearing");
-            int gammaRayDistance = livingEntity.getPersistentData().getInt("doorGammaRay");
-            int doorLayeringDistance = livingEntity.getPersistentData().getInt("doorLayering");
-            int matterAccelerationDistance = livingEntity.getPersistentData().getInt("tyrantSelfAcceleration");
-            int blinkDistance = livingEntity.getPersistentData().getInt("BlinkDistance");
-            int luckGiftingAmount = livingEntity.getPersistentData().getInt("monsterLuckGifting");
-            int doorBlinkDistance = livingEntity.getPersistentData().getInt("trickmasterBlinkDistance");
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
             if (livingEntity.isShiftKeyDown()) {
-                if (livingEntity.getMainHandItem().getItem() instanceof DoorGammaRayBurst && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 0)) {
-                    livingEntity.getPersistentData().putInt("doorGammaRay", gammaRayDistance + 2);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Door: Gamma Ray Burst Spawn Distance is " + gammaRayDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                    if (gammaRayDistance >= 201) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Door Gamma Ray Burst Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("doorGammaRay", 0);
-                    }
-                }
-                if (livingEntity.getMainHandItem().getItem() instanceof SpatialSeal && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 1)) {
-                    if (livingEntity.tickCount % 2 == 0) {
-                        livingEntity.getPersistentData().putInt("keyOfStarsSealScale", Math.max(5,sealSize + 1));
-                    }
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Protective Seal Size is " + sealSize).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                    if (sealSize >= 26) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Protective Seal Size is 5").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("keyOfStarsSealScale", 5);
-                    }
-                }
-                if (livingEntity.getMainHandItem().getItem() instanceof SpatialTearing && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 3)) {
-                    livingEntity.getPersistentData().putInt("wandererTearing", tearingDistance + 2);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Spatial Authority: Tear Spawn Distance is " + tearingDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                    if (tearingDistance >= 101) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Spatial Authority: Tear Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("wandererTearing", 0);
-                    }
-                }
-                if (livingEntity.getMainHandItem().getItem() instanceof SpaceFragmentation && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 1)) {
-                    livingEntity.getPersistentData().putInt("keyOfStarsFragmentation", fragmentationDistance + 2);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Spatial Authority: Fragmentation Spawn Distance is " + fragmentationDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                    if (fragmentationDistance >= 151) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Spatial Authority: Fragmentation Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("keyOfStarsFragmentation", 0);
-                    }
-                }
-                if (livingEntity.getMainHandItem().getItem() instanceof DoorLayering && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 0)) {
-                    livingEntity.getPersistentData().putInt("doorLayering", doorLayeringDistance + 2);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Door: Layering Spawn Distance is " + doorLayeringDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                    if (doorLayeringDistance >= 201) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Door Layering Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("doorLayering", 0);
-                    }
-                }
+                int matterAccelerationDistance = livingEntity.getPersistentData().getInt("tyrantSelfAcceleration");
                 if (livingEntity.getMainHandItem().getItem() instanceof MatterAccelerationSelf && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.SAILOR.get(), 0)) {
                     livingEntity.getPersistentData().putInt("tyrantSelfAcceleration", matterAccelerationDistance + 50);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Matter Acceleration Distance is " + matterAccelerationDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
+                    livingEntity.displayClientMessage(Component.literal("Matter Acceleration Distance is " + matterAccelerationDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
                     if (matterAccelerationDistance >= 1001) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Matter Acceleration Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
+                        livingEntity.displayClientMessage(Component.literal("Matter Acceleration Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
                         livingEntity.getPersistentData().putInt("tyrantSelfAcceleration", 0);
-                    }
-                }
-                if (livingEntity.getMainHandItem().getItem() instanceof EnvisionLocation && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.SPECTATOR.get())) {
-                    livingEntity.getPersistentData().putInt("BlinkDistance", blinkDistance + 5);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Blink Distance is " + blinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                    if (blinkDistance >= 201) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Blink Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("BlinkDistance", 0);
-                    }
-                }
-                //LUCK GIFTING
-                if (livingEntity.getMainHandItem().getItem() instanceof LuckGifting && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.MONSTER.get())) {
-                    livingEntity.getPersistentData().putInt("monsterLuckGifting", luckGiftingAmount + 1);
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Luck Gifting Amount is " + luckGiftingAmount).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                    if (luckGiftingAmount >= BeyonderUtil.getDamage(livingEntity).get(ItemInit.LUCKGIFTING.get())) {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Luck Gifting Amount is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("monsterLuckGifting", 0);
-                    }
-                }
-                if (livingEntity.getMainHandItem().getItem() instanceof Blink && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 5)) {
-                    int maxBlinkDistance = 50;
-                    int blinkIncrement = 2;
-                    int sequence = BeyonderUtil.getSequence(livingEntity);
-                    if (sequence == 5) {
-                        livingEntity.sendSystemMessage(Component.literal("SEQUENCE IS " + sequence));
-                        maxBlinkDistance = 30;
-                    } else if (sequence == 4) {
-                        maxBlinkDistance = 100;
-                        blinkIncrement = 4;
-                    } else if (sequence == 3) {
-                        maxBlinkDistance = 200;
-                        blinkIncrement = 10;
-                    } else if (sequence == 2) {
-                        maxBlinkDistance = 450;
-                        blinkIncrement = 20;
-                    } else if (sequence == 1) {
-                        maxBlinkDistance = 900;
-                        blinkIncrement = 20;
-                    } else if (sequence == 0) {
-                        maxBlinkDistance = 2000;
-                        blinkIncrement = 30;
-                    }
-                    if (livingEntity.getPersistentData().getInt("trickmasterBlinkDistance") < maxBlinkDistance) {
-                        livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", livingEntity.getPersistentData().getInt("trickMasterBlinkDistance") + blinkIncrement);
-                    } else {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Blink Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("trickmasterBlinkDistance", 0);
-                    }
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Blink Distance is " + doorBlinkDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                    }
-                }
-                if (livingEntity.getMainHandItem().getItem() instanceof WormOfStar && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 4)) {
-                    if (livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount") < BeyonderUtil.getMaxSpirituality(livingEntity)) {
-                        livingEntity.getPersistentData().putInt("wormOfStarSpiritualityAmount", livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount") + 10);
-                    } else {
-                        if (livingEntity instanceof Player player) {
-                            player.displayClientMessage(Component.literal("Worm of Star Spirituality amount is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
-                        }
-                        livingEntity.getPersistentData().putInt("wormOfStarSpiritualityAmount", 0);
-                    }
-                    if (livingEntity instanceof Player player) {
-                        player.displayClientMessage(Component.literal("Worm of Star Spirituality amount is " + livingEntity.getPersistentData().getInt("wormOfStarSpiritualityAmount")).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
                     }
                 }
             }
         }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level
+            level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.literal("Upon use, accelerates you to the speed of light, instantly getting you to your destination and leaving behind destruction in your path"));
         tooltipComponents.add(Component.literal("Shift to increase distance"));
         tooltipComponents.add(Component.literal("Spirituality Used: ").append(Component.literal("5 x Distance Traveled").withStyle(ChatFormatting.YELLOW)));

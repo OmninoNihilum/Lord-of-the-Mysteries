@@ -16,6 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -48,9 +50,11 @@ public class GravityManipulation extends SimpleAbilityItem {
             DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
                 dimensionalSightTileEntity.getScryTarget().getPersistentData().putInt("affectedByGravityManipulation", 500);
+                EventManager.addToRegularLoop(dimensionalSightTileEntity.getScryTarget(), EFunctions.GRAVITY_MANIPULATION.get());
             } else {
                 player.getPersistentData().putInt("keyOfStarsGravityManipulation", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.GRAVITY_MANIPULATION.get()));
             }
+            EventManager.addToRegularLoop(player, EFunctions.GRAVITY_MANIPULATION.get());
         }
     }
 

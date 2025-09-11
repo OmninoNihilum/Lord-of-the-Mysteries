@@ -16,6 +16,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.ConsciousnessStrollC2S;
@@ -44,6 +46,7 @@ public class ConsciousnessStroll extends LeftClickHandlerSkill {
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
+    @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
         if (entity instanceof Player player) {
             if (player.tickCount % 2 == 0 && !level.isClientSide()) {
@@ -98,6 +101,7 @@ public class ConsciousnessStroll extends LeftClickHandlerSkill {
             } else {
                 serverPlayer.setGameMode(GameType.SURVIVAL);
             }
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.CONSCIOUSNESS_STROLL.get());
         }
     }
 

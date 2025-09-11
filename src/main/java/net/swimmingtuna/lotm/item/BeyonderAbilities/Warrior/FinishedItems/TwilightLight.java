@@ -17,6 +17,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.TwilightLightEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -60,6 +62,7 @@ public class TwilightLight extends LeftClickHandlerSkillP {
                 double startZ = livingEntity.getZ() + radius * Math.sin(angle);
                 TwilightLightEntity ray = new TwilightLightEntity(livingEntity.level(), startX, livingEntity.getY() + 140, startZ, damage);
                 ray.setMaxLifetime((int) damage);
+                EventManager.addToRegularLoop(livingEntity, EFunctions.TWILIGHT_LIGHT_TICK.get());
                 livingEntity.getPersistentData().putInt("twilightLight", (int) damage);
                 ray.setDivisionAmount((int) (Math.random() * 5));
                 livingEntity.level().addFreshEntity(ray);
@@ -111,6 +114,9 @@ public class TwilightLight extends LeftClickHandlerSkillP {
                     }
                 }
             }
+        }
+        if (x == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.TWILIGHT_LIGHT_TICK.get());
         }
     }
 

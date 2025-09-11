@@ -16,6 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.MeteorNoLevelEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -44,6 +46,7 @@ public class WaterSphere extends SimpleAbilityItem {
 
     private static void waterSphere(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.WATERSPHERE.get());
             player.getPersistentData().putInt("sailorSphere", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.WATER_SPHERE.get()));
         }
     }
@@ -108,6 +111,10 @@ public class WaterSphere extends SimpleAbilityItem {
         }
         if (livingEntity.getPersistentData().getInt("sailorSphere") >= 1) {
             livingEntity.getPersistentData().putInt("sailorSphere", livingEntity.getPersistentData().getInt("sailorSphere") - 1);
+        }
+        if (livingEntity.getPersistentData().getInt("sailorSphere") == 1) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.WATERSPHERE.get());
+            livingEntity.getPersistentData().putInt("sailorSphere", 0);
         }
     }
 

@@ -11,6 +11,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -35,26 +37,26 @@ public class WarriorDangerSense extends SimpleAbilityItem {
         }
         addCooldown(player);
         useSpirituality(player);
-        startGigantification(player);
+        warriorDangerSenseUse(player);
         return InteractionResult.SUCCESS;
     }
 
-    public static void startGigantification(LivingEntity livingEntity) {
-        if (!livingEntity.level().isClientSide()) {
-            if (!livingEntity.level().isClientSide()) {
-                CompoundTag tag = livingEntity.getPersistentData();
-                boolean monsterDangerSense = tag.getBoolean("warriorDangerSense");
-                tag.putBoolean("warriorDangerSense", !monsterDangerSense);
-                if (livingEntity instanceof Player pPlayer) {
-                    pPlayer.displayClientMessage(Component.literal("Danger Sense Turned " + (monsterDangerSense ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW), true);
-                }
+    public static void warriorDangerSenseUse(LivingEntity player) {
+        if (!player.level().isClientSide()) {
+            CompoundTag tag = player.getPersistentData();
+            boolean monsterDangerSense = tag.getBoolean("warriorDangerSense");
+            tag.putBoolean("warriorDangerSense", !monsterDangerSense);
+            if (player instanceof Player pPlayer) {
+                pPlayer.displayClientMessage(Component.literal("Danger Sense Turned " + (monsterDangerSense ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW), true);
             }
+            EventManager.addToRegularLoop(player, EFunctions.WARRIOR_DANGER_SENSE.get());
         }
     }
 
     public static void warriorDangerSense(LivingEntity livingEntity) {
         boolean warriorDangerSense = livingEntity.getPersistentData().getBoolean("warriorDangerSense");
         if (!warriorDangerSense) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.WARRIOR_DANGER_SENSE.get());
             return;
         }
         double radius = 200 - (BeyonderUtil.getSequence(livingEntity) * 20);

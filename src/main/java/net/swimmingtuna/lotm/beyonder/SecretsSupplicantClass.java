@@ -56,36 +56,6 @@ public class SecretsSupplicantClass implements BeyonderClass {
     public void applyAllModifiers(LivingEntity entity, int seq) {
 
     }
-
-    @Override
-    public void tick(LivingEntity player, int sequenceLevel) {
-        if (player.level().getGameTime() % 50 == 0) {
-            if (sequenceLevel == 9) {
-            }
-            if (sequenceLevel == 8) {
-            }
-            if (sequenceLevel == 7) {
-            }
-            if (sequenceLevel == 6) {
-            }
-            if (sequenceLevel == 5) {
-
-            }
-            if (sequenceLevel == 4) {
-            }
-            if (sequenceLevel == 3) {
-            }
-            if (sequenceLevel == 2) {
-            }
-            if (sequenceLevel == 1) {
-
-            }
-            if (sequenceLevel == 0) {
-
-            }
-        }
-    }
-
     @Override
     public Multimap<Integer, Item> getItems() {
         HashMultimap<Integer, Item> items = HashMultimap.create();
@@ -98,5 +68,13 @@ public class SecretsSupplicantClass implements BeyonderClass {
         return ChatFormatting.LIGHT_PURPLE;
     }
 
+    @Override
+    public void removeAllEvents(LivingEntity entity) {
 
+    }
+
+    @Override
+    public void addAllEvents(LivingEntity entity, int sequence) {
+
+    }
 }

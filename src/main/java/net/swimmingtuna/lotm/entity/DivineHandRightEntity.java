@@ -20,6 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateEntityLocationS2C;
@@ -167,6 +169,8 @@ public class DivineHandRightEntity extends AbstractHurtingProjectile implements 
     public static void divineHandCooldownDecrease(LivingEntity living) {
         if (living.getPersistentData().getInt("divineHandLuckCooldown") >= 1) {
             living.getPersistentData().putInt("divineHandLuckCooldown", living.getPersistentData().getInt("divineHandLuckCooldown") -  1);
+        }  else {
+            EventManager.removeFromRegularLoop(living, EFunctions.DIVINE_HAND_COOLDOWN_DECREASE.get());
         }
     }
 

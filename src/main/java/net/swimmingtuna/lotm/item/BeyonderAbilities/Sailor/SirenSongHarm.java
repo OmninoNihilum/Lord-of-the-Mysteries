@@ -15,6 +15,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.beyonder.SailorClass;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.SoundInit;
@@ -49,6 +51,8 @@ public class SirenSongHarm extends LeftClickHandlerSkillP {
 
     private static void sirenSongHarm(LivingEntity player, Level level) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.SIRENSONG.get());
+
             CompoundTag tag = player.getPersistentData();
             if (tag.getInt("sirenSongHarm") == 0) {
                 tag.putInt("sirenSongHarm", 400);
@@ -80,6 +84,16 @@ public class SirenSongHarm extends LeftClickHandlerSkillP {
         int sirenSongWeaken = tag.getInt("sirenSongWeaken");
         int sirenSongStun = tag.getInt("sirenSongStun");
         int sirenSongStrengthen = tag.getInt("sirenSongStrengthen");
+        if (!BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.SAILOR.get(), 5)) {
+            return;
+        }
+        if (sirenSongHarm == 0 && sirenSongStrengthen == 0 && sirenSongStun == 0 && sirenSongWeaken == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.SIRENSONG.get());
+        }
+        int harmCounter = 50 - (sequence * 6);
+        if (sirenSongStrengthen >= 1 || sirenSongWeaken >= 1 || sirenSongStun >= 1 || sirenSongHarm >= 1) {
+            SirenSongStrengthen.spawnParticlesInSphere(livingEntity, harmCounter);
+        }
         if (sirenSongHarm % 20 == 0 && sirenSongHarm != 0) {
             for (LivingEntity entity : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.SIREN_SONG_HARM.get())))) {
                 if (entity != livingEntity && !BeyonderUtil.areAllies(livingEntity, entity)) {

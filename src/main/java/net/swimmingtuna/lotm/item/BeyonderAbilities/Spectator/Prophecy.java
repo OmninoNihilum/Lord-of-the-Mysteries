@@ -30,6 +30,8 @@ import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.MeteorNoLevelEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -141,16 +143,19 @@ public class Prophecy extends LeftClickHandlerSkill {
                     player.sendSystemMessage(Component.literal("You prophesized a tornado into the world").withStyle(BeyonderUtil.getStyle(livingEntity)));
                 }
             } else if (prophecy == 4) {
+                EventManager.addToRegularLoop(livingEntity, EFunctions.PROPHECY.get());
                 tag.putInt("prophecyEarthquake", (int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 15));
                 if (livingEntity instanceof Player player) {
                     player.sendSystemMessage(Component.literal("You prophesized an eartuquake into the world").withStyle(BeyonderUtil.getStyle(livingEntity)));
                 }
             } else if (prophecy == 5) {
+                EventManager.addToRegularLoop(livingEntity, EFunctions.PROPHECY.get());
                 tag.putInt("prophecyPlague",  (int) (BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROPHECY.get()) * 10));
                 if (livingEntity instanceof Player player) {
                     player.sendSystemMessage(Component.literal("You prophesized a plague around you into the world").withStyle(BeyonderUtil.getStyle(livingEntity)));
                 }
             } else if (prophecy == 6) {
+                EventManager.addToRegularLoop(livingEntity, EFunctions.PROPHECY.get());
                 tag.putInt("prophecySinkhole", 80);
                 tag.putInt("prophecySinkholeX", (int) livingEntity.getX());
                 tag.putInt("prophecySinkholeY", (int) livingEntity.getY());

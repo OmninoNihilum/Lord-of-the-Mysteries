@@ -17,6 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -61,16 +63,17 @@ public class DreamIntoReality extends SimpleAbilityItem {
         }
     }
 
-    public static void startFlying(LivingEntity player) { //marked
-        if (!player.level().isClientSide()) {
-            int dreamIntoReality = player.getPersistentData().getInt("dreamIntoReality");
+    public static void startFlying(LivingEntity livingEntity) { //marked
+        if (!livingEntity.level().isClientSide()) {
+            int dreamIntoReality = livingEntity.getPersistentData().getInt("dreamIntoReality");
             if (dreamIntoReality != 3) {
-                player.getPersistentData().putBoolean(CAN_FLY, true);
-                player.getPersistentData().putInt("dreamIntoReality", 4);
-                ScaleData scaleData = ScaleTypes.BASE.getScaleData(player);
+                EventManager.addToRegularLoop(livingEntity, EFunctions.DREAM_INTO_REALITY.get());
+                livingEntity.getPersistentData().putBoolean(CAN_FLY, true);
+                livingEntity.getPersistentData().putInt("dreamIntoReality", 4);
+                ScaleData scaleData = ScaleTypes.BASE.getScaleData(livingEntity);
                 scaleData.setTargetScale(scaleData.getBaseScale() * 12);
                 scaleData.markForSync(true);
-                BeyonderUtil.startFlying(player, 0.1f);
+                BeyonderUtil.startFlying(livingEntity, 0.1f);
             }
         }
     }
@@ -104,6 +107,7 @@ public class DreamIntoReality extends SimpleAbilityItem {
         //DREAM INTO REALITY
         boolean canFly = livingEntity.getPersistentData().getBoolean("CanFly");
         if (!canFly) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.DREAM_INTO_REALITY.get());
             return;
         }
         if (BeyonderUtil.getSpirituality(livingEntity) >= 15) {

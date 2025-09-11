@@ -13,6 +13,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -45,6 +47,7 @@ public class CalamityIncarnationTsunami extends LeftClickHandlerSkillP {
         if (!player.level().isClientSide()) {
             int x = player.getPersistentData().getInt("calamityIncarnationTsunami");
             if (x == 0) {
+                EventManager.addToRegularLoop(player, EFunctions.CALAMITYINCARNATIONTSUNAMI.get());
                 player.getPersistentData().putInt("calamityIncarnationTsunami", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.CALAMITY_INCARNATION_TSUNAMI.get()));
             } else {
                 player.getPersistentData().putInt("calamityIncarnationTsunami", 0);
@@ -71,6 +74,7 @@ public class CalamityIncarnationTsunami extends LeftClickHandlerSkillP {
         CompoundTag tag = livingEntity.getPersistentData();
         int calamityIncarnationTsunami = tag.getInt("calamityIncarnationTsunami");
         if (calamityIncarnationTsunami < 1) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.CALAMITYINCARNATIONTSUNAMI.get());
             return;
         }
         Level level = livingEntity.level();

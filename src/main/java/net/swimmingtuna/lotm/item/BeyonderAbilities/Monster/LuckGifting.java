@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -20,6 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
+import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationSelf;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.ReachChangeUUIDs;
@@ -61,6 +64,27 @@ public class LuckGifting extends SimpleAbilityItem {
             return this.lazyAttributeMap.get();
         }
         return super.getDefaultAttributeModifiers(slot);
+    }
+
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
+            if (livingEntity.isShiftKeyDown()) {
+                int luckGiftingAmount = livingEntity.getPersistentData().getInt("monsterLuckGifting");
+                if (livingEntity.isShiftKeyDown()) {
+                    if (livingEntity.getMainHandItem().getItem() instanceof LuckGifting && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.MONSTER.get())) {
+                        livingEntity.getPersistentData().putInt("monsterLuckGifting", luckGiftingAmount + 1);
+                        livingEntity.displayClientMessage(Component.literal("Luck Gifting Amount is " + luckGiftingAmount).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        if (luckGiftingAmount >= BeyonderUtil.getDamage(livingEntity).get(ItemInit.LUCKGIFTING.get())) {
+                            livingEntity.displayClientMessage(Component.literal("Luck Gifting Amount is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                            livingEntity.getPersistentData().putInt("monsterLuckGifting", 0);
+                        }
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     private Multimap<Attribute, AttributeModifier> createAttributeMap() {

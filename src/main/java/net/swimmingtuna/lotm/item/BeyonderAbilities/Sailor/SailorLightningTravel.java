@@ -13,6 +13,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.entity.LightningEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -65,6 +67,7 @@ public class SailorLightningTravel extends SimpleAbilityItem {
             player.getPersistentData().putInt("sailorLightningTravel", 5);
             lightningEntity.teleportTo(player.getX(), player.getY(), player.getZ());
             level.addFreshEntity(lightningEntity);
+            EventManager.addToRegularLoop(player, EFunctions.LIGHTNINGTRAVEL.get());
         }
     }
 
@@ -73,6 +76,8 @@ public class SailorLightningTravel extends SimpleAbilityItem {
         if (player.getPersistentData().getInt("sailorLightningTravel") >= 1) {
             player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 3, 1, false, false));
             player.getPersistentData().putInt("sailorLightningTravel", player.getPersistentData().getInt("sailorLightningTravel") - 1);
+        } else {
+            EventManager.removeFromRegularLoop(player, EFunctions.LIGHTNINGTRAVEL.get());
         }
     }
 

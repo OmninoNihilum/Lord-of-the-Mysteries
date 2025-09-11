@@ -12,6 +12,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.entity.DivineHandRightEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -45,6 +47,7 @@ public class DivineHandRight extends LeftClickHandlerSkillP {
 
     public static void divineHandRight(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            EventManager.addToRegularLoop(livingEntity, EFunctions.DIVINE_HAND_COOLDOWN_DECREASE.get());
             DivineHandRightEntity divineHandRight = new DivineHandRightEntity(EntityInit.DIVINE_HAND_RIGHT_ENTITY.get(), livingEntity.level());
             divineHandRight.setDeltaMovement(livingEntity.getLookAngle().scale(3));
             BeyonderUtil.setScale(divineHandRight, BeyonderUtil.getDamage(livingEntity).get(ItemInit.DIVINEHANDLEFT.get()));

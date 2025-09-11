@@ -17,6 +17,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -50,6 +52,13 @@ public class DoorMirage extends SimpleAbilityItem {
         CompoundTag tag = entity.getPersistentData();
         boolean mirage = tag.getBoolean("doorMirageIsActive");
         tag.putBoolean("doorMirageIsActive", !mirage);
+        boolean newMirage = tag.getBoolean("doorMirageIsActive");
+        if (newMirage) {
+            EventManager.removeFromRegularLoop(entity, EFunctions.DOOR_MIRAGE.get());
+        } else {
+            EventManager.addToRegularLoop(entity, EFunctions.DOOR_MIRAGE.get());
+        }
+
         if (entity instanceof Player pPlayer) {
             pPlayer.displayClientMessage(Component.literal("Door Mirage Turned " + (mirage ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
         }

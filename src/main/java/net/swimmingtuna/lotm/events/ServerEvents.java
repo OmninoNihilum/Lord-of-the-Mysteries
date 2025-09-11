@@ -31,6 +31,8 @@ import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -110,6 +112,7 @@ public class ServerEvents {
                     }
                     if (otherHolder.currentClassMatches(BeyonderClassInit.SAILOR) && otherHolder.getSequence() <= 1 && !otherPlayer.level().isClientSide()) {
                         otherPlayer.getPersistentData().putInt("tyrantMentionedInChat", 200);
+                        EventManager.addToRegularLoop(otherPlayer, EFunctions.LIGHTNING_STORM.get());
                         otherPlayer.sendSystemMessage(Component.literal(player.getName().getString() + " mentioned you in chat. Do you want to summon a lightning storm on them? Type Yes if so, you have 10 seconds").withStyle(style));
                         otherPlayer.getPersistentData().putInt("sailorStormVecX1", (int) player.getX());
                         otherPlayer.getPersistentData().putInt("sailorStormVecY1", (int) player.getY());
@@ -193,6 +196,7 @@ public class ServerEvents {
             }
             if (player.getPersistentData().getInt("tyrantMentionedInChat") >= 1 && message.toLowerCase().contains("yes")) {
                 if (BeyonderUtil.getSpirituality(player) >= 800) {
+                    EventManager.addToRegularLoop(player, EFunctions.LIGHTNING_STORM.get());
                     BeyonderUtil.useSpirituality(player, 800);
                     player.getPersistentData().putInt("sailorLightningStorm1", 300);
                     player.getPersistentData().putInt("sailorStormVecX1", (int) player.getX());
@@ -254,6 +258,7 @@ public class ServerEvents {
                     } else if (BeyonderUtil.getSpirituality(player) < 300) {
                         player.displayClientMessage(Component.literal("You need 300 spirituality in order to use this").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA), true);
                     } else {
+                        EventManager.addToRegularLoop(player, EFunctions.CONSCIOUSNESS_STROLL.get());
                         player.getCooldowns().addCooldown(ItemInit.CONSCIOUSNESS_STROLL.get(), 400);
                         player.getPersistentData().putInt("consciousnessStrollActivatedX", (int) player.getX());
                         player.getPersistentData().putInt("consciousnessStrollActivatedY", (int) player.getY());

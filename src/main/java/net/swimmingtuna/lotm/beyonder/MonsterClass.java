@@ -45,6 +45,9 @@ import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.LightningEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
+import net.swimmingtuna.lotm.events.NewEventLoop.PathwaysPassiveEvents.MonsterPassiveEvents;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -114,9 +117,7 @@ public class MonsterClass implements BeyonderClass {
         MonsterAttributes.applyAll(entity, seq);
     }
 
-    @Override
     public void tick(LivingEntity player, int sequenceLevel) {
-        CompoundTag tag = player.getPersistentData();
         if (player.tickCount % 20 == 0) {
             if (player instanceof Player) {
                 if (sequenceLevel == 8 || sequenceLevel == 7) {
@@ -291,6 +292,8 @@ public class MonsterClass implements BeyonderClass {
     public static void decrementMonsterAttackEvent(LivingEntity livingEntity) {
         if (livingEntity.getPersistentData().getInt("attackedMonster") >= 1) {
             livingEntity.getPersistentData().putInt("attackedMonster", livingEntity.getPersistentData().getInt("attackedMonster") - 1);
+        }  else {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.DECREMENT_MONSTER_ATTACK_EVENT.get());
         }
     }
 
@@ -1511,6 +1514,8 @@ public class MonsterClass implements BeyonderClass {
                     skeleton.setDropChance(EquipmentSlot.FEET, 0.0F);
                     tag.putInt("calamityUndeadArmyCounter", tag.getInt("calamityUndeadArmyCounter") - 1);
                 }
+            } else {
+                EventManager.removeFromRegularLoop(pPlayer, EFunctions.CALAMITY_UNDEAD_ARMY.get());
             }
         }
     }
@@ -1640,5 +1645,15 @@ public class MonsterClass implements BeyonderClass {
         } else if (sequenceLevel <= 4) {
             applyMobEffect(entity, MobEffects.DAMAGE_RESISTANCE, 60, resistance + 1, true, true);
         }
+    }
+
+    @Override
+    public void removeAllEvents(LivingEntity entity) {
+        MonsterPassiveEvents.removeAllEvents(entity);
+    }
+
+    @Override
+    public void addAllEvents(LivingEntity entity, int sequence) {
+        MonsterPassiveEvents.addAllEvents(entity, sequence);
     }
 }

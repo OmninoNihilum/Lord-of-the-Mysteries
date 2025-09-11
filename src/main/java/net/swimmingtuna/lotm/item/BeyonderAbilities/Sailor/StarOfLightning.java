@@ -19,6 +19,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.swimmingtuna.lotm.entity.LightningEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -49,6 +51,7 @@ public class StarOfLightning extends SimpleAbilityItem {
 
     private static void starOfLightningAbility(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.STAR_OF_LIGHTNING.get());
             if (BeyonderUtil.getSequence(player) == 0) {
                 player.getPersistentData().putInt("sailorLightningStar", 50);
             } else {
@@ -67,6 +70,7 @@ public class StarOfLightning extends SimpleAbilityItem {
             tag.putInt("sailorLightningStar", sailorLightningStar - 1);
         }
         if (sailorLightningStar == 1) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.STAR_OF_LIGHTNING.get());
             StarOfLightning.starOfLightningExplode(livingEntity, livingEntity.getOnPos(), 15);
             tag.putInt("sailorLightningStar", 0);
             tag.putInt("sailorLightningStarLightning", 20);

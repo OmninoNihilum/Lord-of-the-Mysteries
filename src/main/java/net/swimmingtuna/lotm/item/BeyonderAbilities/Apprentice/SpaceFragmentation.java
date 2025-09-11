@@ -4,7 +4,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -64,6 +66,24 @@ public class SpaceFragmentation extends LeftClickHandlerSkillP {
             fragment.teleportTo(livingEntity.getX() + scale.x(), livingEntity.getY() + scale.y(), livingEntity.getZ() + scale.z());
             level.addFreshEntity(fragment);
         }
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
+            if (livingEntity.isShiftKeyDown()) {
+                int fragmentationDistance = livingEntity.getPersistentData().getInt("keyOfStarsFragmentation");
+                if (livingEntity.getMainHandItem().getItem() instanceof SpaceFragmentation && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 1)) {
+                    livingEntity.getPersistentData().putInt("keyOfStarsFragmentation", fragmentationDistance + 2);
+                    livingEntity.displayClientMessage(Component.literal("Spatial Authority: Fragmentation Spawn Distance is " + fragmentationDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    if (fragmentationDistance >= 151) {
+                        livingEntity.displayClientMessage(Component.literal("Spatial Authority: Fragmentation Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        livingEntity.getPersistentData().putInt("keyOfStarsFragmentation", 0);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     @Override

@@ -20,6 +20,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -78,6 +80,7 @@ public class ManipulateMovement extends LeftClickHandlerSkillP {
         if (!player.level().isClientSide()) {
             boolean x = player.getPersistentData().getBoolean("manipulateMovementBoolean");
             if (!x) {
+                EventManager.addToRegularLoop(player, EFunctions.MANIPULATE_MOVEMENT.get());
                 player.getPersistentData().putBoolean("manipulateMovementBoolean", true);
                 BlockPos pos = context.getClickedPos();
                 player.getPersistentData().putInt("manipulateMovementX", pos.getX());
@@ -105,6 +108,7 @@ public class ManipulateMovement extends LeftClickHandlerSkillP {
         Level level = livingEntity.level();
         //MANIPULATE MOVEMENT
         if (!livingEntity.getPersistentData().getBoolean("manipulateMovementBoolean")) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.MANIPULATE_MOVEMENT.get());
             return;
         }
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(180))) {

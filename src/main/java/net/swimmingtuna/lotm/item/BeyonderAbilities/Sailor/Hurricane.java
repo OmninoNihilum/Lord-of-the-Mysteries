@@ -13,6 +13,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -46,6 +48,7 @@ public class Hurricane extends LeftClickHandlerSkill {
 
     private void hurricaneAbility(LivingEntity pPlayer) {
         if (!pPlayer.level().isClientSide()) {
+            EventManager.addToRegularLoop(pPlayer, EFunctions.HURRICANE.get());
             pPlayer.getPersistentData().putInt("sailorHurricane", (int) (float) BeyonderUtil.getDamage(pPlayer).get(ItemInit.HURRICANE.get()));
         }
     }
@@ -57,6 +60,7 @@ public class Hurricane extends LeftClickHandlerSkill {
         BlockPos pos = new BlockPos((int) (livingEntity.getX() + (Math.random() * 100 - 100)), (int) (livingEntity.getY() - 100), (int) (livingEntity.getZ() + (Math.random() * 300 - 300)));
         int hurricane = tag.getInt("sailorHurricane");
         if (hurricane < 1) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.HURRICANE.get());
             return;
         }
         if (sailorHurricaneRain) {

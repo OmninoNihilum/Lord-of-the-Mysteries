@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,13 +22,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
-import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
@@ -97,6 +94,24 @@ public class DoorGammaRayBurst extends LeftClickHandlerSkillP {
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
+            if (livingEntity.isShiftKeyDown()) {
+                int gammaRayDistance = livingEntity.getPersistentData().getInt("doorGammaRay");
+                if (livingEntity.getMainHandItem().getItem() instanceof DoorGammaRayBurst && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 0)) {
+                    livingEntity.getPersistentData().putInt("doorGammaRay", gammaRayDistance + 2);
+                    livingEntity.displayClientMessage(Component.literal("Door: Gamma Ray Burst Spawn Distance is " + gammaRayDistance).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    if (gammaRayDistance >= 201) {
+                        livingEntity.displayClientMessage(Component.literal("Door Gamma Ray Burst Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        livingEntity.getPersistentData().putInt("doorGammaRay", 0);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
 

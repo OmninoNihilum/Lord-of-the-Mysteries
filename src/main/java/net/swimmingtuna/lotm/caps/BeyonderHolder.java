@@ -58,14 +58,17 @@ public class BeyonderHolder extends PlayerCapability {
         BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(event.player);
         if (!event.player.level().isClientSide && event.phase == TickEvent.Phase.END && event.player.isAlive() && holder.getSequence() != -1) {
             holder.regenSpirituality(event.player);
-            if (holder.getCurrentClass() != null) {
-                holder.getCurrentClass().tick(event.player, holder.getSequence());
-            }
+            //if (holder.getCurrentClass() != null) {
+            //    holder.getCurrentClass().tick(event.player, holder.getSequence());
+            //}
         }
 
     }
 
     public void removePathway() {
+        if (this.currentClass != null) {
+            this.currentClass.removeAllEvents(this.player);
+        }
         this.currentClass = null;
         this.currentSequence = -1;
         this.mentalStrength = 0;
@@ -94,6 +97,11 @@ public class BeyonderHolder extends PlayerCapability {
     }
 
     public void setPathwayAndSequence(BeyonderClass newClass, int sequence) {
+        if (this.currentClass != null) {
+            if (newClass == null || newClass != this.currentClass) {
+                this.currentClass.removeAllEvents(this.player);
+            }
+        }
         this.currentClass = newClass;
         this.currentSequence = sequence;
         this.maxSpirituality = this.currentClass.spiritualityLevels().get(this.currentSequence);
@@ -110,6 +118,7 @@ public class BeyonderHolder extends PlayerCapability {
         }
         updateTracking();
         newClass.applyAllModifiers(player, sequence);
+        newClass.addAllEvents(player, sequence);
         LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
     }
 
@@ -194,6 +203,7 @@ public class BeyonderHolder extends PlayerCapability {
             this.spirituality = this.maxSpirituality;
             updateTracking();
             currentClass.applyAllModifiers(player, currentSequence);
+            currentClass.addAllEvents(player, currentSequence);
             LOTMNetworkHandler.sendToPlayer(new SyncSequencePacketS2C(this.currentSequence), (ServerPlayer) player);
         }
     }

@@ -14,6 +14,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -55,6 +57,7 @@ public class WindManipulationFlight extends LeftClickHandlerSkillP {
     public static void flightRegular(LivingEntity player) {
         if (!player.level().isClientSide()) {
             CompoundTag tag = player.getPersistentData();
+            EventManager.addToRegularLoop(player, EFunctions.WIND_MANIPULATION_FLIGHT.get());
             tag.putInt("sailorFlight", 1);
             tag.putInt("sailorFlightDamageCancel", 1);
         }
@@ -62,6 +65,7 @@ public class WindManipulationFlight extends LeftClickHandlerSkillP {
 
     public static void startFlying(LivingEntity player) { //marked
         if (!player.level().isClientSide() && player instanceof Player) {
+            EventManager.addToRegularLoop(player, EFunctions.WIND_MANIPULATION_FLIGHT.get());
             player.getPersistentData().putBoolean("sailorFlight1", true);
             BeyonderUtil.startFlying(player, 0.1f, 20);
         }
@@ -83,6 +87,7 @@ public class WindManipulationFlight extends LeftClickHandlerSkillP {
         if (!livingEntity.level().isClientSide() && livingEntity instanceof Player player) { //marked
             player.getPersistentData().putBoolean("sailorFlight1", false);
             BeyonderUtil.stopFlying(livingEntity);
+            EventManager.removeFromRegularLoop(player, EFunctions.WIND_MANIPULATION_FLIGHT.get());
         }
     }
 

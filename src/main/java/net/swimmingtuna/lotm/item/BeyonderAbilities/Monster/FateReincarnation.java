@@ -21,6 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -62,6 +64,7 @@ public class FateReincarnation extends LeftClickHandlerSkillP {
             int surfaceY = getNonAirSurfaceBlock(player.level(),x,z);
             player.teleportTo(x, surfaceY + 4, z);
             player.getPersistentData().putInt("monsterReincarnationCounter", 7200);
+            EventManager.addToRegularLoop(player, EFunctions.FATEREINCARNATION.get());
             if (BeyonderUtil.getSequence(player) == 0) {
                 player.getPersistentData().putBoolean("monsterReincarnation", true);
             } else {
@@ -129,6 +132,9 @@ public class FateReincarnation extends LeftClickHandlerSkillP {
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(livingEntity);
             boolean y = livingEntity.getPersistentData().getBoolean("monsterReincarnation");
             int x = tag.getInt("monsterReincarnationCounter");
+            if (x == 0) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.FATEREINCARNATION.get());
+            }
             if (!y) {
                 if (x >= 1) {
                     tag.putInt("monsterReincarnationCounter", x - 1);

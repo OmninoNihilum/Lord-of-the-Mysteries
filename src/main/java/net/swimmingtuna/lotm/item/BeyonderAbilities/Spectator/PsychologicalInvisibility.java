@@ -17,6 +17,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -61,6 +63,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                     BeyonderUtil.setInvisible(livingEntity, true, 30);
                     pPlayer.displayClientMessage(Component.literal("You are now invisible").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
                 }
+                EventManager.addToRegularLoop(livingEntity, EFunctions.PSYCHOLOGICAL_INVISIBILITY.get());
                 tag.putBoolean("psychologicalInvisibility", true);
             } else {
                 if (livingEntity instanceof Player pPlayer) {
@@ -88,6 +91,7 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                 living.removeEffect(MobEffects.INVISIBILITY);
             }
         }
+        EventManager.removeFromRegularLoop(living, EFunctions.PSYCHOLOGICAL_INVISIBILITY.get());
     }
 
 
@@ -140,6 +144,8 @@ public class PsychologicalInvisibility extends SimpleAbilityItem {
                 BeyonderUtil.applyMobEffect(livingEntity, MobEffects.INVISIBILITY, 300, 1, false, false);
                 BeyonderUtil.useSpirituality(livingEntity, Math.min(10, BeyonderUtil.getMaxSpirituality(livingEntity) / 100));
                 BeyonderUtil.setInvisible(livingEntity, true, 30);
+            } else {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.PSYCHOLOGICAL_INVISIBILITY.get());
             }
         }
     }

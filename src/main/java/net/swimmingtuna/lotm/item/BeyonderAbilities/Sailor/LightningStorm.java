@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -13,6 +14,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.entity.LightningEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -46,6 +49,7 @@ public class LightningStorm extends LeftClickHandlerSkill {
 
     public void lightningStormAbility(LivingEntity player) { //add logic to add persitatent data of targetX,
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.LIGHTNING_STORM.get());
             int sailorStormVec = player.getPersistentData().getInt("sailorStormVec");
             Vec3 lookVec = player.getLookAngle();
             int sequence = BeyonderUtil.getSequence(player);
@@ -61,6 +65,27 @@ public class LightningStorm extends LeftClickHandlerSkill {
                 persistentData.putInt("sailorLightningStormTyrant", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.LIGHTNING_STORM.get()));
             }
         }
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
+            if (livingEntity.isShiftKeyDown()) {
+                if (BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.SAILOR.get(), 3) && livingEntity.getMainHandItem().getItem() instanceof LightningStorm) {
+                    CompoundTag tag = livingEntity.getPersistentData();
+                    int stormVec = tag.getInt("sailorStormVec");
+                    if (livingEntity.isShiftKeyDown()) {
+                        tag.putInt("sailorStormVec", stormVec + 10);
+                        livingEntity.displayClientMessage(Component.literal("Sailor Storm Spawn Distance is " + stormVec).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    }
+                    if (stormVec >= 301) {
+                        livingEntity.displayClientMessage(Component.literal("Sailor Storm Spawn Distance is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        tag.putInt("sailorStormVec", 0);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
     public static void lightningStorm(LivingEntity livingEntity) {
@@ -171,6 +196,7 @@ public class LightningStorm extends LeftClickHandlerSkill {
         }
         return 0;
     }
+
     @Override
     public LeftClickType getleftClickEmpty() {
         return new LeftClickC2S();

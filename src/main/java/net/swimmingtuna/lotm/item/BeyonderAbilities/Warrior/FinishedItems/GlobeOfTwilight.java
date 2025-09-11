@@ -22,6 +22,8 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.GlobeOfTwilightEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -78,6 +80,7 @@ public class GlobeOfTwilight extends LeftClickHandlerSkillP {
                     living.getPersistentData().putInt("globeOfTwilightZ", (int) living.getZ());
                     living.getPersistentData().putInt("globeOfTwilight", 50 - (BeyonderUtil.getSequence(living) * 5));
                     living.getPersistentData().putInt("globeOfTwilightSize", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.GLOBEOFTWILIGHT.get()));
+                    EventManager.addToRegularLoop(living, EFunctions.GLOBE_OF_TWILIGHT_TICK.get());
                 }
             }
         }
@@ -90,6 +93,7 @@ public class GlobeOfTwilight extends LeftClickHandlerSkillP {
             target.getPersistentData().putInt("globeOfTwilightZ", (int) target.getZ());
             target.getPersistentData().putInt("globeOfTwilight", 50 - (BeyonderUtil.getSequence(target) * 5));
             target.getPersistentData().putInt("globeOfTwilightSize", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.GLOBEOFTWILIGHT.get()) * 5);
+            EventManager.addToRegularLoop(target, EFunctions.GLOBE_OF_TWILIGHT_TICK.get());
         }
     }
 
@@ -148,6 +152,8 @@ public class GlobeOfTwilight extends LeftClickHandlerSkillP {
                         }
                     }
                 }
+            } else {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.GLOBE_OF_TWILIGHT_TICK.get());
             }
             if (counter == 1) {
                 float random = BeyonderUtil.getRandomInRange(5);

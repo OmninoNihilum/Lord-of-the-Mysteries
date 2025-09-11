@@ -20,6 +20,8 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.LavaEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -100,6 +102,7 @@ public class VolcanicEruption extends LeftClickHandlerSkillP {
                     mob.setTarget(living);
                 }
                 int damage = (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.VOLCANIC_ERUPTION.get());
+                EventManager.addToRegularLoop(target, EFunctions.VOLCANIC_ERUPTION.get());
                 target.getPersistentData().putInt("volcanicEruption", damage);
             }
         }
@@ -107,6 +110,7 @@ public class VolcanicEruption extends LeftClickHandlerSkillP {
 
     public static void volcanicEruptionTarget(LivingEntity living, LivingEntity target) {
         if (!living.level().isClientSide()) {
+            EventManager.addToRegularLoop(target, EFunctions.VOLCANIC_ERUPTION.get());
             target.getPersistentData().putInt("volcanicEruption", (int) (float) BeyonderUtil.getDamage(living).get(ItemInit.VOLCANIC_ERUPTION.get()) * 2);
         }
     }
@@ -139,6 +143,9 @@ public class VolcanicEruption extends LeftClickHandlerSkillP {
                     level.addFreshEntity(lavaEntity);
                 }
             }
+        } else {
+            EventManager.removeFromRegularLoop(living, EFunctions.VOLCANIC_ERUPTION.get());
+
         }
     }
 

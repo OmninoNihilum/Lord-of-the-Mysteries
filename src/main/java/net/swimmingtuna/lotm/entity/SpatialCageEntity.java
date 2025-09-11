@@ -13,6 +13,8 @@ import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
@@ -77,6 +79,7 @@ public class SpatialCageEntity extends Entity{
         tag.putDouble("spatialCageY", entity.getY());
         tag.putDouble("spatialCageZ", entity.getZ());
         tag.putUUID("spatialCageSealUUID", sealUUID);
+        EventManager.addToRegularLoop(entity, EFunctions.SPATIAL_CAGE.get());
     }
 
     public static void unsetSealed(LivingEntity entity){
@@ -89,6 +92,7 @@ public class SpatialCageEntity extends Entity{
         tag.remove("spatialCageY");
         tag.remove("spatialCageZ");
         tag.remove("spatialCageSealUUID");
+        EventManager.removeFromRegularLoop(entity, EFunctions.SPATIAL_CAGE.get());
     }
 
     @Override

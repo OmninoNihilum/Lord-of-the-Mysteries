@@ -30,6 +30,7 @@ import net.swimmingtuna.lotm.attributes.PathwayAttributes.ApprenticeAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.capabilities.replicated_entity.ReplicatedEntityUtils;
 import net.swimmingtuna.lotm.capabilities.scribed_abilities.ScribedUtils;
+import net.swimmingtuna.lotm.events.NewEventLoop.PathwaysPassiveEvents.ApprenticePassiveEvents;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.Conceptualization;
@@ -92,115 +93,6 @@ public class ApprenticeClass implements BeyonderClass {
     @Override
     public void applyAllModifiers(LivingEntity entity, int seq) {
         ApprenticeAttributes.applyAll(entity, seq);
-    }
-
-
-    @Override
-    public void tick(LivingEntity player, int sequenceLevel) {
-        if (player.level().getGameTime() % 50 == 0) {
-            CompoundTag tag = player.getPersistentData();
-            int waitOnWormLogic = tag.getInt("waitOnWormLogic");
-            int maxWormCount = 0;
-            int wormRegenAmount = 0;
-            switch (sequenceLevel) {
-                case 6:
-                    tag.putInt("maxScribedAbilities", 20);
-                    break;
-                case 5:
-                    tag.putInt("maxScribedAbilities", 25);
-                    break;
-                case 4:
-                    maxWormCount = 200;
-                    wormRegenAmount = 1;
-                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                    }
-                    tag.putInt("maxScribedAbilities", 30);
-                    break;
-                case 3:
-                    maxWormCount = 800;
-                    wormRegenAmount = 3;
-                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                    }
-
-                    tag.putInt("maxScribedAbilities", 35);
-                    break;
-                case 2:
-                    maxWormCount = 4000;
-                    wormRegenAmount = 10;
-                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                    }
-
-                    tag.putInt("maxScribedAbilities", 40);
-                    if (player instanceof Player pPlayer) {
-                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 5);
-                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 1);
-                    }
-                    ScribedUtils.seq2FixCount(player);
-                    break;
-                case 1:
-                    maxWormCount = 16000;
-                    wormRegenAmount = 25;
-                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                    }
-
-                    tag.putInt("maxScribedAbilities", 45);
-                    if (player instanceof Player pPlayer) {
-                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 10);
-                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 4);
-                    }
-                    ScribedUtils.seq2FixCount(player);
-                    break;
-                case 0:
-                    maxWormCount = 80000;
-                    wormRegenAmount = 100;
-                    tag.putInt("wormOfStar", Math.min(maxWormCount, tag.getInt("wormOfStar") + wormRegenAmount));
-
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        LOTMNetworkHandler.sendToPlayer(new ClientWormOfStarDataS2C(tag.getInt("wormOfStar")), serverPlayer);
-                    }
-
-                    tag.putInt("maxScribedAbilities", 50);
-                    if (player instanceof Player pPlayer) {
-                        ReplicatedEntityUtils.setMaxEntities(pPlayer, 45);
-                        ReplicatedEntityUtils.setMaxAbilitiesUse(pPlayer, 10000000);
-                    }
-                    ScribedUtils.seq2FixCount(player);
-                    break;
-            }
-            if (sequenceLevel <= 4) {
-                if (waitOnWormLogic == 0) {
-                    if (tag.getInt("wormOfStar") < maxWormCount * 0.1) {
-                        player.sendSystemMessage(Component.literal("Died due to a lack of Worms of Star").withStyle(ChatFormatting.DARK_RED).withStyle(ChatFormatting.BOLD));
-                        player.kill();
-                    } else if (tag.getInt("wormOfStar") < maxWormCount * 0.25) {
-                        player.sendSystemMessage(Component.literal("You can't handle the low amount of Worms of Star and will soon die").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
-                        player.hurt(player.damageSources().magic(), player.getMaxHealth() / 7);
-                        BeyonderUtil.applyMobEffect(player, MobEffects.BLINDNESS, 100, 1, true, true);
-                    } else if (tag.getInt("wormOfStar") < maxWormCount * 0.5) {
-                        player.sendSystemMessage(Component.literal("You are dangerously low on Worms of Star and are taking damage because of it").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD));
-                        player.hurt(player.damageSources().magic(), player.getMaxHealth() / 10);
-                        BeyonderUtil.applyMobEffect(player, MobEffects.DARKNESS, 100, 1, true, true);
-                    } else if (tag.getInt("wormOfStar") < maxWormCount * 0.75) {
-                        player.hurt(player.damageSources().magic(), player.getMaxHealth() / 20);
-                        player.sendSystemMessage(Component.literal("You are over exerting yourself, and shouldn't separate any more Worms of Stars").withStyle(ChatFormatting.YELLOW).withStyle(ChatFormatting.BOLD));
-                    }
-                }
-            }
-            if (waitOnWormLogic >= 1) {
-                tag.putInt("waitOnWormLogic", waitOnWormLogic - 1);
-            }
-        }
     }
 
 
@@ -446,5 +338,15 @@ public class ApprenticeClass implements BeyonderClass {
             }
         }
         return false;
+    }
+
+    @Override
+    public void removeAllEvents(LivingEntity entity) {
+        ApprenticePassiveEvents.removeAllEvents(entity);
+    }
+
+    @Override
+    public void addAllEvents(LivingEntity entity, int sequence) {
+        ApprenticePassiveEvents.addAllEvents(entity, sequence);
     }
 }

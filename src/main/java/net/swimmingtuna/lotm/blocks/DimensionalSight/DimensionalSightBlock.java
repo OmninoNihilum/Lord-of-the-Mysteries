@@ -30,7 +30,6 @@ public class DimensionalSightBlock extends DimensionalSightBlockTileEntity<Dimen
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (!pLevel.isClientSide()) {
-            BlockEntity entity = pLevel.getBlockEntity(pPos);
 
         }
 

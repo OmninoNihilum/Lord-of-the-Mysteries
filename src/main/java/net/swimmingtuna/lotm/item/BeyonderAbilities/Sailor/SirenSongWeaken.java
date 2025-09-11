@@ -10,6 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -40,6 +42,7 @@ public class SirenSongWeaken extends LeftClickHandlerSkillP {
 
     private static void sirenSongWeaken(LivingEntity player, Level level) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.SIRENSONG.get());
             CompoundTag tag = player.getPersistentData();
             if (tag.getInt("sirenSongWeaken") == 0) {
                 tag.putInt("sirenSongWeaken", 400);

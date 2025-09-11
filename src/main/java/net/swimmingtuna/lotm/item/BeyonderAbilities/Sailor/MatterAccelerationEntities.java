@@ -64,7 +64,6 @@ public class MatterAccelerationEntities extends LeftClickHandlerSkillP {
             Entity entity = pContext.getItemInHand().getEntityRepresentation();
             if (entity instanceof LivingEntity user) {
                 BlockPos targetPos = pContext.getClickedPos();
-
                 if (!checkAll(user)) {
                     return InteractionResult.FAIL;
                 }

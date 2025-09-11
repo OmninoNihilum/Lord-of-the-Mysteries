@@ -32,6 +32,7 @@ import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.PathwaysPassiveEvents.SpectatorPassiveEvents;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake;
@@ -91,21 +92,6 @@ public class SpectatorClass implements BeyonderClass {
     @Override
     public void applyAllModifiers(LivingEntity entity, int seq) {
         SpectatorAttributes.applyAll(entity, seq);
-    }
-
-    @Override
-    public void tick(LivingEntity player, int sequenceLevel) {
-        if (!player.level().isClientSide()) {
-            if (player instanceof Player pPlayer) {
-                if (pPlayer.isCrouching()) {
-                    player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 5, -1, false, false));
-                }
-            } else {
-                if (player.tickCount % 200 == 0) {
-                    BeyonderUtil.applyMobEffect(player, MobEffects.INVISIBILITY, 50, 1, false, false);
-                }
-            }
-        }
     }
 
     @Override
@@ -652,5 +638,14 @@ public class SpectatorClass implements BeyonderClass {
         }
     }
 
+    @Override
+    public void removeAllEvents(LivingEntity entity) {
+        SpectatorPassiveEvents.removeAllEvents(entity);
+    }
+
+    @Override
+    public void addAllEvents(LivingEntity entity, int sequence) {
+        SpectatorPassiveEvents.addAllEvents(entity, sequence);
+    }
 
 }

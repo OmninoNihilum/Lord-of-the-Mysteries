@@ -3,10 +3,13 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Monster;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -20,8 +23,10 @@ import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
+import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.MonsterDomainLeftClickC2S;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkill;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import org.jetbrains.annotations.NotNull;
@@ -45,6 +50,26 @@ public class DomainOfProvidence extends LeftClickHandlerSkill {
         makeDomainOfProvidence(player);
         useSpirituality(player);
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity) {
+            CompoundTag tag = livingEntity.getPersistentData();
+            if (livingEntity.tickCount % 2 == 0 && !level.isClientSide()) {
+                int radius = tag.getInt("monsterDomainRadius");
+                if (livingEntity.isShiftKeyDown() && (livingEntity.getMainHandItem().getItem() instanceof DomainOfProvidence)) {
+                    tag.putInt("monsterDomainRadius", radius + 5);
+                    int maxRadius = (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.DECAYDOMAIN.get());
+                    livingEntity.displayClientMessage(Component.literal("Current Domain Radius is " + radius).withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                    if (radius >= maxRadius + 1) {
+                        livingEntity.displayClientMessage(Component.literal("Current Domain Radius is 0").withStyle(BeyonderUtil.getStyle(livingEntity)), true);
+                        tag.putInt("monsterDomainRadius", 0);
+                    }
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
     }
 
 

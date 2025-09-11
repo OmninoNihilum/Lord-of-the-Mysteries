@@ -32,6 +32,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.*;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BiomeInit;
 import net.swimmingtuna.lotm.init.EntityInit;
@@ -74,6 +76,7 @@ public class Exile extends SimpleAbilityItem {
                 apprenticeDoor.teleportTo(spawnPos.x(), spawnPos.y(), spawnPos.z());
             }
             player.level().addFreshEntity(apprenticeDoor);
+            EventManager.addToRegularLoop(player, EFunctions.EXILE.get());
         }
     }
 
@@ -109,6 +112,7 @@ public class Exile extends SimpleAbilityItem {
                         livingEntity.hurt(livingEntity.damageSources().generic(), 15);
                     }
                 }
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.EXILE.get());
             }
             if (timer >= 1) {
                 tag.putInt("exileDoorTimer", timer - 1);
