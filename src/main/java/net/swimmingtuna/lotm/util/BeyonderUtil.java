@@ -60,9 +60,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.phys.*;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.swimmingtuna.lotm.LOTM;
@@ -1239,6 +1241,7 @@ public class BeyonderUtil {
     }
 
     public static void leftClick(Player pPlayer) {
+        if (FMLEnvironment.dist != Dist.CLIENT) return;
         System.out.println("[DEBUG] Left click from: " + pPlayer.getName().getString() + " on side: " + (pPlayer.level().isClientSide() ? "CLIENT" : "SERVER"));
         ItemStack heldItem = pPlayer.getMainHandItem();
         Item item = heldItem.getItem();
@@ -3525,6 +3528,12 @@ public class BeyonderUtil {
             if (!calledBySealedUtils) {
                 SealedUtils.removeAllSeals(livingEntity);
             }
+            tag.putInt("deathKnellFireFear", 0);
+            tag.putInt("deathKnellMobFear", 0);
+            tag.putInt("deathKnellPeacefulFear", 0);
+            tag.putInt("deathKnellPlayerFear", 0);
+            tag.putInt("deathKnellNightFear", 0);
+            tag.putInt("deathKnellWaterFear", 0);
             tag.putInt("mazeTrap", 0);
             tag.putInt("doorLayeringCounter", 0);
             tag.putInt("doorLayering", 0);

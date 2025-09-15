@@ -389,8 +389,7 @@ public class RagingBlows extends SimpleAbilityItem {
         if (!player.level().isClientSide()) {
             CompoundTag persistentData = player.getPersistentData();
             persistentData.putInt("ragingBlows", 1);
-            EventManager.removeFromRegularLoop(player, EFunctions.RAGINGCOMBO.get());
-
+            EventManager.addToRegularLoop(player, EFunctions.RAGINGBLOWS.get());
         }
     }
 

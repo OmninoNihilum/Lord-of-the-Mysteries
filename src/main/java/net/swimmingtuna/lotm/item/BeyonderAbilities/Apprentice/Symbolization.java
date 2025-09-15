@@ -55,11 +55,11 @@ public class Symbolization extends SimpleAbilityItem {
                 pPlayer.displayClientMessage(Component.literal("You are currently " + (isNowSymbolized ? "" : "NOT ") + "symbolized").withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.BOLD), true);
             }
             if (isNowSymbolized) {
-                EventManager.addToRegularLoop(player, EFunctions.SPATIAL_CAGE.get());
+                EventManager.addToRegularLoop(player, EFunctions.SYMBOLIZATION.get());
                 BeyonderUtil.startFlying(player, 0.15f, 20);
                 BeyonderUtil.setInvisible(player, true, 10);
             } else {
-                EventManager.removeFromRegularLoop(player, EFunctions.SPATIAL_CAGE.get());
+                EventManager.removeFromRegularLoop(player, EFunctions.SYMBOLIZATION.get());
                 BeyonderUtil.stopFlying(player);
                 BeyonderUtil.setInvisible(player, false, 0);
             }
@@ -73,7 +73,7 @@ public class Symbolization extends SimpleAbilityItem {
             CompoundTag tag = living.getPersistentData();
             BeyonderUtil.startFlying(living, 0.15f, 20);
             if (BeyonderUtil.getSpirituality(living) < 10) {
-                EventManager.removeFromRegularLoop(living, EFunctions.SPATIAL_CAGE.get());
+                EventManager.removeFromRegularLoop(living, EFunctions.SYMBOLIZATION.get());
                 BeyonderUtil.setInvisible(living, false, 0);
                 tag.putBoolean("planeswalkerSymbolization", false);
             } else {

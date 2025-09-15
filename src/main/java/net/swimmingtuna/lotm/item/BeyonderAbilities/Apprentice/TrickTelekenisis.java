@@ -21,7 +21,10 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -61,6 +64,7 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Telekinesis Turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
             }
+            EventManager.addToRegularLoop(player, EFunctions.TRICKMASTERTELEKENESIS.get());
         }
     }
 
@@ -68,13 +72,18 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
     public static void trickMasterTelekenisisPassive(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         CompoundTag tag = livingEntity.getPersistentData();
+        LOTM.LOGGER.info("VALUE OF TAG IS " + tag.getBoolean("trickmasterTelekenisis"));
         if (!livingEntity.level().isClientSide() && tag.getBoolean("trickmasterTelekenisis") && livingEntity.tickCount % 5 == 0) {
+            LOTM.LOGGER.info("1");
             if (BeyonderUtil.getSpirituality(livingEntity) >= 10) {
+                LOTM.LOGGER.info("2");
                 for (Entity entity : livingEntity.level().getEntitiesOfClass(Entity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTELEKENISIS.get())))) {
                     if (entity == livingEntity) {
                         continue;
                     }
+                    LOTM.LOGGER.info("ENTITY " + entity.getName());
                     if (!BeyonderUtil.isEntityAlly(livingEntity, entity)) {
+                        LOTM.LOGGER.info("ENTITY ISN'T ALLY: " + entity.getName());
                         double x = entity.getX() - livingEntity.getX();
                         double y = entity.getY() - livingEntity.getY();
                         double z = entity.getZ() - livingEntity.getZ();
@@ -98,6 +107,8 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
                     pPlayer.displayClientMessage(Component.literal("Telekinesis turned off due to lack of spirituality").withStyle(ChatFormatting.BOLD, ChatFormatting.RED), true);
                 }
             }
+        } if (!livingEntity.level().isClientSide() && !tag.getBoolean("trickmasterTelekenisis")) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.TRICKMASTERTELEKENESIS.get());
         }
     }
 

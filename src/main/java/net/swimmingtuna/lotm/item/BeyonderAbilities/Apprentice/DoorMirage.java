@@ -54,9 +54,9 @@ public class DoorMirage extends SimpleAbilityItem {
         tag.putBoolean("doorMirageIsActive", !mirage);
         boolean newMirage = tag.getBoolean("doorMirageIsActive");
         if (newMirage) {
-            EventManager.removeFromRegularLoop(entity, EFunctions.DOOR_MIRAGE.get());
-        } else {
             EventManager.addToRegularLoop(entity, EFunctions.DOOR_MIRAGE.get());
+        } else {
+            EventManager.removeFromRegularLoop(entity, EFunctions.DOOR_MIRAGE.get());
         }
 
         if (entity instanceof Player pPlayer) {
