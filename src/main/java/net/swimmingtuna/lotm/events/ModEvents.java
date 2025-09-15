@@ -420,14 +420,14 @@ public class ModEvents {
             event.getEntity().getCapability(EventsProvider.EVENTS_DATA).ifPresent(cap -> {
                 List<IFunction> listW = cap.getWorldEvents();
                 for (var obj : listW) {
-                    //LOTM.LOGGER.info("Calling world event: {} - {}", obj.getClass().getSimpleName(), obj.toString());
+                    LOTM.LOGGER.info("Calling world event: {}", obj.getClass().getSimpleName());
                     obj.use(event);
                 }
 
                 if (tag.getInt("inTwilight") == 0 && tag.getInt("cancelTick") == 0) {
                     List<IFunction> listR = cap.getRegularEvents();
                     for (var obj : listR) {
-                        //LOTM.LOGGER.info("Calling regular event: {} - {}", obj.getClass().getSimpleName(), obj.toString());
+                        LOTM.LOGGER.info("Calling regular event: {}", obj.toString());
                         obj.use(event);
                     }
                 }

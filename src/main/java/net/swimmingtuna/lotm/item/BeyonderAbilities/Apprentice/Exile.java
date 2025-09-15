@@ -112,6 +112,8 @@ public class Exile extends SimpleAbilityItem {
                         livingEntity.hurt(livingEntity.damageSources().generic(), 15);
                     }
                 }
+            }
+            if (timer <= 1) {
                 EventManager.removeFromRegularLoop(livingEntity, EFunctions.EXILE.get());
             }
             if (timer >= 1) {

@@ -30,10 +30,10 @@ public enum EFunctions {
     STARFALL_TICK(new StarfallTickLayer()),
     INVISIBLE_HAND_TICK(new InvisibleHandTickLayer()),
     SPATIAL_MAZE_TICK(new SpatialMazeTickLayer()),
-    TRICKMASTERTELEKENESIS(new TrickmasterTelekenisisPassiveLayer()), //TEST AGAIN
+    TRICKMASTER_TELEKENESIS(new TrickmasterTelekenisisPassiveLayer()), //TEST AGAIN
 
     //SAILOR
-    LIGHTNINGREDIRECTION(new LightningRedirectionLayer()),
+    LIGHTNINGREDIRECTION(new LightningRedirectionLayer()), //
     RAIN_EYES(new RainEyesLayer()),
     SAILOR_TICK(new SailorTickLayer()),
     VOLCANIC_ERUPTION(new VolcanicEruptionLayer()),

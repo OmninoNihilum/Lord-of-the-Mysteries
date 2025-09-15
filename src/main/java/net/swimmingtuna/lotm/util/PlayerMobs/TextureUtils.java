@@ -16,10 +16,13 @@ import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TextureUtils {
 
     private static final Map<UUID, SkinType> SKIN_TYPE_CACHE = new Object2ObjectOpenHashMap<>();
+    private static final Map<UUID, Long> FAILED_REQUESTS_COOLDOWN = new ConcurrentHashMap<>();
+    private static final long COOLDOWN_TIME = 30000;
 
     public static SkinType getPlayerSkinType(@Nullable GameProfile profile) {
         SkinType type = SkinType.DEFAULT;
@@ -27,12 +30,21 @@ public class TextureUtils {
             if (SKIN_TYPE_CACHE.containsKey(profile.getId())) {
                 type = SKIN_TYPE_CACHE.get(profile.getId());
             } else {
-                Minecraft mc = Minecraft.getInstance();
-                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = mc.getSkinManager().getInsecureSkinInformation(profile);
-                if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                    String stringType = map.get(MinecraftProfileTexture.Type.SKIN).getMetadata("model");
-                    SKIN_TYPE_CACHE.put(profile.getId(), type = getType(stringType));
-                } else {
+                if (isOnCooldown(profile.getId())) {
+                    return getType(DefaultPlayerSkin.getSkinModelName(profile.getId()));
+                }
+                try {
+                    Minecraft mc = Minecraft.getInstance();
+                    Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = mc.getSkinManager().getInsecureSkinInformation(profile);
+                    if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
+                        String stringType = map.get(MinecraftProfileTexture.Type.SKIN).getMetadata("model");
+                        SKIN_TYPE_CACHE.put(profile.getId(), type = getType(stringType));
+                        FAILED_REQUESTS_COOLDOWN.remove(profile.getId());
+                    } else {
+                        type = getType(DefaultPlayerSkin.getSkinModelName(profile.getId()));
+                    }
+                } catch (Exception e) {
+                    FAILED_REQUESTS_COOLDOWN.put(profile.getId(), System.currentTimeMillis());
                     type = getType(DefaultPlayerSkin.getSkinModelName(profile.getId()));
                 }
             }
@@ -64,24 +76,46 @@ public class TextureUtils {
         }
 
         if (profile != null && profile.getName() != null) {
-            Minecraft mc = Minecraft.getInstance();
-            Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = mc.getSkinManager().getInsecureSkinInformation(profile);
-            if (map.containsKey(type)) {
-                MinecraftProfileTexture profileTexture = map.get(type);
-                // Use sha1 as that is how minecraft hashes and stores the skins
-                String s = Hashing.sha1().hashUnencodedChars(profileTexture.getHash()).toString();
-                ResourceLocation location = SkinManager.getTextureLocation(type, s);
-                if (mc.textureManager.getTexture(location, MissingTextureAtlasSprite.getTexture()) != MissingTextureAtlasSprite.getTexture()) {
-                    return Optional.of(location);
-                } else {
-                    RenderSystem.recordRenderCall(() -> {
-                        mc.getSkinManager().registerTexture(profileTexture, type, entity.getSkinCallback());
-                    });
-                }
+            if (isOnCooldown(profile.getId())) {
+                return getDefault(profile, type);
             }
 
+            try {
+                Minecraft mc = Minecraft.getInstance();
+                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = mc.getSkinManager().getInsecureSkinInformation(profile);
+                if (map.containsKey(type)) {
+                    MinecraftProfileTexture profileTexture = map.get(type);
+                    String s = Hashing.sha1().hashUnencodedChars(profileTexture.getHash()).toString();
+                    ResourceLocation location = SkinManager.getTextureLocation(type, s);
+                    if (mc.textureManager.getTexture(location, MissingTextureAtlasSprite.getTexture()) != MissingTextureAtlasSprite.getTexture()) {
+                        FAILED_REQUESTS_COOLDOWN.remove(profile.getId());
+                        return Optional.of(location);
+                    } else {
+                        RenderSystem.recordRenderCall(() -> {
+                            mc.getSkinManager().registerTexture(profileTexture, type, entity.getSkinCallback());
+                        });
+                        FAILED_REQUESTS_COOLDOWN.remove(profile.getId());
+                    }
+                }
+            } catch (Exception e) {
+                FAILED_REQUESTS_COOLDOWN.put(profile.getId(), System.currentTimeMillis());
+                return getDefault(profile, type);
+            }
         }
         return getDefault(profile, type);
+    }
+
+    private static boolean isOnCooldown(UUID profileId) {
+        Long lastFailTime = FAILED_REQUESTS_COOLDOWN.get(profileId);
+        if (lastFailTime == null) {
+            return false;
+        }
+
+        boolean onCooldown = System.currentTimeMillis() - lastFailTime < COOLDOWN_TIME;
+        if (!onCooldown) {
+            FAILED_REQUESTS_COOLDOWN.remove(profileId);
+        }
+        return onCooldown;
     }
 
     private static Optional<ResourceLocation> getDefault(@Nullable GameProfile profile, MinecraftProfileTexture.Type type) {
@@ -90,6 +124,10 @@ public class TextureUtils {
         } else {
             return Optional.of(profile != null && profile.isComplete() ? DefaultPlayerSkin.getDefaultSkin(profile.getId()) : DefaultPlayerSkin.getDefaultSkin());
         }
+    }
+
+    public static void clearCooldowns() {
+        FAILED_REQUESTS_COOLDOWN.clear();
     }
 
     public enum SkinType {

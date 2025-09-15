@@ -64,7 +64,7 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Telekinesis Turned " + (telekenisis ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
             }
-            EventManager.addToRegularLoop(player, EFunctions.TRICKMASTERTELEKENESIS.get());
+            EventManager.addToRegularLoop(player, EFunctions.TRICKMASTER_TELEKENESIS.get());
         }
     }
 

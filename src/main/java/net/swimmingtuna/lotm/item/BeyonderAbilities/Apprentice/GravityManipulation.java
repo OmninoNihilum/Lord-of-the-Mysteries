@@ -40,12 +40,12 @@ public class GravityManipulation extends SimpleAbilityItem {
             return InteractionResult.FAIL;
         }
         addCooldown(player);
-        gravityManipulationTickEvent(player);
+        gravityManipulation(player);
         useSpirituality(player);
         return InteractionResult.SUCCESS;
     }
 
-    private void gravityManipulationTickEvent(LivingEntity player) {
+    private void gravityManipulation(LivingEntity player) {
         if (!player.level().isClientSide()) {
             DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {

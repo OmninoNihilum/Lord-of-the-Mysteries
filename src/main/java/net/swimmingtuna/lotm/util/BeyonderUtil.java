@@ -3528,6 +3528,9 @@ public class BeyonderUtil {
             if (!calledBySealedUtils) {
                 SealedUtils.removeAllSeals(livingEntity);
             }
+            tag.putBoolean("keyOfStarsGravityManipulation", false);
+            tag.putInt("affectedByGravityManipulation", 0);
+            tag.putInt("exileDoorTimer", 2);
             tag.putInt("deathKnellFireFear", 0);
             tag.putInt("deathKnellMobFear", 0);
             tag.putInt("deathKnellPeacefulFear", 0);
