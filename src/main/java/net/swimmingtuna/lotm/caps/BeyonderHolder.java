@@ -47,6 +47,7 @@ public class BeyonderHolder extends PlayerCapability {
     private double spirituality = 100;
     private double maxSpirituality = 100;
     private double spiritualityRegen = 1;
+    private boolean destruction = false;
 
     protected BeyonderHolder(Player entity) {
         super(entity);
@@ -175,6 +176,14 @@ public class BeyonderHolder extends PlayerCapability {
     public void setSpirituality(double spirituality) {
         this.spirituality = Mth.clamp(spirituality, 0, this.maxSpirituality);
         updateTracking();
+    }
+
+    public void switchDestruction(){
+        destruction = !destruction;
+    }
+
+    public boolean getDestruction(){
+        return destruction;
     }
 
     public @Nullable BeyonderClass getCurrentClass() {

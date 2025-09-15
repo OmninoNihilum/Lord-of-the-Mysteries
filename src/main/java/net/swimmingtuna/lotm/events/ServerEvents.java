@@ -46,6 +46,7 @@ import net.swimmingtuna.lotm.item.OtherItems.Astrolabe;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientWormOfStarDataS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.DestructionQueue;
 import net.swimmingtuna.lotm.world.worlddata.PlayerMobTracker;
 
 import java.util.Arrays;
@@ -694,6 +695,8 @@ public class ServerEvents {
                     }
                 }
             }
+        } else if (event.phase == TickEvent.Phase.START) {
+            DestructionQueue.destroy();
         }
     }
 

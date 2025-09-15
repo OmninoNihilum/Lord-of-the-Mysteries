@@ -12,7 +12,7 @@ public class KeyBinding {
     public static final String ABILITY_KEY_1 = "key.lotm.ability_key_1";
     public static final String ABILITY_KEY_0 = "key.lotm.ability_key_0";
     public static final String ABILITY_KEY_2 = "key.lotm.ability_key_clear";
-
+    public static final String DESTRUCTION_SWITCH = "key.lotm.destruction_switch";
 
     public static final KeyMapping SPIRIT_VISION = new KeyMapping(ABILITY_KEY, KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, KEY_CATEGORY_LOTM);
@@ -25,5 +25,7 @@ public class KeyBinding {
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, KEY_CATEGORY_LOTM);
     public static final KeyMapping ABILITY_KEY_CLEAR = new KeyMapping(ABILITY_KEY_2, KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, KEY_CATEGORY_LOTM);
+    public static final KeyMapping DESTRUCTION_SWITCH_KEY = new KeyMapping(DESTRUCTION_SWITCH, KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, KEY_CATEGORY_LOTM);
 }
 

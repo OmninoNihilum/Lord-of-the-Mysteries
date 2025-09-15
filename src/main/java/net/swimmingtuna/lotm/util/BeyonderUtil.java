@@ -39,6 +39,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
@@ -174,8 +175,15 @@ public class BeyonderUtil {
     }
 
     public static void setAir(Entity entity, BlockPos pos) {
+        if (entity instanceof Projectile projectile) {
+            if (projectile.getOwner() instanceof ServerPlayer player) {
+                if (!getDestruction(player)) {
+                    return;
+                }
+            }
+        }
         if (entity.getPersistentData().getInt("shouldntDestroyBlocks") == 0) {
-            entity.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+            DestructionQueue.mark(entity.level(), pos);
         }
     }
 
@@ -3504,6 +3512,18 @@ public class BeyonderUtil {
             return true;
         }
         return false;
+    }
+
+    public static void switchDestruction(Player player) {
+        BeyonderHolderAttacher.getHolder(player).ifPresent(BeyonderHolder::switchDestruction);
+    }
+
+    public static boolean getDestruction(Player player) {
+        boolean[] value = {false};
+        BeyonderHolderAttacher.getHolder(player).ifPresent(cap -> {
+            value[0] = cap.getDestruction();
+        });
+        return value[0];
     }
 
 

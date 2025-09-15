@@ -20,6 +20,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.swimmingtuna.lotm.LOTM;
+import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
+import net.swimmingtuna.lotm.networking.packet.DestructionSwitchC2S;
 import net.swimmingtuna.lotm.util.ClientData.*;
 import net.swimmingtuna.lotm.util.KeyBinding;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
@@ -128,6 +130,10 @@ public class KeyClientEvents {
                 ClientAbilityCombinationData.resetKeysClicked();
                 player.displayClientMessage(Component.literal("_ _ _ _ _").withStyle(ChatFormatting.BOLD), true);
             }
+
+            if(KeyBinding.DESTRUCTION_SWITCH_KEY.consumeClick()){
+                LOTMNetworkHandler.sendToServer(new DestructionSwitchC2S());
+            }
         }
 
         @OnlyIn(Dist.CLIENT)
@@ -170,6 +176,7 @@ public class KeyClientEvents {
             event.register(KeyBinding.ABILITY_KEY_O);
             event.register(KeyBinding.ABILITY_KEY_X);
             event.register(KeyBinding.ABILITY_KEY_CLEAR);
+            event.register(KeyBinding.DESTRUCTION_SWITCH_KEY);
         }
     }
 
