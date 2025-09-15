@@ -16,6 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import virtuoel.pehkui.api.ScaleData;
@@ -60,6 +62,7 @@ public class StormSealEntity extends AbstractHurtingProjectile {
             }
             if (entity instanceof LivingEntity livingEntity) {
                 if (this.getOwner() != null && livingEntity != this.getOwner()) {
+                    EventManager.addToRegularLoop(livingEntity, EFunctions.STORM_SEAL_TICK.get());
                     livingEntity.getPersistentData().putInt("inStormSeal", 3600);
                     livingEntity.getPersistentData().putInt("stormSealX", (int) livingEntity.getX());
                     livingEntity.getPersistentData().putInt("stormSealY", (int) livingEntity.getY());
@@ -106,6 +109,7 @@ public class StormSealEntity extends AbstractHurtingProjectile {
             for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(radius * 0.75))) {
                 if (this.getOwner() != null && livingEntity != null && livingEntity.getMaxHealth() >= 50 && livingEntity != this.getOwner() && (this.getOwner() instanceof LivingEntity owner && !BeyonderUtil.areAllies(owner, livingEntity))) {
                     if (BeyonderUtil.canSeal(owner, livingEntity)) {
+                        EventManager.addToRegularLoop(livingEntity, EFunctions.STORM_SEAL_TICK.get());
                         livingEntity.getPersistentData().putInt("inStormSeal", 3600);
                         livingEntity.getPersistentData().putInt("stormSealX", (int) livingEntity.getX());
                         livingEntity.getPersistentData().putInt("stormSealY", (int) livingEntity.getY());

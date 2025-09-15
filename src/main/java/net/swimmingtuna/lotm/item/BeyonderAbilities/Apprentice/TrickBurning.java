@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -97,6 +98,41 @@ public class TrickBurning extends LeftClickHandlerSkillP {
         }
     }
 
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player player && !player.isSpectator() && !player.level().isClientSide() && player.tickCount % 20 == 0 && !player.getOffhandItem().isEmpty() && BeyonderUtil.currentPathwayAndSequenceMatches(player, BeyonderClassInit.APPRENTICE.get(), 8) && player.getMainHandItem().getItem() == ItemInit.TRICKBURNING.get()) {
+            if (player.isShiftKeyDown()) {
+                int sequence = BeyonderUtil.getSequence(player);
+                int smelt;
+                ItemStack offHand = player.getOffhandItem();
+                int amount = offHand.getCount();
+                if (sequence == 8) {
+                    smelt = 1;
+                } else if (sequence == 7) {
+                    smelt = 4;
+                } else if (sequence == 6) {
+                    smelt = 16;
+                } else {
+                    smelt = 64;
+                }
+                if (BeyonderUtil.isSmeltable(offHand, level)) {
+                    if (offHand.getCount() <= smelt) {
+                        ItemStack result = BeyonderUtil.getSmeltingResult(offHand, level);
+                        result.setCount(amount);
+                        player.setItemInHand(InteractionHand.OFF_HAND, result);
+                    } else {
+                        player.displayClientMessage(Component.literal("Can only smelt up to ").append(Component.literal(String.valueOf(smelt)).append(Component.literal(" items."))), true);
+                    }
+                } else {
+                    player.displayClientMessage(Component.literal("Not smeltable"), true);
+
+                }
+            }
+        }
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
+    }
+
     public static void smeltItem(LivingEvent.LivingTickEvent event) {
         LivingEntity player = event.getEntity();
         Level level = player.level();
@@ -105,17 +141,17 @@ public class TrickBurning extends LeftClickHandlerSkillP {
             int smelt;
             ItemStack offHand = player.getOffhandItem();
             int amount = offHand.getCount();
-            if(sequence == 8){
+            if (sequence == 8) {
                 smelt = 1;
-            }else if(sequence == 7){
+            } else if (sequence == 7) {
                 smelt = 4;
-            }else if(sequence == 6){
+            } else if (sequence == 6) {
                 smelt = 16;
-            }else {
+            } else {
                 smelt = 64;
             }
-            if(BeyonderUtil.isSmeltable(offHand, level)) {
-                if(offHand.getCount() <= smelt){
+            if (BeyonderUtil.isSmeltable(offHand, level)) {
+                if (offHand.getCount() <= smelt) {
                     ItemStack result = BeyonderUtil.getSmeltingResult(offHand, level);
                     result.setCount(amount);
                     player.setItemInHand(InteractionHand.OFF_HAND, result);
@@ -124,7 +160,7 @@ public class TrickBurning extends LeftClickHandlerSkillP {
                         pPlayer.displayClientMessage(Component.literal("Can only smelt up to ").append(Component.literal(String.valueOf(smelt)).append(Component.literal(" items."))), true);
                     }
                 }
-            }else {
+            } else {
                 if (player instanceof Player pPlayer) {
                     pPlayer.displayClientMessage(Component.literal("Not smeltable"), true);
                 }
@@ -143,6 +179,7 @@ public class TrickBurning extends LeftClickHandlerSkillP {
         tooltipComponents.add(SimpleAbilityItem.getClassText(this.requiredSequence, this.requiredClass.get()));
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
+
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("APPRENTICE_ABILITY", ChatFormatting.AQUA);
@@ -156,6 +193,7 @@ public class TrickBurning extends LeftClickHandlerSkillP {
         }
         return projectileSize;
     }
+
     @Override
     public <T> LeftClickType getleftClickEmpty(T item) {
         return new UpdateItemInHandC2S((Integer) item, new ItemStack(ItemInit.TRICKELECTRICSHOCK.get()));

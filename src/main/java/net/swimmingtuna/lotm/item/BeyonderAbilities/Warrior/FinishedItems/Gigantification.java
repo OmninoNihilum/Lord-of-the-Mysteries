@@ -18,6 +18,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.beyonder.WarriorClass;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.networking.packet.GigantificationC2S;
@@ -66,6 +68,8 @@ public class Gigantification extends LeftClickHandlerSkill {
 
     public static void gigantification(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            EventManager.addToRegularLoop(livingEntity, EFunctions.GIGANTIFICATION_SCALE.get());
+            EventManager.addToRegularLoop(livingEntity, EFunctions.GIGANTIFICATION_DESTROY_BLOCKS.get());
             CompoundTag tag = livingEntity.getPersistentData();
             boolean isGiant = tag.getBoolean("warriorGiant");
             boolean isHoGGiant = tag.getBoolean("handOfGodGiant");
@@ -74,6 +78,8 @@ public class Gigantification extends LeftClickHandlerSkill {
             int sequence = BeyonderUtil.getSequence(livingEntity);
             float scaleToSet = BeyonderUtil.getDamage(livingEntity).get(ItemInit.GIGANTIFICATION.get());
             if (isGiant || isHoGGiant || isTwilightGiant) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.GIGANTIFICATION_SCALE.get());
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.GIGANTIFICATION_DESTROY_BLOCKS.get());
                 disableGigantification(livingEntity);
             } else if (sequence <= 6 && sequence >= 2) {
                 tag.putBoolean("warriorGiant", true);
@@ -137,6 +143,8 @@ public class Gigantification extends LeftClickHandlerSkill {
                         }
                     }
                 }
+            } if (!isGiant && !isHoGGiant && !isTwilightGiant) {
+                EventManager.removeFromRegularLoop(entity, EFunctions.GIGANTIFICATION_DESTROY_BLOCKS.get());
             }
         }
     }
@@ -188,16 +196,11 @@ public class Gigantification extends LeftClickHandlerSkill {
                     tag.putBoolean("handOfGodGiant", false);
                 }
             }
-        }
-    }
-
-    public static void warriorGiant(LivingEntity livingEntity) {
-        if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 20 == 0) {
-            boolean isGiant = livingEntity.getPersistentData().getBoolean("warriorGiant");
-            boolean isHoGGiant = livingEntity.getPersistentData().getBoolean("handOfGodGiant");
-            boolean isTwilightGiant = livingEntity.getPersistentData().getBoolean("twilightGiant");
+            if (!isGiant && !isHoGGiant && !isTwilightGiant) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.GIGANTIFICATION_SCALE.get());
+            }
             if (isGiant || isHoGGiant || isTwilightGiant) {
-                BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DAMAGE_RESISTANCE, 40, WarriorClass.resistance + 1, true, true);
+                BeyonderUtil.applyMobEffect(livingEntity, MobEffects.DAMAGE_RESISTANCE, 40,  1, true, true);
             }
         }
     }

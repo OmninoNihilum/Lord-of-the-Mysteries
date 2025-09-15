@@ -160,6 +160,8 @@ public class TsunamiSeal extends LeftClickHandlerSkillP {
                         }
                     }
                 }
+            } else if (sealCounter == 0) {
+                EventManager.addToRegularLoop(entity, EFunctions.SPECTATORPROPHECY.get());
             }
         }
     }
@@ -228,6 +230,7 @@ public class TsunamiSeal extends LeftClickHandlerSkillP {
                     if (BeyonderUtil.canSeal(player, livingEntity)) {
                         player.getPersistentData().putInt("sailorTsunamiSeal", 0);
                         livingEntity.getPersistentData().putInt("sailorSeal", 1200);
+                        EventManager.addToRegularLoop(livingEntity, EFunctions.TSUNAMI_SEAL_TICK.get());
                         livingEntity.getPersistentData().putInt("sailorSealX", (int) livingEntity.getX());
                         livingEntity.getPersistentData().putInt("sailorSeaY", (int) livingEntity.getY());
                         livingEntity.getPersistentData().putInt("sailorSealZ", (int) livingEntity.getZ());

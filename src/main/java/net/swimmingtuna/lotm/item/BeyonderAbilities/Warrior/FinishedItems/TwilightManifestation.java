@@ -15,6 +15,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -46,6 +48,7 @@ public class TwilightManifestation extends SimpleAbilityItem {
         if (!livingEntity.level().isClientSide()) {
             CompoundTag tag = livingEntity.getPersistentData();
             tag.putInt("twilightManifestation", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.TWILIGHTMANIFESTATION.get()));
+            EventManager.addToRegularLoop(livingEntity, EFunctions.TWILIGHT_MANIFESTATION_TICK.get());
             tag.putInt("twilightManifestationSaveMovement", 1);
         }
     }
@@ -117,6 +120,9 @@ public class TwilightManifestation extends SimpleAbilityItem {
             if (livingEntity.getPersistentData().getInt("unableToUseAbility") >= 1 && livingEntity.tickCount % 10 == 0) {
                 livingEntity.getPersistentData().putInt("unableToUseAbility", 0);
             }
+        }
+        if (x == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.TWILIGHT_MANIFESTATION_TICK.get());
         }
     }
 

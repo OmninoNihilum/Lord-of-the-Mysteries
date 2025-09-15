@@ -13,6 +13,6 @@ public class WarriorDangerSenseLayer implements IFunction {
 
     @Override
     public String getID() {
-        return "CalamityUndeadArmyEventID";
+        return "WarriorDangerSenseEventID";
     }
 }

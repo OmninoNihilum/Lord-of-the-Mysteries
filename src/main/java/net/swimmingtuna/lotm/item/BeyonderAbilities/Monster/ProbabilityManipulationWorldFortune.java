@@ -16,8 +16,10 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
+import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationSelf;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.UpdateItemInHandC2S;
+import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickHandlerSkillP;
 import net.swimmingtuna.lotm.util.LeftClickHandler.LeftClickType;
 import net.swimmingtuna.lotm.world.worlddata.WorldFortuneValue;
@@ -45,10 +47,17 @@ public class ProbabilityManipulationWorldFortune extends LeftClickHandlerSkillP 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
         if (entity instanceof Player player) {
-            if (player.tickCount % 2 == 0 && !level.isClientSide()) {
-                if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationWorldFortune) {
-                    player.displayClientMessage(Component.literal("Probability of fortunate events to happen will be amplified by: " + player.getPersistentData().getInt("probabilityManipulationWorldFortuneValue")).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+            if (player.tickCount % 2 == 0 && !level.isClientSide() && player.getMainHandItem().getItem() == ItemInit.PROBABILITYFORTUNEINCREASE.get()) {
+                CompoundTag tag = player.getPersistentData();
+                int fortune = tag.getInt("probabilityManipulationWorldFortuneValue");
+                if (player.tickCount % 20 == 0 && player.isShiftKeyDown()) {
+                    if (fortune <= 4) {
+                        tag.putInt("probabilityManipulationWorldFortuneValue", fortune + 1);
+                    } else {
+                        tag.putInt("probabilityManipulationWorldFortuneValue", 0);
+                    }
                 }
+                player.displayClientMessage(Component.literal("Probability of fortunate events to happen will be amplified by: " + player.getPersistentData().getInt("probabilityManipulationWorldFortuneValue")).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
             }
         }
         super.inventoryTick(stack, level, entity, itemSlot, isSelected);
@@ -73,27 +82,6 @@ public class ProbabilityManipulationWorldFortune extends LeftClickHandlerSkillP 
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
-    public static void probabilityManipulationWorld(LivingEntity livingEntity) {
-        if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 20 == 0 && livingEntity.isShiftKeyDown()) {
-            CompoundTag tag = livingEntity.getPersistentData();
-            int fortune = tag.getInt("probabilityManipulationWorldFortuneValue");
-            int misfortune = tag.getInt("probabilityManipulationWorldMisfortuneValue");
-            if (livingEntity.getMainHandItem().getItem() instanceof ProbabilityManipulationWorldFortune) {
-                if (fortune <= 4) {
-                    tag.putInt("probabilityManipulationWorldFortuneValue", fortune + 1);
-                } else {
-                    tag.putInt("probabilityManipulationWorldFortuneValue", 0);
-                }
-            }
-            if (livingEntity.getMainHandItem().getItem() instanceof ProbabilityManipulationWorldMisfortune) {
-                if (misfortune <= 4) {
-                    tag.putInt("probabilityManipulationWorldMisfortuneValue", misfortune + 1);
-                } else {
-                    tag.putInt("probabilityManipulationWorldMisfortuneValue", 0);
-                }
-            }
-        }
-    }
     @Override
     public Rarity getRarity(ItemStack pStack) {
         return Rarity.create("MONSTER_ABILITY", ChatFormatting.GRAY);

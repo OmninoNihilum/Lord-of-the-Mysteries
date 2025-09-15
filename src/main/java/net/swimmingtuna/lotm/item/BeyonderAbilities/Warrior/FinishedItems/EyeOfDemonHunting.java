@@ -27,13 +27,14 @@ import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.SendDustParticleS2C;
 import net.swimmingtuna.lotm.networking.packet.SendParticleS2C;
-import net.swimmingtuna.lotm.networking.packet.SyncAntiConcealmentPacketS2C;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import net.swimmingtuna.lotm.util.effect.ModEffects;
 import org.jetbrains.annotations.NotNull;
@@ -119,84 +120,8 @@ public class EyeOfDemonHunting extends SimpleAbilityItem {
                         }
                     }
                 }
-            }
-            if (entity.tickCount % 10 == 0 && BeyonderUtil.getSequence(entity) <= 4 && BeyonderUtil.currentPathwayMatchesNoException(entity, BeyonderClassInit.WARRIOR.get())) {
-                Vec3 eyePosition = entity.getEyePosition();
-                Vec3 lookVector = entity.getLookAngle();
-                Vec3 reachVector = eyePosition.add(lookVector.x * 35, lookVector.y * 35, lookVector.z * 35);
-                AABB searchBox = entity.getBoundingBox().inflate(150);
-                EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(entity.level(), entity, eyePosition, reachVector, searchBox, livingEntity -> !livingEntity.isSpectator() && livingEntity.isPickable(), 0.0f);
-                if (entityHit != null && entityHit.getEntity() instanceof LivingEntity livingEntity && !BeyonderUtil.areAllies(entity, livingEntity)) {
-                    BeyonderClass pathway = BeyonderUtil.getPathway(livingEntity);
-                    int sequence = BeyonderUtil.getSequence(entity);
-                    int hitSequence = BeyonderUtil.getSequence(livingEntity);
-                    if (pathway != null && hitSequence >= sequence) {
-                        if (pathway == BeyonderClassInit.SPECTATOR.get()) {
-                            livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 100, 1, true, true));
-                        } else if (pathway == BeyonderClassInit.SAILOR.get()) {
-                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 100, 1, true, true);
-                        } else if (pathway == BeyonderClassInit.SEER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.APPRENTICE.get()) {
-                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 100, 1, true, true);
-
-                        } else if (pathway == BeyonderClassInit.MARAUDER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.SECRETSSUPPLICANT.get()) {
-
-                        } else if (pathway == BeyonderClassInit.BARD.get()) {
-
-                        } else if (pathway == BeyonderClassInit.READER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.SLEEPLESS.get()) {
-
-                        } else if (pathway == BeyonderClassInit.WARRIOR.get()) {
-                            if (entity.hasEffect(MobEffects.DAMAGE_BOOST)) {
-                                BeyonderUtil.applyMobEffect(entity, MobEffects.DAMAGE_BOOST, 100, Math.min(6, entity.getEffect(MobEffects.DAMAGE_BOOST).getAmplifier() + 1), true, true);
-                            }
-                        } else if (pathway == BeyonderClassInit.HUNTER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.ASSASSIN.get()) {
-
-                        } else if (pathway == BeyonderClassInit.SAVANT.get()) {
-
-                        } else if (pathway == BeyonderClassInit.MYSTERYPRYER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.CORPSECOLLECTOR.get()) {
-
-                        } else if (pathway == BeyonderClassInit.LAWYER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.MONSTER.get()) {
-                            tag.putDouble("luck", Math.min(100, tag.getDouble("luck") + 2));
-                        } else if (pathway == BeyonderClassInit.APOTHECARY.get()) {
-
-                        } else if (pathway == BeyonderClassInit.PLANTER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.ARBITER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.PRISONER.get()) {
-
-                        } else if (pathway == BeyonderClassInit.CRIMINAL.get()) {
-
-                        }
-                    }
-
-                }
-
-            }
-        }
-    }
-
-    public static void demonHunterAntiConcealment(LivingEvent.LivingTickEvent event) {
-        LivingEntity entity = event.getEntity();
-        if (!entity.level().isClientSide()) {
-            BeyonderClass pathway = BeyonderUtil.getPathway(entity);
-            if (pathway != null && entity.tickCount % 200 == 0) {
-                if ((pathway == BeyonderClassInit.WARRIOR.get() || BeyonderUtil.sequenceAbleCopy(entity)) && BeyonderUtil.getSequence(entity) <= 4) {
-                    LOTMNetworkHandler.sendToAllPlayers(new SyncAntiConcealmentPacketS2C(true, entity.getUUID()));
-                } else {
-                    LOTMNetworkHandler.sendToAllPlayers(new SyncAntiConcealmentPacketS2C(false, entity.getUUID()));
-                }
+            } else {
+                EventManager.removeFromRegularLoop(entity, EFunctions.EYE_TICK.get());
             }
         }
     }

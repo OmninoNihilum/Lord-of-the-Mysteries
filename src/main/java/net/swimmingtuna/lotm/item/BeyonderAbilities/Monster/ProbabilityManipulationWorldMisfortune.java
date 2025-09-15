@@ -2,6 +2,7 @@ package net.swimmingtuna.lotm.item.BeyonderAbilities.Monster;
 
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -45,10 +46,17 @@ public class ProbabilityManipulationWorldMisfortune extends LeftClickHandlerSkil
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
         if (entity instanceof Player player) {
-            if (player.tickCount % 2 == 0 && !level.isClientSide()) {
-                if (player.getMainHandItem().getItem() instanceof ProbabilityManipulationWorldMisfortune) {
-                    player.displayClientMessage(Component.literal("Probability of misfortunate events to happen will be amplified by: " + player.getPersistentData().getInt("probabilityManipulationWorldMisfortuneValue")).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.RED), true);
+            if (player.tickCount % 2 == 0 && !level.isClientSide() && player.getMainHandItem().getItem() == ItemInit.PROBABILITYMISFORTUNEINCREASE.get()) {
+                CompoundTag tag = player.getPersistentData();
+                int misfortune = tag.getInt("probabilityManipulationWorldMisfortuneValue");
+                if (player.tickCount % 20 == 0 && player.isShiftKeyDown()) {
+                    if (misfortune <= 4) {
+                        tag.putInt("probabilityManipulationWorldMisfortuneValue", misfortune + 1);
+                    } else {
+                        tag.putInt("probabilityManipulationWorldMisfortuneValue", 0);
+                    }
                 }
+                player.displayClientMessage(Component.literal("Probability of misfortunate events to happen will be amplified by: " + player.getPersistentData().getInt("probabilityManipulationWorldMisfortuneValue")).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.RED), true);
             }
         }
         super.inventoryTick(stack, level, entity, itemSlot, isSelected);

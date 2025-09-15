@@ -1,13 +1,21 @@
 package net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.BeyonderTicks.Warrior;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.*;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.IFunction;
+import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
+import net.swimmingtuna.lotm.util.effect.ModEffects;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -29,6 +37,73 @@ public class WarriorTickLayer implements IFunction {
             int resistance = 0;
             int strength = 0;
             int regen = 0;
+            if (player.tickCount % 10 == 0 && sequenceLevel <= 4) {
+                CompoundTag tag = player.getPersistentData();
+                Vec3 eyePosition = player.getEyePosition();
+                Vec3 lookVector = player.getLookAngle();
+                Vec3 reachVector = eyePosition.add(lookVector.x * 35, lookVector.y * 35, lookVector.z * 35);
+                AABB searchBox = player.getBoundingBox().inflate(150);
+                EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(player.level(), player, eyePosition, reachVector, searchBox, livingEntity -> !livingEntity.isSpectator() && livingEntity.isPickable(), 0.0f);
+                if (entityHit != null && entityHit.getEntity() instanceof LivingEntity livingEntity && !BeyonderUtil.areAllies(player, livingEntity)) {
+                    BeyonderClass pathway = BeyonderUtil.getPathway(livingEntity);
+                    int sequence = BeyonderUtil.getSequence(player);
+                    int hitSequence = BeyonderUtil.getSequence(livingEntity);
+                    if (pathway != null && hitSequence >= sequence) {
+                        if (pathway == BeyonderClassInit.SPECTATOR.get()) {
+                            livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 100, 1, true, true));
+                        } else if (pathway == BeyonderClassInit.SAILOR.get()) {
+                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 100, 1, true, true);
+                        } else if (pathway == BeyonderClassInit.SEER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.APPRENTICE.get()) {
+                            BeyonderUtil.applyMobEffect(livingEntity, ModEffects.ABILITY_WEAKNESS.get(), 100, 1, true, true);
+
+                        } else if (pathway == BeyonderClassInit.MARAUDER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.SECRETSSUPPLICANT.get()) {
+
+                        } else if (pathway == BeyonderClassInit.BARD.get()) {
+
+                        } else if (pathway == BeyonderClassInit.READER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.SLEEPLESS.get()) {
+
+                        } else if (pathway == BeyonderClassInit.WARRIOR.get()) {
+                            if (player.hasEffect(MobEffects.DAMAGE_BOOST)) {
+                                BeyonderUtil.applyMobEffect(player, MobEffects.DAMAGE_BOOST, 100, Math.min(6, player.getEffect(MobEffects.DAMAGE_BOOST).getAmplifier() + 1), true, true);
+                            }
+                        } else if (pathway == BeyonderClassInit.HUNTER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.ASSASSIN.get()) {
+
+                        } else if (pathway == BeyonderClassInit.SAVANT.get()) {
+
+                        } else if (pathway == BeyonderClassInit.MYSTERYPRYER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.CORPSECOLLECTOR.get()) {
+
+                        } else if (pathway == BeyonderClassInit.LAWYER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.MONSTER.get()) {
+                            tag.putDouble("luck", Math.min(100, tag.getDouble("luck") + 2));
+                        } else if (pathway == BeyonderClassInit.APOTHECARY.get()) {
+
+                        } else if (pathway == BeyonderClassInit.PLANTER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.ARBITER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.PRISONER.get()) {
+
+                        } else if (pathway == BeyonderClassInit.CRIMINAL.get()) {
+
+                        }
+                    }
+
+                }
+
+            }
+
+
             if (player.tickCount % 10 == 0) {
                 if (player instanceof Player) {
                     if (sequenceLevel == 8) {

@@ -16,6 +16,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -71,7 +73,9 @@ public class DawnArmory extends SimpleAbilityItem {
                 armorData.put("dawnArmorItems", armorItems);
                 persistentData.put("dawnStoredArmorData", armorData);
                 persistentData.putBoolean("dawnArmorOn", true);
+                EventManager.addToRegularLoop(livingEntity, EFunctions.DAWN_ARMOR_TICK.get());
             } else {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.DAWN_ARMOR_TICK.get());
                 for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
                     ItemStack currentArmor = livingEntity.getItemBySlot(slot);
                     if (!currentArmor.isEmpty() && (currentArmor.is(ItemInit.DAWN_HELMET.get()) || currentArmor.is(ItemInit.DAWN_CHESTPLATE.get()) || currentArmor.is(ItemInit.DAWN_LEGGINGS.get()) || currentArmor.is(ItemInit.DAWN_BOOTS.get()))) {
@@ -110,7 +114,7 @@ public class DawnArmory extends SimpleAbilityItem {
 
     public static void dawnArmorTickEvent(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
-        if (entity.tickCount % 20 == 0 && !entity.level().isClientSide() && (BeyonderUtil.getPathway(entity) == BeyonderClassInit.WARRIOR.get() || BeyonderUtil.sequenceAbleCopy(entity)) && BeyonderUtil.getSequence(entity) <= 6) {
+        if (entity.tickCount % 20 == 0 && !entity.level().isClientSide() && (BeyonderUtil.currentPathwayAndSequenceMatches(entity, BeyonderClassInit.WARRIOR.get(), 6))) {
             if (hasFullDawnArmor(entity)) {
                 BeyonderUtil.useSpirituality(entity, 40 - (BeyonderUtil.getSequence(entity) * 3));
             }

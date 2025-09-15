@@ -17,6 +17,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -227,6 +229,9 @@ public class GuardianBoxEntity extends Entity {
             }
             if (entity.getPersistentData().getInt("divineHandGuarding") >= 1) {
                 entity.getPersistentData().putInt("divineHandGuarding", entity.getPersistentData().getInt("divineHandGuarding") - 1);
+            }
+            if (entity.getPersistentData().getInt("guardianProtectionTimer") == 0 && entity.getPersistentData().getInt("divineHandGuarding") == 0) {
+                EventManager.removeFromRegularLoop(entity, EFunctions.DECREMENT_GUARDIAN_TIMER.get());
             }
         }
     }

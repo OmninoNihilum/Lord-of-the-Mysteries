@@ -33,6 +33,8 @@ import net.swimmingtuna.lotm.capabilities.sealed_data.ABILITIES_SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SEAL_TYPES;
 import net.swimmingtuna.lotm.capabilities.sealed_data.SealedUtils;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.BlockInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -106,6 +108,7 @@ public class SpatialMaze extends SimpleAbilityItem {
             BlockPos origin = buildOuterLayer(user, target);
             UUID sealUUID = SealedUtils.seal(target, user.getUUID(), user.getName().getString(), BeyonderUtil.getSequence(user), ABILITIES_SEAL_TYPES.ALL, null, false, null, SEAL_TYPES.SPATIAL_MAZE);
             target.getPersistentData().putUUID("mazeSealUUID", sealUUID);
+            EventManager.addToRegularLoop(target, EFunctions.SPATIAL_MAZE_TICK.get());
 
             for (int y = 0; y < maze.length; y++) {
                 if (origin == null) break;
@@ -296,6 +299,8 @@ public class SpatialMaze extends SimpleAbilityItem {
             entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20, 0, false, false));
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1, false, false));
             entity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20, 3, false, false));
+        } else {
+            EventManager.removeFromRegularLoop(entity, EFunctions.SPATIAL_MAZE_TICK.get());
         }
     }
 

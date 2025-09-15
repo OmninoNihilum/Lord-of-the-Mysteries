@@ -25,6 +25,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -111,6 +113,7 @@ public class PsycheStorm extends SimpleAbilityItem {
                     livingEntity.getPersistentData().putInt("psycheStormTick", 85);
                     livingEntity.getPersistentData().putFloat("psycheStormDamage", damage);
                     livingEntity.getPersistentData().putUUID("psycheStormUUID", player.getUUID());
+                    EventManager.addToRegularLoop(livingEntity, EFunctions.PSYCHE_STORM.get());
                     livingEntity.invulnerableTime = 0;
                     livingEntity.hurtTime = 0;
                     livingEntity.hurtDuration = 0;
@@ -149,6 +152,8 @@ public class PsycheStorm extends SimpleAbilityItem {
                     SpamClass.sendMonsterMessage(player);
                 }
             }
+        } else if (!livingEntity.level().isClientSide() && livingEntity.getPersistentData().getInt("psycheStormTick") == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.PSYCHE_STORM.get());
         }
     }
 

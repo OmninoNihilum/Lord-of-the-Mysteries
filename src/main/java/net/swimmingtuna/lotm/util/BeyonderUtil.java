@@ -76,6 +76,8 @@ import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
 import net.swimmingtuna.lotm.entity.*;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Ability;
@@ -131,6 +133,35 @@ public class BeyonderUtil {
         BlockState blockState = level.getBlockState(pos);
         boolean canBreak = blockState.getDestroySpeed(level, pos) >= 0 && blockState.getDestroySpeed(level, pos) <= 51;
         return canBreak && !isChunkProtected(entity, pos);
+    }
+
+    public static void flyingTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        CompoundTag tag = livingEntity.getPersistentData();
+        int flyTime = tag.getInt("LOTMFlying");
+        float flySpeed = tag.getFloat("LOTMFlySpeed");
+        if (flyTime >= 1) {
+            tag.putInt("LOTMFlying", flyTime - 1);
+            if (livingEntity instanceof Player pPlayer ) {
+                Abilities playerAbilities = pPlayer.getAbilities();
+                if (!pPlayer.isCreative()) {
+                    playerAbilities.mayfly = true;
+                    playerAbilities.setFlyingSpeed(flySpeed);
+                }
+                pPlayer.onUpdateAbilities();
+                if (livingEntity instanceof ServerPlayer serverPlayer) {
+                    serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
+                }
+            } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
+                playerMobEntity.setIsFlying(true);
+                playerMobEntity.setFlySpeed(flySpeed);
+            }
+        } else {
+            boolean x = livingEntity instanceof Player player && (player.isCreative() || player.isSpectator());
+            if (!x) {
+                stopFlying(livingEntity);
+            }
+        }
     }
 
     public static boolean shouldDestroyBlocksFirstCheck() {
@@ -267,58 +298,6 @@ public class BeyonderUtil {
         double angle = Math.acos(Math.max(-1.0, Math.min(1.0, dot))) * 180.0 / Math.PI;
 
         return angle <= maxAngleDegrees;
-    }
-
-    public static void projectileEvent(LivingEntity living) {
-        //PROJECTILE EVENT
-        if (living.level().isClientSide) {
-            return;
-        }
-        if (BeyonderUtil.getPathway(living) == null) {
-            return;
-        }
-        Projectile projectile = BeyonderUtil.getProjectiles(living, 50);
-        if (projectile == null) return;
-        //MATTER ACCELERATION ENTITIES
-        LivingEntity target = BeyonderUtil.getTarget(projectile, 75, 0);
-        if (target != null) {
-            if (BeyonderUtil.currentPathwayAndSequenceMatches(living, BeyonderClassInit.SAILOR.get(), 8) && living.getPersistentData().getBoolean("sailorProjectileMovement")) {
-                double dx = target.getX() - projectile.getX();
-                double dy = target.getY() - projectile.getY();
-                double dz = target.getZ() - projectile.getZ();
-                double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                double speed = 1.2;
-                projectile.setDeltaMovement((dx / length) * speed, (dy / length) * speed, (dz / length) * speed);
-                projectile.hurtMarked = true;
-            }
-        }
-
-
-        //SAILOR PASSIVE CHECK FROM HERE
-        if (target != null) {
-            if (BeyonderUtil.currentPathwayAndSequenceMatches(living, BeyonderClassInit.SAILOR.get(), 8) && living.getPersistentData().getBoolean("sailorProjectileMovement")) {
-                double dx = target.getX() - projectile.getX();
-                double dy = target.getY() - projectile.getY();
-                double dz = target.getZ() - projectile.getZ();
-                double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                double speed = 1.2;
-                projectile.setDeltaMovement((dx / length) * speed, (dy / length) * speed, (dz / length) * speed);
-                projectile.hurtMarked = true;
-            }
-        }
-
-        //MONSTER CALCULATION PASSIVE
-        if (target != null) {
-            if (BeyonderUtil.currentPathwayAndSequenceMatches(living, BeyonderClassInit.MONSTER.get(), 8) && living.getPersistentData().getBoolean("monsterProjectileControl")) {
-                double dx = target.getX() - projectile.getX();
-                double dy = target.getY() - projectile.getY();
-                double dz = target.getZ() - projectile.getZ();
-                double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                double speed = 1.2;
-                projectile.setDeltaMovement((dx / length) * speed, (dy / length) * speed, (dz / length) * speed);
-                projectile.hurtMarked = true;
-            }
-        }
     }
 
 
@@ -2895,11 +2874,6 @@ public class BeyonderUtil {
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.WEAKNESS, 20, 0, true, true);
                 } else if (tenPercent) {
                     BeyonderUtil.applyMobEffect(livingEntity, MobEffects.MOVEMENT_SLOWDOWN, 20, 0, true, true);
-                }
-            }
-            if (sequence <= 2 && sequence != -1 && livingEntity instanceof Player player) {
-                if (player.getFoodData().getFoodLevel() <= 8) {
-                    player.getFoodData().setFoodLevel(9);
                 }
             }
         }

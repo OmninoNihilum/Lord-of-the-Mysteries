@@ -60,6 +60,7 @@ public class MonsterCalamityIncarnation extends LeftClickHandlerSkill {
         if (!player.level().isClientSide()) {
             CompoundTag tag = player.getPersistentData();
             int calamityIncarnation = tag.getInt("monsterCalamityIncarnationItem");
+            EventManager.addToRegularLoop(player, EFunctions.MONSTER_CALAMITY_INCARNATION.get());
             if (calamityIncarnation == 1) {
                 tag.putInt("calamityIncarnationInMeteor", 200);
             }
@@ -171,7 +172,8 @@ public class MonsterCalamityIncarnation extends LeftClickHandlerSkill {
         if (meteor == 0 && tornado == 0 && lightning == 0 && plague == 0) {
             EventManager.removeFromRegularLoop(entity, EFunctions.CALAMITY_LIGHTNING_STORM.get());
             EventManager.removeFromRegularLoop(entity, EFunctions.CALAMITY_INCARNATION_TORNADO.get());
-            tag.putInt("monsterCalamityImmunity", immunity - 1);
+            EventManager.addToRegularLoop(entity, EFunctions.MONSTER_CALAMITY_INCARNATION.get());
+            tag.putInt("monsterCalamityImmunity", 0);
         }
         BlockPos pos = entity.getOnPos().below(1);
         if (immunity >= 1) {

@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
 import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
@@ -60,7 +61,8 @@ public class AcidicRain extends SimpleAbilityItem {
         super.baseHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
-    public static void acidicRainTick(LivingEntity livingEntity) {
+    public static void acidicRainTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
         //ACIDIC RAIN
         int acidicRain = livingEntity.getPersistentData().getInt("sailorAcidicRain");
         if (acidicRain <= 0) {

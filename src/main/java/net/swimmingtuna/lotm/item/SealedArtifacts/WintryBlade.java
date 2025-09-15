@@ -9,6 +9,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,6 +33,7 @@ public class WintryBlade extends SwordItem {
                         if (livingEntity != player) {
                             CompoundTag tag = livingEntity.getPersistentData();
                             if (livingEntity.getPersistentData().getInt("wintryBladeOthers") <= 1000) {
+                                EventManager.addToRegularLoop(livingEntity, EFunctions.WINTRY_BLADE_TICK.get());
                                 tag.putInt("wintryBladeOthers", tag.getInt("wintryBladeOthers") + 1);
                             }
                         }
@@ -40,6 +43,7 @@ public class WintryBlade extends SwordItem {
             if (player.tickCount % 20 == 0) {
                 CompoundTag tag = player.getPersistentData();
                 if (player.getPersistentData().getInt("wintryBladeSelf") <= 100) {
+                    EventManager.addToRegularLoop(player, EFunctions.WINTRY_BLADE_TICK.get());
                     tag.putInt("wintryBladeSelf", tag.getInt("wintryBladeSelf") + 1);
                 }
             }
@@ -50,6 +54,7 @@ public class WintryBlade extends SwordItem {
     @Override
     public boolean hurtEnemy(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
         if (pTarget.getPersistentData().getInt("wintryBladeOthers") <= 1000) {
+            EventManager.addToRegularLoop(pTarget, EFunctions.WINTRY_BLADE_TICK.get());
             pTarget.getPersistentData().putInt("wintryBladeOthers", pTarget.getPersistentData().getInt("wintryBladeOthers") + 25);
         }
         return super.hurtEnemy(pStack, pTarget, pAttacker);
@@ -61,6 +66,9 @@ public class WintryBlade extends SwordItem {
         int x = tag.getInt("wintryBladeOthers");
         int y = tag.getInt("wintryBladeSelf");
         if (!livingEntity.level().isClientSide()) {
+            if (x == 0 && y == 0) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.WINTRY_BLADE_TICK.get());
+            }
             if (livingEntity.tickCount % 10 == 0) {
                 if (livingEntity.isOnFire()) {
                     if (x >= 1) {

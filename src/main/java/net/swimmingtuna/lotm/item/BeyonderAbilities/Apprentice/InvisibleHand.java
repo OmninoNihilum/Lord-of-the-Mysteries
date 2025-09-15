@@ -31,9 +31,10 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.CustomFallingBlockEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ToggleDistanceC2S;
 import net.swimmingtuna.lotm.networking.packet.UpdateEntityLocationS2C;
@@ -52,7 +53,7 @@ import static net.swimmingtuna.lotm.util.BeyonderUtil.getLivingEntityFromUUID;
 
 public class InvisibleHand extends LeftClickHandlerSkill {
     public InvisibleHand(Properties properties) {
-        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0, 25,25);
+        super(properties, BeyonderClassInit.APPRENTICE, 5, 0, 0, 25, 25);
     }
 
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
@@ -129,7 +130,9 @@ public class InvisibleHand extends LeftClickHandlerSkill {
             return InteractionResult.FAIL;
         if (isGrabbingSomething(player)) return InteractionResult.FAIL;
         player.getPersistentData().putBoolean("justUsedInvisibleHand", true);
-        if (!player.isShiftKeyDown()) grabBlock(player, level, blockState, pos);
+        if (!player.isShiftKeyDown()) {
+            grabBlock(player, level, blockState, pos);
+        }
         return InteractionResult.SUCCESS;
     }
 
@@ -146,6 +149,7 @@ public class InvisibleHand extends LeftClickHandlerSkill {
             int amount = livingEntity.getPersistentData().getInt("invisibleHandDistance");
             Vec3 lookVec = livingEntity.getLookAngle().scale(amount);
             dimensionalSightTileEntity.getScryTarget().teleportTo(lookVec.x(), lookVec.y(), lookVec.z());
+            EventManager.addToRegularLoop(livingEntity, EFunctions.INVISIBLE_HAND_TICK.get());
         }
     }
 
@@ -167,6 +171,7 @@ public class InvisibleHand extends LeftClickHandlerSkill {
         if (!livingEntity.getPersistentData().contains("invisibleHandDistance")) {
             livingEntity.getPersistentData().putDouble("invisibleHandDistance", 5);
         }
+        EventManager.addToRegularLoop(livingEntity, EFunctions.INVISIBLE_HAND_TICK.get());
     }
 
 
@@ -213,77 +218,91 @@ public class InvisibleHand extends LeftClickHandlerSkill {
         }
     }
 
-    public static void invisibleHandTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity livingEntity = event.getEntity();
-        CompoundTag tag = livingEntity.getPersistentData();
-        if (!livingEntity.level().isClientSide() && livingEntity.getMainHandItem().getItem() instanceof InvisibleHand) {
-            double distance = tag.getDouble("invisibleHandDistance");
-            double minDistance = 3;
-            float maxDistance = BeyonderUtil.getDamage(livingEntity).get(ItemInit.INVISIBLEHAND.get());
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof Player livingEntity && !livingEntity.isSpectator()) {
             if (livingEntity.isShiftKeyDown()) {
-                if (tag.getBoolean("invisibleHandIncrease")) {
-                    if (distance < maxDistance) {
-                        tag.putDouble("invisibleHandDistance", distance + 0.5);
-                    } else {
-                        tag.putDouble("invisibleHandDistance", minDistance);
+                if (livingEntity.getMainHandItem().getItem() instanceof InvisibleHand && BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.APPRENTICE.get(), 5)) {
+                    CompoundTag tag = livingEntity.getPersistentData();
+                    double distance = tag.getDouble("invisibleHandDistance");
+                    double minDistance = 3;
+                    float maxDistance = BeyonderUtil.getDamage(livingEntity).get(ItemInit.INVISIBLEHAND.get());
+                    if (livingEntity.isShiftKeyDown()) {
+                        if (tag.getBoolean("invisibleHandIncrease")) {
+                            if (distance < maxDistance) {
+                                tag.putDouble("invisibleHandDistance", distance + 0.5);
+                            } else {
+                                tag.putDouble("invisibleHandDistance", minDistance);
+                            }
+                        } else {
+                            if (distance > minDistance) {
+                                tag.putDouble("invisibleHandDistance", distance - 0.5);
+                            } else {
+                                tag.putDouble("invisibleHandDistance", maxDistance);
+                            }
+                        }
+                        livingEntity.displayClientMessage(Component.literal("Distance: ").withStyle(BeyonderUtil.getStyle(livingEntity)).append(Component.literal(String.valueOf(tag.getDouble("invisibleHandDistance"))).withStyle(ChatFormatting.WHITE)), true);
                     }
-                } else {
-                    if (distance > minDistance) {
-                        tag.putDouble("invisibleHandDistance", distance - 0.5);
-                    } else {
-                        tag.putDouble("invisibleHandDistance", maxDistance);
-                    }
-                }
-                if (livingEntity instanceof Player player) {
-                    player.displayClientMessage(Component.literal("Distance: ").withStyle(BeyonderUtil.getStyle(player)).append(Component.literal(String.valueOf(tag.getDouble("invisibleHandDistance"))).withStyle(ChatFormatting.WHITE)), true);
                 }
             }
         }
-        if (!livingEntity.level().isClientSide() && tag.contains("invisibleHandUUID")) {
-            int counter = tag.getInt("invisibleHandCounter");
-            UUID targetUUID = tag.getUUID("invisibleHandUUID");
-            double distance = tag.getDouble("invisibleHandDistance");
-            float maxDistance = BeyonderUtil.getDamage(livingEntity).get(ItemInit.INVISIBLEHAND.get());
-            double minDistance = 3;
-            Entity target = getLivingEntityFromUUID(livingEntity.level(), targetUUID);
-            if (target == null) target = getCustomFallingBlockFromUUID(livingEntity.level(), targetUUID);
-            if (distance > maxDistance) {
-                tag.putDouble("invisibleHandDistance", maxDistance);
-            }
-            if (distance < minDistance) {
-                tag.putDouble("invisibleHandDistance", minDistance);
-            }
-            if (counter == 1) {
-                releaseEntity(livingEntity);
-            }
-            if (counter >= 1) {
-                tag.putDouble("invisibleHandCounter", counter - 1);
-            }
-            if (target != null) {
-                if (counter >= 1 && !target.level().isClientSide()) {
-                    HitResult hitResult = livingEntity.pick(distance, 0.0F, false);
-                    if (hitResult instanceof BlockHitResult blockHit) {
-                        double x = blockHit.getLocation().x();
-                        double y = blockHit.getLocation().y();
-                        double z = blockHit.getLocation().z();
-                        target.teleportTo(x, y, z);
-                        if (target instanceof ServerPlayer serverPlayer) {
-                            serverPlayer.connection.teleport(x, y, z, serverPlayer.getYRot(), serverPlayer.getXRot());
-                        }
-                        LOTMNetworkHandler.sendToAllPlayers(new UpdateEntityLocationS2C(x, y, z, 0, 0, 0, target.getId()));
-                        if (target instanceof LivingEntity living && BeyonderUtil.areAllies(livingEntity, living)) {
-                            target.fallDistance = 0;
-                        } else {
-                            target.fallDistance = (float) (target.getY() - target.level().getHeight(Heightmap.Types.WORLD_SURFACE, (int) x, (int) y));
-                        }
-                        if (target.fallDistance >= maxDistance) {
-                            target.fallDistance = maxDistance;
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
+    }
+
+    public static void invisibleHandTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity livingEntity = event.getEntity();
+        CompoundTag tag = livingEntity.getPersistentData();
+        if (!livingEntity.level().isClientSide() && !(livingEntity.getMainHandItem().getItem() instanceof InvisibleHand)) {
+            if (!livingEntity.level().isClientSide() && tag.contains("invisibleHandUUID")) {
+                int counter = tag.getInt("invisibleHandCounter");
+                UUID targetUUID = tag.getUUID("invisibleHandUUID");
+                double distance = tag.getDouble("invisibleHandDistance");
+                float maxDistance = BeyonderUtil.getDamage(livingEntity).get(ItemInit.INVISIBLEHAND.get());
+                double minDistance = 3;
+                Entity target = getLivingEntityFromUUID(livingEntity.level(), targetUUID);
+                if (target == null) target = getCustomFallingBlockFromUUID(livingEntity.level(), targetUUID);
+                if (distance > maxDistance) {
+                    tag.putDouble("invisibleHandDistance", maxDistance);
+                }
+                if (distance < minDistance) {
+                    tag.putDouble("invisibleHandDistance", minDistance);
+                }
+                if (counter == 1) {
+                    releaseEntity(livingEntity);
+                }
+                if (counter >= 1) {
+                    tag.putDouble("invisibleHandCounter", counter - 1);
+                }
+                if (target != null) {
+                    if (counter >= 1 && !target.level().isClientSide()) {
+                        HitResult hitResult = livingEntity.pick(distance, 0.0F, false);
+                        if (hitResult instanceof BlockHitResult blockHit) {
+                            double x = blockHit.getLocation().x();
+                            double y = blockHit.getLocation().y();
+                            double z = blockHit.getLocation().z();
+                            target.teleportTo(x, y, z);
+                            if (target instanceof ServerPlayer serverPlayer) {
+                                serverPlayer.connection.teleport(x, y, z, serverPlayer.getYRot(), serverPlayer.getXRot());
+                            }
+                            LOTMNetworkHandler.sendToAllPlayers(new UpdateEntityLocationS2C(x, y, z, 0, 0, 0, target.getId()));
+                            if (target instanceof LivingEntity living && BeyonderUtil.areAllies(livingEntity, living)) {
+                                target.fallDistance = 0;
+                            } else {
+                                target.fallDistance = (float) (target.getY() - target.level().getHeight(Heightmap.Types.WORLD_SURFACE, (int) x, (int) y));
+                            }
+                            if (target.fallDistance >= maxDistance) {
+                                target.fallDistance = maxDistance;
+                            }
                         }
                     }
+                    if (counter >= 1 && counter <= 3) {
+                        target.fallDistance = 0;
+                    }
                 }
-                if (counter >= 1 && counter <= 3) {
-                    target.fallDistance = 0;
-                }
+            }
+            if (!livingEntity.level().isClientSide() && livingEntity.getPersistentData().getInt("invisibleHandCounter") == 0) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.INVISIBLE_HAND_TICK.get());
             }
         }
     }
@@ -318,6 +337,7 @@ public class InvisibleHand extends LeftClickHandlerSkill {
         }
         return 0;
     }
+
     @Override
     public LeftClickType getleftClickEmpty() {
         return new ToggleDistanceC2S();

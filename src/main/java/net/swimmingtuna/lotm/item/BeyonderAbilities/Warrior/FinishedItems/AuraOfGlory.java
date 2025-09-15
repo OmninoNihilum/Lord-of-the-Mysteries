@@ -15,6 +15,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -54,6 +56,11 @@ public class AuraOfGlory extends LeftClickHandlerSkillP {
             if (livingEntity instanceof Player player) {
                 player.displayClientMessage(Component.literal("Aura of Twilight Turned " + (auraOfGlory ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW), true);
             }
+            if (auraOfGlory) {
+                EventManager.addToRegularLoop(livingEntity, EFunctions.AURA_OF_GLORY.get());
+            } else {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.AURA_OF_GLORY.get());
+            }
         }
     }
 
@@ -63,6 +70,9 @@ public class AuraOfGlory extends LeftClickHandlerSkillP {
         boolean glory = tag.getBoolean("auraOfGlory");
         boolean twilight = tag.getBoolean("auraOfTwilight");
         int expansionAmount = tag.getInt("warriorAuraMaxAmount");
+        if (!glory && !twilight) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.AURA_OF_GLORY.get());
+        }
         if (!livingEntity.level().isClientSide() && (glory || twilight)) {
             if (glory) {
                 if (expansionAmount <= 151) {

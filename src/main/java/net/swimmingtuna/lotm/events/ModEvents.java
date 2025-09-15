@@ -53,6 +53,8 @@ import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.client.Configs;
 import net.swimmingtuna.lotm.commands.AbilityRegisterCommand;
 import net.swimmingtuna.lotm.entity.*;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventsProvider;
 import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.IFunction;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
@@ -62,14 +64,10 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Apprentice.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.*;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamWalking;
-import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.Prophecy;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.PsychologicalInvisibility;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.*;
 import net.swimmingtuna.lotm.item.BeyonderPotions.BeyonderCharacteristic;
 import net.swimmingtuna.lotm.item.OtherItems.SwordOfTwilight;
-import net.swimmingtuna.lotm.item.SealedArtifacts.DeathKnell;
-import net.swimmingtuna.lotm.item.SealedArtifacts.WintryBlade;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.ClientRecipesJEISyncS2C;
 import net.swimmingtuna.lotm.networking.packet.DimensionalSightSealC2S;
@@ -95,42 +93,11 @@ import static net.swimmingtuna.lotm.beyonder.WarriorClass.newWarriorDamageNegati
 import static net.swimmingtuna.lotm.beyonder.WarriorClass.twilightTick;
 import static net.swimmingtuna.lotm.blocks.MonsterDomainBlockEntity.domainDrops;
 import static net.swimmingtuna.lotm.entity.PlayerMobEntity.getDrop;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ChaosWalkerDisableEnable.onChaosWalkerCombat;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfDecay.monsterDomainIntHandler;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.DomainOfProvidence.domainDropsExperience;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.EnableDisableRipple.rippleOfMisfortune;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.FalseProphecy.doubleProphecyDamageHelper;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation.livingLightningStorm;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MonsterCalamityIncarnation.calamityIncarnationTornado;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MonsterCalamityIncarnation.calamityLightningStorm;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MonsterDangerSense.monsterDangerSense;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.ProbabilityManipulationWorldFortune.probabilityManipulationWorld;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.AcidicRain.acidicRainTick;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.CalamityIncarnationTsunami.calamityIncarnationTsunamiTick;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Earthquake.earthquake;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.ExtremeColdness.extremeColdness;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Hurricane.hurricane;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.LightningStorm.lightningStorm;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.MatterAccelerationEntities.matterAccelerationEntitiesAndRainEyes;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.RagingBlows.ragingBlowsTick;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.SailorLightningTravel.sailorLightningTravel;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.SirenSongHarm.sirenSongs;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.SirenSongHarm.sirenSongsTick;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.StarOfLightning.starOfLightning;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.Tsunami.tsunami;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WaterSphere.waterSphereCheck;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WindManipulationFlight.windManipulationFlight;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WindManipulationFlight.windManipulationGuide;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.WindManipulationSense.windManipulationSense;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.ConsciousnessStroll.consciousnessStroll;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamIntoReality.dreamIntoReality;
+import static net.swimmingtuna.lotm.item.BeyonderAbilities.Monster.MisfortuneManipulation.misfortuneLightningStorm;
 import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.DreamWeaving.dreamWeaving;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionBarrier.envisionBarrier;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.EnvisionKingdom.envisionKingdom;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.ManipulateMovement.manipulateMovement;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Spectator.Nightmare.nightmareTick;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.Gigantification.warriorGiant;
-import static net.swimmingtuna.lotm.item.BeyonderAbilities.Warrior.FinishedItems.WarriorDangerSense.warriorDangerSense;
 import static net.swimmingtuna.lotm.world.worldgen.dimension.DimensionInit.SPIRIT_WORLD_LEVEL_KEY;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
@@ -427,6 +394,11 @@ public class ModEvents {
         CompoundTag tag = livingEntity.getPersistentData();
         Level level = livingEntity.level();
         if (level instanceof ServerLevel serverLevel) {
+            if (BeyonderUtil.getSequence(livingEntity) <= 2 && BeyonderUtil.getSequence(livingEntity) != -1 && livingEntity instanceof Player player) {
+                if (player.getFoodData().getFoodLevel() <= 8) {
+                    player.getFoodData().setFoodLevel(9);
+                }
+            }
             if (tag.getInt("LOTMinCombat") >= 1) {
                 tag.putInt("LOTMinCombat", tag.getInt("LOTMinCombat") - 1);
             }
@@ -448,24 +420,23 @@ public class ModEvents {
             event.getEntity().getCapability(EventsProvider.EVENTS_DATA).ifPresent(cap -> {
                 List<IFunction> listW = cap.getWorldEvents();
                 for (var obj : listW) {
-                    LOTM.LOGGER.info("Calling world event: {} - {}", obj.getClass().getSimpleName(), obj.toString());
+                    //LOTM.LOGGER.info("Calling world event: {} - {}", obj.getClass().getSimpleName(), obj.toString());
                     obj.use(event);
                 }
 
                 if (tag.getInt("inTwilight") == 0 && tag.getInt("cancelTick") == 0) {
                     List<IFunction> listR = cap.getRegularEvents();
                     for (var obj : listR) {
-                        LOTM.LOGGER.info("Calling regular event: {} - {}", obj.getClass().getSimpleName(), obj.toString());
+                        //LOTM.LOGGER.info("Calling regular event: {} - {}", obj.getClass().getSimpleName(), obj.toString());
                         obj.use(event);
                     }
                 }
                 cap.deleteAllMarked();
             });
+
             CorruptionAndLuckHandler.corruptionAndLuckManagers(serverLevel, livingEntity);
             twilightTick(event);
-            envisionKingdom(livingEntity, level);
             SwordOfTwilight.twilightSwordTick(event);
-            FactionData.factionDecrementer(event);
             if (tag.getInt("inTwilight") == 0 && tag.getInt("cancelTick") == 0) {
                 //mob ticks
                 //MatterAccelerationBlocks.matterAccelerationBlocksMobTick(event);
@@ -473,58 +444,53 @@ public class ModEvents {
 
 
                 //regular ticks
-                BeyonderUtil.projectileEvent(livingEntity);
+                BeyonderUtil.flyingTick(event);
                 BeyonderUtil.effectTick(event);
                 DimensionalSightSealEntity.dimensionalSightSealTick(livingEntity);
-                DawnArmory.dawnArmorTickEvent(event);
-                ConcealedUtils.timerTick(livingEntity);
-                DoorLayering.doorLayeringTick(event);
-                Conceptualization.conceptualizationTick(event);
-                Starfall.starfallTick(event);
-                MonsterClass.calamityExplosion(livingEntity);
-                TwilightManifestation.twilightManifestationTick(event);
-                SwordOfTwilight.decrementTwilightSword(event);
-                MercuryLiquefication.mercuryArmorTick(event);
-                MercuryLiquefication.mercuryLiqueficationTick(event);
                 BeyonderUtil.ageHandlerTick(event);
-                InvisibleHand.invisibleHandTick(event);
-                TrickBurning.smeltItem(event);
-                Gigantification.gigantificationScale(event);
-                EnableOrDisableProtection.warriorProtectionTick(event);
-                GuardianBoxEntity.decrementGuardianTimer(livingEntity);
-                EyeOfDemonHunting.eyeTick(event);
-                EyeOfDemonHunting.demonHunterAntiConcealment(event);
-                WintryBlade.wintryBladeTick(event);
-                warriorGiant(livingEntity);
-                DeathKnell.deathKnellNegativeTick(livingEntity);
-                ProbabilityManipulationInfiniteMisfortune.testEvent(event);
-                probabilityManipulationWorld(livingEntity);
-                CycleOfFate.cycleOfFateTickEvent(event);
-                DreamWalking.dreamWalkingTick(event);
-                MonsterClass.dodgeProjectiles(livingEntity);
-                MisfortuneManipulation.livingTickMisfortuneManipulation(event);
-                FalseProphecy.falseProphecyTick(livingEntity);
-                AuraOfChaos.auraOfChaos(event);
-                PsycheStorm.psycheStormTick(event);
-                AuraOfGlory.auraOfGloryAndTwilightTick(event);
-                livingLightningStorm(livingEntity);
-                Gigantification.gigantificationDestroyBlocks(event);
-                LightOfDawn.sunriseGleamTick(event);
-                doubleProphecyDamageHelper(event);
-                MonsterClass.showMonsterParticles(livingEntity);
-                MonsterClass.luckDenial(livingEntity);
-                MonsterCalamityIncarnation.calamityTickEvent(event);
-                dreamWeaving(livingEntity);
-                LightConcealment.lightConcealmentTick(event);
-                SpectatorClass.demiseTick(event);
-                AqueousLightDrown.aqueousLightDrownTick(event);
-                matterAccelerationEntitiesAndRainEyes(livingEntity);
-                ExtremeColdness.extremeColdnessTick(event);
-                StormSeal.stormSealTick(event);
-                SpatialMaze.mazeTick(livingEntity);
-                AqueousLightDrown.lightTickEvent(livingEntity);
-                TsunamiSeal.sealTick(event);
 
+                //MonsterClass.luckDenial(livingEntity);
+                //MonsterCalamityIncarnation.calamityTickEvent(event);
+                //dreamWeaving(livingEntity);
+                //LightConcealment.lightConcealmentTick(event);
+                //SpectatorClass.demiseTick(event);
+                //AqueousLightDrown.aqueousLightDrownTick(event);
+                //ExtremeColdness.extremeColdnessTick(event);
+                //StormSeal.stormSealTick(event);
+                //SpatialMaze.mazeTick(livingEntity);
+                //AqueousLightDrown.lightTickEvent(livingEntity);
+                //TsunamiSeal.sealTick(event);
+                //FalseProphecy.falseProphecyTick(livingEntity);
+                //AuraOfChaos.auraOfChaos(event);
+                //PsycheStorm.psycheStormTick(event);
+                //AuraOfGlory.auraOfGloryAndTwilightTick(event);
+                //misfortuneLightningStorm(livingEntity);
+                //Gigantification.gigantificationDestroyBlocks(event);
+                //LightOfDawn.lightOfDawnTick(event);
+                //doubleProphecyDamageHelper(event);
+                //DoorLayering.doorLayeringTick(event);
+                //Conceptualization.conceptualizationTick(event);
+                //Starfall.starfallTick(event);
+                //MonsterClass.calamityExplosion(livingEntity);
+                //TwilightManifestation.twilightManifestationTick(event);
+                //MercuryLiquefication.mercuryArmorTick(event);
+                //MercuryLiquefication.mercuryLiqueficationTick(event);
+                //InvisibleHand.invisibleHandTick(event);
+                //Gigantification.gigantificationScale(event);
+                //EnableOrDisableProtection.warriorProtectionTick(event);
+                //GuardianBoxEntity.decrementGuardianTimer(livingEntity);
+                //EyeOfDemonHunting.eyeTick(event);
+                //WintryBlade.wintryBladeTick(event);
+                //DeathKnell.deathKnellNegativeTick(livingEntity);
+                //ProbabilityManipulationInfiniteMisfortune.inifniteMisfortune(event);
+                //probabilityManipulationWorld(livingEntity);
+                //CycleOfFate.cycleOfFateTickEvent(event);
+                //DreamWalking.dreamWalkingTick(event);
+                //MisfortuneManipulation.livingTickMisfortuneManipulation(event);
+                //ConcealedUtils.timerTick(livingEntity);
+                //DawnArmory.dawnArmorTickEvent(event);
+                //FactionData.factionDecrementer(event);
+                //envisionKingdom(livingEntity, level);
                 //SealedUtils.timerTick(livingEntity);
                 //SailorClass.rainEyesTickEvent(event);
                 //GravityManipulation.gravityManipulationTickEvent(event);
@@ -677,9 +643,15 @@ public class ModEvents {
                 if (attacker.getPersistentData().getInt("beneficialFalseProphecyAttack") >= 1) {
                     attacker.getPersistentData().putInt("beneficialDamageDoubled", 5);
                     attacker.getPersistentData().putBoolean("shouldDoubleProphecyDamage", true);
+                    if (attacker instanceof LivingEntity livingEntity) {
+                        EventManager.removeFromRegularLoop(livingEntity, EFunctions.FALSE_PROPHECY_DOUBLE_DAMAGE.get());
+                    }
                     attacker.getPersistentData().putInt("beneficialFalseProphecyAttack", 0);
                 }
                 if (attacker.getPersistentData().getInt("beneficialDamageDoubled") >= 1 && attacker.getPersistentData().getBoolean("shouldDoubleProphecyDamage")) {
+                    if (attacker instanceof LivingEntity livingEntity) {
+                        EventManager.removeFromRegularLoop(livingEntity, EFunctions.FALSE_PROPHECY_DOUBLE_DAMAGE.get());
+                    }
                     attacker.getPersistentData().putInt("beneficialDamageDoubled", attacker.getPersistentData().getInt("beneficialDamageDoubled") - 1);
                     event.setCanceled(true);
                     attacker.getPersistentData().putBoolean("shouldDoubleProphecyDamage", false);

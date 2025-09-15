@@ -16,6 +16,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -50,6 +52,7 @@ public class LightConcealment extends SimpleAbilityItem {
         if (!livingEntity.level().isClientSide()) {
             int sequence = BeyonderUtil.getSequence(livingEntity);
             livingEntity.getPersistentData().putInt("warriorLightConcealment", 400 - (sequence * 60));
+            EventManager.addToRegularLoop(livingEntity, EFunctions.LIGHT_CONCEALMENT_TICK.get());
         }
     }
 
@@ -93,6 +96,8 @@ public class LightConcealment extends SimpleAbilityItem {
                     }
                 }
             }
+        } else if (!livingEntity.level().isClientSide() && lightConcealment == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.LIGHT_CONCEALMENT_TICK.get());
         }
     }
 

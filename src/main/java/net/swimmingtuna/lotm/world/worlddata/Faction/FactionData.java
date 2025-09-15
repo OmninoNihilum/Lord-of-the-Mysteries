@@ -18,6 +18,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.swimmingtuna.lotm.client.Configs;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 
 import java.util.*;
@@ -652,8 +654,11 @@ public class FactionData extends SavedData {
     public static void factionDecrementer(LivingEvent.LivingTickEvent event) {
         if (event.getEntity().getPersistentData().getInt("ignoreFactionProtection") >= 1) {
             event.getEntity().getPersistentData().putInt("ignoreFactionProtection", event.getEntity().getPersistentData().getInt("ignoreFactionProtection") - 1);
+        } else {
+            EventManager.removeFromRegularLoop(event.getEntity(), EFunctions.FACTION_DATA_TICK.get());
         }
     }
+
     public boolean grantProtectionBypass(String factionName, UUID requester, ServerPlayer targetPlayer, int minutes) {
         if (minutes <= 0) {
             return false;
@@ -678,6 +683,7 @@ public class FactionData extends SavedData {
         }
         faction.spendPower(totalCost);
         int ticksToAdd = minutes * 1200;
+        EventManager.removeFromRegularLoop(targetPlayer, EFunctions.FACTION_DATA_TICK.get());
         targetPlayer.getPersistentData().putInt("ignoreFactionProtection", targetPlayer.getPersistentData().getInt("ignoreFactionProtection") + ticksToAdd);
 
         setDirty();

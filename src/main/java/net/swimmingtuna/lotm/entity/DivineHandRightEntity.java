@@ -140,6 +140,7 @@ public class DivineHandRightEntity extends AbstractHurtingProjectile implements 
                         livingEntity.getPersistentData().putDouble("luck", livingEntity.getPersistentData().getDouble("luck") + 25);
                         livingEntity.getPersistentData().putUUID("divineHandUUID", owner.getUUID());
                         livingEntity.getPersistentData().putInt("divineHandGuarding", 1200);
+                        EventManager.addToRegularLoop(livingEntity, EFunctions.DECREMENT_GUARDIAN_TIMER.get());
                         if (livingEntity instanceof Player player) {
                             player.displayClientMessage(Component.literal("You are being guarded by " + owner.getName() + "for 1 minute").withStyle(ChatFormatting.GREEN), true);
                         }

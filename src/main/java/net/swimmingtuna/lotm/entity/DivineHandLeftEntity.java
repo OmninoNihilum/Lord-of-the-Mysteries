@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
 import net.swimmingtuna.lotm.networking.packet.UpdateEntityLocationS2C;
@@ -62,7 +64,8 @@ public class DivineHandLeftEntity extends AbstractHurtingProjectile implements G
                         player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
                     }
                     tag.putInt("monsterMisfortuneManipulationGravity", 200);
-                    owner.sendSystemMessage(Component.literal(livingEntity.getName() + "hit"));
+                    EventManager.addToRegularLoop(livingEntity, EFunctions.MISFORTUNE_MANIPULATION.get());
+                    owner.sendSystemMessage(Component.literal(livingEntity.getName() + " was hit.").withStyle(BeyonderUtil.getStyle(livingEntity)));
                 }
             }
         }
@@ -161,6 +164,7 @@ public class DivineHandLeftEntity extends AbstractHurtingProjectile implements G
                         player.displayClientMessage(Component.literal("You are getting rapidly aged").withStyle(BeyonderUtil.ageStyle(livingEntity)).withStyle(ChatFormatting.BOLD),true);
                     }
                     tag.putInt("monsterMisfortuneManipulationGravity", 200);
+                    EventManager.addToRegularLoop(livingEntity, EFunctions.MISFORTUNE_MANIPULATION.get());
                     this.discard();
                 }
             }

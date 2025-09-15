@@ -22,6 +22,8 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.swimmingtuna.lotm.attributes.AttributeHelper;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -115,6 +117,8 @@ public class DreamWeaving extends SimpleAbilityItem {
                 entity.kill();
                 entity.setRemoved(Entity.RemovalReason.DISCARDED);
             }
+        } else if (entity != null && entity.getPersistentData().getInt("dreamWeavingDeathTimer") == 0) {
+            EventManager.removeFromRegularLoop(entity, EFunctions.DREAM_WEAVING.get());
         }
     }
 
@@ -141,6 +145,7 @@ public class DreamWeaving extends SimpleAbilityItem {
                     mob.getPersistentData().putUUID("dreamWeavingUUID", interactionTarget.getUUID());
                     mob.setTarget(entity);
                     mob.getPersistentData().putInt("dreamWeavingDeathTimer", 300);
+                    EventManager.addToRegularLoop(entity, EFunctions.DREAM_WEAVING.get());
                     if (isBossEntity(mob)) {
                         mob.getPersistentData().putBoolean("dreamWeavingBoss", true);
                     }

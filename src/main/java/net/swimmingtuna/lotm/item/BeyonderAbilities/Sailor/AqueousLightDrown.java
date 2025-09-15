@@ -18,6 +18,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.AqueousLightEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -63,6 +65,9 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
             CompoundTag tag = entity.getPersistentData();
             BlockPos headPos = BlockPos.containing(entity.getEyePosition());
             int aqueousLight = tag.getInt("lightDrowning");
+            if (aqueousLight == 0) {
+                EventManager.removeFromRegularLoop(entity, EFunctions.AQUEOUS_LIGHT_DROWN_TICK.get());
+            }
             if (aqueousLight == 1) {
                 entity.setAirSupply(0);
             }
@@ -107,53 +112,6 @@ public class AqueousLightDrown extends LeftClickHandlerSkillP {
             if (entity.getPersistentData().getInt("lightDrowning") >= 1) {
                 Level level = entity.level();
                 BlockPos headPos = BlockPos.containing(entity.getEyePosition());
-                for (int x = -3; x <= 3; x++) {
-                    for (int y = -3; y <= 3; y++) {
-                        for (int z = -3; z <= 3; z++) {
-                            BlockPos blockPos = headPos.offset(x, y, z);
-                            if (level.getBlockState(blockPos).is(Blocks.WATER)) {
-                                BeyonderUtil.setAir( entity, blockPos);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public static void lightTickEvent(Entity entity) {
-        Level level = entity.level();
-        CompoundTag tag = entity.getPersistentData();
-        if (!entity.level().isClientSide()) {
-            BlockPos headPos = BlockPos.containing(entity.getEyePosition());
-            int aqueousLight = tag.getInt("lightDrowning");
-            if (aqueousLight == 1) {
-                entity.setAirSupply(0);
-            }
-            if (aqueousLight >= 1) {
-                if (entity.getDeltaMovement().y <= 0.15) {
-                    entity.setDeltaMovement(entity.getDeltaMovement().x, entity.getDeltaMovement().y - 0.01, entity.getDeltaMovement().z);
-                }
-                tag.putInt("lightDrowning", aqueousLight + 1);
-                if (level.getBlockState(headPos).is(Blocks.AIR)) {
-                    BeyonderUtil.setAsBlockIgnoreConfig(entity, headPos, Blocks.WATER);
-                }
-                for (int x = -3; x <= 3; x++) {
-                    for (int y = -3; y <= 3; y++) {
-                        for (int z = -3; z <= 3; z++) {
-                            if (Math.abs(x) > 1 || Math.abs(y) > 1 || Math.abs(z) > 1) {
-                                BlockPos blockPos = headPos.offset(x, y, z);
-                                if (level.getBlockState(blockPos).is(Blocks.WATER)) {
-                                    BeyonderUtil.setAsBlockIgnoreConfig(entity, blockPos, Blocks.WATER);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (aqueousLight >= 200) {
-                aqueousLight = 0;
-                tag.putInt("lightDrowning", 0);
                 for (int x = -3; x <= 3; x++) {
                     for (int y = -3; y <= 3; y++) {
                         for (int z = -3; z <= 3; z++) {

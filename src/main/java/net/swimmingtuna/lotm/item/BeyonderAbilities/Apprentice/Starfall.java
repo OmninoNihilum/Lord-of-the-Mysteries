@@ -18,6 +18,8 @@ import net.minecraft.world.phys.*;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -48,6 +50,7 @@ public class Starfall extends SimpleAbilityItem {
 
     public void starfall(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.STARFALL_TICK.get());
             CompoundTag tag = player.getPersistentData();
             tag.putFloat("starfallYaw", player.getYHeadRot());
             tag.putFloat("starfallPitch", player.getXRot());
@@ -66,6 +69,9 @@ public class Starfall extends SimpleAbilityItem {
         LivingEntity player = event.getEntity();
         CompoundTag tag = player.getPersistentData();
         if (!player.level().isClientSide()) {
+            if (tag.getInt("starfallTimer") == 0 && tag.getInt("starfallEntitySearch") == 0) {
+                EventManager.removeFromRegularLoop(player, EFunctions.STARFALL_TICK.get());
+            }
             if (tag.getInt("starfallTimer") >= 1) {
                 int timer = tag.getInt("starfallTimer");
                 tag.putInt("starfallTimer", timer - 1);

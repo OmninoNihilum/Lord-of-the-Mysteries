@@ -5,6 +5,8 @@ import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.*;
 import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.BeyonderTicks.Apprentice.ApprenticeSPTickLayer;
 import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.BeyonderTicks.Apprentice.ApprenticeTickLayer;
 import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.BeyonderTicks.Apprentice.WaterWalkingLayer;
+import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.MisfortuneLightningStorm;
+import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.CalamityExplosionLayer;
 import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.BeyonderTicks.Monster.MonsterTickLayer;
 import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.BeyonderTicks.Sailor.SailorTickLayer;
 import net.swimmingtuna.lotm.events.NewEventLoop.LayerClasses.BeyonderTicks.Spectator.SpectatorTickLayer;
@@ -32,7 +34,6 @@ public enum EFunctions {
     VOLCANIC_ERUPTION(new VolcanicEruptionLayer()),
     WARRIOR_TICK(new WarriorTickLayer()),
     WATER_WALKING(new WaterWalkingLayer()),
-
     TRICKMASTERTELEKENESIS(new TrickmasterTelekenisisPassiveLayer()),
     PROPHECY(new ProphecyTickLayer()),
     SPECTATORPROPHECY(new SpectatorClassProphecyTickLayer()),
@@ -70,11 +71,46 @@ public enum EFunctions {
     TWILIGHT_FREEZE_TICK(new TwilightFreezeTickLayer()),
     MISFORTUNEIMPLOSIONLIGHTNING(new MisfortuneImplosionLightningLayer()),
     TWILIGHT_LIGHT_TICK(new TwilightLightTickLayer()),
-    MATTER_ACCELERATION_BLOCKS(new MatterAccelerationBlocksLayer());
+    FACTION_DATA_TICK(new FactionDataTickLayer()),
+    MATTER_ACCELERATION_BLOCKS(new MatterAccelerationBlocksLayer()),
+    DAWN_ARMOR_TICK(new DawnArmorTickEventLayer()),
+    CONCEAL_TIMER(new ConcealTickLayer()),
+    DOOR_LAYERING_TICK(new DoorLayeringTickLayer()),
 
-
-    // Additional enum values to add to your existing EFunctions enum
-
+    CONCEPTUALIZATION_TICK(new ConceptualizationTickLayer()),
+    STARFALL_TICK(new StarfallTickLayer()),
+    CALAMITY_EXPLOSION(new CalamityExplosionLayer()),
+    TWILIGHT_MANIFESTATION_TICK(new TwilightManifestationTickLayer()),
+    MERCURY_LIQUEFICATION_TICK(new MercuryLiqueficationTickLayer()),
+    INVISIBLE_HAND_TICK(new InvisibleHandTickLayer()),
+    GIGANTIFICATION_SCALE(new GigantificationScaleLayer()),
+    WARRIOR_PROTECTION_TICK(new WarriorProtectionTickLayer()),
+    DECREMENT_GUARDIAN_TIMER(new DecrementGuardianTimerLayer()),
+    EYE_TICK(new EyeTickLayer()),
+    WINTRY_BLADE_TICK(new WintryBladeTickLayer()),
+    DEATH_KNELL_NEGATIVE_TICK(new DeathKnellNegativeTickLayer()),
+    PROBABILITY_MANIPULATION_INFINITE(new ProbabilityManipulationInfiniteLayer()),
+    CYCLE_OF_FATE(new CycleOfFateTickLayer()),
+    DREAM_WALKING_TICK(new DreamWalkingTickLayer()),
+    MISFORTUNE_MANIPULATION(new MisfortuneManipulationTickLayer()),
+    FALSE_PROPHECY(new FalseProphecyTickLayer()),
+    AURA_OF_CHAOS(new AuraOfChaosLayer()),
+    PSYCHE_STORM(new PsycheStormTickLayer()),
+    AURA_OF_GLORY(new AuraOfGloryTickLayer()),
+    MISFORTUNE_LIGHTNING_STORM(new MisfortuneLightningStorm()),
+    GIGANTIFICATION_DESTROY_BLOCKS(new GigantificationDestroyBlocksLayer()),
+    LIGHT_OF_DAWN(new LightOfDawnLayer()),
+    FALSE_PROPHECY_DOUBLE_DAMAGE(new FalseProphecyDoubleDamageLayer()),
+    LUCK_DENIAL(new LuckDenialLayer()),
+    MONSTER_CALAMITY_INCARNATION(new MonsterCalamityIncarnationLayer()),
+    DREAM_WEAVING(new DreamWeavingLayer()),
+    LIGHT_CONCEALMENT_TICK(new LightConcealmentTickLayer()),
+    PROPHESISE_TICK(new ProphesizeDemiseTickLayer()),
+    AQUEOUS_LIGHT_DROWN_TICK(new AqueousLightDrownTickLayer()),
+    EXTREME_COLDNESS_TICK(new ExtremeColdnessTickLayer()),
+    STORM_SEAL_TICK(new StormSealTickLayer()),
+    SPATIAL_MAZE_TICK(new SpatialMazeTickLayer()),
+    TSUNAMI_SEAL_TICK(new TsunamiSealTickLayer());
 
     private final IFunction func;
 

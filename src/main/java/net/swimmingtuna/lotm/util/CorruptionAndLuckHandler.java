@@ -18,6 +18,8 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -62,6 +64,37 @@ public class CorruptionAndLuckHandler {
 
     public static void corruptionAndLuckManagers(ServerLevel serverLevel, LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            if (livingEntity.tickCount % 3 == 0) {
+                if (livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") >= 1) {
+                    for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {
+                        if (projectile.getPersistentData().getInt("windDodgeProjectilesCounter") == 0) {
+                            if (projectile instanceof Arrow arrow && arrow.tickCount >= 100) {
+                                return;
+                            }
+                            float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
+                            double maxDistance = 6 * scale;
+                            double deltaX = Math.abs(projectile.getX() - livingEntity.getX());
+                            double deltaY = Math.abs(projectile.getY() - livingEntity.getY());
+                            double deltaZ = Math.abs(projectile.getZ() - livingEntity.getZ());
+                            if ((deltaX <= maxDistance && deltaY <= maxDistance && deltaZ <= maxDistance) && projectile.getOwner() != livingEntity) {
+                                double mathRandom = (Math.random() + .4) - 0.2;
+                                double x = projectile.getDeltaMovement().x() + (mathRandom * scale);
+                                double y = projectile.getDeltaMovement().y() + (mathRandom * scale);
+                                double z = projectile.getDeltaMovement().z() + (mathRandom * scale);
+                                projectile.setDeltaMovement(x, y, z);
+                                projectile.hurtMarked = true;
+                                projectile.getPersistentData().putInt("windDodgeProjectilesCounter", 100);
+                                livingEntity.getPersistentData().putInt("windMovingProjectilesCounter", livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") - 1);
+                                if (livingEntity instanceof Player player) {
+                                    player.displayClientMessage(Component.literal("A gust of wind moved a projectile headed towards you").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
+                                }
+                            }
+                        } else {
+                            projectile.getPersistentData().putInt("windDodgeProjectilesCounter", projectile.getPersistentData().getInt("windDodgeProjectilesCounter") - 1);
+                        }
+                    }
+                }
+            }
             int sequence = BeyonderUtil.getSequence(livingEntity);
             CompoundTag tag = livingEntity.getPersistentData();
             boolean isMonsterNoException = BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.MONSTER.get());
@@ -1045,6 +1078,7 @@ public class CorruptionAndLuckHandler {
                     }
                 }
                 if (calamityLightningStorm == 1) {
+                    EventManager.addToRegularLoop(livingEntity, EFunctions.CALAMITY_LIGHTNING_STORM.get());
                     tag.putInt("luckLightningLOTMDamage", 5 + (calamityEnhancement * 2));
                     tag.putInt("calamityLightningStormSummon", 20 + (calamityEnhancement * 5));
                     if (sequence <= 3) {
@@ -1194,6 +1228,7 @@ public class CorruptionAndLuckHandler {
                     }
                 }
                 if (calamityExplosion == 2) {
+                    EventManager.addToRegularLoop(livingEntity, EFunctions.CALAMITY_EXPLOSION.get());
                     tag.putInt("calamityExplosionOccurrence", 2);
                 }
                 if (calamityBabyZombie == 1) {

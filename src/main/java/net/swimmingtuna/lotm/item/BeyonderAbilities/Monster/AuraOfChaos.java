@@ -27,6 +27,8 @@ import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -63,6 +65,11 @@ public class AuraOfChaos extends SimpleAbilityItem {
             tag.putBoolean("monsterAuraOfChaos", !auraOfChaos);
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Aura of Chaos Turned " + (auraOfChaos ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.RED), true);
+            }
+            if (auraOfChaos) {
+                EventManager.addToRegularLoop(player, EFunctions.AURA_OF_CHAOS.get());
+            } else {
+                EventManager.removeFromRegularLoop(player, EFunctions.AURA_OF_CHAOS.get());
             }
         }
     }
@@ -165,6 +172,8 @@ public class AuraOfChaos extends SimpleAbilityItem {
                     }
                 }
             }
+        } else {
+            EventManager.addToRegularLoop(entity, EFunctions.AURA_OF_CHAOS.get());
         }
     }
     @Override

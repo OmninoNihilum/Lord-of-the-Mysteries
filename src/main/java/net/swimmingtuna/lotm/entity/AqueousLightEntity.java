@@ -20,6 +20,8 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
 import net.swimmingtuna.lotm.networking.LOTMNetworkHandler;
@@ -69,6 +71,7 @@ public class AqueousLightEntity extends AbstractHurtingProjectile {
         }
         CompoundTag compoundTag = entity.getPersistentData();
         compoundTag.putInt("lightDrowning", 1);
+        EventManager.removeFromRegularLoop(entity, EFunctions.AQUEOUS_LIGHT_DROWN_TICK.get());
         LivingEntity owner = (LivingEntity) this.getOwner();
         CompoundTag ownerTag = owner.getPersistentData();
         boolean sailorLightning = ownerTag.getBoolean("SailorLightning");

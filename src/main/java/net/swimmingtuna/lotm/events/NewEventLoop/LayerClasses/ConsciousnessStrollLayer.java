@@ -13,6 +13,6 @@ public class ConsciousnessStrollLayer implements IFunction {
 
     @Override
     public String getID() {
-        return "ManipulateMovementEventID";
+        return "ConsciousnessStrollEventID";
     }
 }

@@ -95,6 +95,7 @@ public class Prophecy extends LeftClickHandlerSkill {
             CompoundTag tag = player.getPersistentData();
             int prophecy = tag.getInt("spectatorProphecyItem");
             if (prophecy == 8) {
+                EventManager.addToRegularLoop(player, EFunctions.PROPHESISE_TICK.get());
                 if (interactionTarget instanceof Player) {
                     if (BeyonderUtil.getDreamIntoReality(player) > 1) {
                         BeyonderUtil.applyFrenzy(interactionTarget, 40);

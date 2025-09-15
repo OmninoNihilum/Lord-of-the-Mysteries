@@ -30,8 +30,8 @@ public class BlockInit {
 
     public static final RegistryObject<Block> VISIONARY_BARRIER_BLOCK = registerBlock("visionary_barrier_block",
             () -> new VisionaryBB(BlockBehaviour.Properties.copy(Blocks.GLASS)
-                    .destroyTime(2)
-                    .strength(15).noLootTable()));
+                    .destroyTime(25)
+                    .strength(52).noLootTable()));
     public static final RegistryObject<Block> LOTM_BLUE_STAINED_GLASS = registerBlock("lotm_blue_stained_glass",
             () -> new LOTMStainedGlass(DyeColor.BLUE, BlockBehaviour.Properties.copy(Blocks.GLASS)
                 .destroyTime(2)

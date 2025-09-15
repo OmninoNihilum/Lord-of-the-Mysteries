@@ -142,11 +142,6 @@ public class LOTMNetworkHandler {
                 .encoder(SendPlayerRenderDataS2C::toBytes)
                 .consumerMainThread(SendPlayerRenderDataS2C::handle)
                 .add();
-        INSTANCE.messageBuilder(SyncAntiConcealmentPacketS2C.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(SyncAntiConcealmentPacketS2C::new)
-                .encoder(SyncAntiConcealmentPacketS2C::encode)
-                .consumerMainThread(SyncAntiConcealmentPacketS2C::handle)
-                .add();
         INSTANCE.messageBuilder(ScribeCopyAbilityC2S.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(ScribeCopyAbilityC2S::new)
                 .encoder(ScribeCopyAbilityC2S::toByte)

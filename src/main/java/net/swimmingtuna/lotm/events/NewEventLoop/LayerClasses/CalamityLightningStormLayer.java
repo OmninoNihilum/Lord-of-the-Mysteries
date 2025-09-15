@@ -14,6 +14,6 @@ public class CalamityLightningStormLayer implements IFunction {
 
     @Override
     public String getID() {
-        return "CalamityUndeadArmyEventID";
+        return "CalamityLightningStormEventID";
     }
 }

@@ -7,7 +7,7 @@ import net.swimmingtuna.lotm.item.BeyonderAbilities.Sailor.AcidicRain;
 public class AcidicRainTickLayer implements IFunction {
     @Override
     public void use(LivingEvent.LivingTickEvent event) {
-        AcidicRain.acidicRainTick(event.getEntity());
+        AcidicRain.acidicRainTick(event);
     }
 
     @Override

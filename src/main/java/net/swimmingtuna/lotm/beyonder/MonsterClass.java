@@ -30,14 +30,11 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.swimmingtuna.lotm.LOTM;
 import net.swimmingtuna.lotm.attributes.PathwayAttributes.MonsterAttributes;
 import net.swimmingtuna.lotm.beyonder.api.BeyonderClass;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
@@ -292,7 +289,7 @@ public class MonsterClass implements BeyonderClass {
     public static void decrementMonsterAttackEvent(LivingEntity livingEntity) {
         if (livingEntity.getPersistentData().getInt("attackedMonster") >= 1) {
             livingEntity.getPersistentData().putInt("attackedMonster", livingEntity.getPersistentData().getInt("attackedMonster") - 1);
-        }  else {
+        } else {
             EventManager.removeFromRegularLoop(livingEntity, EFunctions.DECREMENT_MONSTER_ATTACK_EVENT.get());
         }
     }
@@ -380,13 +377,15 @@ public class MonsterClass implements BeyonderClass {
                                 if (livingEntity instanceof Player player) {
                                     player.sendSystemMessage(Component.literal("You deprived " + target.getName().getString() + " off all their luck and beneficial effects."));
                                 }
-                            } if (livingEntity.getPersistentData().getInt("luckDenial") == 0) {
+                            }
+                            if (livingEntity.getPersistentData().getInt("luckDenial") == 0) {
                                 luckDenial(target);
                                 tag.putInt("luckDenial", 200);
                                 if (livingEntity instanceof Player player) {
-                                    player.sendSystemMessage(Component.literal("You denied " + target.getName().getString() + " from receiving luck for" + + (int) ((damage * 27) / 20) + " seconds " + "and receiving beneficial effects for " + + (int) ((damage * 27) / 4) + " seconds").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.BOLD));
+                                    player.sendSystemMessage(Component.literal("You denied " + target.getName().getString() + " from receiving luck for" + +(int) ((damage * 27) / 20) + " seconds " + "and receiving beneficial effects for " + +(int) ((damage * 27) / 4) + " seconds").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.BOLD));
                                 }
-                            } if (livingEntity.getPersistentData().getInt("misfortuneRedirection") == 0) {
+                            }
+                            if (livingEntity.getPersistentData().getInt("misfortuneRedirection") == 0) {
                                 misfortuneRedirection(target, livingEntity);
                                 tag.putInt("misfortuneRedirection", 200);
                                 if (livingEntity instanceof Player player) {
@@ -495,7 +494,7 @@ public class MonsterClass implements BeyonderClass {
                 int calamityExplosion = tag.getInt("calamityExplosion");
                 int calamityTornado = tag.getInt("calamityTornado");
                 if (meteor >= 1) {
-                    MisfortuneManipulation.summonMeteor(interactionTarget,player);
+                    MisfortuneManipulation.summonMeteor(interactionTarget, player);
                 }
                 if (lotmLightning >= 1) {
                     lotmLightningCount = lotmLightningCount + enhancement;
@@ -684,7 +683,8 @@ public class MonsterClass implements BeyonderClass {
         int enhancement = 1;
         if (level instanceof ServerLevel serverLevel) {
             enhancement = CalamityEnhancementData.getInstance(serverLevel).getCalamityEnhancement();
-        }        ItemStack leatherHelmet = new ItemStack(Items.LEATHER_HELMET);
+        }
+        ItemStack leatherHelmet = new ItemStack(Items.LEATHER_HELMET);
         ItemStack leatherChestplate = new ItemStack(Items.LEATHER_CHESTPLATE);
         ItemStack leatherLeggings = new ItemStack(Items.LEATHER_LEGGINGS);
         ItemStack leatherBoots = new ItemStack(Items.LEATHER_BOOTS);
@@ -851,106 +851,13 @@ public class MonsterClass implements BeyonderClass {
             } else if (misfortune > luckDenialMisfortune) {
                 tag.putDouble("luckDenialMisfortune", misfortune);
             }
-        }
-    }
-
-    private static void denyLuck(LivingEntity interactionTarget, LivingEntity player) {
-        if (!player.level().isClientSide() && !interactionTarget.level().isClientSide()) {
-            CompoundTag tag = interactionTarget.getPersistentData();
-            double luck = tag.getDouble("luck");
-            double misfortune = tag.getDouble("misfortune");
-            double damage = BeyonderUtil.getDamage(player).get(ItemInit.MONSTERREBOOT.get());
-            if (BeyonderUtil.getSequence(player) <= 2) {
-                tag.putDouble("luckDenialTimer", damage * 27);
-                tag.putDouble("luckDenialLuck", luck);
-                tag.putDouble("luckDenialMisfortune", misfortune);
-            } else {
-                tag.putDouble("luckDenialTimer", damage * 27);
-                tag.putDouble("luckDenialLuck", luck);
-            }
-            BeyonderUtil.applyBeneficialEffectBlocker(interactionTarget, (int) damage / 5);
-        }
-    }
-
-
-    public static void dodgeProjectiles(LivingEntity livingEntity) {
-        if (!livingEntity.level().isClientSide()) {
-            if (livingEntity.tickCount % 3 == 0) {
-                if (livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") >= 1) {
-                    for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {
-                        if (projectile.getPersistentData().getInt("windDodgeProjectilesCounter") == 0) {
-                            if (projectile instanceof Arrow arrow && arrow.tickCount >= 100) {
-                                return;
-                            }
-                            float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
-                            double maxDistance = 6 * scale;
-                            double deltaX = Math.abs(projectile.getX() - livingEntity.getX());
-                            double deltaY = Math.abs(projectile.getY() - livingEntity.getY());
-                            double deltaZ = Math.abs(projectile.getZ() - livingEntity.getZ());
-                            if ((deltaX <= maxDistance && deltaY <= maxDistance && deltaZ <= maxDistance) && projectile.getOwner() != livingEntity) {
-                                double mathRandom = (Math.random() + .4) - 0.2;
-                                double x = projectile.getDeltaMovement().x() + (mathRandom * scale);
-                                double y = projectile.getDeltaMovement().y() + (mathRandom * scale);
-                                double z = projectile.getDeltaMovement().z() + (mathRandom * scale);
-                                projectile.setDeltaMovement(x, y, z);
-                                projectile.hurtMarked = true;
-                                projectile.getPersistentData().putInt("windDodgeProjectilesCounter", 100);
-                                livingEntity.getPersistentData().putInt("windMovingProjectilesCounter", livingEntity.getPersistentData().getInt("windMovingProjectilesCounter") - 1);
-                                if (livingEntity instanceof Player player) {
-                                    player.displayClientMessage(Component.literal("A gust of wind moved a projectile headed towards you").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
-                                }
-                            }
-                        } else {
-                            projectile.getPersistentData().putInt("windDodgeProjectilesCounter", projectile.getPersistentData().getInt("windDodgeProjectilesCounter") - 1);
-                        }
-                    }
-                } else {
-                    if (BeyonderUtil.isBeyonderCapable(livingEntity)) {
-                        if (livingEntity instanceof Player pPlayer) {
-                            BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(pPlayer);
-                            int sequence = holder.getSequence();
-                            if (BeyonderUtil.currentPathwayMatchesNoException(livingEntity, BeyonderClassInit.MONSTER.get()) && holder.getSequence() <= 7) {
-                                int reverseChance = (int) (Math.random() * 20 - sequence);
-                                for (Projectile projectile : livingEntity.level().getEntitiesOfClass(Projectile.class, livingEntity.getBoundingBox().inflate(100))) {
-                                    if (projectile.getPersistentData().getInt("monsterReverseProjectiles") == 0) {
-                                        if (projectile instanceof Arrow arrow && arrow.tickCount >= 80) {
-                                            return;
-                                        }
-                                        if (reverseChance >= 10) {
-                                            float scale = ScaleTypes.BASE.getScaleData(projectile).getScale();
-                                            double maxDistance = 6 * scale;
-                                            double deltaX = Math.abs(projectile.getX() - livingEntity.getX());
-                                            double deltaY = Math.abs(projectile.getY() - livingEntity.getY());
-                                            double deltaZ = Math.abs(projectile.getZ() - livingEntity.getZ());
-                                            if ((deltaX <= maxDistance && deltaY <= maxDistance && deltaZ <= maxDistance) && projectile.getOwner() != livingEntity) {
-                                                double x = projectile.getDeltaMovement().x() * -1;
-                                                double y = projectile.getDeltaMovement().y() * -1;
-                                                double z = projectile.getDeltaMovement().z() * -1;
-                                                projectile.setDeltaMovement(x, y, z);
-                                                projectile.hurtMarked = true;
-                                                if (livingEntity instanceof Player player) {
-                                                    player.displayClientMessage(Component.literal("A strong breeze luckily reversed a projectile headed towards you").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.GREEN), true);
-                                                }
-                                            }
-                                        }
-                                        projectile.getPersistentData().putInt("monsterReverseProjectiles", 60);
-                                    } else {
-                                        projectile.getPersistentData().putInt("monsterReverseProjectiles", projectile.getPersistentData().getInt("windDodgeProjectilesCounter") - 1);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        } else {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.LUCK_DENIAL.get());
         }
     }
 
     public static void showMonsterParticles(LivingEntity livingEntity) {
-        if (!livingEntity.level().isClientSide() && livingEntity.tickCount % 100 == 0) {
             if (livingEntity instanceof ServerPlayer serverPlayer) {
-                BeyonderHolder holder = BeyonderHolderAttacher.getHolderUnwrap(serverPlayer);
-                if (holder.getSequence() <= 2 && BeyonderUtil.currentPathwayMatches(livingEntity, BeyonderClassInit.MONSTER.get())) {
                     for (LivingEntity entities : livingEntity.level().getEntitiesOfClass(LivingEntity.class, livingEntity.getBoundingBox().inflate(50))) {
                         if (entities != serverPlayer) {
                             CompoundTag tag = entities.getPersistentData();
@@ -1244,9 +1151,7 @@ public class MonsterClass implements BeyonderClass {
                                     LOTMNetworkHandler.sendToPlayer(new SendParticleS2C(ParticleInit.ATTACKER_POISONED_PARTICLE.get(), offsetX, offsetY, offsetZ, 0, 0, 0), serverPlayer);
                                 }
                             }
-                        }
                     }
-                }
             }
         }
     }
@@ -1548,6 +1453,9 @@ public class MonsterClass implements BeyonderClass {
                 explosion.explode();
                 explosion.finalizeExplosion(true);
                 tag.putInt("calamityExplosionOccurrence", 0);
+            }
+            if (x == 0) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.CALAMITY_EXPLOSION.get());
             }
         }
     }

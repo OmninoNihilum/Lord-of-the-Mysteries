@@ -12,6 +12,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -46,6 +48,11 @@ public class EnableOrDisableProtection extends SimpleAbilityItem {
             if (player instanceof Player pPlayer) {
                 pPlayer.displayClientMessage(Component.literal("Protection effect turned " + (protection ? "off" : "on")).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.BOLD), true);
             }
+            if (protection) {
+                EventManager.addToRegularLoop(player, EFunctions.WARRIOR_PROTECTION_TICK.get());
+            } else {
+                EventManager.removeFromRegularLoop(player, EFunctions.WARRIOR_PROTECTION_TICK.get());
+            }
         }
     }
 
@@ -74,9 +81,12 @@ public class EnableOrDisableProtection extends SimpleAbilityItem {
                 for (LivingEntity livingEntity : entity.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(300 - (sequence * 45)))) {
                     if (BeyonderUtil.areAllies(entity, livingEntity) && livingEntity != entity) {
                         livingEntity.getPersistentData().putInt("guardianProtectionTimer", 10);
+                        EventManager.addToRegularLoop(livingEntity, EFunctions.DECREMENT_GUARDIAN_TIMER.get());
                         livingEntity.getPersistentData().putUUID("guardianProtection", entity.getUUID());
                     }
                 }
+            } else {
+                EventManager.removeFromRegularLoop(entity, EFunctions.WARRIOR_PROTECTION_TICK.get());
             }
         }
     }

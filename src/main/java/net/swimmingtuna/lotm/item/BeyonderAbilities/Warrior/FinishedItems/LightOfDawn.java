@@ -18,6 +18,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.DawnRayEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -43,12 +45,13 @@ public class LightOfDawn extends SimpleAbilityItem {
         }
         addCooldown(player);
         useSpirituality(player);
-        sunriseGleam(player);
+        lightOfDawn(player);
         return InteractionResult.SUCCESS;
     }
 
-    public static void sunriseGleam(LivingEntity livingEntity) {
+    public static void lightOfDawn(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            EventManager.addToRegularLoop(livingEntity, EFunctions.LIGHT_OF_DAWN.get());
             int sequence = BeyonderUtil.getSequence(livingEntity);
             int maxLifetime = 500 - (sequence * 50);
             float maxRadius = BeyonderUtil.getDamage(livingEntity).get(ItemInit.LIGHTOFDAWN.get());
@@ -68,7 +71,7 @@ public class LightOfDawn extends SimpleAbilityItem {
     }
     private static final Random random = new Random();
 
-    public static void sunriseGleamTick(LivingEvent.LivingTickEvent event) {
+    public static void lightOfDawnTick(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         CompoundTag tag = livingEntity.getPersistentData();
         int x = tag.getInt("lightOfDawnCounter");
@@ -111,6 +114,8 @@ public class LightOfDawn extends SimpleAbilityItem {
                     }
                 }
             }
+        } if (!livingEntity.level().isClientSide() && x == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.LIGHT_OF_DAWN.get());
         }
     }
 

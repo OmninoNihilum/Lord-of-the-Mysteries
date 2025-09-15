@@ -21,6 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.networking.packet.FalseProphecyLeftClickC2S;
@@ -85,6 +87,7 @@ public class FalseProphecy extends LeftClickHandlerSkill {
             CompoundTag tag = interactionTarget.getPersistentData();
             CompoundTag playerTag = player.getPersistentData();
             int falseProphecyItem = playerTag.getInt("falseProphecyItem");
+            EventManager.addToRegularLoop(interactionTarget, EFunctions.FALSE_PROPHECY.get());
             if (falseProphecyItem == 1) {
                 tag.putInt("harmfulFalseProphecyShift", 200);
                 if (interactionTarget instanceof Player) {
@@ -212,6 +215,10 @@ public class FalseProphecy extends LeftClickHandlerSkill {
         int beneficialSprint = tag.getInt("beneficialFalseProphecySprint");
         int beneficialJump = tag.getInt("beneficialFalseProphecyJump");
         int beneficialAttack = tag.getInt("beneficialFalseProphecyAttack");
+        if (tag.getInt("falseProphecyJumpHarmful") == 0 && tag.getInt("falseProphecyJumpBeneficial") == 0 && harmfulShift == 0 && harmfulStand == 0 && harmfulSprint == 0 && harmfulJump == 0 && harmfulAttack == 0 && beneficialShift == 0 && beneficialStand == 0 && beneficialSprint == 0 && beneficialJump == 0 && beneficialAttack == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.FALSE_PROPHECY.get());
+        }
+
         if (harmfulShift >= 1) {
             tag.putInt("harmfulFalseProphecyShift", harmfulShift - 1);
             int x = tag.getInt("falseProphecyShiftHarmful");
@@ -343,6 +350,9 @@ public class FalseProphecy extends LeftClickHandlerSkill {
             CompoundTag tag = entity.getPersistentData();
             boolean x = tag.getBoolean("shouldDoubleProphecyDamage");
             int y = tag.getInt("beneficialDamageDoubled");
+            if (!x && y == 0) {
+                EventManager.removeFromRegularLoop(entity, EFunctions.SPECTATORPROPHECY.get());
+            }
             if (y < 1) {
                 return;
             } else if (!x) {

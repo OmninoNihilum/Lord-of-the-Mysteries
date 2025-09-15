@@ -17,6 +17,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -42,7 +44,7 @@ public class LuckDenial extends SimpleAbilityItem {
             }
             useSpirituality(player);
             addCooldown(player);
-            giftLuck(player, interactionTarget);
+            luckDenial(player, interactionTarget);
         }
         return InteractionResult.SUCCESS;
     }
@@ -75,13 +77,14 @@ public class LuckDenial extends SimpleAbilityItem {
     }
 
 
-    private static void giftLuck(LivingEntity interactionTarget, LivingEntity player) {
+    private static void luckDenial(LivingEntity interactionTarget, LivingEntity player) {
         if (!player.level().isClientSide() && !interactionTarget.level().isClientSide()) {
             CompoundTag tag = interactionTarget.getPersistentData();
             double luck = tag.getDouble("luck");
             double misfortune = tag.getDouble("misfortune");
             double beneficialEffectBlocker = BeyonderUtil.getDamage(player).get(ItemInit.LUCKDENIAL.get()) / 5;
             double damage = BeyonderUtil.getDamage(player).get(ItemInit.MONSTERREBOOT.get());
+            EventManager.addToRegularLoop(interactionTarget, EFunctions.LUCK_DENIAL.get());
             if (BeyonderUtil.getSequence(player) <= 2) {
                 tag.putDouble("luckDenialTimer", damage * 27);
                 tag.putDouble("luckDenialLuck", luck);
@@ -91,28 +94,6 @@ public class LuckDenial extends SimpleAbilityItem {
                 tag.putDouble("luckDenialLuck", luck);
             }
             BeyonderUtil.applyBeneficialEffectBlocker(interactionTarget, (int) beneficialEffectBlocker);
-        }
-    }
-
-    public static void luckDenial(LivingEntity livingEntity) {
-        CompoundTag tag = livingEntity.getPersistentData();
-        double luck = tag.getDouble("luck");
-        double misfortune = tag.getDouble("misfortune");
-        double luckDenialTimer = tag.getDouble("luckDenialTimer");
-        double luckDenialLuck = tag.getDouble("luckDenialLuck");
-        double luckDenialMisfortune = tag.getDouble("luckDenialMisfortune");
-        if (luckDenialTimer >= 1) {
-            tag.putDouble("luckDenialTimer", luckDenialTimer - 1);
-            if (luck >= luckDenialLuck) {
-                tag.putDouble("luck", luckDenialLuck);
-            } else if (luck < luckDenialLuck) {
-                tag.putDouble("luckDenialLuck", luck);
-            }
-            if (misfortune <= luckDenialMisfortune) {
-                tag.putDouble("misfortune", luckDenialMisfortune);
-            } else if (misfortune > luckDenialMisfortune) {
-                tag.putDouble("luckDenialMisfortune", misfortune);
-            }
         }
     }
 

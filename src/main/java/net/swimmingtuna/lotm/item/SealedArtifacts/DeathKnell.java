@@ -25,6 +25,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.DeathKnellBulletEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -144,6 +146,7 @@ public class DeathKnell extends Item {
         }
         Random random = new Random();
         int choice = random.nextInt(6);
+        EventManager.addToRegularLoop(livingEntity, EFunctions.DEATH_KNELL_NEGATIVE_TICK.get());
         switch (choice) {
             case 0:
                 if (sequence <= 4) {
@@ -201,6 +204,9 @@ public class DeathKnell extends Item {
             int d = tag.getInt("deathKnellPeacefulFear");
             int e = tag.getInt("deathKnellPlayerFear");
             int f = tag.getInt("deathKnellNightFear");
+            if (a == 0 && b == 0 && c == 0 && d == 0 && e == 0 && f == 0) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.DEATH_KNELL_NEGATIVE_TICK.get());
+            }
             if (a >= 1) {
                 if (livingEntity.isInWaterOrRain()) {
                     applyFear(livingEntity);

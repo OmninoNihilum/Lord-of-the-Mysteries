@@ -1,6 +1,8 @@
 package net.swimmingtuna.lotm.capabilities.concealed_data;
 
 import net.minecraft.world.entity.LivingEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -116,6 +118,7 @@ public class ConcealedUtils {
         setCreator(entity, concealmentUUID, creator);
         setSequence(entity, concealmentUUID, sequence);
         setConcealmentType(entity, concealmentUUID, type);
+        EventManager.addToRegularLoop(entity, EFunctions.CONCEAL_TIMER.get());
         return concealmentUUID;
     }
 
@@ -126,6 +129,7 @@ public class ConcealedUtils {
         toggleTimer(entity, concealmentUUID);
         setTimer(entity, concealmentUUID, timer);
         setConcealmentType(entity, concealmentUUID, type);
+        EventManager.addToRegularLoop(entity, EFunctions.CONCEAL_TIMER.get());
         return concealmentUUID;
     }
 
@@ -136,6 +140,7 @@ public class ConcealedUtils {
     }
 
     public static void timerTick(LivingEntity entity){
+
         entity.getCapability(ConcealedDataProvider.CONCEALED_DATA).ifPresent(data -> {
             HashSet<UUID> concealmentsWithTimers = data.concealmentsWithTimers();
             if(concealmentsWithTimers.isEmpty()) return;
@@ -152,6 +157,9 @@ public class ConcealedUtils {
             }
             for(UUID concealment : concealmentsToRemove){
                 data.removeConcealment(concealment);
+            }
+            if(getAllConcealments(entity).isEmpty()){
+                EventManager.removeFromRegularLoop(entity, EFunctions.CONCEAL_TIMER.get());
             }
         });
     }

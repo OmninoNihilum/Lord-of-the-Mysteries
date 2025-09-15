@@ -22,6 +22,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.entity.GuardianBoxEntity;
 import net.swimmingtuna.lotm.entity.HurricaneOfLightEntity;
 import net.swimmingtuna.lotm.entity.SwordOfTwilightEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -169,12 +171,6 @@ public class SwordOfTwilight extends LeftClickHandlerSword implements GeoItem {
                     tag.putInt("returnSwordOfTwilight", 0);
                 }
             }
-        }
-    }
-
-    public static void decrementTwilightSword(LivingEvent.LivingTickEvent event) {
-        if (!event.getEntity().level().isClientSide() && event.getEntity().getPersistentData().getInt("twilightSwordCooldown") >= 1) {
-            event.getEntity().getPersistentData().putInt("twilightSwordCooldown", event.getEntity().getPersistentData().getInt("twilightSwordCooldown") - 1);
         }
     }
 

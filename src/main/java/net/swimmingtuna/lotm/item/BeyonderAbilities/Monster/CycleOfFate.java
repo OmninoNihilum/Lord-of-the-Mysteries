@@ -25,6 +25,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.caps.BeyonderHolder;
 import net.swimmingtuna.lotm.caps.BeyonderHolderAttacher;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -93,7 +95,8 @@ public class CycleOfFate extends LeftClickHandlerSkillP {
         if (!player.level().isClientSide() && !interactionTarget.level().isClientSide()) {
             int spirituality = 0;
             int sequence = -1;
-
+            EventManager.addToRegularLoop(player, EFunctions.CYCLE_OF_FATE.get());
+            EventManager.addToRegularLoop(interactionTarget, EFunctions.CYCLE_OF_FATE.get());
             player.getPersistentData().putInt("monsterCycleOfFateUser", 70);
             savePotionEffectsToTag(player, player.getPersistentData());
             player.getPersistentData().putInt("monsterCycleOfFateUserX", (int) player.getX());
@@ -128,6 +131,7 @@ public class CycleOfFate extends LeftClickHandlerSkillP {
                 for (LivingEntity entity : interactionTarget.level().getEntitiesOfClass(LivingEntity.class, interactionTarget.getBoundingBox().inflate(500))) {
                     CompoundTag tag = entity.getPersistentData();
                     if (entity != interactionTarget && entity != player) {
+                        EventManager.addToRegularLoop(entity, EFunctions.CYCLE_OF_FATE.get());
                         int pSpirituality;
                         int pSequence;
                         savePotionEffectsToTag(entity, tag);
@@ -265,6 +269,7 @@ public class CycleOfFate extends LeftClickHandlerSkillP {
 
                                 // Use spirituality with multiplier
                                 holder.useSpirituality(1000 * spiritualityMultiplier);
+                                EventManager.addToRegularLoop(living, EFunctions.CYCLE_OF_FATE.get());
                                 livingTag.putInt("monsterCycleOfFateMultiplier", spiritualityMultiplier + 1);
 
                                 // Restore target entity
@@ -289,6 +294,7 @@ public class CycleOfFate extends LeftClickHandlerSkillP {
                                 // Handle other entities in the area
                                 for (LivingEntity pEntity : living.level().getEntitiesOfClass(LivingEntity.class, living.getBoundingBox().inflate(800))) {
                                     if (pEntity != pPlayer && pEntity != living) {
+                                        EventManager.addToRegularLoop(pEntity, EFunctions.CYCLE_OF_FATE.get());
                                         CompoundTag pTag = pEntity.getPersistentData();
                                         int entityCounter = pTag.getInt("monsterCycleOfFateEntity");
                                         if (entityCounter >= 1) {
@@ -386,7 +392,7 @@ public class CycleOfFate extends LeftClickHandlerSkillP {
                     tag.putInt("monsterCycleOfFateSequence", 0);
                     tag.putBoolean("monsterCycleOfFateIsDead", false);
                 }
-                if (targetTag == 1) {
+                if (entityTag == 1) {
                     tag.putInt("monsterCycleOfFateEntityX", 0);
                     tag.putInt("monsterCycleOfFateEntityY", 0);
                     tag.putInt("monsterCycleOfFateEntityZ", 0);
@@ -394,7 +400,10 @@ public class CycleOfFate extends LeftClickHandlerSkillP {
                     tag.putInt("monsterCycleOfFateEntitySpirituality", 0);
                     tag.putInt("monsterCycleOfFateEntitySequence", 0);
                     tag.putBoolean("monsterCycleOfFateIsDead", false);
+                }
 
+                if (userTag == 0 && targetTag == 0 && entityTag == 0) {
+                    EventManager.removeFromRegularLoop(entity, EFunctions.CYCLE_OF_FATE.get());
                 }
             }
         }

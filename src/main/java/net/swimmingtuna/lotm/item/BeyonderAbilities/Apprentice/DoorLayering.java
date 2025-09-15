@@ -25,6 +25,8 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
 import net.swimmingtuna.lotm.entity.ApprenticeDoorEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -91,6 +93,7 @@ public class DoorLayering extends LeftClickHandlerSkillP {
     public static void doorLayering(LivingEntity livingEntity) {
         Level level = livingEntity.level();
         if (!level.isClientSide()) {
+            EventManager.addToRegularLoop(livingEntity, EFunctions.DOOR_LAYERING_TICK.get());
             int doorLayeringDistance = livingEntity.getPersistentData().getInt("doorLayering");
             DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(livingEntity);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
@@ -138,6 +141,7 @@ public class DoorLayering extends LeftClickHandlerSkillP {
     public static void doorLayering(LivingEntity livingEntity, LivingEntity living) {
         Level level = livingEntity.level();
         if (!level.isClientSide()) {
+            EventManager.addToRegularLoop(livingEntity, EFunctions.DOOR_LAYERING_TICK.get());
             livingEntity.getPersistentData().putInt("doorLayeringCounter", 100);
             livingEntity.getPersistentData().putInt("doorLayeringX", (int) living.getX());
             livingEntity.getPersistentData().putInt("doorLayeringY", (int) living.getY());
@@ -163,6 +167,8 @@ public class DoorLayering extends LeftClickHandlerSkillP {
             door.teleportTo(pos.getX(), pos.getY(), pos.getZ());
             BeyonderUtil.setScale(door, (int) BeyonderUtil.getRandomInRange(Math.max(4, 7)));
             living.level().addFreshEntity(door);
+        } else {
+            EventManager.removeFromRegularLoop(living, EFunctions.DOOR_LAYERING_TICK.get());
         }
         if (timer == 30) {
             BlockPos pos = new BlockPos(doorX, doorY, doorZ);

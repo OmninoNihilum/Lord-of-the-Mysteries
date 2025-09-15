@@ -21,6 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
 import net.swimmingtuna.lotm.util.BeyonderUtil;
@@ -34,8 +36,9 @@ public class DreamWalking extends SimpleAbilityItem {
     private final Lazy<Multimap<Attribute, AttributeModifier>> lazyAttributeMap = Lazy.of(this::createAttributeMap);
 
     public DreamWalking(Properties properties) {
-        super(properties, BeyonderClassInit.SPECTATOR, 5, 40, 40,300,300);
+        super(properties, BeyonderClassInit.SPECTATOR, 5, 40, 40, 300, 300);
     }
+
     @SuppressWarnings("deprecation")
     @Override
     public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
@@ -77,18 +80,9 @@ public class DreamWalking extends SimpleAbilityItem {
         return InteractionResult.SUCCESS;
     }
 
-    public static void dreamWalk(LivingEntity interactionTarget, LivingEntity player) {
-        if (!player.level().isClientSide()) {
-            double x = interactionTarget.getX();
-            double y = interactionTarget.getY();
-            double z = interactionTarget.getZ();
-            player.teleportTo(x, y, z);
-            player.getPersistentData().putInt("dreamWalkingDeaggro", 5);
-        }
-    }
-
     public static void dreamWalkingNew(LivingEntity player, LivingEntity interactionTarget) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.DREAM_WALKING_TICK.get());
             if (player instanceof Player pPlayer) {
                 player.getPersistentData().putInt("dreamWalkingDeaggro", 5);
                 player.getPersistentData().putUUID("dreamWalkingTargetUUID", interactionTarget.getUUID());
@@ -120,42 +114,43 @@ public class DreamWalking extends SimpleAbilityItem {
                 }
             }
             LivingEntity player = event.getEntity();
-            if (player.getPersistentData().contains("dreamWalkingTargetUUID")) {
-                LivingEntity dreamWalkingTarget = BeyonderUtil.getLivingEntityFromUUID(player.level(), player.getPersistentData().getUUID("dreamWalkingTargetUUID"));
-                if (dreamWalkingTarget != null) {
-                    if (dreamWalkingTarget.level().dimension() == player.level().dimension()) {
-                        player.getPersistentData().putInt("dreamWalkingMode", 7);
-                    } else {
-                        if (player instanceof ServerPlayer serverPlayer) {
-                            player.getPersistentData().putInt("dreamWalkingMode", 0);
-                            String string = serverPlayer.getPersistentData().getString("dreamWalkingGamemode");
-                            if (string.equalsIgnoreCase("creative")) {
-                                serverPlayer.setGameMode(GameType.CREATIVE);
-                            } else if (string.equalsIgnoreCase("spectator")) {
-                                serverPlayer.setGameMode(GameType.SPECTATOR);
-                            } else {
-                                serverPlayer.setGameMode(GameType.SURVIVAL);
-                            }
+            LivingEntity dreamWalkingTarget = BeyonderUtil.getLivingEntityFromUUID(player.level(), player.getPersistentData().getUUID("dreamWalkingTargetUUID"));
+            if (player.getPersistentData().getInt("dreamWalkingDeaggro") == 0 && player.getPersistentData().getInt("dreamWalkingMode") == 0) {
+                EventManager.removeFromRegularLoop(player, EFunctions.DREAM_WALKING_TICK.get());
+            }
+            if (dreamWalkingTarget != null) {
+                if (dreamWalkingTarget.level().dimension() == player.level().dimension()) {
+                    player.getPersistentData().putInt("dreamWalkingMode", 7);
+                } else {
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        player.getPersistentData().putInt("dreamWalkingMode", 0);
+                        String string = serverPlayer.getPersistentData().getString("dreamWalkingGamemode");
+                        if (string.equalsIgnoreCase("creative")) {
+                            serverPlayer.setGameMode(GameType.CREATIVE);
+                        } else if (string.equalsIgnoreCase("spectator")) {
+                            serverPlayer.setGameMode(GameType.SPECTATOR);
+                        } else {
+                            serverPlayer.setGameMode(GameType.SURVIVAL);
                         }
                     }
-                    if (player.distanceTo(dreamWalkingTarget) <= 5) {
-                        player.getPersistentData().remove("dreamWalkingTargetUUID");
-                        if (player instanceof ServerPlayer serverPlayer) {
-                            player.getPersistentData().putInt("dreamWalkingMode", 0);
-                            String string = serverPlayer.getPersistentData().getString("dreamWalkingGamemode");
-                            if (string.equalsIgnoreCase("creative")) {
-                                serverPlayer.setGameMode(GameType.CREATIVE);
-                            } else if (string.equalsIgnoreCase("spectator")) {
-                                serverPlayer.setGameMode(GameType.SPECTATOR);
-                            } else {
-                                serverPlayer.setGameMode(GameType.SURVIVAL);
-                            }
-                        }
-                        player.teleportTo(dreamWalkingTarget.getX(), dreamWalkingTarget.getY(), dreamWalkingTarget.getZ());
-                    }
-                    player.hurtMarked = true;
-                    player.setDeltaMovement(dreamWalkingTarget.getX() - player.getX(), dreamWalkingTarget.getY() - player.getY(), dreamWalkingTarget.getZ() - player.getZ());
                 }
+                if (player.distanceTo(dreamWalkingTarget) <= 5) {
+                    player.getPersistentData().remove("dreamWalkingTargetUUID");
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        player.getPersistentData().putInt("dreamWalkingMode", 0);
+                        String string = serverPlayer.getPersistentData().getString("dreamWalkingGamemode");
+                        if (string.equalsIgnoreCase("creative")) {
+                            serverPlayer.setGameMode(GameType.CREATIVE);
+                        } else if (string.equalsIgnoreCase("spectator")) {
+                            serverPlayer.setGameMode(GameType.SPECTATOR);
+                        } else {
+                            serverPlayer.setGameMode(GameType.SURVIVAL);
+                        }
+                    }
+                    player.teleportTo(dreamWalkingTarget.getX(), dreamWalkingTarget.getY(), dreamWalkingTarget.getZ());
+                }
+                player.hurtMarked = true;
+                player.setDeltaMovement(dreamWalkingTarget.getX() - player.getX(), dreamWalkingTarget.getY() - player.getY(), dreamWalkingTarget.getZ() - player.getZ());
             }
             if (player.getPersistentData().getInt("dreamWalkingMode") >= 1 && player instanceof ServerPlayer serverPlayer) {
                 player.getPersistentData().putInt("dreamWalkingMode", player.getPersistentData().getInt("dreamWalkingMode") - 1);
@@ -174,6 +169,7 @@ public class DreamWalking extends SimpleAbilityItem {
             }
         }
     }
+
     @Override
     public @NotNull Rarity getRarity(ItemStack pStack) {
         return Rarity.create("SPECTATOR_ABILITY", ChatFormatting.AQUA);

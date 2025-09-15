@@ -56,6 +56,7 @@ public class ExtremeColdness extends LeftClickHandlerSkillP {
 
     public void extremeColdnessAbility(LivingEntity player) {
         if (!player.level().isClientSide()) {
+            EventManager.addToRegularLoop(player, EFunctions.EXTREME_COLDNESS_TICK.get());
             player.getPersistentData().putInt("sailorExtremeColdness", 1);
         }
     }
@@ -134,6 +135,8 @@ public class ExtremeColdness extends LeftClickHandlerSkillP {
                     }
                 }
             }
+        } else {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.EXTREME_COLDNESS_TICK.get());
         }
     }
 

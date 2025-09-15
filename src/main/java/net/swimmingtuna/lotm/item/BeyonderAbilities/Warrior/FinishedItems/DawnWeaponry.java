@@ -19,6 +19,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.swimmingtuna.lotm.entity.HurricaneOfLightEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -171,7 +173,9 @@ public class DawnWeaponry extends LeftClickHandlerSkill {
     }
 
     public static void removeDawnArmor(LivingEntity livingEntity) {
-        if (BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.WARRIOR.get(), 6)) return;
+        if (BeyonderUtil.currentPathwayAndSequenceMatches(livingEntity, BeyonderClassInit.WARRIOR.get(), 6)) {
+            return;
+        }
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() == EquipmentSlot.Type.ARMOR) {
                 ItemStack itemStack = livingEntity.getItemBySlot(slot);
@@ -180,6 +184,7 @@ public class DawnWeaponry extends LeftClickHandlerSkill {
                 }
             }
         }
+        EventManager.removeFromRegularLoop(livingEntity, EFunctions.DAWN_ARMOR_TICK.get());
     }
 
     public static boolean hasFullSilverArmor(LivingEntity entity) {

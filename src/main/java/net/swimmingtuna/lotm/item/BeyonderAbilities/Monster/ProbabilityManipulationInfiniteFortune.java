@@ -16,6 +16,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -94,6 +96,7 @@ public class ProbabilityManipulationInfiniteFortune extends LeftClickHandlerSkil
 
     public static void giveInfiniteFortune(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            EventManager.addToRegularLoop(livingEntity, EFunctions.PROBABILITY_MANIPULATION_INFINITE.get());
             livingEntity.getPersistentData().putInt("probabilityManipulationInfiniteFortune", (int) (float)BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROBABILITYINFINITEFORTUNE.get()));
         }
 

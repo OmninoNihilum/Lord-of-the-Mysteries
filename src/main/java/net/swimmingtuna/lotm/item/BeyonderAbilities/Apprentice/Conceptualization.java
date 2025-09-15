@@ -25,6 +25,8 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.swimmingtuna.lotm.blocks.DimensionalSight.DimensionalSightTileEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.init.ParticleInit;
@@ -93,8 +95,10 @@ public class Conceptualization extends SimpleAbilityItem {
             float health = mob.getHealth();
             float targetHealth = mob.getHealth();
             if (targetHealth < health || mob.getPersistentData().getBoolean("doorConceptualization")) {
+                EventManager.addToRegularLoop(target, EFunctions.CONCEPTUALIZATION_TICK.get());
                 conceptualize(mob);
             } else {
+                EventManager.addToRegularLoop(target, EFunctions.CONCEPTUALIZATION_TICK.get());
                 target.getPersistentData().putInt("doorConceptualizationPassive", 6000 / (10 - sequence));
             }
         }
@@ -105,6 +109,7 @@ public class Conceptualization extends SimpleAbilityItem {
             DimensionalSightTileEntity dimensionalSightTileEntity = BeyonderUtil.findNearbyDimensionalSight(player);
             if (dimensionalSightTileEntity != null && dimensionalSightTileEntity.getScryTarget() != null) {
                 LivingEntity scryTarget = dimensionalSightTileEntity.getScryTarget();
+                EventManager.addToRegularLoop(scryTarget, EFunctions.CONCEPTUALIZATION_TICK.get());
                 int sequence = BeyonderUtil.getSequence(scryTarget);
                 if (sequence == -1) {
                     sequence = 9;
@@ -122,6 +127,7 @@ public class Conceptualization extends SimpleAbilityItem {
                 CompoundTag tag = player.getPersistentData();
                 boolean conceptualization = tag.getBoolean("doorConceptualization");
                 tag.putBoolean("doorConceptualization", !conceptualization);
+                EventManager.addToRegularLoop(player, EFunctions.CONCEPTUALIZATION_TICK.get());
                 if (player instanceof Player pPlayer) {
                     pPlayer.displayClientMessage(Component.literal("Conceptualization Turned " + (conceptualization ? "Off" : "On")).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE), true);
                 }
@@ -157,6 +163,10 @@ public class Conceptualization extends SimpleAbilityItem {
                 }
                 if (living.tickCount % 20 == 0) {
                     BeyonderUtil.setInvisible(living, true, 30);
+                }
+            } else {
+                if (conceptualized == 0) {
+                    EventManager.removeFromRegularLoop(living, EFunctions.CONCEPTUALIZATION_TICK.get());
                 }
             }
             if (conceptualized >= 1) {
@@ -204,6 +214,10 @@ public class Conceptualization extends SimpleAbilityItem {
                     if (living.tickCount % 20 == 0) {
                         BeyonderUtil.setInvisible(living, true, 30);
                     }
+                }
+            } else {
+                if (passive == 0) {
+                    EventManager.removeFromRegularLoop(living, EFunctions.CONCEPTUALIZATION_TICK.get());
                 }
             }
         }

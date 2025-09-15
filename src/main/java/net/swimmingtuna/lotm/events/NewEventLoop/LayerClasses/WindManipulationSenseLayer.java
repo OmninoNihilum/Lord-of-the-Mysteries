@@ -12,6 +12,6 @@ public class WindManipulationSenseLayer implements IFunction {
 
     @Override
     public String getID() {
-        return "RagingComboEventID";
+        return "WindManipulationSenseEventID";
     }
 }

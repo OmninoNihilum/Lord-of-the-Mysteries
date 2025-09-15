@@ -89,6 +89,9 @@ public class MercuryLiquefication extends SimpleAbilityItem {
         boolean currentState = tag.getBoolean("mercuryLiquefication");
         int trapped = tag.getInt("mercuryLiqueficationTrapped");
         int y = tag.getInt("mercuryArmorForm");
+        if (!currentState && trapped == 0 && y == 0) {
+            EventManager.removeFromRegularLoop(livingEntity, EFunctions.MERCURY_LIQUEFICATION_TICK.get());
+        }
         if (!level.isClientSide() && currentState) {
             if (tag.getInt("mercuryLiqueficationFlyTimer") >= 1) {
                 tag.putInt("mercuryLiqueficationFlyTimer", tag.getInt("mercuryLiqueficationFlyTimer") -1);

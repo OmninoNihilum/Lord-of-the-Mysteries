@@ -32,6 +32,8 @@ import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.entity.StoneEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.events.NewEventLoop.PathwaysPassiveEvents.SpectatorPassiveEvents;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -484,34 +486,9 @@ public class SpectatorClass implements BeyonderClass {
         CompoundTag tag = entity.getPersistentData();
         if (!entity.level().isClientSide()) {
             LivingEntity livingEntity = event.getEntity();
-            if (!livingEntity.level().isClientSide()) {
-                int flyTime = tag.getInt("LOTMFlying");
-                float flySpeed = tag.getFloat("LOTMFlySpeed");
-                if (flyTime >= 1) {
-                    tag.putInt("LOTMFlying", flyTime - 1);
-                    if (livingEntity instanceof Player pPlayer ) {
-                        Abilities playerAbilities = pPlayer.getAbilities();
-                        if (!pPlayer.isCreative()) {
-                            playerAbilities.mayfly = true;
-                            playerAbilities.setFlyingSpeed(flySpeed);
-                        }
-                        pPlayer.onUpdateAbilities();
-                        if (livingEntity instanceof ServerPlayer serverPlayer) {
-                            serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(playerAbilities));
-                        }
-                    } else if (livingEntity instanceof PlayerMobEntity playerMobEntity) {
-                        playerMobEntity.setIsFlying(true);
-                        playerMobEntity.setFlySpeed(flySpeed);
-                    }
-                } else {
-                    boolean x = livingEntity instanceof Player player && (player.isCreative() || player.isSpectator());
-                    if (!x) {
-                        stopFlying(livingEntity);
-                    }
-                }
-            }
             boolean hasSpectatorDemise = entity.hasEffect(ModEffects.SPECTATORDEMISE.get());
             if (!hasSpectatorDemise) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.PROPHESISE_TICK.get());
                 tag.putInt("EntityDemise", 0);
                 tag.putInt("NonDemise", 0);
             }

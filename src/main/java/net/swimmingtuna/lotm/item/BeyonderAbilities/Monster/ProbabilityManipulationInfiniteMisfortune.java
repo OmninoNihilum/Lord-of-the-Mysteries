@@ -18,6 +18,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.ItemInit;
 import net.swimmingtuna.lotm.item.BeyonderAbilities.SimpleAbilityItem;
@@ -84,12 +86,13 @@ public class ProbabilityManipulationInfiniteMisfortune extends LeftClickHandlerS
 
     public static void giveInfiniteMisfortune(LivingEntity livingEntity) {
         if (!livingEntity.level().isClientSide()) {
+            EventManager.addToRegularLoop(livingEntity, EFunctions.PROBABILITY_MANIPULATION_INFINITE.get());
             livingEntity.getPersistentData().putInt("probabilityManipulationInfiniteMisfortune", (int) (float) BeyonderUtil.getDamage(livingEntity).get(ItemInit.PROBABILITYINFINITEMISFORTUNE.get()));
         }
     }
 
 
-    public static void testEvent(LivingEvent.LivingTickEvent event) {
+    public static void inifniteMisfortune(LivingEvent.LivingTickEvent event) {
         LivingEntity livingEntity = event.getEntity();
         CompoundTag tag = livingEntity.getPersistentData();
         int x = tag.getInt("probabilityManipulationInfiniteMisfortune");
@@ -151,6 +154,9 @@ public class ProbabilityManipulationInfiniteMisfortune extends LeftClickHandlerS
                     tag.putInt("luckIgnoreMobs", tag.getInt("luckIgnoreMobs" + 2));
                     tag.putInt("luckAttackerPoisoned", tag.getInt("luckAttackerPoisoned" + 2));
                 }
+            }
+            if (x == 0 && y == 0) {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.PROBABILITY_MANIPULATION_INFINITE.get());
             }
         }
     }

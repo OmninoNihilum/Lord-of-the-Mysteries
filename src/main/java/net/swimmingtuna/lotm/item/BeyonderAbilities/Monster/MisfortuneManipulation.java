@@ -29,6 +29,8 @@ import net.swimmingtuna.lotm.entity.LightningEntity;
 import net.swimmingtuna.lotm.entity.MeteorEntity;
 import net.swimmingtuna.lotm.entity.PlayerMobEntity;
 import net.swimmingtuna.lotm.entity.TornadoEntity;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EFunctions;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventManager;
 import net.swimmingtuna.lotm.init.BeyonderClassInit;
 import net.swimmingtuna.lotm.init.EntityInit;
 import net.swimmingtuna.lotm.init.ItemInit;
@@ -127,6 +129,7 @@ public class MisfortuneManipulation extends LeftClickHandlerSkill {
                 tornadoEntity.teleportTo(interactionTarget.getX(), interactionTarget.getY(), interactionTarget.getZ());
                 player.level().addFreshEntity(tornadoEntity);
             } else if (misfortuneManipulation == 3) {
+                EventManager.addToRegularLoop(interactionTarget, EFunctions.MISFORTUNE_LIGHTNING_STORM.get());
                 interactionTarget.getPersistentData().putInt("sailorLightningStorm2", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MISFORTUNEMANIPULATION.get()) * 15);
                 interactionTarget.getPersistentData().putInt("sailorStormVecX2", (int) interactionTarget.getX());
                 interactionTarget.getPersistentData().putInt("sailorStormVecY2", (int) interactionTarget.getY());
@@ -183,6 +186,7 @@ public class MisfortuneManipulation extends LeftClickHandlerSkill {
             } else if (misfortuneManipulation == 9) {
                 BeyonderUtil.applyMobEffect(interactionTarget, MobEffects.POISON, (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MISFORTUNEMANIPULATION.get()) * 20, 4, true, true);
             } else if (misfortuneManipulation == 10) {
+                EventManager.addToRegularLoop(interactionTarget, EFunctions.MISFORTUNE_MANIPULATION.get());
                 tag.putInt("monsterMisfortuneManipulationGravity", (int) (float) BeyonderUtil.getDamage(player).get(ItemInit.MISFORTUNEMANIPULATION.get()) * 20);
             } else if (misfortuneManipulation == 11) {
                 for (PlayerMobEntity playerMobEntity : interactionTarget.level().getEntitiesOfClass(PlayerMobEntity.class, interactionTarget.getBoundingBox().inflate(BeyonderUtil.getDamage(player).get(ItemInit.MISFORTUNEMANIPULATION.get()) * 20))) {
@@ -276,6 +280,8 @@ public class MisfortuneManipulation extends LeftClickHandlerSkill {
                     Vec3 motion = livingEntity.getDeltaMovement();
                     livingEntity.setDeltaMovement(motion.x, -2, motion.z);
                 }
+            } else {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.MISFORTUNE_MANIPULATION.get());
             }
         }
     }
@@ -301,7 +307,7 @@ public class MisfortuneManipulation extends LeftClickHandlerSkill {
         }
     }
 
-    public static void livingLightningStorm(LivingEntity livingEntity) {
+    public static void misfortuneLightningStorm(LivingEntity livingEntity) {
         //MISFORTUNE MANIPULATION
         if (livingEntity.tickCount % 5 == 0) {
             CompoundTag tag = livingEntity.getPersistentData();
@@ -326,6 +332,8 @@ public class MisfortuneManipulation extends LeftClickHandlerSkill {
                     lightningEntity.teleportTo(x1 + ((Math.random() * 150) - (double) 150 / 2), y1 + 130, z1 + ((Math.random() * 150) - (double) 150 / 2));
                 }
                 lightningEntity.level().addFreshEntity(lightningEntity);
+            } else {
+                EventManager.removeFromRegularLoop(livingEntity, EFunctions.MISFORTUNE_LIGHTNING_STORM.get());
             }
         }
     }
