@@ -74,9 +74,7 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
         CompoundTag tag = livingEntity.getPersistentData();
         LOTM.LOGGER.info("VALUE OF TAG IS " + tag.getBoolean("trickmasterTelekenisis"));
         if (!livingEntity.level().isClientSide() && tag.getBoolean("trickmasterTelekenisis") && livingEntity.tickCount % 5 == 0) {
-            LOTM.LOGGER.info("1");
             if (BeyonderUtil.getSpirituality(livingEntity) >= 10) {
-                LOTM.LOGGER.info("2");
                 for (Entity entity : livingEntity.level().getEntitiesOfClass(Entity.class, livingEntity.getBoundingBox().inflate(BeyonderUtil.getDamage(livingEntity).get(ItemInit.TRICKTELEKENISIS.get())))) {
                     if (entity == livingEntity) {
                         continue;
@@ -108,7 +106,7 @@ public class TrickTelekenisis extends LeftClickHandlerSkillP {
                 }
             }
         } if (!livingEntity.level().isClientSide() && !tag.getBoolean("trickmasterTelekenisis")) {
-            EventManager.removeFromRegularLoop(livingEntity, EFunctions.TRICKMASTERTELEKENESIS.get());
+            //EventManager.removeFromRegularLoop(livingEntity, EFunctions.TRICKMASTERTELEKENESIS.get());
         }
     }
 

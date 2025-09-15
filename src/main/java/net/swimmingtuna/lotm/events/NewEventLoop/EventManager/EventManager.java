@@ -7,8 +7,10 @@ public class EventManager {
 
     public static void addToRegularLoop(LivingEntity entity, IFunction func){
         entity.getCapability(EventsProvider.EVENTS_DATA).ifPresent(cap -> {
-            LOTM.LOGGER.info("Adding event " + func.toString());
-            cap.addR(func);
+            if (!cap.getRegularEvents().contains(func)) {
+                LOTM.LOGGER.info("Adding event " + func.toString());
+                cap.addR(func);
+            }
         });
     }
 
@@ -21,7 +23,9 @@ public class EventManager {
 
     public static void addToWorldLoop(LivingEntity entity, IFunction func){
         entity.getCapability(EventsProvider.EVENTS_DATA).ifPresent(cap -> {
-            cap.addW(func);
+            if (!cap.getWorldEvents().contains(func)) {
+                cap.addW(func);
+            }
         });
     }
 
