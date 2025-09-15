@@ -34,6 +34,9 @@ import net.swimmingtuna.lotm.capabilities.sealed_data.SealedDataProvider;
 import net.swimmingtuna.lotm.capabilities.unlocked_recipes.IUnlockedRecipesDataCapability;
 import net.swimmingtuna.lotm.capabilities.unlocked_recipes.UnlockedRecipesDataCapability;
 import net.swimmingtuna.lotm.capabilities.unlocked_recipes.UnlockedRecipesDataProvider;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventsCapabilityData;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.EventsProvider;
+import net.swimmingtuna.lotm.events.NewEventLoop.EventManager.IEventsCapabilityData;
 
 @Mod.EventBusSubscriber(modid = LOTM.MOD_ID)
 public class CapabilityInit {
@@ -50,12 +53,19 @@ public class CapabilityInit {
         event.register(IReplicatedEntityCapability.class);
         event.register(ISealedDataCapability.class);
         event.register(IUnlockedRecipesDataCapability.class);
+        event.register(IEventsCapabilityData.class);
     }
 
     @SubscribeEvent
     public static void attachCapabilities(AttachCapabilitiesEvent<Entity> event) {
         // All entities
         if (event.getObject() instanceof LivingEntity entity) {
+            if (!entity.getCapability(EventsProvider.EVENTS_DATA).isPresent()) {
+                event.addCapability(
+                        new ResourceLocation(MOD_ID, "events_data"),
+                        new EventsProvider()
+                );
+            }
             if (!entity.getCapability(ConcealedSpaceProvider.CONCEALED_SPACE).isPresent()) {
                 event.addCapability(
                         new ResourceLocation(MOD_ID, "concealed_space"),
@@ -119,6 +129,11 @@ public class CapabilityInit {
         original.getCapability(ConcealedSpaceProvider.CONCEALED_SPACE).ifPresent(oldData -> {
             clone.getCapability(ConcealedSpaceProvider.CONCEALED_SPACE).ifPresent(newData -> {
                 ((ConcealedSpaceCapability) newData).copyFrom((ConcealedSpaceCapability) oldData);
+            });
+        });
+        original.getCapability(EventsProvider.EVENTS_DATA).ifPresent(oldData -> {
+            clone.getCapability(EventsProvider.EVENTS_DATA).ifPresent(newData -> {
+                ((EventsCapabilityData) newData).copyFrom((EventsCapabilityData) oldData);
             });
         });
         original.getCapability(UnlockedRecipesDataProvider.UNLOCKED_DATA).ifPresent(oldData -> {

@@ -59,6 +59,17 @@ public class EventsCapabilityData implements IEventsCapabilityData, INBTSerializ
         deserialize(compoundTag, listWToDelete, TAG_LIST_W_TO_DELETE_KEY);
     }
 
+    public void copyFrom(EventsCapabilityData other) {
+        this.listR.clear();
+        this.listRToDelete.clear();
+        this.listW.clear();
+        this.listWToDelete.clear();
+        this.listR.addAll(other.listR);
+        this.listRToDelete.addAll(other.listRToDelete);
+        this.listW.addAll(other.listW);
+        this.listWToDelete.addAll(other.listWToDelete);
+    }
+
     @Override
     public List<IFunction> getRegularEvents() {
         return listR;
